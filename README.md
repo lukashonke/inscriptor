@@ -1,4 +1,9 @@
 # Inscriptor
+Open source and free alternative to tools like NovelCrafter. 
+
+Text editor with cleverly integrated AI tools and predefined AI prompts, suitable for writing fiction and non-fiction, brainstorming or chatting with AI, supplying your project as context. 
+
+## Run:
 
 Run from web:
 https://app.inscriptor.io/
@@ -33,7 +38,9 @@ yarn build
 yarn tauri build
 ```
 
+
 (see https://v2.tauri.app/distribute/)
+
 (in tauri.conf.json remove the "plugins.updater" part to disable the certificate check required for auto-update)
 
 
