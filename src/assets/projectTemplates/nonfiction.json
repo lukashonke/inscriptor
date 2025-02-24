@@ -1,0 +1,205 @@
+{
+  "files": [
+    {
+      "id": "23c96fb6-707f-48ed-ae01-ab8ab7393287",
+      "title": "Manuscript",
+      "content": "",
+      "order": 0,
+      "icon": "las la-film",
+      "expanded": true,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": null,
+      "settings": {
+        "contextType": {
+          "label": "Manuscript",
+          "color": "blue-grey"
+        }
+      }
+    },
+    {
+      "id": "4e957cab-3673-493c-82da-14d4538521ba",
+      "title": "Foreword",
+      "content": "",
+      "order": 0,
+      "icon": "las la-file",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": "23c96fb6-707f-48ed-ae01-ab8ab7393287",
+      "settings": {
+        "contextType": {
+          "label": "Manuscript",
+          "color": "blue-grey"
+        }
+      }
+    },
+    {
+      "id": "aabfaa33-1b28-4490-bf69-6bf01fc5cdb3",
+      "title": "Chapter",
+      "content": "<p></p>",
+      "order": 2,
+      "icon": "las la-file",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": "23c96fb6-707f-48ed-ae01-ab8ab7393287",
+      "settings": {
+        "contextType": {
+          "label": "Manuscript",
+          "color": "blue-grey"
+        }
+      }
+    },
+    {
+      "id": "83a81cc3-ef8a-42cf-a856-b444a82b651a",
+      "title": "Chapter Section",
+      "content": "",
+      "order": 0,
+      "icon": "las la-file",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": "aabfaa33-1b28-4490-bf69-6bf01fc5cdb3"
+    },
+    {
+      "id": "b3210697-5099-4a03-a574-9873f17eaae7",
+      "title": "Characters",
+      "content": "",
+      "order": 1,
+      "icon": "las la-users",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": null,
+      "settings": {
+        "contextType": {
+          "label": "Characters",
+          "color": "blue"
+        }
+      }
+    },
+    {
+      "id": "df3ce928-e324-4eb9-b9f8-5dedd7a05df4",
+      "title": "Places",
+      "content": "",
+      "order": 2,
+      "icon": "las la-globe",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": null,
+      "settings": {
+        "contextType": {
+          "label": "Places",
+          "color": "brown"
+        }
+      }
+    },
+    {
+      "id": "f1096880-fc1c-43f1-8380-500ffe758c2d",
+      "title": "Notes",
+      "content": "",
+      "order": 3,
+      "icon": "las la-sticky-note",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": null,
+      "settings": {
+        "contextType": {
+          "label": "Notes",
+          "color": "yellow"
+        }
+      }
+    },
+    {
+      "id": "m1196880-fc1c-43f1-8380-500ffe778c3d",
+      "title": "Ideas",
+      "content": "",
+      "order": 3,
+      "icon": "las la-lightbulb",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": null,
+      "settings": {
+      }
+    },
+    {
+      "id": "419bf0bc-90a4-408c-9141-017da2605a7c",
+      "title": "Research",
+      "content": "",
+      "order": 4,
+      "icon": "las la-graduation-cap",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": null,
+      "settings": {
+        "contextType": {
+          "label": "Research",
+          "color": "deep-orange"
+        }
+      }
+    }
+  ],
+  "variables": [
+    {
+      "title": "WritingStyle",
+      "value": "Write in English language.",
+      "description": "Define how you want the AI to write. Specify language, tone, stylem, tense, etc. Be as precise as possible.",
+      "undeletable": true
+    }
+  ],
+  "contextTypes": [
+    {
+      "label": "Manuscript",
+      "color": "blue-grey"
+    },
+    {
+      "label": "Characters",
+      "color": "blue"
+    },
+    {
+      "label": "Places",
+      "color": "brown"
+    },
+    {
+      "label": "Notes",
+      "color": "yellow"
+    },
+    {
+      "label": "Research",
+      "color": "deep-orange"
+    }
+  ],
+  "importPromptPackIds": [3,5,6]
+}

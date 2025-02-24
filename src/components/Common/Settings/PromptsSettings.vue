@@ -1,0 +1,153 @@
+<template>
+  <div class="row">
+    <div class="col-auto" style="width: 150px">
+      <q-tabs
+        v-model="layoutStore.settingsTab"
+        vertical
+        class="text-primary"
+      >
+        <q-tab name="prompts" icon="mdi-creation-outline" label="Promps" />
+        <q-tab name="models" icon="las la-microchip" label="Models" />
+        <q-tab name="files" icon="las la-file" label="Files" />
+        <q-tab name="apikeys" icon="las la-cloud" label="API Keys" />
+      </q-tabs>
+    </div>
+    <div class="col">
+      <q-tab-panels
+        v-model="layoutStore.settingsTab"
+        animated
+        swipeable
+        vertical
+        transition-prev="jump-up"
+        transition-next="jump-up"
+      >
+        <q-tab-panel name="apikeys">
+          <div class="">
+            <div class="row q-mb-lg">
+              <div class="col-6">
+              <div class="q-mb-sm text-caption">
+                You can decide to use your own Cloud AI provider, which you will connect using API key. Refer to the documentation of the provider to get the API key. Using such API keys will not consume your Inscriptor AI credits.
+              </div>
+              <div class="q-mb-sm text-caption">
+                These tokens are stored only in your internet browser or Inscriptor desktop application, ensuring no data including your prompts leave your acomputer. If you access Inscriptor from another device, make sure the re-enter the tokens there as well.
+              </div>
+              </div>
+            </div>
+
+            <div class="row q-gutter-x-sm q-gutter-y-lg">
+              <template v-for="(key) in localDataStore.apiKeys" :key="key">
+                <div class="col-6 items-center">
+                  <q-input :model-value="key.key" :label="key.name" @update:modelValue="(val) => localDataStore.setApiKey(key.name, val)" filled dense clearable :hint="key.description" />
+                </div>
+              </template>
+            </div>
+
+          </div>
+          <!-- <q-btn color="primary" label="Add model" @click="promptStore.addNewModel" /> -->
+        </q-tab-panel>
+
+        <q-tab-panel name="models">
+          <div v-for="model in models" :key="model.id">
+            <ModelSettingsItem :model="model" />
+          </div>
+
+          <div>
+            <q-btn color="primary" label="Inscriptor Hub" icon="las la-store" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
+          </div>
+          <!-- <q-btn color="primary" label="Add model" @click="promptStore.addNewModel" /> -->
+        </q-tab-panel>
+
+        <q-tab-panel name="prompts" class="q-pt-none">
+          <q-tabs
+            v-model="promptModel"
+            dense
+            class="text-grey "
+            active-color="primary"
+            indicator-color="primary"
+            narrow-indicator
+            align="left"
+          >
+            <q-tab v-for="model in models" :key="model.id" :name="model.id" :label="model.name" no-caps />
+          </q-tabs>
+
+          <q-separator />
+
+          <div class="q-ml-md" v-if="!anyModelImported">
+
+            <div class="q-mb-lg">
+              <span class="text-caption">No models available. Add a model first. </span>
+            </div>
+            <div>
+              <q-btn color="primary" label="Inscriptor Hub" icon="las la-store" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
+            </div>
+          </div>
+
+          <div class="q-ml-sm q-gutter-x-sm q-mt-md" v-else>
+            <q-btn color="primary" icon="las la-plus" label="Add prompt" @click="layoutStore.openAddPromptDialog(true, promptModel)" />
+            <q-btn color="accent" label="Inscriptor Hub" icon="las la-store" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
+          </div>
+
+          <q-tab-panels v-model="promptModel" animated>
+            <q-tab-panel v-for="model in models" :key="model.id" :name="model.id">
+              <div v-for="prompt in prompts.filter(p => p.modelId === promptModel)" :key="prompt.id">
+                <PromptSettingsItem :prompt="prompt" />
+              </div>
+            </q-tab-panel>
+          </q-tab-panels>
+
+         </q-tab-panel>
+
+         <q-tab-panel name="files">
+           <PagePropertiesSettings />
+         </q-tab-panel>
+
+      </q-tab-panels>
+    </div>
+
+  </div>
+</template>
+
+<script setup>
+  import {usePromptStore} from "stores/prompt-store";
+  import {computed, ref, watch} from "vue";
+  import PromptSettingsItem from "components/Common/Settings/PromptSettingsItem.vue";
+  import ModelSettingsItem from "components/Common/Settings/ModelSettingsItem.vue";
+  import PagePropertiesSettings from "components/Common/Settings/PagePropertiesSettings.vue";
+  import {useQuasar} from "quasar";
+  import {useLayoutStore} from "stores/layout-store";
+  import {useLocalDataStore} from "stores/localdata-store";
+
+  const promptStore = usePromptStore();
+  const layoutStore = useLayoutStore();
+  const localDataStore = useLocalDataStore();
+
+  const $q = useQuasar();
+
+  const prompts = computed(() => promptStore.prompts);
+  const tabs = computed(() => promptStore.tabs);
+  const models = computed(() => promptStore.models);
+
+  const promptType = ref('general');
+  const systemPrompt = ref('Perform the task to the best of your ability');
+  const userPrompt = ref('$textOrSelection');
+
+  watch(promptType, (value) => {
+    console.log(value);
+    if (value.value === 'inline' && userPrompt.value === '$text') {
+      userPrompt.value = '$selection';
+    } else if (value.value === 'insert' && userPrompt.value === '$selection'){
+      userPrompt.value = '$text';
+    }
+  });
+
+  const promptModel = ref(models.value.length > 0 ? models.value[0].id : '');
+
+  const anyModelImported = computed(() => {
+    return promptStore.models.length > 0
+  });
+
+</script>
+
+<style scoped>
+
+</style>

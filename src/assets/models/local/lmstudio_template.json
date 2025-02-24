@@ -1,0 +1,55 @@
+{
+  "meta": {
+    "name": "LM Studio Template",
+    "description": "Templatte Ollama model",
+    "version": "1.0.0",
+    "modelType": "text",
+    "metaType": "model"
+  },
+  "models": [
+    {
+      "id": "lmstudio_[model]",
+      "name": "LM Studio Template",
+      "description": "Your local LLM, private & secure",
+      "canBeDeleted": true,
+      "modelName": "llama3",
+      "availableModelQuants": ["Q8_0", "Q6_K", "Q5_K_M", "Q4_K_M"],
+      "modelQuants": "Q8_0",
+      "enabled": true,
+      "downloaded": true,
+      "type": "lmstudio",
+      "args": {
+        "url": "http://localhost:1234/",
+        "apiCallType": "chat",
+        "inferenceEngine": "lmstudio"
+      },
+      "defaultSystemPrompt": "Perform the task to the best of your ability.",
+      "defaultStopStrings": "<|start_header_id|>,<|eot_id|>",
+
+      "defaultSystemPromptPrefix": "<|begin_of_text|><|start_header_id|>system<|end_header_id|>\n\n",
+      "defaultSystemPromptSuffix": "<|eot_id|>",
+      "defaultUserPromptPrefix": "<|start_header_id|>user<|end_header_id|>\n\n",
+      "defaultUserPromptSuffix": "<|eot_id|>",
+      "defaultAssistantPromptPrefix": "<|start_header_id|>assistant<|end_header_id|>\n\n",
+      "defaultAssistantPromptSuffix": "<|eot_id|>",
+
+      "defaultTemperature": 0.8,
+      "defaultMaxTokens": 4096,
+      "defaultTopP": 0.95,
+      "defaultMinP": 0.05,
+      "defaultTopK": 40,
+      "defaultRepeatPenalty": 1.1,
+      "defaultFrequencyPenalty": 0.0,
+      "defaultPresencePenalty": 0.0,
+
+      "contextSize": 4096,
+      "gpuLayers": 32,
+      "maxGpuLayers": 32,
+
+      "promptTimes": 3
+    }
+  ],
+  "prompts": [
+    { "id": "lmstudio_[model]_Chat", "enabled": true, "title": "Chat", "description": "", "userPrompt": "$chat", "color": "", "tabId": 2, "modelId": "lmstudio_[model]", "overridePromptFormat": false, "overrideSystemPrompt": true, "systemPrompt": "Perform the task to the best of your ability.", "inline": true, "promptType": "chat", "overridePromptTimes": "1","hasParameters": false, "parameters": [], "settings": {}}
+  ]
+}

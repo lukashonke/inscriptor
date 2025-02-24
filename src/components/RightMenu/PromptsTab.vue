@@ -1,0 +1,141 @@
+<template>
+  <div class="q-mx-md">
+    <!--<div v-if="promptStore.isPrompting" class="menu-subtitle q-mb-lg">
+      <q-spinner-ios></q-spinner-ios> generating prompts...
+      <q-btn dense @click="promptStore.stopPrompt" label="Abort" size="sm" class="no-margin q-py-none" color="negative"/>
+    </div>-->
+
+    <div class="flex justify-center q-mb-lg" v-if="maxResultsPage > 0">
+      <div class="col-auto flex items-center" v-if="maxResultsPage > 0">
+        <q-pagination :max="maxResultsPage" v-model="page" :max-pages="3"  :boundary-links="false" direction-links   />
+      </div>
+
+      <div class="col">
+      </div>
+
+      <div class="col-auto flex items-center">
+        <q-btn dense flat color="negative" icon="las la-trash" size="md">
+          <q-menu>
+            <q-list dense>
+              <q-item clickable v-ripple @click="removeConversation" class="text-negative">
+                <q-item-section side>
+                  <q-icon name="las la-times" size="xs" />
+                </q-item-section>
+                <q-item-section>Delete current conversation</q-item-section>
+              </q-item>
+              <q-item clickable v-ripple @click="clearPromptHistory" class="text-negative">
+                <q-item-section side>
+                  <q-icon name="las la-trash" size="xs" />
+                </q-item-section>
+                <q-item-section>Delete all conversations</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
+
+      </div>
+    </div>
+
+    <div class="q-gutter-y-sm q-ml-xs">
+
+      <template v-for="(promptResult, index) in results" :key="index">
+        <template v-if="index + 1 === results.length">
+
+          <div>
+            <transition
+              appear
+              enter-active-class="animated fadeInDown slower"
+              leave-active-class="animated fadeOut delay-1s"
+            >
+              <div v-if="promptStore.isPrompting && !promptStore.isSilentPrompting" class="menu-subtitle q-ml-xs q-my-lg">
+                <q-spinner-ios></q-spinner-ios> <span>{{ (promptStore.isPrompting === true) ? 'generating prompts...' : 'generated' }}</span>
+                <q-btn dense @click="promptStore.stopPrompt" label="Abort" size="sm" class="no-margin q-py-none" color="negative"/>
+              </div>
+
+            </transition>
+          </div>
+          <!--<template v-else>
+            <div class="menu-subtitle q-ml-xs q-my-lg">
+              <q-icon name="las la-check" color="grey" size="xs" class="q-mr-xs"/> generated
+            </div>
+          </template>-->
+
+        </template>
+
+        <PromptResult :promptResult="promptResult" :allow-regenerate="index + 1 === results.length"/>
+
+      </template>
+
+      <div v-if="results.length === 0" class="text-center text-grey-8 q-mt-xl">
+        No prompt results to display. Run AI prompts to view results here.
+      </div>
+
+      <transition
+        appear
+        enter-active-class="animated fadeIn slower"
+        leave-active-class="animated fadeOut"
+      >
+        <div v-show="layoutStore.fakePromptResult">
+          <FakePromptResult />
+        </div>
+      </transition>
+
+    </div>
+
+
+  </div>
+
+</template>
+
+<script setup>
+import PromptResult from "components/RightMenu/PromptResult.vue";
+import {usePromptStore} from "stores/prompt-store";
+import {computed} from "vue";
+import {Dialog} from "quasar";
+import {useLayoutStore} from "stores/layout-store";
+import FakePromptResult from "components/RightMenu/FakePromptResult.vue";
+
+const promptStore = usePromptStore();
+const layoutStore = useLayoutStore();
+
+const results = computed(() => {
+  const index = promptStore.getTabData(promptStore.currentTab)?.promptResultsIndex ?? 0;
+  return promptStore.getTabData(promptStore.currentTab)?.promptResultsHistory[index] ?? [];
+});
+
+const maxResultsPage = computed(() => {
+  return promptStore.getTabData(promptStore.currentTab)?.promptResultsHistory.length ?? 0;
+});
+
+const page = computed({
+  get: () => (promptStore.getTabData(promptStore.currentTab)?.promptResultsIndex ?? 0) + 1,
+  set: (value) => {
+    promptStore.setCurrentTabResultsIndex(value - 1);
+  }
+});
+
+function removeConversation() {
+  promptStore.removePromptResultsHistoryItem(promptStore.getTabData(promptStore.currentTab)?.promptResultsIndex ?? null);
+}
+
+function clearPromptHistory() {
+
+  Dialog.create(
+    {
+      title: 'Confirm',
+      message: 'Are you sure you want to delete whole prompt history?',
+      cancel: true,
+      persistent: true
+    }).onOk(() => {
+    promptStore.clearPromptHistory();
+  }).onCancel(() => {
+  }).onDismiss(() => {
+    }
+  )
+}
+
+</script>
+
+<style scoped>
+
+</style>

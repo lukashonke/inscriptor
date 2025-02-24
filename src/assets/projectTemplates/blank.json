@@ -1,0 +1,52 @@
+{
+  "files": [
+    {
+      "id": "dg3ce928-e324-4eb9-b9f8-5dedd7a05df4",
+      "title": "Get Started!",
+      "content": "<p><strong>Begin writing your content here.</strong></p><p>Select any text or start on a new line to access the AI prompt selector.\n</p><p>Import Inscriptor Hub to view pre-created prompt packs or import additional AI models.</p><p>Automate tasks such as grammar correction or wording improvements by setting up AI Analysis.</p><p><strong>Create something amazing!</strong></p>",
+      "order": 0,
+      "icon": null,
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "children": [],
+      "parentId": null,
+      "settings": {
+      }
+    }
+  ],
+  "variables": [
+    {
+      "title": "WritingStyle",
+      "value": "Write in English language.",
+      "description": "Define how you want the AI to write. Specify language, tone, stylem, tense, etc. Be as precise as possible.",
+      "undeletable": true
+    }
+  ],
+  "contextTypes": [
+    {
+      "label": "Manuscript",
+      "color": "blue-grey"
+    },
+    {
+      "label": "Characters",
+      "color": "blue"
+    },
+    {
+      "label": "Places",
+      "color": "brown"
+    },
+    {
+      "label": "Notes",
+      "color": "yellow"
+    },
+    {
+      "label": "Research",
+      "color": "deep-orange"
+    }
+  ],
+  "importPromptPackIds": [3,5,6]
+}

@@ -1,0 +1,215 @@
+{
+  "files": [
+    {
+      "id": "23c96fb6-707f-48ed-ae01-ab8ab7393287",
+      "title": "Manuscript",
+      "content": "",
+      "order": 0,
+      "icon": "las la-film",
+      "expanded": true,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": null,
+      "settings": {
+        "contextType": {
+          "label": "Manuscript",
+          "color": "blue-grey"
+        }
+      }
+    },
+    {
+      "id": "4e957cab-3673-493c-82da-14d4538521ba",
+      "title": "Act 1",
+      "content": "",
+      "order": 0,
+      "icon": "las la-file",
+      "expanded": true,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": "23c96fb6-707f-48ed-ae01-ab8ab7393287",
+      "settings": {
+        "contextType": {
+          "label": "Manuscript",
+          "color": "blue-grey"
+        }
+      }
+    },
+    {
+      "id": "87848a34-23f9-479e-948a-059bb8d3ddd8",
+      "title": "Act 2",
+      "content": "",
+      "order": 1,
+      "icon": "las la-file",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": "23c96fb6-707f-48ed-ae01-ab8ab7393287",
+      "settings": {
+        "contextType": {
+          "label": "Manuscript",
+          "color": "blue-grey"
+        }
+      }
+    },
+    {
+      "id": "aabfaa33-1b28-4490-bf69-6bf01fc5cdb3",
+      "title": "Act 3",
+      "content": "<p></p>",
+      "order": 2,
+      "icon": "las la-file",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": "23c96fb6-707f-48ed-ae01-ab8ab7393287",
+      "settings": {
+        "contextType": {
+          "label": "Manuscript",
+          "color": "blue-grey"
+        }
+      }
+    },
+    {
+      "id": "bb94fe53-1e99-4a39-9c53-c8fcbbac22af",
+      "title": "Chapter 1",
+      "content": "",
+      "order": 0,
+      "icon": "las la-file",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": "4e957cab-3673-493c-82da-14d4538521ba",
+      "settings": {
+        "contextType": {
+          "label": "Manuscript",
+          "color": "blue-grey"
+        }
+      }
+    },
+    {
+      "id": "b3210697-5099-4a03-a574-9873f17eaae7",
+      "title": "Characters",
+      "content": "",
+      "order": 1,
+      "icon": "las la-users",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": null,
+      "settings": {
+        "contextType": {
+          "label": "Characters",
+          "color": "blue"
+        }
+      }
+    },
+    {
+      "id": "df3ce928-e324-4eb9-b9f8-5dedd7a05df4",
+      "title": "Places",
+      "content": "",
+      "order": 2,
+      "icon": "las la-globe",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": null,
+      "settings": {
+        "contextType": {
+          "label": "Places",
+          "color": "brown"
+        }
+      }
+    },
+    {
+      "id": "f1096880-fc1c-43f1-8380-500ffe758c2d",
+      "title": "Notes",
+      "content": "",
+      "order": 3,
+      "icon": "las la-sticky-note",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": null,
+      "settings": {
+        "contextType": {
+          "label": "Notes",
+          "color": "yellow"
+        }
+      }
+    },
+    {
+      "id": "419bf0bc-90a4-408c-9141-017da2605a7c",
+      "title": "Research",
+      "content": "",
+      "order": 4,
+      "icon": "las la-graduation-cap",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": null,
+      "settings": {
+        "contextType": {
+          "label": "Research",
+          "color": "deep-orange"
+        }
+      }
+    }
+  ],
+  "variables": [
+    {
+      "title": "WritingStyle",
+      "value": "Write in English language.",
+      "description": "Define how you want the AI to write. Specify language, tone, stylem, tense, etc. Be as precise as possible.",
+      "undeletable": true
+    }
+  ],
+  "contextTypes": [
+    {
+      "label": "Manuscript",
+      "color": "blue-grey"
+    },
+    {
+      "label": "Characters",
+      "color": "blue"
+    },
+    {
+      "label": "Places",
+      "color": "brown"
+    },
+    {
+      "label": "Notes",
+      "color": "yellow"
+    },
+    {
+      "label": "Research",
+      "color": "deep-orange"
+    }
+  ],
+  "importPromptPackIds": [3,5,6]
+}

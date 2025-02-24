@@ -1,0 +1,546 @@
+// app global css in SCSS form
+@import "editor";
+
+body {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Fira Sans", Roboto, Oxygen, Ubuntu, "Droid Sans", Arial, sans-serif;
+  font-weight: 300;
+  font-style: normal;
+}
+
+.text-aleo {
+  font-family: Aleo, Inter, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Fira Sans", Roboto, Oxygen, Ubuntu, "Droid Sans", Arial, sans-serif;
+}
+
+.no-link-decoration {
+  text-decoration: none !important;
+}
+
+.sticky-top {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.tree-padding-1 {
+  margin-left: 12px;
+}
+
+.tree-padding-2 {
+  margin-left: 24px;
+}
+
+.tree-padding-3 {
+  margin-left: 36px;
+}
+
+.tree-padding-4 {
+  margin-left: 48px;
+}
+
+.tree-padding-5 {
+  margin-left: 60px;
+}
+
+.plan-padding-2 {
+  margin-left: 24px;
+}
+
+.plan-padding-2 {
+  margin-left: 48px;
+}
+
+.plan-padding-2 {
+  margin-left: 36px;
+}
+
+.plan-padding-2 {
+  margin-left: 48px;
+}
+
+.plan-padding-2 {
+  margin-left: 60px;
+}
+
+.file-menu-item {
+  font-size: 0.8rem;
+}
+
+.prompt-select-text {
+  font-size: 0.7rem;
+}
+
+.n-grow-1 {
+  flex-grow: 1;
+}
+
+.q-drawer {
+  background: transparent !important;
+}
+
+@font-face {
+  font-family: customfont;
+  src: url(./fonts/Baskervville-Regular.ttf);
+}
+
+.prompt-card {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.prompt-card-expanded {
+  overflow-y: auto;
+}
+
+.prompt-card-image {
+}
+
+.cursor-text {
+  cursor: text;
+}
+
+.titlebar {
+  -webkit-app-region: drag;
+  user-select: none;
+}
+
+div.sticky {
+  position: -webkit-sticky; /* Safari */
+  position: sticky;
+  top: 12px;
+  z-index: 1000;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+}
+
+.q-splitter__separator {
+  background-color: transparent !important;
+}
+
+.flex-break {
+  flex: 1 0 100% !important
+}
+
+/* Class assigned to popover wrapper */
+.driver-popover {
+
+}
+
+/* Arrow pointing towards the highlighted element */
+.driver-popover-arrow {}
+
+/* Title and description */
+.driver-popover-title {}
+.driver-popover-description {}
+
+/* Close button displayed on the top right corner */
+.driver-popover-close-btn {}
+
+/* Footer of the popover displaying progress and navigation buttons */
+.driver-popover-footer {}
+.driver-popover-progress-text {}
+.driver-popover-prev-btn {
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Fira Sans", Roboto, Oxygen, Ubuntu, "Droid Sans", Arial, sans-serif;
+  font-size: 14px !important;
+  font-weight: 500 !important;
+  padding: 4px 16px !important;
+
+
+}
+.driver-popover-next-btn {
+  background-color: #4F5ED6 !important;
+  font-size: 14px !important;
+  color: white !important;
+  font-weight: 500 !important;
+  padding: 4px 16px !important;
+  text-shadow: 0px 0px 0px #fff !important;
+  border: 0px black !important;
+  font-family: Inter, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Fira Sans", Roboto, Oxygen, Ubuntu, "Droid Sans", Arial, sans-serif;
+
+  border-radius: 3px !important;
+
+  box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2), 0 5px 8px rgba(0, 0, 0, 0.14), 0 1px 14px rgba(0, 0, 0, 0.12) !important;
+}
+
+.drop-box {
+  position: absolute;
+  top: 0; left: 0;
+  z-index: 10;
+  width: 65%;
+  transform: translateY(-50%);
+}
+
+
+
+.dark-mode {
+  .bg-accent-1 {
+    background-color: rgba(178, 163, 45, 0.95);
+  }
+
+  .bg-file-list-hover {
+    background-color: #212121;
+  }
+
+  .bg-file-list-selected {
+    background-color: #434343;
+  }
+
+  .left-border {
+    border-left: 1px solid rgba(255, 255, 255, 0.88);
+  }
+
+  .all-border {
+    border: 1px solid rgba(255, 255, 255, 0.88);
+  }
+
+  .bottom-border {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.88);
+  }
+
+  .right-border {
+    border-right: 1px solid rgba(255, 255, 255, 0.88);
+  }
+
+  .top-border {
+    border-top: 1px solid rgba(255, 255, 255, 0.88);
+  }
+
+  .menu-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: lightblue;
+  }
+
+  .menu-subtitle {
+    font-size: 0.9em;
+    color: lightblue;
+  }
+
+  .text-light {
+    color: #212121;
+  }
+
+  .bordered {
+    border: 1px solid #212121;
+    border-radius: 5px;
+  }
+
+  .file-list-item {
+    border: 1px solid rgba(0, 0, 0, 0);
+    border-radius: 5px;
+  }
+
+  .file-list-item-hover {
+    border: 1px solid #212121;
+    border-radius: 5px;
+  }
+
+  .square-bordered {
+    border: 1px solid #212121;
+    border-radius: 0px;
+  }
+
+  .searchinput {
+    background-color: rgba(0, 0, 0, 0.9);
+    border: 0;
+    height: 26px;
+    border-radius: 2px;
+    color: black;
+    font-size: 0.9rem;
+    padding: 5px 5px 5px 5px;
+    &:hover,
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .bg-primary-1 {
+    background-color: rgb(12, 12, 0);
+  }
+
+  .bg-secondary-1 {
+    background-color: rgba(17, 33, 42, 0.49);
+  }
+
+  .bg-primary-light {
+    background-color: rgb(0, 0, 0, 0.75);
+  }
+
+  .bg-primary-2 {
+    background-color: rgb(19, 19, 7);
+  }
+
+  .bg-primary-3 {
+    background-color: rgba(176, 161, 41, 0.75);
+  }
+
+  .bg-primary-4 {
+    background-color: rgba(176, 161, 41, 0.667);
+  }
+
+  .bg-primary-5 {
+    background-color: rgba(176, 161, 41, 0.583);
+  }
+
+  .bg-primary-6 {
+    background-color: rgba(176, 161, 41, 0.5);
+  }
+
+  .bg-primary-7 {
+    background-color: rgba(176, 161, 41, 0.417);
+  }
+
+  .bg-primary-8 {
+    background-color: rgba(176, 161, 41, 0.333);
+  }
+
+  .bg-primary-9 {
+    background-color: rgba(176, 161, 41, 0.25);
+  }
+
+  .bg-primary-10 {
+    background-color: rgba(176, 161, 41, 0.167);
+  }
+
+  .bg-primary-11 {
+    background-color: rgba(176, 161, 41, 0.083);
+  }
+
+  .bg-primary-12 {
+    background-color: rgba(176, 161, 41, 0);
+  }
+
+  .bg-inscriptorblue-dark {
+    background-color: #e6e2bc;
+  }
+
+  .bg-inscriptorblue {
+    background-color: #dcd7a3;
+  }
+
+  .bg-inscriptorblue-light {
+    background-color: #c0b751;
+  }
+
+  .text-inscriptorblue-dark {
+    color: #9d9487;
+  }
+
+  .text-inscriptorblue-light {
+    color: #302e17;
+  }
+
+  .highlight {
+    background-color: rgba(177, 162, 43, 0.75) !important;
+  }
+}
+
+
+.day-mode {
+
+  .bg-accent-1 {
+    background-color: rgba(77, 92, 210, 0.05);
+  }
+
+  .bg-file-list-hover {
+    background-color: #eeeeee;
+  }
+
+  .bg-file-list-selected {
+    background-color: #e0e0e0;
+  }
+
+  .left-border {
+    border-left: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  .all-border {
+    border: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  .bottom-border {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  .right-border {
+    border-right: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  .top-border {
+    border-top: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+  .left-border {
+    border-left: 1px solid rgba(0, 0, 0, 0.12);
+  }
+
+
+
+  .menu-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: lightslategrey;
+  }
+
+  .menu-subtitle {
+    font-size: 0.9em;
+    color: lightslategrey;
+  }
+
+  .text-light {
+    color: #dedede;
+  }
+
+
+
+  .bordered {
+    border: 1px solid #dedede;
+    border-radius: 5px;
+  }
+
+  .file-list-item {
+    border: 1px solid rgba(255, 255, 255, 0);
+    border-radius: 5px;
+  }
+
+  .file-list-item-hover {
+    border: 1px solid #dedede;
+    border-radius: 5px;
+  }
+
+  .square-bordered {
+    border: 1px solid #dedede;
+    border-radius: 0px;
+  }
+
+  .searchinput {
+    background-color: rgba(255,255,255, 0.1);
+    border: 0;
+    height: 26px;
+    border-radius: 2px;
+    color: white;
+    font-size: 0.9rem;
+    padding: 5px 5px 5px 5px;
+    &:hover,
+    &:focus {
+      outline: none;
+    }
+  }
+
+  .bg-primary-1 {
+    background-color: rgb(243, 243, 255);
+  }
+
+  .bg-secondary-1 {
+    background-color: rgba(238, 222, 213, 0.51);
+  }
+
+  .bg-primary-light {
+    background-color: rgb(255,255,255, 0.25);
+  }
+
+  .bg-primary-2 {
+    background-color: rgb(236, 236, 248);
+  }
+
+  .bg-primary-3 {
+    background-color: rgba(79, 94, 214, 0.25);
+  }
+
+  .bg-primary-4 {
+    background-color: rgba(79, 94, 214, 0.333);
+  }
+
+  .bg-primary-5 {
+    background-color: rgba(79, 94, 214, 0.417);
+  }
+
+  .bg-primary-6 {
+    background-color: rgba(79, 94, 214, 0.5);
+  }
+
+  .bg-primary-7 {
+    background-color: rgba(79, 94, 214, 0.583);
+  }
+
+  .bg-primary-8 {
+    background-color: rgba(79, 94, 214, 0.667);
+  }
+
+  .bg-primary-9 {
+    background-color: rgba(79, 94, 214, 0.75);
+  }
+
+  .bg-primary-10 {
+    background-color: rgba(79, 94, 214, 0.833);
+  }
+
+  .bg-primary-11 {
+    background-color: rgba(79, 94, 214, 0.917);
+  }
+
+  .bg-primary-12 {
+    background-color: rgba(79, 94, 214, 1);
+  }
+
+  .bg-inscriptorblue-dark {
+    background-color: #191d43;
+  }
+
+  .bg-inscriptorblue {
+    background-color: #23285c;
+  }
+
+  .bg-inscriptorblue-light {
+    background-color: #3f48a8;
+  }
+
+  .text-inscriptorblue-dark {
+    color: #626bb8;
+  }
+
+  .text-inscriptorblue-light {
+    color: #cfd1e8;
+  }
+
+  .highlight {
+    background-color: rgba(78, 93, 212, 0.25) !important;
+  }
+
+}
+
+/* Style the scrollbar */
+textarea::-webkit-scrollbar {
+  width: 6px; /* Keep the same width */
+}
+
+textarea::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 4px;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 4px;
+  box-shadow: inset 1px 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+textarea::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Remove the arrows (buttons at the top and bottom of the scrollbar) */
+textarea::-webkit-scrollbar-button {
+  display: none; /* Hides the arrows */
+}
+
+.pattern-bg {
+  z-index: -1;
+  background-color: #ffffff;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='100' viewBox='0 0 100 100'%3E%3Cg fill-rule='evenodd'%3E%3Cg fill='%23dfe1f0' fill-opacity='0.4'%3E%3Cpath opacity='.5' d='M96 95h4v1h-4v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4h-9v4h-1v-4H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15v-9H0v-1h15V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h9V0h1v15h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9h4v1h-4v9zm-1 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm9-10v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-10 0v-9h-9v9h9zm-9-10h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9zm10 0h9v-9h-9v9z'/%3E%3Cpath d='M6 5V0H5v5H0v1h5v94h1V6h94V5H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+
+
