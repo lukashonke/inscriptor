@@ -3,6 +3,8 @@ Our goal is to create an open-source and free alternative to tools like NovelCra
 
 Inscriptor has cleverly integrated AI tools designed to enhance creativity, refine and analyze writing, provide suggestions and much more. all while being fully customizable. 
 
+https://inscriptor.io/
+
 ![alt text](https://inscriptor.io/images/inscriptor/screenshots/full4.png)
 
 ## Key Features:
