@@ -144,6 +144,8 @@ export const useFileStore = defineStore('files', {
       if(file) {
         console.log('setDirty', file.title);
         file.dirty = true;
+
+        this.setBrowserWindowLeaveDialogIfNotSet();
       }
     },
     async setOrder(file, order) {
@@ -638,7 +640,7 @@ export const useFileStore = defineStore('files', {
         }
       }
 
-      // --- save project data (not files, other settings)
+      // --- save project data (not files, but all other settings)
 
       const projectDataHash = this.computerProjectDataHash();
       let projectDataChanged = this.lastProjectDataHash !== projectDataHash;
@@ -679,6 +681,11 @@ export const useFileStore = defineStore('files', {
         }
       }
     },
+    setBrowserWindowLeaveDialogIfNotSet() {
+      if(window.onbeforeunload === null) {
+        this.setBrowserWindowLeaveDialog(true);
+      }
+    },
     setBrowserWindowLeaveDialog(set) {
       const layoutStore = useLayoutStore();
       if(layoutStore.runsInDesktopApp()) {
@@ -692,21 +699,13 @@ export const useFileStore = defineStore('files', {
         window.onbeforeunload = async function() {
           try {
             await quickSave(true);
-            return undefined;
+
+            const dirtyFiles = this.getDirtyFiles();
+            if(dirtyFiles.length === 0) {
+              return undefined;
+            }
           } catch (e) {
-
-            event.preventDefault();
-
-            Dialog.create({
-              title: 'Confirm close',
-              message: 'Data could not be saved. Are you sure you want to close the application?',
-              cancel: true,
-              persistent: true
-            }).onOk(() => {
-              window.appWindow.close();
-            }).onCancel(() => {
-            }).onDismiss(() => {
-            })
+            console.error('Failed to save dirty files');
           }
         };
       } else {

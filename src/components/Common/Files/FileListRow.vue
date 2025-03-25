@@ -38,7 +38,10 @@
             <div class="inline-block" style="width: 5px">&nbsp;</div>
 
           </template>
-          <span class="file-menu-item" >{{ truncate(file.title, 25) }}&nbsp;</span>
+          <span class="file-menu-item" >
+            {{ truncate(file.title, 25) }}
+            <span v-if="file.dirty" class="text-grey-7">*</span>
+          </span>
 
 
         </div>

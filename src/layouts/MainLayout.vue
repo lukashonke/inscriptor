@@ -185,7 +185,7 @@ onMounted(async () => {
     });
 
     // repeat quick save
-    setInterval(quickSave, 5000);
+    setInterval(quickSave, 3000);
 
     setInterval(reloadUserData, 60000);
 
@@ -219,6 +219,22 @@ if(layoutStore.runsInDesktopApp()) {
 
     try {
       await quickSave(true);
+
+      const dirtyFiles = fileStore.getDirtyFiles();
+      if(dirtyFiles.length > 0) {
+        event.preventDefault();
+
+        Dialog.create({
+          title: 'Confirm close',
+          message: 'Data has been modified and cannot be saved right now. Are you sure you want to close the application?',
+          cancel: true,
+          persistent: true
+        }).onOk(() => {
+          appWindow.close();
+        }).onCancel(() => {
+        }).onDismiss(() => {
+        })
+      }
     } catch (e) {
 
       event.preventDefault();
