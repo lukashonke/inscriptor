@@ -273,6 +273,9 @@
               <div v-html="formatPendingBrainstormingPrompt(promptResultText)" />
             </template>
           </template>
+          <template v-else-if="promptResult.prompt.promptStyle === 'mermaid'">
+            <vue-mermaid-string :value="promptResult.text" :options="{ securityLevel: 'loose' }"/>
+          </template>
           <template v-else>
             <q-input v-if="!hasImages && editEnabled" filled dense square v-model="promptResultText" type="textarea"
               autogrow />
@@ -467,8 +470,9 @@
 </template>
 
 <script setup>
-import {useTextSelection} from '@vueuse/core'
-  import {computed, ref, watch} from "vue";
+  import {useTextSelection} from '@vueuse/core'
+  import mermaid from 'mermaid';
+  import {computed, ref, watch, watchEffect} from "vue";
 
   import { writeText } from '@tauri-apps/plugin-clipboard-manager';
   import {usePromptStore} from "stores/prompt-store";
@@ -487,24 +491,25 @@ import {useTextSelection} from '@vueuse/core'
   import {uploadImage} from "src/common/apiServices/imageGenService";
   import {useCurrentUser} from "vuefire";
   import {useLayoutStore} from "stores/layout-store";
-import {editorTextBetween, getEditor, getEditorSelection} from "src/common/utils/editorUtils";
-import {BubbleMenu, EditorContent, FloatingMenu, useEditor} from "@tiptap/vue-3";
-import Document from "@tiptap/extension-document";
-import Paragraph from "@tiptap/extension-paragraph";
-import Text from "@tiptap/extension-text";
-import Image from "@tiptap/extension-image";
-import History from "@tiptap/extension-history";
-import {HardBreak} from "@tiptap/extension-hard-break";
-import {Link} from "@tiptap/extension-link";
-import {Underline} from "@tiptap/extension-underline";
-import {Italic} from "@tiptap/extension-italic";
-import {Bold} from "@tiptap/extension-bold";
-import {CodeBlock} from "@tiptap/extension-code-block";
-import {ListItem} from "@tiptap/extension-list-item";
-import {BulletList} from "@tiptap/extension-bullet-list";
-import {OrderedList} from "@tiptap/extension-ordered-list";
-import {Heading} from "@tiptap/extension-heading";
-import {Blockquote} from "@tiptap/extension-blockquote";
+  import {editorTextBetween, getEditor, getEditorSelection} from "src/common/utils/editorUtils";
+  import {BubbleMenu, EditorContent, FloatingMenu, useEditor} from "@tiptap/vue-3";
+  import Document from "@tiptap/extension-document";
+  import Paragraph from "@tiptap/extension-paragraph";
+  import Text from "@tiptap/extension-text";
+  import Image from "@tiptap/extension-image";
+  import History from "@tiptap/extension-history";
+  import {HardBreak} from "@tiptap/extension-hard-break";
+  import {Link} from "@tiptap/extension-link";
+  import {Underline} from "@tiptap/extension-underline";
+  import {Italic} from "@tiptap/extension-italic";
+  import {Bold} from "@tiptap/extension-bold";
+  import {CodeBlock} from "@tiptap/extension-code-block";
+  import {ListItem} from "@tiptap/extension-list-item";
+  import {BulletList} from "@tiptap/extension-bullet-list";
+  import {OrderedList} from "@tiptap/extension-ordered-list";
+  import {Heading} from "@tiptap/extension-heading";
+  import {Blockquote} from "@tiptap/extension-blockquote";
+  import VueMermaidString from 'vue-mermaid-string'
 
   const promptStore = usePromptStore();
   const fileStore = useFileStore();
@@ -802,10 +807,15 @@ import {Blockquote} from "@tiptap/extension-blockquote";
 
     const appendMessages = [];
 
+    let overrideText = null;
+    if(prompt.promptStyle === 'mermaid') {
+      overrideText = props.promptResult.text;
+    }
+
     if(props.promptResult.appendMessages) {
       appendMessages.push(...props.promptResult.appendMessages);
     }
-    appendMessages.push({type: 'assistant', text: convertHtmlToText(replaceParameterEditorText(promptResultText.value))});
+    appendMessages.push({type: 'assistant', text: overrideText ?? convertHtmlToText(replaceParameterEditorText(promptResultText.value))});
     appendMessages.push({type: 'user', text: reactInput.value});
 
     reactInput.value = '';

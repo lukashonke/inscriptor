@@ -617,6 +617,7 @@ import {
     {label: "Change (show colored differences)", value: "change"},
     {label: "Generate (generates new text)", value: "generate"},
     {label: "Brainstorm", value: "brainstorm"},
+    {label: "Mermaid", value: "mermaid"},
   ]
 
   const actionTypes = [
