@@ -109,6 +109,20 @@ body {
   }
 }
 
+.prompt-brainstorm-actions {
+  visibility: hidden;
+  max-height: 40px;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+*:hover > .prompt-brainstorm-actions {
+  visibility: visible;
+  max-height: 40px; /* Adjust based on your content height */
+  opacity: 1;
+}
+
 div.sticky {
   position: -webkit-sticky; /* Safari */
   position: sticky;

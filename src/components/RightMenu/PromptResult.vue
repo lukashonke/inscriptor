@@ -200,19 +200,55 @@
           </div>
 
           <template v-if="promptResult.prompt.promptStyle === 'brainstorm'">
-            <template v-if="promptBrainstormValueTree != null">
-              <q-card v-for="(idea, index) in promptBrainstormValueTree" :key="index" flat class="q-ma-xs">
-                <q-card-section class="q-pa-sm">
+            <template v-if="promptBrainstormValueTree != null && promptBrainstormValueTree.length > 0">
+              <q-card v-for="(idea, index) in promptBrainstormValueTree" :key="index" flat class="no-margin">
+                <q-card-section class="q-px-sm q-py-none">
                   <div class="prompt-brainstorm-idea">
                     <q-btn @click="promptBrainstormValueTree.splice(index, 1)" flat size="sm" class="float-right" icon="las la-times" color="negative" dense />
                     <span v-html="markdownToHtml(idea.text)"></span>
 
-                    <q-card v-if="idea.children" bordered flat class="q-mt-md">
+                    <div class="full-width flex q-my-xs prompt-brainstorm-actions">
+                      <template v-if="!idea.loading">
+                        <q-btn flat padding="xs xs" no-caps color="primary" size="sm" icon="mdi-creation-outline" label="Expand" @click="promptTreeRespond(idea, 'Create ideas that are building on this idea')" class="q-mr-md"/>
+                        <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Similar" @click="promptTreeRespond(idea, 'Create ideas similar to this idea')"  class="q-mr-md"/>
+                        <template v-if="idea.customReplyEnabled">
+                          <q-input v-model="idea.customReply" filled dense square autofocus autogrow/>
+                          <q-btn flat padding="xs sm" no-caps color="primary" icon="las la-reply" size="sm" @click="idea.customReplyEnabled = false; promptTreeRespond(idea, 'Perform this custom instruction - \'' + idea.customReply + '\'')" class="q-mr-sm"/>
+                          <q-btn flat padding="xs sm" no-caps color="primary" icon="las la-times" size="sm" @click="idea.customReplyEnabled = false"  class="q-mr-sm"/>
+                        </template>
+                        <template v-else>
+                          <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply" @click="idea.customReplyEnabled = true"  class="q-mr-sm"/>
+                        </template>
+
+                      </template>
+                    </div>
+
+                    <q-card v-if="idea.children && idea.children.length > 0" bordered flat class="bg-grey-1 q-py-md q-mb-md">
                       <template v-for="(child, i) in idea.children " :key="i">
-                        <q-card-section class="q-pa-md" >
+                        <q-card-section class="q-px-md q-py-none" >
                           <q-btn @click="idea.children.splice(i, 1)" flat size="sm" class="float-right" icon="las la-times" color="negative" dense />
                           <span v-html="markdownToHtml(child.text)" class=""></span>
-                          <q-card v-if="child.children" bordered flat class="q-mt-md">
+
+
+                          <div class="full-width flex q-my-xs prompt-brainstorm-actions">
+                            <template v-if="!child.loading">
+                              <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Expand" @click="promptTreeRespond(child, 'Create ideas that are expanding on this idea')"  class="q-mr-sm"/>
+                              <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Similar" @click="promptTreeRespond(child, 'Create ideas similar to this idea')"  class="q-mr-sm"/>
+                              <template v-if="child.customReplyEnabled">
+                                <q-input v-model="child.customReply" filled dense square autofocus autogrow/>
+                                <q-btn flat padding="xs sm" no-caps color="primary" icon="las la-reply" size="sm" @click="child.customReplyEnabled = false; promptTreeRespond(child, 'Perform this custom instruction - \'' + child.customReply + '\'')" class="q-mr-sm"/>
+                                <q-btn flat padding="xs sm" no-caps color="primary" icon="las la-times" size="sm" @click="child.customReplyEnabled = false"  class="q-mr-sm"/>
+                              </template>
+                              <template v-else>
+                                <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply" @click="child.customReplyEnabled = true"  class="q-mr-sm"/>
+                              </template>
+                            </template>
+                          </div>
+                          <div v-if="child.loading">
+                            <q-spinner-grid class="q-mt-sm q-mb-md" />
+                          </div>
+
+                          <q-card v-if="child.children && child.children.length > 0" bordered flat class="q-mt-md bg-blue-grey-1 q-mb-md">
 
                             <template v-for="(childChild, ii) in child.children " :key="ii">
                               <q-card-section class="q-pa-md">
@@ -223,35 +259,18 @@
                           </q-card>
 
                         </q-card-section>
-                        <q-card-actions class="q-pt-none">
-                          <template v-if="!child.loading">
-                            <q-btn flat no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Expand" @click="promptTreeRespond(child, 'Create ideas that are expanding on this idea')" />
-                            <q-btn flat no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Similar" @click="promptTreeRespond(child, 'Create ideas similar to this idea')" />
-                          </template>
-                          <template v-else>
-                            <q-spinner-dots />
-                          </template>
-                        </q-card-actions>
                       </template>
                     </q-card>
 
                   </div>
+                  <div v-if="idea.loading">
+                    <q-spinner-grid class="q-mt-sm q-mb-md" />
+                  </div>
                 </q-card-section>
-                <q-card-actions class="q-pt-none">
-                  <template v-if="!idea.loading">
-                    <q-btn flat no-caps color="primary" size="sm" icon="mdi-creation-outline" label="Expand" @click="promptTreeRespond(idea, 'Create ideas that are building on this idea')" />
-                    <q-btn flat no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Similar" @click="promptTreeRespond(idea, 'Create ideas similar to this idea')" />
-                  </template>
-                  <template v-else>
-                    <q-spinner-dots />
-                  </template>
-                </q-card-actions>
               </q-card>
             </template>
             <template v-else>
-              <q-spinner-grid />
-
-              <div v-html="promptResultText" />
+              <div v-html="formatPendingBrainstormingPrompt(promptResultText)" />
             </template>
           </template>
           <template v-else>
@@ -429,8 +448,7 @@
       <q-slide-transition>
         <div v-show="reactExpanded" class="row q-mx-md q-mb-md">
           <div class="col q-mr-sm">
-            <q-input v-model="reactInput" filled dense square label="Message" autofocus autogrow ref="reactInputRef"
-              @keyup="onReplyKeyup" />
+            <q-input v-model="reactInput" filled dense square label="Message" autofocus autogrow ref="reactInputRef" @keyup="onReplyKeyup" />
           </div>
           <div class="col-auto">
             <q-btn icon="las la-reply" @click="promptReactClick(promptResult.prompt)" color="primary" />
@@ -649,6 +667,10 @@ import {Blockquote} from "@tiptap/extension-blockquote";
     return props.promptResult.valueTree;
   });
 
+  function formatPendingBrainstormingPrompt() {
+    return promptResultText.value.replaceAll('<split/>', '<br>');
+  }
+
   const promptResultText = computed({
     get: () => {
       //console.log(props.promptResult.text);
@@ -805,6 +827,7 @@ import {Blockquote} from "@tiptap/extension-blockquote";
   }
 
   async function promptTreeRespond(treeItem, instruction) {
+    if(!instruction) return;
     const appendMessages = [];
 
     if(props.promptResult.appendMessages) {
