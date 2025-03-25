@@ -1,10 +1,6 @@
 <template>
 
-  <bubble-menu
-    :editor="editor"
-    :tippy-options="{ duration: 100 }"
-    v-if="editor"
-  >
+  <bubble-menu :editor="editor" :tippy-options="{ duration: 100 }" v-if="editor">
     <q-card class="bubble-menu">
       <q-card-section class="q-pa-xs q-gutter-xs">
         <div class="row q-gutter-x-xs">
@@ -43,135 +39,131 @@
     </q-card>
   </template>
 
-  <transition
-    appear
-    enter-active-class="animated fadeIn slow"
-    leave-active-class="animated fadeOut"
-  >
+  <transition appear enter-active-class="animated fadeIn slow" leave-active-class="animated fadeOut">
 
-  <q-card bordered ref="myHoverableElement" :class="isReactionToAnotherPrompt ? 'q-ml-md' : ''">
-    <div class="prompt-actions sticky-top">
-      <div class="row no-wrap ellipsis">
-        <div class="col-auto">
-          <q-btn color="primary" flat unelevated size="sm" :icon="type === 'inline' ? 'las la-plus' : 'las la-angle-double-left'" @click="insert" :loading="copying">
-            <q-tooltip :delay="1000">
-              Click to insert
-            </q-tooltip>
-          </q-btn>
-        </div>
-        <div class="col-auto">
-          <q-btn color="primary" flat unelevated size="sm" icon="las la-copy" v-if="type !== 'inline'">
-            <q-menu>
-              <q-list dense>
-                <template v-if="!hasImages">
-                  <q-item clickable @click="copyToClipboard($event)">
-                    <q-item-section side>
-                      <q-icon name="las la-clipboard" size="xs"/>
-                    </q-item-section>
-                    <q-item-section>
-                      Copy to clipboard
-                    </q-item-section>
-                  </q-item>
-                  <q-separator />
-                  <q-item clickable @click="copyToVariable($event, variable)" v-for="variable in variables" :key="variable.title">
-                    <q-item-section side>
-                      <q-icon name="las la-cogs" size="xs"/>
-                    </q-item-section>
-                    <q-item-section>
-                      Copy to variable ${{variable.title}}
-                    </q-item-section>
-                  </q-item>
-                </template>
-                <template v-if="hasImages">
-                  <q-separator />
-                  <q-item clickable @click="copyToFileImage($event)" >
-                    <q-item-section side>
-                      <q-icon name="las la-image" size="xs"/>
-                    </q-item-section>
-                    <q-item-section>
-                      Copy to file cover image
-                    </q-item-section>
-                  </q-item>
-                </template>
-              </q-list>
-            </q-menu>
-          </q-btn>
-        </div>
-
-        <div class="col ellipsis">
-          <q-badge class="q-ml-md q-gutter-x-xs">
-            <span>{{ promptResultTitle }}</span>
-            <span><q-icon name="las la-microchip" v-if="promptResultModel"/> {{ promptResultModel }}</span>
-            <span><q-icon v-if="promptResultTemperature" name="mdi-thermometer-low" /> {{ promptResultTemperature }}</span>
-          </q-badge>
-        </div>
-
-        <div class="col-auto" v-if="collapsed">
-          <q-btn color="primary" flat unelevated size="sm" :icon="collapsed ? 'las la-plus-square' : 'las la-minus-square'" @click="collapsed = !collapsed">
-          </q-btn>
-        </div>
-
-        <div class="col-auto" v-if="hasClose">
-          <q-btn color="primary" flat unelevated size="sm" icon="las la-times" @click="onClose">
-          </q-btn>
-        </div>
-        <div class="col-auto" v-else>
+    <q-card bordered ref="myHoverableElement" :class="isReactionToAnotherPrompt ? 'q-ml-md' : ''">
+      <div class="prompt-actions sticky-top">
+        <div class="row no-wrap ellipsis">
           <div class="col-auto">
-            <q-btn color="primary" flat unelevated size="sm" icon="las la-ellipsis-v" >
+            <q-btn color="primary" flat unelevated size="sm" :icon="type === 'inline' ? 'las la-plus' : 'las la-angle-double-left'" @click="insert" :loading="copying">
+              <q-tooltip :delay="1000">
+                Click to insert
+              </q-tooltip>
+            </q-btn>
+          </div>
+          <div class="col-auto">
+            <q-btn color="primary" flat unelevated size="sm" icon="las la-copy" v-if="type !== 'inline'">
               <q-menu>
                 <q-list dense>
-                  <q-item clickable @click="expanded = !expanded; collapsed = false">
-                    <q-item-section side>
-                      <q-icon name="las la-expand-arrows-alt" size="xs"/>
-                    </q-item-section>
-                    <q-item-section>
-                      {{ expanded ? 'Collapse' : 'Expand' }}
-                    </q-item-section>
-                  </q-item>
-                  <q-item clickable @click="collapsed = !collapsed" v-if="!isPrompting && type !== 'inline'">
-                    <q-item-section side>
-                      <q-icon :name="collapsed ? 'las la-plus-square' : 'las la-minus-square'" size="xs"/>
-                    </q-item-section>
-                    <q-item-section>
-                      {{ collapsed ? 'Maximize' : 'Minimize' }}
-                    </q-item-section>
-                  </q-item>
-                  <q-item clickable @click="htmlViewOverride = !(htmlView ?? defaultHtmlView)">
-                    <q-item-section side>
-                      <q-icon name="mdi-view-agenda-outline" size="xs"/>
-                    </q-item-section>
-                    <q-item-section>
-                      Raw view
-                    </q-item-section>
-                  </q-item>
-                  <q-item clickable @click="editEnabled = !editEnabled">
-                    <q-item-section side>
-                      <q-icon name="mdi-pen" size="xs"/>
-                    </q-item-section>
-                    <q-item-section>
-                      Edit
-                    </q-item-section>
-                  </q-item>
-                  <q-separator />
-                  <q-item clickable @click="removePromptResult($event)" v-if="!isPrompting && type !== 'inline'" class="text-negative">
-                    <q-item-section side>
-                      <q-icon name="las la-trash" size="xs"/>
-                    </q-item-section>
-                    <q-item-section>
-                      Delete
-                    </q-item-section>
-                  </q-item>
+                  <template v-if="!hasImages">
+                    <q-item clickable @click="copyToClipboard($event)">
+                      <q-item-section side>
+                        <q-icon name="las la-clipboard" size="xs" />
+                      </q-item-section>
+                      <q-item-section>
+                        Copy to clipboard
+                      </q-item-section>
+                    </q-item>
+                    <q-separator />
+                    <q-item clickable @click="copyToVariable($event, variable)" v-for="variable in variables" :key="variable.title">
+                      <q-item-section side>
+                        <q-icon name="las la-cogs" size="xs" />
+                      </q-item-section>
+                      <q-item-section>
+                        Copy to variable ${{variable.title}}
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                  <template v-if="hasImages">
+                    <q-separator />
+                    <q-item clickable @click="copyToFileImage($event)">
+                      <q-item-section side>
+                        <q-icon name="las la-image" size="xs" />
+                      </q-item-section>
+                      <q-item-section>
+                        Copy to file cover image
+                      </q-item-section>
+                    </q-item>
+                  </template>
                 </q-list>
               </q-menu>
             </q-btn>
           </div>
-        </div>
-        <div class="col-auto">
-          <q-btn class="float-right" flat color="warning" unelevated size="sm" icon="las la-stop" @click.prevent="stopPrompting($event)" v-if="isPrompting">
-            <q-tooltip>Stop</q-tooltip>
-          </q-btn>
-        </div>
-        <!--<q-btn class="float-right" flat color="primary" unelevated size="sm" icon="las la-robot" v-if="!isPrompting">
+
+          <div class="col ellipsis">
+            <q-badge class="q-ml-md q-gutter-x-xs">
+              <span>{{ promptResultTitle }}</span>
+              <span><q-icon name="las la-microchip" v-if="promptResultModel" /> {{ promptResultModel }}</span>
+              <span><q-icon v-if="promptResultTemperature" name="mdi-thermometer-low" /> {{ promptResultTemperature }}</span>
+            </q-badge>
+          </div>
+
+          <div class="col-auto" v-if="collapsed">
+            <q-btn color="primary" flat unelevated size="sm" :icon="collapsed ? 'las la-plus-square' : 'las la-minus-square'" @click="collapsed = !collapsed">
+            </q-btn>
+          </div>
+
+          <div class="col-auto" v-if="hasClose">
+            <q-btn color="primary" flat unelevated size="sm" icon="las la-times" @click="onClose">
+            </q-btn>
+          </div>
+          <div class="col-auto" v-else>
+            <div class="col-auto">
+              <q-btn color="primary" flat unelevated size="sm" icon="las la-ellipsis-v">
+                <q-menu>
+                  <q-list dense>
+                    <q-item clickable @click="expanded = !expanded; collapsed = false">
+                      <q-item-section side>
+                        <q-icon name="las la-expand-arrows-alt" size="xs" />
+                      </q-item-section>
+                      <q-item-section>
+                        {{ expanded ? 'Collapse' : 'Expand' }}
+                      </q-item-section>
+                    </q-item>
+                    <q-item clickable @click="collapsed = !collapsed" v-if="!isPrompting && type !== 'inline'">
+                      <q-item-section side>
+                        <q-icon :name="collapsed ? 'las la-plus-square' : 'las la-minus-square'" size="xs" />
+                      </q-item-section>
+                      <q-item-section>
+                        {{ collapsed ? 'Maximize' : 'Minimize' }}
+                      </q-item-section>
+                    </q-item>
+                    <q-item clickable @click="htmlViewOverride = !(htmlView ?? defaultHtmlView)">
+                      <q-item-section side>
+                        <q-icon name="mdi-view-agenda-outline" size="xs" />
+                      </q-item-section>
+                      <q-item-section>
+                        Raw view
+                      </q-item-section>
+                    </q-item>
+                    <q-item clickable @click="editEnabled = !editEnabled">
+                      <q-item-section side>
+                        <q-icon name="mdi-pen" size="xs" />
+                      </q-item-section>
+                      <q-item-section>
+                        Edit
+                      </q-item-section>
+                    </q-item>
+                    <q-separator />
+                    <q-item clickable @click="removePromptResult($event)" v-if="!isPrompting && type !== 'inline'" class="text-negative">
+                      <q-item-section side>
+                        <q-icon name="las la-trash" size="xs" />
+                      </q-item-section>
+                      <q-item-section>
+                        Delete
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-btn>
+            </div>
+          </div>
+          <div class="col-auto">
+            <q-btn class="float-right" flat color="warning" unelevated size="sm" icon="las la-stop" @click.prevent="stopPrompting($event)" v-if="isPrompting">
+              <q-tooltip>Stop</q-tooltip>
+            </q-btn>
+          </div>
+          <!--<q-btn class="float-right" flat color="primary" unelevated size="sm" icon="las la-robot" v-if="!isPrompting">
           <q-tooltip>Prompt this</q-tooltip>
           <q-menu>
             <q-card>
@@ -179,215 +171,279 @@
             </q-card>
           </q-menu>
         </q-btn>-->
+        </div>
+        <q-separator />
       </div>
-    <q-separator />
-    </div>
-    <q-card-section v-if="collapsed === false">
-      <q-spinner-grid v-if="promptResult.waitingForResponse" />
+      <q-card-section v-if="collapsed === false">
+        <q-spinner-grid v-if="promptResult.waitingForResponse" />
 
-      <div class="q-pa-none" :class="classes">
-        <template v-if="hasImages" >
-          <q-img v-for="(image, index) in promptResult.images" :src="imageUrl(image)" :key="index" fit="contain" height="400px" />
-        </template>
+        <div class="q-pa-none" :class="classes">
+          <template v-if="hasImages">
+            <q-img v-for="(image, index) in promptResult.images" :src="imageUrl(image)" :key="index" fit="contain" height="400px" />
+          </template>
 
-        <div v-if="hasAppendMessages" class="cursor-pointer">
-          <div v-if="!appendMessagesExpanded" class="write-serif bg-grey-4 q-pa-none q-my-sm cursor-pointer" @click="appendMessagesExpanded = true">
-            You: {{ lastUserAppendMessage.text }}
-            <span class="text-italic">({{ appendMessagesCount}} more messages)</span>
-          </div>
+          <div v-if="hasAppendMessages" class="cursor-pointer">
+            <div v-if="!appendMessagesExpanded" class="write-serif bg-grey-4 q-pa-none q-my-sm cursor-pointer" @click="appendMessagesExpanded = true">
+              You: {{ lastUserAppendMessage.text }}
+              <span class="text-italic">({{ appendMessagesCount}} more messages)</span>
+            </div>
 
-          <div v-if="appendMessagesExpanded" @click="appendMessagesExpanded = false">
-            <div v-for="(message, index) in promptResult.appendMessages" :key="index">
-              <div v-if="message.type === 'assistant'" class="write-serif all-border" v-html="message.text" />
-              <div v-if="message.type === 'user'" class="bg-grey-4 all-border">
-                You:
-                <span :class="writeClasses" v-html="message.text" />
+            <div v-if="appendMessagesExpanded" @click="appendMessagesExpanded = false">
+              <div v-for="(message, index) in promptResult.appendMessages" :key="index">
+                <div v-if="message.type === 'assistant'" class="write-serif all-border" v-html="message.text" />
+                <div v-if="message.type === 'user'" class="bg-grey-4 all-border">
+                  You:
+                  <span :class="writeClasses" v-html="message.text" />
+                </div>
               </div>
             </div>
           </div>
+
+          <template v-if="promptResult.prompt.promptStyle === 'brainstorm'">
+            <template v-if="promptBrainstormValueTree != null">
+              <q-card v-for="(idea, index) in promptBrainstormValueTree" :key="index" flat class="q-ma-xs">
+                <q-card-section class="q-pa-sm">
+                  <div class="prompt-brainstorm-idea">
+                    <q-btn @click="promptBrainstormValueTree.splice(index, 1)" flat size="sm" class="float-right" icon="las la-times" color="negative" dense />
+                    <span v-html="markdownToHtml(idea.text)"></span>
+
+                    <q-card v-if="idea.children" bordered flat class="q-mt-md">
+                      <template v-for="(child, i) in idea.children " :key="i">
+                        <q-card-section class="q-pa-md" >
+                          <q-btn @click="idea.children.splice(i, 1)" flat size="sm" class="float-right" icon="las la-times" color="negative" dense />
+                          <span v-html="markdownToHtml(child.text)" class=""></span>
+                          <q-card v-if="child.children" bordered flat class="q-mt-md">
+
+                            <template v-for="(childChild, ii) in child.children " :key="ii">
+                              <q-card-section class="q-pa-md">
+                                <q-btn @click="child.children.splice(ii, 1)" flat size="sm" class="float-right" icon="las la-times" color="negative" dense />
+                                <span v-html="markdownToHtml(childChild.text)"></span>
+                              </q-card-section>
+                            </template>
+                          </q-card>
+
+                        </q-card-section>
+                        <q-card-actions class="q-pt-none">
+                          <template v-if="!child.loading">
+                            <q-btn flat no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Expand" @click="promptTreeRespond(child, 'Create ideas that are expanding on this idea')" />
+                            <q-btn flat no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Similar" @click="promptTreeRespond(child, 'Create ideas similar to this idea')" />
+                          </template>
+                          <template v-else>
+                            <q-spinner-dots />
+                          </template>
+                        </q-card-actions>
+                      </template>
+                    </q-card>
+
+                  </div>
+                </q-card-section>
+                <q-card-actions class="q-pt-none">
+                  <template v-if="!idea.loading">
+                    <q-btn flat no-caps color="primary" size="sm" icon="mdi-creation-outline" label="Expand" @click="promptTreeRespond(idea, 'Create ideas that are building on this idea')" />
+                    <q-btn flat no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Similar" @click="promptTreeRespond(idea, 'Create ideas similar to this idea')" />
+                  </template>
+                  <template v-else>
+                    <q-spinner-dots />
+                  </template>
+                </q-card-actions>
+              </q-card>
+            </template>
+            <template v-else>
+              <q-spinner-grid />
+
+              <div v-html="promptResultText" />
+            </template>
+          </template>
+          <template v-else>
+            <q-input v-if="!hasImages && editEnabled" filled dense square v-model="promptResultText" type="textarea"
+              autogrow />
+            <template v-else-if="promptResultText">
+              <contenteditable tag="div" :class="writeClasses" class="no-outline" v-model="promptResultText"
+                v-if="!hasImages && !htmlView" ref="promptResultRef" contenteditable="false" spellcheck="false"
+                :no-html="false">
+              </contenteditable>
+
+              <div>
+                <editor-content :editor="editor" spellcheck="false" class="no-outline" :class="writeClasses"
+                  v-if="htmlView" />
+              </div>
+
+            </template>
+          </template>
         </div>
 
-        <q-input v-if="!hasImages && editEnabled" filled dense square v-model="promptResultText" type="textarea" autogrow/>
-        <template v-else-if="promptResultText">
-          <contenteditable tag="div" :class="writeClasses" class="no-outline" v-model="promptResultText" v-if="!hasImages && !htmlView" ref="promptResultRef" contenteditable="false" spellcheck="false" :no-html="false">
-          </contenteditable>
+        <div v-if="promptResult.error">
+          <span class="text-negative">
+            <q-icon name="las la-exclamation-triangle" />
+            Error while prompting: {{ promptResult.error }}
+          </span>
+        </div>
+      </q-card-section>
 
-          <div  >
-            <editor-content :editor="editor" spellcheck="false" class="no-outline" :class="writeClasses" v-if="htmlView" />
-          </div>
+      <q-separator />
 
-        </template>
-
-      </div>
-
-      <div v-if="promptResult.error">
-        <span class="text-negative">
-          <q-icon name="las la-exclamation-triangle" />
-          Error while prompting: {{ promptResult.error }}
-        </span>
-      </div>
-    </q-card-section>
-
-    <q-separator />
-
-    <q-card-actions v-if="type === 'inline'">
-      <q-btn class="text-weight-bold" label="Reply" flat color="primary" unelevated size="sm" icon="las la-reply" @click.prevent="toggleReply()" :loading="replyLoading">
-        <q-tooltip>Reply on this prompt to AI</q-tooltip>
-      </q-btn>
-    </q-card-actions>
-
-    <q-card-actions v-if="!isPrompting && allowRegenerate && collapsed === false && promptResult.prompt.promptType !== 'chat'" class="row">
-      <q-btn class="text-weight-bold" label="Reply" flat color="primary" unelevated size="sm" icon="las la-reply" @click.prevent="toggleReply()">
-        <q-tooltip>Reply on this prompt to AI</q-tooltip>
-      </q-btn>
-
-
-
-      <div class="col q-ml-md">
-        <q-btn class="col-auto text-weight-bold" flat color="primary" unelevated size="sm" @click.prevent="generateFollowUpQuestions()" icon="mdi-creation-outline" v-if="promptStore.getPredefinedPromptId('Prompt Follow-Up Generator')" :loading="promptStore.isPrompting && promptStore.isSilentPrompting">
-          <q-tooltip >
-            Generate Follow-up questions
-          </q-tooltip>
+      <q-card-actions v-if="type === 'inline'">
+        <q-btn class="text-weight-bold" label="Reply" flat color="primary" unelevated size="sm" icon="las la-reply" @click.prevent="toggleReply()" :loading="replyLoading">
+          <q-tooltip>Reply on this prompt to AI</q-tooltip>
         </q-btn>
-        <template v-if="promptResult.followUpQuestions">
-          <template v-for="question in promptResult.followUpQuestions" :key="question.title">
-            <q-btn class="col-auto text-weight-bold" :label="question.title" flat color="accent" unelevated size="sm" @click.prevent="doPromptAction({type: 'Reply', typeParameter: question.followUp})">
-              <q-tooltip>
-                Reply: '{{ question.followUp }}'
-              </q-tooltip>
-            </q-btn>
-          </template>
-          <q-btn class="col-auto text-weight-bold" flat color="primary" unelevated size="sm" @click.prevent="removeFollowUpQuestions()" icon="las la-times">
+      </q-card-actions>
+
+      <q-card-actions
+        v-if="!isPrompting && allowRegenerate && collapsed === false && promptResult.prompt.promptType !== 'chat'"
+        class="row">
+        <q-btn class="text-weight-bold" label="Reply" flat color="primary" unelevated size="sm" icon="las la-reply" @click.prevent="toggleReply()">
+          <q-tooltip>Reply on this prompt to AI</q-tooltip>
+        </q-btn>
+
+
+
+        <div class="col q-ml-md">
+          <q-btn class="col-auto text-weight-bold" flat color="primary" unelevated size="sm"
+            @click.prevent="generateFollowUpQuestions()" icon="mdi-creation-outline"
+            v-if="promptStore.getPredefinedPromptId('Prompt Follow-Up Generator')"
+            :loading="promptStore.isPrompting && promptStore.isSilentPrompting">
+            <q-tooltip>
+              Generate Follow-up questions
+            </q-tooltip>
           </q-btn>
-        </template>
-        <template v-else>
-          <template v-for="(promptAction, index) in promptResult.prompt.actions ?? []" :key="index">
-            <q-btn class="col-auto text-weight-bold" :label="promptAction.title" flat color="primary" unelevated size="sm" @click.prevent="doPromptAction(promptAction)" :icon="getPromptActionIcon(promptAction)">
-              <q-tooltip v-if="promptAction.type === 'Add to Context'">
-                Add this text to a file with context '{{promptAction.typeParameter}}'
-              </q-tooltip>
-              <q-tooltip v-if="promptAction.type === 'Run Prompt'">
-                Runs prompt with this text as input
-              </q-tooltip>
-              <q-tooltip v-if="promptAction.type === 'Save to Variable'">
-                Saves this text to a variable
-              </q-tooltip>
-              <q-tooltip v-if="promptAction.type === 'Reply'">
-                Reply: '{{ promptAction.typeParameter }}'
-              </q-tooltip>
+          <template v-if="promptResult.followUpQuestions">
+            <template v-for="question in promptResult.followUpQuestions" :key="question.title">
+              <q-btn class="col-auto text-weight-bold" :label="question.title" flat color="accent" unelevated size="sm"
+                @click.prevent="doPromptAction({type: 'Reply', typeParameter: question.followUp})">
+                <q-tooltip>
+                  Reply: '{{ question.followUp }}'
+                </q-tooltip>
+              </q-btn>
+            </template>
+            <q-btn class="col-auto text-weight-bold" flat color="primary" unelevated size="sm"
+              @click.prevent="removeFollowUpQuestions()" icon="las la-times">
             </q-btn>
           </template>
-        </template>
-      </div>
-
-      <q-space />
-
-      <q-btn class="text-weight-bold float-right" label="Prompt Again" flat color="primary" unelevated size="sm" icon="las la-sync" @click.prevent="regeneratePrompt($event, false)">
-        <q-tooltip>Generate this prompt again</q-tooltip>
-      </q-btn>
-
-      <q-btn v-if="!promptResult.prompt.enablePromptRuns" class="text-weight-bold float-right" flat color="primary" unelevated size="sm" icon="arrow_drop_down">
-        <q-menu>
-          <q-list dense>
-
-            <q-item clickable v-ripple>
-              <q-item-section>Prompt with creativity...</q-item-section>
-              <q-item-section side>
-                <q-icon name="keyboard_arrow_right" />
-              </q-item-section>
-
-              <q-menu anchor="top end" self="top start">
-                <q-list dense>
-                  <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 1)">
-                    <q-item-section side>
-                      <q-icon name="mdi-palette" size="xs" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>Very Creative (temperature 1)</q-item-label>
-                    </q-item-section>
-                  </q-item>
-
-                  <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 0.8)">
-                    <q-item-section side>
-                      <q-icon name="mdi-palette-outline" size="xs" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>Creative (temperature 0.8)</q-item-label>
-                    </q-item-section>
-                  </q-item>
-
-                  <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 0.5)">
-                    <q-item-section side>
-                      <q-icon name="mdi-keyboard-outline" size="xs" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>Deterministic (temperature 0.5)</q-item-label>
-                    </q-item-section>
-                  </q-item>
-
-                  <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 0)">
-                    <q-item-section side>
-                      <q-icon name="mdi-keyboard" size="xs" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>Very Deterministic (temperature 0)</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-item>
-
-            <q-item clickable v-ripple>
-              <q-item-section>Prompt using model...</q-item-section>
-              <q-item-section side>
-                <q-icon name="keyboard_arrow_right" />
-              </q-item-section>
-
-              <q-menu anchor="top end" self="top start">
-                <q-list>
-
-
-                  <q-item
-                    v-for="model in promptStore.models"
-                    :key="model"
-                    @click="regeneratePrompt($event, false, undefined, model)"
-                    dense
-                    clickable
-                  >
-                    <q-item-section side>
-                      <q-icon name="las la-microchip" size="xs" />
-                    </q-item-section>
-                    <q-item-section>{{ model.name }}</q-item-section>
-                  </q-item>
-
-                </q-list>
-              </q-menu>
-            </q-item>
-          </q-list>
-        </q-menu>
-      </q-btn>
-
-    </q-card-actions>
-
-    <q-slide-transition>
-      <div v-show="reactExpanded" class="row q-mx-md q-mb-md">
-        <div class="col q-mr-sm">
-          <q-input v-model="reactInput" filled dense square label="Message" autofocus autogrow ref="reactInputRef" @keyup="onReplyKeyup" />
+          <template v-else>
+            <template v-for="(promptAction, index) in promptResult.prompt.actions ?? []" :key="index">
+              <q-btn class="col-auto text-weight-bold" :label="promptAction.title" flat color="primary" unelevated
+                size="sm" @click.prevent="doPromptAction(promptAction)" :icon="getPromptActionIcon(promptAction)">
+                <q-tooltip v-if="promptAction.type === 'Add to Context'">
+                  Add this text to a file with context '{{promptAction.typeParameter}}'
+                </q-tooltip>
+                <q-tooltip v-if="promptAction.type === 'Run Prompt'">
+                  Runs prompt with this text as input
+                </q-tooltip>
+                <q-tooltip v-if="promptAction.type === 'Save to Variable'">
+                  Saves this text to a variable
+                </q-tooltip>
+                <q-tooltip v-if="promptAction.type === 'Reply'">
+                  Reply: '{{ promptAction.typeParameter }}'
+                </q-tooltip>
+              </q-btn>
+            </template>
+          </template>
         </div>
-        <div class="col-auto">
-          <q-btn icon="las la-reply" @click="promptReactClick(promptResult.prompt)" color="primary"/>
-        </div>
-      </div>
-    </q-slide-transition>
 
-    <q-menu
-      touch-position
-      context-menu>
-      <q-card>
-        <PromptSelector prompt-types="selection" @promptClick="promptClick"></PromptSelector>
-      </q-card>
-    </q-menu>
-  </q-card>
+        <q-space />
+
+        <q-btn class="text-weight-bold float-right" label="Prompt Again" flat color="primary" unelevated size="sm"
+          icon="las la-sync" @click.prevent="regeneratePrompt($event, false)">
+          <q-tooltip>Generate this prompt again</q-tooltip>
+        </q-btn>
+
+        <q-btn v-if="!promptResult.prompt.enablePromptRuns" class="text-weight-bold float-right" flat color="primary"
+          unelevated size="sm" icon="arrow_drop_down">
+          <q-menu>
+            <q-list dense>
+
+              <q-item clickable v-ripple>
+                <q-item-section>Prompt with creativity...</q-item-section>
+                <q-item-section side>
+                  <q-icon name="keyboard_arrow_right" />
+                </q-item-section>
+
+                <q-menu anchor="top end" self="top start">
+                  <q-list dense>
+                    <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 1)">
+                      <q-item-section side>
+                        <q-icon name="mdi-palette" size="xs" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>Very Creative (temperature 1)</q-item-label>
+                      </q-item-section>
+                    </q-item>
+
+                    <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 0.8)">
+                      <q-item-section side>
+                        <q-icon name="mdi-palette-outline" size="xs" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>Creative (temperature 0.8)</q-item-label>
+                      </q-item-section>
+                    </q-item>
+
+                    <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 0.5)">
+                      <q-item-section side>
+                        <q-icon name="mdi-keyboard-outline" size="xs" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>Deterministic (temperature 0.5)</q-item-label>
+                      </q-item-section>
+                    </q-item>
+
+                    <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 0)">
+                      <q-item-section side>
+                        <q-icon name="mdi-keyboard" size="xs" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>Very Deterministic (temperature 0)</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-item>
+
+              <q-item clickable v-ripple>
+                <q-item-section>Prompt using model...</q-item-section>
+                <q-item-section side>
+                  <q-icon name="keyboard_arrow_right" />
+                </q-item-section>
+
+                <q-menu anchor="top end" self="top start">
+                  <q-list>
+
+
+                    <q-item v-for="model in promptStore.models" :key="model"
+                      @click="regeneratePrompt($event, false, undefined, model)" dense clickable>
+                      <q-item-section side>
+                        <q-icon name="las la-microchip" size="xs" />
+                      </q-item-section>
+                      <q-item-section>{{ model.name }}</q-item-section>
+                    </q-item>
+
+                  </q-list>
+                </q-menu>
+              </q-item>
+            </q-list>
+          </q-menu>
+        </q-btn>
+
+      </q-card-actions>
+
+      <q-slide-transition>
+        <div v-show="reactExpanded" class="row q-mx-md q-mb-md">
+          <div class="col q-mr-sm">
+            <q-input v-model="reactInput" filled dense square label="Message" autofocus autogrow ref="reactInputRef"
+              @keyup="onReplyKeyup" />
+          </div>
+          <div class="col-auto">
+            <q-btn icon="las la-reply" @click="promptReactClick(promptResult.prompt)" color="primary" />
+          </div>
+        </div>
+      </q-slide-transition>
+
+      <q-menu touch-position context-menu>
+        <q-card>
+          <PromptSelector prompt-types="selection" @promptClick="promptClick"></PromptSelector>
+        </q-card>
+      </q-menu>
+    </q-card>
 
   </transition>
 </template>
@@ -572,6 +628,27 @@ import {Blockquote} from "@tiptap/extension-blockquote";
 
   const inlineReactText = ref('');
 
+  const promptBrainstormValueTree = computed(() => {
+    if(isPrompting.value === true) {
+      return null;
+    }
+
+    if(!props.promptResult.valueTree) {
+      if(!props.promptResult.text) {
+        return null;
+      }
+
+      const pr = props.promptResult;
+      let tree = pr.text.split('<split/>').map(item => ({ text: item })).filter(item => item.text.trim() !== '');
+
+      pr.valueTree = tree;
+
+      return props.promptResult.valueTree;
+    }
+
+    return props.promptResult.valueTree;
+  });
+
   const promptResultText = computed({
     get: () => {
       //console.log(props.promptResult.text);
@@ -725,6 +802,38 @@ import {Blockquote} from "@tiptap/extension-blockquote";
       collapsed.value = true;
       await executePromptClick(prompt, props.promptResult.input, false, appendMessages, true);
     }
+  }
+
+  async function promptTreeRespond(treeItem, instruction) {
+    const appendMessages = [];
+
+    if(props.promptResult.appendMessages) {
+      appendMessages.push(...props.promptResult.appendMessages);
+    }
+
+    appendMessages.push({type: 'assistant', text: convertHtmlToText(replaceParameterEditorText(promptResultText.value))});
+    appendMessages.push({type: 'user', text: instruction + ': ' + treeItem.text});
+
+    promptStore.setCurrentOverridePromptParameters(props.promptResult.promptArgs.overridePromptParameters);
+
+    replyLoading.value = true;
+
+    treeItem.loading = true;
+
+    const result = await executePromptClick(props.promptResult.prompt, props.promptResult.input, false, appendMessages, true, null, true);
+    replyLoading.value = false;
+
+    if(!treeItem.children) {
+      treeItem.children = [];
+    }
+
+    const childTree = result.text.split('<split/>').map(item => ({ text: item })).filter(item => item.text.trim() !== '');
+
+    treeItem.children.push(...childTree);
+
+    treeItem.loading = false;
+
+    return result;
   }
 
   async function promptResultInlinePrompt(prompt, instruction) {

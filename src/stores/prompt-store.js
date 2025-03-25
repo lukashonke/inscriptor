@@ -378,6 +378,9 @@ export const usePromptStore = defineStore('prompts', {
       let assistantPrefix = prompt.overridePromptFormat ? prompt.assistantPromptPrefix : model.defaultAssistantPromptPrefix;
       let assistantSuffix = prompt.overridePromptFormat ? prompt.assistantPromptSuffix : model.defaultAssistantPromptSuffix;
 
+      let jsonMode = prompt.promptStyle === 'brainstorm';
+      jsonMode = false; // disable json mode for now
+
       let systemPrompt = prompt.overrideSystemPrompt ? prompt.systemPrompt : model.defaultSystemPrompt;
 
       let userPrompt = prompt.userPrompt;
@@ -869,7 +872,6 @@ export const usePromptStore = defineStore('prompts', {
         textMessage.text = reduceLineBreaks(textMessage.text);
       }
 
-
       return {
         systemPrefix, systemSuffix, userPrefix, userSuffix, assistantPrefix, assistantSuffix,
         textMessages, contextTextMessages,
@@ -878,7 +880,8 @@ export const usePromptStore = defineStore('prompts', {
         inputIsText, selectedText, textBefore, textAfter, text, nodeBefore, nodeAfter, nodeParent,
         missingVariable,
         promptResultInput, promptResultAppendMessages,
-        model
+        model,
+        jsonMode
       }
     },
     promptInternal(prompt, inputText, parametersValue, contextTypes, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource) {
@@ -1057,6 +1060,8 @@ export const usePromptStore = defineStore('prompts', {
               repeatPenalty: input.repeatPenalty,
               frequencyPenalty: input.frequencyPenalty,
               presencePenalty: input.presencePenalty,
+
+              jsonMode: input.jsonMode,
             };
 
             loggedPrompt = this.pushLastPrompt({
@@ -1115,6 +1120,8 @@ export const usePromptStore = defineStore('prompts', {
               repeatPenalty: input.repeatPenalty,
               frequencyPenalty: input.frequencyPenalty,
               presencePenalty: input.presencePenalty,
+
+              jsonMode: input.jsonMode,
             }
           }
 
@@ -1264,6 +1271,7 @@ export const usePromptStore = defineStore('prompts', {
 
                 max_tokens: input.maxTokens,
                 stop: model.defaultStopStrings.length > 0 ? undefined : model.defaultStopStrings,
+                //response_format: input.jsonMode === true ? { "type": "json_object" } : undefined,
               },
               {
                 signal: this.promptAbortController.signal,
@@ -1332,6 +1340,7 @@ export const usePromptStore = defineStore('prompts', {
 
                 max_tokens: input.maxTokens,
                 stop: model.defaultStopStrings.length > 0 ? undefined : model.defaultStopStrings,
+                response_format: input.jsonMode === true ? { type: "json_object" } : undefined,
               },
               {
                 signal: this.promptAbortController.signal,
@@ -1453,7 +1462,7 @@ export const usePromptStore = defineStore('prompts', {
                 frequency_penalty: input.frequencyPenalty,
                 presence_penalty: input.presencePenalty,
                 num_ctx: model.contextSize,
-                num_predict: input.maxTokens
+                num_predict: input.maxTokens,
               }
 
               loggedPrompt = this.pushLastPrompt({
@@ -1466,6 +1475,7 @@ export const usePromptStore = defineStore('prompts', {
               stream = await ollama.generate({
                 model: model.modelName,
                 prompt: input,
+                format: input.jsonMode === true ? "json" : undefined,
                 raw: true,
                 stream: true,
                 options: options
@@ -1509,7 +1519,8 @@ export const usePromptStore = defineStore('prompts', {
                 model: model.modelName,
                 messages: messages,
                 stream: true,
-                options: options
+                options: options,
+                format: input.jsonMode === true ? "json" : undefined,
               });
 
               for await (const chunk of stream) {
