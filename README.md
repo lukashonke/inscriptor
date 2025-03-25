@@ -1,7 +1,7 @@
 # Inscriptor | ✨ AI Text Editor
 Our goal is to create an open-source and free alternative to tools like NovelCrafter, Scrivener or Notion.
 
-Inscriptor has cleverly integrated AI tools designed to enhance creativity, refine and analyze writing, provide suggestions and much more. all while being fully customizable. 
+Inscriptor has cleverly integrated AI tools designed to enhance creativity, brainstorm, refine and analyze writing, provide suggestions and much more. all while being fully customizable.
 
 https://inscriptor.io/
 
@@ -14,7 +14,7 @@ https://inscriptor.io/
 - 🌍 Use Any AI Model - Connect an API key for OpenAI's ChatGPT, Anthropic's Claude or OpenRouter, run local AI models with Ollama or LM Studio or use Inscriptor Cloud to run any AI model without additional setup
 - 🧠AI Context Selector - You decide what context gets included in AI prompts
 - 📌 Outlining and Planning - Get a bird's-eye view of your project on a planning board, generate summaries, write notes, and feed them all into AI for enhanced context.
-- ✍️ Writing Style definition - Customize how AI adapts to your personal writing style. Let it learn from your text or define the style of writing when you begin. 
+- ✍️ Writing Style definition - Customize how AI adapts to your personal writing style. Let it learn from your text or define the style of writing when you begin.
 - ⚡ Advanced AI tools: Chain prompts, run multiple prompts simultaneously, get instant text analysis, generate synopses with one click, create follow-up questions, and more—all fully customizable!
 
 ### Recommended use cases:
