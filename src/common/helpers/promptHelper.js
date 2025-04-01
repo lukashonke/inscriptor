@@ -48,7 +48,7 @@ export function trimLineBreaks(text) {
   return text.replace(/\n{3,}/g, '\n\n');
 }
 
-export async function executePromptClick(prompt, text, clear = true, appendMessages = null, forceBypassMoreParameters = false, appendContext = null, silent = false, forceShowContextSelection = false, promptSource = null) {
+export async function executePromptClick(prompt, text, clear = true, appendMessages = null, forceBypassMoreParameters = false, appendContext = null, silent = false, forceShowContextSelection = false, promptSource = null, onOutput = null) {
   const promptStore = usePromptStore();
   const layoutStore = useLayoutStore();
 
@@ -140,7 +140,7 @@ export async function executePromptClick(prompt, text, clear = true, appendMessa
     }
   } else {
     if(prompt.promptType === "general" || prompt.promptType === "insert" || prompt.promptType === "selection" || prompt.promptType === "selectionAnalysis") {
-      return await executePrompt(text, prompt, clear, appendMessages, false, null, appendContext, silent, promptSource);
+      return await executePrompt(text, prompt, clear, appendMessages, false, null, appendContext, silent, promptSource, onOutput);
     }  else if (prompt.promptType === "chat") {
       return await executeChatPrompt(text, prompt, clear, appendMessages, false, null, appendContext);
     }
@@ -172,7 +172,7 @@ export async function executeConfirmPrompt(previewOnly = false, forceInput = nul
   return null;
 }
 
-async function executePrompt(text, prompt, clear = true, appendMessages = null, previewOnly = false, forceInput = null, appendContext = null, silent = false, promptSource = null) {
+async function executePrompt(text, prompt, clear = true, appendMessages = null, previewOnly = false, forceInput = null, appendContext = null, silent = false, promptSource = null, onOutput = null) {
   const promptStore = usePromptStore();
 
   const model = promptStore.getModel(promptStore.getCurrentPromptModelId(prompt));
@@ -199,7 +199,7 @@ async function executePrompt(text, prompt, clear = true, appendMessages = null, 
     }
   }
 
-  return await promptStore.promptMultiple(prompt, text, promptStore.promptParametersValue, context, prompt.promptType, promptTimes, clear, appendMessages, null, previewOnly, forceInput, silent, promptSource);
+  return await promptStore.promptMultiple(prompt, text, promptStore.promptParametersValue, context, prompt.promptType, promptTimes, clear, appendMessages, null, previewOnly, forceInput, silent, promptSource, onOutput);
 }
 
 async function executeChatPrompt(text, prompt, clear = true, appendMessages = null, previewOnly = false, forceInput = null, appendContext = null) {

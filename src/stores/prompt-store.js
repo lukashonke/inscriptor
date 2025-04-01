@@ -120,7 +120,7 @@ export const usePromptStore = defineStore('prompts', {
         this.defaultFileTemplate = createFile('Template file');
       }
     },
-    async promptMultiple(prompt, text, parametersValue, contextTypes, promptType, counts=3, clear = true, appendMessages = null, forceTemperature = null, previewOnly = false, forceInput = null, silent = false, promptSource = null) {
+    async promptMultiple(prompt, text, parametersValue, contextTypes, promptType, counts=3, clear = true, appendMessages = null, forceTemperature = null, previewOnly = false, forceInput = null, silent = false, promptSource = null, onOutput = null) {
       if(!this.canPrompt(prompt)) {
         return;
       }
@@ -178,7 +178,7 @@ export const usePromptStore = defineStore('prompts', {
 
             const promptArgs = { prompt, parametersValue, text, promptType, contextTypes, overridePromptParameters };
 
-            const result = await this.promptInternal(prompt, text, parametersValue, contextTypes, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource);
+            const result = await this.promptInternal(prompt, text, parametersValue, contextTypes, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource, onOutput);
 
             if(promptType === "general" || promptType === "selection" || promptType === "selectionAnalysis") {
               const trimmedResultText = result.text.trimStart().replace(/\n/g, '<br>');
@@ -207,7 +207,7 @@ export const usePromptStore = defineStore('prompts', {
 
             const promptArgs = { prompt, parametersValue, text, promptType, contextTypes, overridePromptParameters };
 
-            const result = await this.promptInternal(prompt, text, parametersValue, contextTypes, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource);
+            const result = await this.promptInternal(prompt, text, parametersValue, contextTypes, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource, onOutput);
 
             if(promptType === "general" || promptType === "selection" || promptType === "selectionAnalysis") {
               const trimmedResultText = result.text.trimStart().replace(/\n/g, '<br>');
@@ -671,13 +671,33 @@ export const usePromptStore = defineStore('prompts', {
         }
 
         for (const contextType of contextTypes) {
-          if(contextType.id === 'Current File') {
+          if(contextType.id === 'Current File' || contextType.id === 'Current & Children Files') {
             if(text && text.length > 0) {
               if(contextTypes.length > 1) {
                 context += fileStore.getFileNameWithPath(fileStore.selectedFile) + ' Text: ';
               }
               context += convertHtmlToText(text);
               context += '\n-----\n';
+            }
+
+            if(contextType.id === 'Current & Children Files') {
+              const addChildrenFunc = (f) => {
+                if(f.children) {
+                  for (const child of f.children) {
+                    const childText = convertHtmlToText(child.content);
+
+                    if(childText && childText.length > 0) {
+                      context += '' + fileStore.getFileNameWithPath(child) + ' Text: \n';
+                      context += childText;
+                      context += '\n-----\n';
+                    }
+
+                    addChildrenFunc(child);
+                  }
+                }
+              }
+
+              addChildrenFunc(fileStore.selectedFile);
             }
           } else if(contextType.id === 'Selected Text') {
             if(selectedText && selectedText.length > 0) {
@@ -687,12 +707,33 @@ export const usePromptStore = defineStore('prompts', {
               context += convertHtmlToText(selectedText);
               context += '\n-----\n';
             }
-          } else if(contextType.id === 'Current File Summary') {
+          } else if(contextType.id === 'Current File Summary' || contextType.id === 'Current & Children File Summary') {
             const contextValue = fileStore.selectedFile?.synopsis ?? '';
             if(contextValue && contextValue.length > 0) {
               context += fileStore.getFileNameWithPath(fileStore.selectedFile) + ' Summary: ' + convertHtmlToText(contextValue);
               context += '\n-----\n';
             }
+
+            if(contextType.id === 'Current & Children File Summary') {
+              const addChildrenFunc = (f) => {
+                if(f.children) {
+                  for (const child of f.children) {
+                    const childText = child.synopsis ?? '';
+
+                    if(childText && childText.length > 0) {
+                      context += '' + fileStore.getFileNameWithPath(child) + ' Text Summary:\n';
+                      context += convertHtmlToText(childText);
+                      context += '\n-----\n';
+                    }
+
+                    addChildrenFunc(child);
+                  }
+                }
+              }
+
+              addChildrenFunc(fileStore.selectedFile);
+            }
+
           } else if(contextType.id === 'Previous Text') {
             if(textBefore && textBefore.length > 0) {
               const charactersToTake = contextType.parameters;
@@ -776,6 +817,8 @@ export const usePromptStore = defineStore('prompts', {
                     }
                   }
                 }
+
+                addChildrenFunc(file);
               }
             }
           } else if(contextType.contextType === 'Context Type Summary') {
@@ -884,7 +927,7 @@ export const usePromptStore = defineStore('prompts', {
         jsonMode
       }
     },
-    promptInternal(prompt, inputText, parametersValue, contextTypes, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource) {
+    promptInternal(prompt, inputText, parametersValue, contextTypes, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource, onOutput) {
       if(this.isPrompting) {
         this.promptAbortController?.abort();
       }
@@ -1138,6 +1181,9 @@ export const usePromptStore = defineStore('prompts', {
               if(pr.meta === null) {
                 pr.text += text;
                 pr.originalText += text;
+                if(onOutput) {
+                  onOutput(pr.text, text, false);
+                }
 
                 if(pr.text.includes('[[META]]')) {
                   // extract text after [[META]]

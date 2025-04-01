@@ -299,7 +299,6 @@
                               </q-tooltip>
                             </q-chip>
                           </div>
-                          <div class="col-auto flex items-center q-mx-md"></div>
                           <div class="col-auto">
                             <q-chip :text-color="getContextChipFontColor(currentFileSummaryPromptContext)" :color="getContextChipColor(currentFileSummaryPromptContext)" :icon="getContextChipIcon(currentFileSummaryPromptContext)" :clickable="isContextAllowedForThisPrompt(currentFileSummaryPromptContext)" @click="toggleContext(currentFileSummaryPromptContext)" >
                               {{ currentFileSummaryPromptContext.label }} &nbsp;
@@ -315,7 +314,34 @@
 
                           </div>
                         </div>
-
+                        <div class="row">
+                          <div class="col-auto">
+                            <q-chip :text-color="getContextChipFontColor(currentAndChildrenFilePromptContext)" :color="getContextChipColor(currentAndChildrenFilePromptContext)" :icon="getContextChipIcon(currentAndChildrenFilePromptContext)" :clickable="isContextAllowedForThisPrompt(currentAndChildrenFilePromptContext)" @click="toggleContext(currentAndChildrenFilePromptContext)" >
+                              {{ currentAndChildrenFilePromptContext.label }} &nbsp;
+                              <q-tooltip color="primary">
+                                <div>include all text from {{ currentFile?.title }} and its children</div>
+                                <div>
+                                  <q-badge :color="contextWarning(currentAndChildrenFilePromptContext).color" v-if="contextWarning(currentAndChildrenFilePromptContext)">
+                                    {{ contextWarning(currentAndChildrenFilePromptContext).warning }}
+                                  </q-badge>
+                                </div>
+                              </q-tooltip>
+                            </q-chip>
+                          </div>
+                          <div class="col-auto">
+                            <q-chip :text-color="getContextChipFontColor(currentAndChildrenFileSummaryPromptContext)" :color="getContextChipColor(currentAndChildrenFileSummaryPromptContext)" :icon="getContextChipIcon(currentAndChildrenFileSummaryPromptContext)" :clickable="isContextAllowedForThisPrompt(currentAndChildrenFileSummaryPromptContext)" @click="toggleContext(currentAndChildrenFileSummaryPromptContext)" >
+                              {{ currentAndChildrenFileSummaryPromptContext.label }} &nbsp;
+                              <q-tooltip color="primary">
+                                <div>include summary of {{ currentFile?.title }} and its children</div>
+                                <div>
+                                  <q-badge :color="contextWarning(currentAndChildrenFileSummaryPromptContext).color" v-if="contextWarning(currentAndChildrenFileSummaryPromptContext)">
+                                    {{ contextWarning(currentAndChildrenFileSummaryPromptContext).warning }}
+                                  </q-badge>
+                                </div>
+                              </q-tooltip>
+                            </q-chip>
+                          </div>
+                        </div>
                         <div class="row">
                           <div class="col-auto">
                             <q-chip :text-color="getContextChipFontColor(selectedTextPromptContext)" :color="getContextChipColor(selectedTextPromptContext)" :icon="getContextChipIcon(selectedTextPromptContext)" :clickable="isContextAllowedForThisPrompt(selectedTextPromptContext)" @click="toggleContext(selectedTextPromptContext)" >
@@ -415,9 +441,9 @@
                           </div>
                         </div>
 
-                        <div class="text-subtitle2 q-mt-md">Files:</div>
+                        <div class="text-subtitle2 q-mt-md">Individual Files:</div>
                         <div class="row q-gutter-x-sm">
-                          <div class="col-6">
+                          <div class="col-12">
                             <q-select label="Add single file" input-debounce="0" @filter="filterFnFile" use-input options-dense dense filled square dropdown-icon="add" v-model="promptContextFile" :options="promptContextFiles" @update:model-value="(val) => addFileContext(val)" >
                             </q-select>
                           </div>
@@ -554,6 +580,8 @@
   import {useFileStore} from "stores/file-store";
   import CodeEditor from "components/Common/Editors/CodeEditor.vue";
   import {
+    currentAndChildrenFilePromptContext,
+    currentAndChildrenFileSummaryPromptContext,
     currentFilePromptContext, currentFileSummaryPromptContext, previousCharactersPromptContext,
     selectedTextPromptContext
   } from "src/common/resources/promptContexts";
@@ -941,9 +969,10 @@
   function addContext(context, parametersValue = undefined) {
     if(context === selectedTextPromptContext) {
       removeContext(currentFilePromptContext);
+      removeContext(currentAndChildrenFileSummaryPromptContext);
     }
 
-    if(context === currentFilePromptContext) {
+    if(context === currentFilePromptContext || context === currentAndChildrenFileSummaryPromptContext) {
       removeContext(selectedTextPromptContext);
     }
 

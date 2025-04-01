@@ -128,20 +128,17 @@
           </div>
         </q-card-section>
 
-        <template v-for="grouping in promptsGrouped" :key="grouping.modelId">
-          <q-card-section class="full-width q-pa-sm">
-            <div class="bordered q-pa-sm shadow-1">
-              <div class="text-grey-6 flex items-center"><q-icon name="las la-microchip" class="q-mr-xs" /> <span class="text-caption">{{promptStore.getModel(grouping.modelId).name}}</span></div>
-              <div class="q-mt-xs">
-                <template v-for="prompt in groupPromptsByFolder(grouping.prompts)" :key="prompt.id">
-                  <div class="row text-caption full-width q-pb-xs">
-                    <PromptSelectorItem :prompt="prompt" @promptClick="promptClick" />
-                  </div>
-                </template>
-              </div>
+        <q-card-section class="full-width q-pa-sm">
+          <div class="q-pa-sm shadow-1">
+            <div class="q-mt-xs">
+              <template v-for="prompt in groupPromptsByFolder(categoryPrompts)" :key="prompt.id">
+                <div class="row text-caption full-width q-pb-xs">
+                  <PromptSelectorItem :prompt="prompt" @promptClick="promptClick" />
+                </div>
+              </template>
             </div>
-          </q-card-section>
-        </template>
+          </div>
+        </q-card-section>
       </div>
     </div>
   </div>
@@ -280,7 +277,12 @@ const categories = computed(() => {
   return retValue;
 });
 
-const promptsGrouped = computed(() => {
+const categoryPrompts = computed(() => {
+  const prompts = getPrompts().filter(p => promptStore.canPrompt(p)).filter(p => p.category === currentPromptCategory.value || (currentPromptCategory.value === '' && !p.category))
+  return prompts;
+});
+
+const promptsGroupedByModel = computed(() => {
   const prompts = getPrompts().filter(p => promptStore.canPrompt(p)).filter(p => p.category === currentPromptCategory.value || (currentPromptCategory.value === '' && !p.category))
   const grouping = groupBy(prompts, 'modelId');
 

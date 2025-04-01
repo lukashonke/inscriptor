@@ -200,7 +200,7 @@
           </div>
 
           <template v-if="promptResult.prompt.promptStyle === 'brainstorm'">
-            <template v-if="promptBrainstormValueTree != null && promptBrainstormValueTree.length > 0">
+            <template v-if="promptBrainstormValueTree != null && promptBrainstormValueTree.length> 0">
               <q-card v-for="(idea, index) in promptBrainstormValueTree" :key="index" flat class="no-margin">
                 <q-card-section class="q-px-sm q-py-none">
                   <div class="prompt-brainstorm-idea">
@@ -246,6 +246,7 @@
                           </div>
                           <div v-if="child.loading">
                             <q-spinner-grid class="q-mt-sm q-mb-md" />
+                            <div v-html="formatPendingBrainstormingPrompt(child.progressText)" class="q-pa-md rounded-borders bg-blue-grey-1" />
                           </div>
 
                           <q-card v-if="child.children && child.children.length > 0" bordered flat class="q-mt-md bg-blue-grey-1 q-mb-md">
@@ -265,6 +266,7 @@
                   </div>
                   <div v-if="idea.loading">
                     <q-spinner-grid class="q-mt-sm q-mb-md" />
+                    <div v-html="formatPendingBrainstormingPrompt(idea.progressText)" class="q-pa-md bordered rounded-borders bg-grey-1" />
                   </div>
                 </q-card-section>
               </q-card>
@@ -672,8 +674,8 @@
     return props.promptResult.valueTree;
   });
 
-  function formatPendingBrainstormingPrompt() {
-    return promptResultText.value.replaceAll('<split/>', '<br>');
+  function formatPendingBrainstormingPrompt(text) {
+    return text.replaceAll('&lt;split/&gt;', '<br><br>').replaceAll('\n', '<br>');
   }
 
   const promptResultText = computed({
@@ -849,11 +851,17 @@
 
     promptStore.setCurrentOverridePromptParameters(props.promptResult.promptArgs.overridePromptParameters);
 
+    treeItem.progressText = '';
+
     replyLoading.value = true;
 
     treeItem.loading = true;
 
-    const result = await executePromptClick(props.promptResult.prompt, props.promptResult.input, false, appendMessages, true, null, true);
+    const onOutput = (fullText, newText, isFinished) => {
+      treeItem.progressText = fullText;
+    };
+
+    const result = await executePromptClick(props.promptResult.prompt, props.promptResult.input, false, appendMessages, true, null, true, false, null, onOutput);
     replyLoading.value = false;
 
     if(!treeItem.children) {
