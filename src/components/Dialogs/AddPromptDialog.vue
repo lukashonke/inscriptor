@@ -45,7 +45,7 @@
               <div class="row q-mb-lg">
                 <div class="col flex items-center">
                   <q-icon name="las la-microchip" class="q-mr-xs"/>
-                  AI model:
+                  Default AI model:
 
                   <q-select v-if="changingModel" dense filled :options="models" emit-value v-model="promptModel" option-value="id" option-label="name" options-dense class="q-ml-xs" />
                   <template v-if="!changingModel">

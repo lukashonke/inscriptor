@@ -530,8 +530,10 @@
 
       <q-card-actions class="text-primary">
 
+        <div class="col-auto">
+          <q-select filled dense label="AI model" square :options="models" v-model="model" option-label="name" option-value="id" options-dense />
+        </div>
         <div class="col">
-
         </div>
         <div class="col-auto q-mr-md">
           <q-btn flat label="Preview & Cost" color="secondary" @click="previewPrompt" class="float-left" :disable="!canConfirmPrompt"/>

@@ -7,7 +7,7 @@
             <span class="text-subtitle1 text-weight-medium">{{ title }}</span>
           </div>
           <div v-if="description">
-            <span class="text-caption ">{{ description }}</span>
+            <span class="text-caption text-grey-7 ">{{ description }}</span>
           </div>
         </div>
 
@@ -15,27 +15,34 @@
 
         </div>
         <div class="col flex items-center q-mr-xl q-gutter-y-xs">
-          <q-badge class="q-ml-sm" color="" v-if="promptType?.label.length > 0">
+          <q-badge class="q-ml-sm" color="">
+            <q-icon name="las la-robot" class="q-mr-xs" />
+            {{ model?.name }}
+            <q-tooltip>
+              Default AI model
+            </q-tooltip>
+          </q-badge>
+          <!--<q-badge class="q-ml-sm" color="" v-if="promptType?.label.length > 0">
             {{ promptType.label }} prompt
             <q-tooltip>
               Prompt Trigger Type
             </q-tooltip>
-          </q-badge>
+          </q-badge>-->
           <q-badge class="q-ml-sm" color="secondary" v-if="promptCategory?.length > 0">
-            <q-icon name="las la-tag" />
+            <q-icon name="las la-tag"  class="q-mr-xs"/>
             {{ promptCategory }}
             <q-tooltip>
               Prompt Category
             </q-tooltip>
           </q-badge>
           <q-badge class="q-ml-sm" color="secondary" v-if="promptFolder?.length > 0">
-            <q-icon name="las la-folder" />
+            <q-icon name="las la-folder" class="q-mr-xs" />
             {{ promptFolder }}
             <q-tooltip>
               Folder
             </q-tooltip>
           </q-badge>
-          <q-badge v-if="prompt.info?.tags.includes('context')" class="q-ml-sm" color="warning" >
+          <!--<q-badge v-if="prompt.info?.tags.includes('context')" class="q-ml-sm" color="warning" >
             <q-icon name="las la-user" />
             Context
             <q-tooltip>
@@ -48,7 +55,7 @@
             <q-tooltip>
               This prompt will ask for extra parameters
             </q-tooltip>
-          </q-badge>
+          </q-badge>-->
         </div>
 
         <template v-if="!startExpanded">
@@ -136,7 +143,7 @@
             </div>
             <div class="row q-gutter-x-sm">
               <div class="col">
-                <q-select v-model="modelId" filled dense label="Model" :options="models" options-dense />
+                <q-select v-model="modelId" filled dense label="Default AI Model" :options="models" options-dense />
               </div>
               <div class="col-auto" v-if="showPromptType">
                 <q-select v-model="promptType" filled dense label="Prompt Type" :options="promptTypes" style="min-width: 150px" >
@@ -169,7 +176,7 @@
               <div class="col-auto">
                 <q-checkbox v-model="overrideSystemPrompt" dense label="Override system prompt" />
               </div>
-              <div class="col-auto">
+              <div class="col-auto" v-if="model.args?.apiCallType === 'raw'">
                 <q-checkbox v-model="overridePromptFormat" dense label="Override prompt format" />
               </div>
               <div class="col-auto" v-if="prompt.info?.tags.includes('context') && canChangeContextTypes">
@@ -440,6 +447,9 @@
 
             <q-expansion-item label="Post Execute Actions" switch-toggle-side dense v-if="allowActions">
               <q-card bordered>
+                <q-card-section class="q-pb-none">
+                  <div class="text-caption text-grey">Tip: Define quick actions that can be run after your AI prompt is executed.</div>
+                </q-card-section>
                 <q-card-section class="q-gutter-y-md" v-if="prompt.actions?.length > 0">
                   <q-card v-for="(action, index) in prompt.actions" :key="index">
                     <q-card-section>
@@ -483,6 +493,9 @@
 
             <q-expansion-item label="Multiple Prompt Executions" switch-toggle-side dense v-if="allowMultipleRuns">
               <q-card bordered>
+                <q-card-section class="q-pb-none">
+                  <div class="text-caption text-grey">Tip: Execute prompt multiple times, using different AI models and settings, getting varied results at a single click, then select the reply you like the most.</div>
+                </q-card-section>
                 <q-card-section v-if="showPromptResultCount">
                   <div  class="row">
                     <div class="col">

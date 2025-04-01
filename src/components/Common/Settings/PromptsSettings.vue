@@ -58,20 +58,6 @@
         </q-tab-panel>
 
         <q-tab-panel name="prompts" class="q-pt-none">
-          <q-tabs
-            v-model="promptModel"
-            dense
-            class="text-grey "
-            active-color="primary"
-            indicator-color="primary"
-            narrow-indicator
-            align="left"
-          >
-            <q-tab v-for="model in models" :key="model.id" :name="model.id" :label="model.name" no-caps />
-          </q-tabs>
-
-          <q-separator />
-
           <div class="q-ml-md" v-if="!anyModelImported">
 
             <div class="q-mb-lg">
@@ -82,18 +68,22 @@
             </div>
           </div>
 
-          <div class="q-ml-sm q-gutter-x-sm q-mt-md" v-else>
+          <div class="q-gutter-x-sm q-mb-md" v-else>
             <q-btn color="primary" icon="las la-plus" label="Add prompt" @click="layoutStore.openAddPromptDialog(true, promptModel)" />
             <q-btn color="accent" label="Inscriptor Hub" icon="las la-store" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
           </div>
 
-          <q-tab-panels v-model="promptModel" animated>
+          <div v-for="prompt in prompts" :key="prompt.id">
+            <PromptSettingsItem :prompt="prompt" />
+          </div>
+
+          <!--<q-tab-panels v-model="promptModel" animated>
             <q-tab-panel v-for="model in models" :key="model.id" :name="model.id">
               <div v-for="prompt in prompts.filter(p => p.modelId === promptModel)" :key="prompt.id">
                 <PromptSettingsItem :prompt="prompt" />
               </div>
             </q-tab-panel>
-          </q-tab-panels>
+          </q-tab-panels>-->
 
          </q-tab-panel>
 
