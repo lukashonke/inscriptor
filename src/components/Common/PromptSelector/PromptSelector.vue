@@ -128,7 +128,7 @@
           </div>
         </q-card-section>
 
-        <q-card-section class="full-width q-pa-sm">
+        <q-card-section class="full-width q-pa-sm" v-if="groupPromptsByFolder(categoryPrompts).length > 0">
           <div class="q-pa-sm shadow-1">
             <div class="q-mt-xs">
               <template v-for="prompt in groupPromptsByFolder(categoryPrompts)" :key="prompt.id">

@@ -63,6 +63,9 @@
                 <q-btn size="12px" flat dense icon="las la-trash" color="negative" @click="removeProjectFromCloud(project.projectId)" v-if="!isCloudProjectLoaded(project) || fileStore.projectSettings?.syncToCloud"/>
               </div>
             </q-item-section>
+            <q-tooltip :delay="700">
+              Last opened: {{ new Date(project.lastOpened).toLocaleString() }}
+            </q-tooltip>
           </q-item>
 
           <q-item v-if="projects.length === 0 && !user.isAnonymous">

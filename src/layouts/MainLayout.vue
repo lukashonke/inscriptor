@@ -64,6 +64,7 @@
       <LowOnCreditsDialog />
       <ExportDialog />
       <FeedbackWindow />
+      <EditProjectMetadataDialog />
     </template>
 
   </q-layout>
@@ -107,6 +108,7 @@ import {onUserLogin} from "src/common/apiServices/userProjectService";
 import FeedbackWindow from "components/Dialogs/FeedbackWindow.vue";
 import MessageUsDialog from "components/Dialogs/MessageUsDialog.vue";
 import NewUserWelcomeDialog from "components/Dialogs/NewUserWelcomeDialog.vue";
+import EditProjectMetadataDialog from 'components/Dialogs/EditProjectMetadataDialog.vue';
 
 const layoutStore = useLayoutStore();
 const promptStore = usePromptStore();

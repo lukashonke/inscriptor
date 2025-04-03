@@ -90,7 +90,7 @@ export async function importModel(model, callback, skipDialog = false, forceMode
       Dialog.create(
         {
           title: 'Import prompts',
-          message: 'Select model for which you want to import these prompts',
+          message: 'Select default AI model for these prompts',
           options: {
             type: 'radio',
             model: '',

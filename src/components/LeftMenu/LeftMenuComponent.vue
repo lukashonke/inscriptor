@@ -17,7 +17,7 @@
             {{ currentProjectName ?? "(unknown project)" }}
           </div>
           <div class="col-auto">
-
+            <q-btn flat dense @click.prevent="editProjectMetadata" icon="mdi-dots-vertical" padding="none none" size="12px"/>
           </div>
         </div>
       </q-btn>
@@ -74,6 +74,10 @@ async function addTemplate(template) {
   if(file) {
     fileStore.selectFile(file, true);
   }
+}
+
+function editProjectMetadata() {
+  layoutStore.editProjectMetadataOpen = true;
 }
 
 const fileTemplates = computed(() => promptStore.fileTemplates);

@@ -2670,9 +2670,14 @@ export const usePromptStore = defineStore('prompts', {
 
       if(aiSettings.selectedAnalysisPrompts) {
         this.selectedAnalysisPrompts = [];
-        for(const prompt of aiSettings.selectedAnalysisPrompts) {
-          this.onUpdatePrompt(prompt);
-          this.selectedAnalysisPrompts.push(prompt);
+        debugger;
+        for(const analysisPrompt of aiSettings.selectedAnalysisPrompts) {
+          const prompt = this.prompts.find(p => p.id === analysisPrompt.value);
+
+          if (prompt && !this.selectedAnalysisPrompts.find(p => p.id === prompt.id)) {
+            this.onUpdatePrompt(prompt);
+            this.selectedAnalysisPrompts.push(analysisPrompt);
+          }
         }
       }
 
