@@ -50,18 +50,12 @@ function myCompletions(context) {
     }
   }));
 
-  options.push(...fileStore.files.map(file => {
+  /*options.push(...fileStore.files.map(file => {
     return {
       label: file.title, type: "variable", apply: '@file(' + file.id + ',' + file.title + ')' , info: '', icon: null, detail: 'file'
       //value: parameter.title, description: null, caption: 'Variable'
     }
-  }));
-
-  /*[
-    {label: "match", type: "keyword"},
-    {label: "hello", type: "variable", info: "(World)"},
-    {label: "magic", type: "text", apply: "⠁⭒*.✩.*⭒⠁", detail: "macro"}
-  ]*/
+  }));*/
 
   return {
     from: word.from,

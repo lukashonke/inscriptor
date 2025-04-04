@@ -104,18 +104,17 @@
 
 
         <q-card-section v-if="currentPromptCategory === '-custom-'" class="q-gutter-y-sm" style="width: 480px;" id="promptSelectorCustomPrompt">
-          <InputWithAi v-model="customPromptText" :autofocus="true" :filled="true" label="System Prompt Instructions" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Prompt Refiner')" :prompt-input="customPromptText" class="write-monospace" :automatic-text-correction="false"/>
-
-          <div class="row q-mt-lg">
-            <div class="col-12">
+          <InputWithAi v-model="customPromptText" :autofocus="true" :filled="true" label="Instructions for AI" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Prompt Refiner')" :prompt-input="customPromptText" class="write-monospace" :automatic-text-correction="false"/>
+          <div class="row">
+            <div class="col-auto">
               <q-select v-model="customPromptModel" :options="models" filled dense options-dense square label="AI Model" class="" />
             </div>
             <div class="col-12 q-mt-lg">
-              <q-btn-dropdown icon="mdi-creation-outline" split label="Prompt" unelevated :disable="!canCustomPrompt" color="accent" @click="customPromptClick" class="full-width">
+              <q-btn-dropdown icon="mdi-creation-outline" split label="Prompt" :disable="!canCustomPrompt" color="accent" @click="customPromptClick" class="full-width">
                 <q-list>
                   <q-item dense clickable v-close-popup @click="turnIntoPrompt">
                     <q-item-section avatar>
-                      <q-icon name="mdi-creation-outline" color="amber" />
+                      <q-icon name="mdi-file" />
                     </q-item-section>
                     <q-item-section>
                       <q-item-label>Save as Prompt</q-item-label>

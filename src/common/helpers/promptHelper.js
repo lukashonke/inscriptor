@@ -191,6 +191,8 @@ async function executePrompt(text, prompt, clear = true, appendMessages = null, 
 
   const context = [...promptStore.promptContext];
 
+  debugger;
+
   if(appendContext) {
     for (const appendContextElement of appendContext) {
       if(!context.find(c => c.id === appendContextElement.id)) {

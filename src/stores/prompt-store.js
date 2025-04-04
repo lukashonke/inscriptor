@@ -140,7 +140,7 @@ export const usePromptStore = defineStore('prompts', {
       let lastResult = null;
 
       try {
-        if(prompt.enablePromptRuns === true && prompt.runs && prompt.runs.length > 0) {
+        if(prompt.enablePromptRuns === true && prompt.runs && prompt.runs.length > 0 && !silent) {
           let runResults = [];
 
           for (const run of prompt.runs) {
@@ -604,7 +604,8 @@ export const usePromptStore = defineStore('prompts', {
         for (const parameter of prompt.parameters) {
           const parameterValue = parametersValue.find(p => p.name === parameter.name);
           if(parameterValue) {
-            const parameterValuePlainText = convertHtmlToText(parameterValue.value ?? '');
+            debugger;
+            const parameterValuePlainText = convertHtmlToText(parameterValue.value?.value ?? parameterValue.value ?? '');
 
             let valueWithPrefixSuffix;
             if(parameterValuePlainText === '') {
@@ -662,6 +663,8 @@ export const usePromptStore = defineStore('prompts', {
         promptResultInput = userPrompt;
       }
 
+      debugger;
+
       if(contextTypes && contextTypes.length > 0) {
         let context = '';
 
@@ -669,6 +672,15 @@ export const usePromptStore = defineStore('prompts', {
         if(userPrompt?.trim() == '$context' || systemPrompt?.trim() == '$context') {
           prefixWithContextWord = false;
         }
+
+        const hasText = userPrompt.includes('$text') || systemPrompt.includes('$text');
+        const hasSelection = userPrompt.includes('$selection') || systemPrompt.includes('$selection')
+        const hasTextOrSelection = userPrompt.includes('$textOrSelection') || systemPrompt.includes('$textOrSelection')
+        const hasTextBefore = userPrompt.includes('$textBefore') || systemPrompt.includes('$textBefore')
+                              || userPrompt.includes('$text2000Before') || systemPrompt.includes('$text2000Before')
+                              || userPrompt.includes('$text1000Before') || systemPrompt.includes('$text1000Before')
+                              || userPrompt.includes('$text500Before') || systemPrompt.includes('$text500Before')
+
 
         for (const contextType of contextTypes) {
           if(contextType.id === 'Current File' || contextType.id === 'Current & Children Files') {
@@ -707,6 +719,11 @@ export const usePromptStore = defineStore('prompts', {
               context += convertHtmlToText(selectedText);
               context += '\n-----\n';
             }
+          } else if(contextType.contextType === 'Dynamic' && contextType.dynamicContextValue) {
+            debugger;
+              context += '' + contextType.label + ':\n';
+              context += convertHtmlToText(contextType.dynamicContextValue);
+              context += '\n-----\n';
           } else if(contextType.id === 'Current File Summary' || contextType.id === 'Current & Children File Summary') {
             const contextValue = fileStore.selectedFile?.synopsis ?? '';
             if(contextValue && contextValue.length > 0) {
@@ -2947,7 +2964,7 @@ export const usePromptStore = defineStore('prompts', {
       if(prompt.enablePromptRuns === true) {
         if(!prompt.runs || prompt.runs.length === 0) {
           prompt.runs = [{
-            name: 'Run 1',
+            name: 'Default Run',
             changeModel: false,
             changeTemperature: false,
             changeModelValue: prompt.modelId,

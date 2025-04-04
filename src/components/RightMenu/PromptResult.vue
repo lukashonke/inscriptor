@@ -675,7 +675,7 @@
   });
 
   function formatPendingBrainstormingPrompt(text) {
-    return text.replaceAll('&lt;split/&gt;', '<br><br>').replaceAll('\n', '<br>');
+    return text.replaceAll('&lt;split/&gt;', '<br><br>').replaceAll('\n', '<br>').replaceAll('<br><br>', '<br>').replaceAll('<br><br>', '<br>');
   }
 
   const promptResultText = computed({

@@ -197,6 +197,9 @@
         </div>
       </q-card-section>
 
+      TODO input selector like context selector when it contains $input
+      preselect input for InputWithAi prompts and for selection analysis and chat prompts
+
       <q-separator class="q-mt-sm" />
 
       <template v-if="prompt.info?.tags?.includes('context')">
@@ -490,6 +493,9 @@
             <template v-if="parameter.type === 'Select'">
               <q-select dense filled v-model="parameter.value" :options="parameter.values" :label="parameter.name"></q-select>
             </template>
+            <template v-if="parameter.type === 'Select (advanced)'">
+              <q-select dense filled v-model="parameter.value" :options="parameter.values" :label="parameter.name"></q-select>
+            </template>
             <template v-if="parameter.type === 'Text'">
               <p class="text-subtitle2 q-mb-none" v-if="parameter.hint?.length > 0 ?? false">
                 {{ parameter.hint }}
@@ -695,13 +701,20 @@
   });
 
   function separateTextByComma(text) {
-    return text.split(',').map(t => t.trim());
+    return text.split(',')?.map(t => t.trim()) ?? [];
   }
 
   const canConfirmPrompt = computed(() => {
     for (const parameter of promptStore.promptParametersValue) {
-      if (parameter.required && (!parameter.value || convertHtmlToText(parameter.value).trim() === '')) {
-        return false;
+      if (parameter.required) {
+        debugger;
+        if(parameter.value?.value !== undefined) {
+          if(convertHtmlToText(parameter.value.value).trim() === '') {
+            return false;
+          }
+        } else if(!parameter.value || convertHtmlToText(parameter.value).trim() === '') {
+          return false;
+        }
       }
     }
 

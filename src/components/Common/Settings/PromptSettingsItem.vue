@@ -331,10 +331,15 @@
 
                       <div class="row q-gutter-x-sm">
                         <div class="col">
-                          <q-input dense filled square label="Default value" :model-value="parameter.default" v-on:update:model-value="updateParameter(prompt, parameter, {default: $event})" />
+                          <template v-if="parameter.type === 'Select (advanced)' || parameter.type === 'Select'" >
+                            <q-select dense filled square label="Default value" :options="parameter.values" options-dense emit-value :model-value="parameter.default" v-on:update:model-value="updateParameter(prompt, parameter, {default: $event})" />
+                          </template>
+                          <template v-else>
+                            <q-input dense filled square label="Default value" :model-value="parameter.default" v-on:update:model-value="updateParameter(prompt, parameter, {default: $event})" />
+                          </template>
                         </div>
                         <div class="col">
-                          <q-select dense filled square label="Type" :model-value="parameter.type" :options="parameterTypes" v-on:update:model-value="updateParameter(prompt, parameter, {type: $event})" />
+                          <q-select dense filled square label="Type" :model-value="parameter.type" :options="parameterTypes" v-on:update:model-value="updateParameter(prompt, parameter, {type: $event})" options-dense />
                         </div>
                       </div>
 
@@ -347,6 +352,21 @@
 
                         </q-list>
 
+                        <q-btn label="Add Option" icon="las la-plus" flat dense class="q-my-md" @click="addParameterValue(prompt, parameter)" />
+                      </template>
+
+                      <template v-if="parameter.type === 'Select (advanced)'">
+                        <q-list dense class="q-mt-md q-gutter-xs">
+                          <q-item v-for="(value, index) in parameter.values" :key="index">
+                            <div class="row q-mr-xs">
+                              <q-input dense outlined autogrow :model-value="value?.label" label="Name" v-on:update:model-value="updateParameterValue(prompt, parameter, index, {label: $event, value: value?.value})" class="col"/>
+                            </div>
+                            <div class="row full-width">
+                              <q-input dense outlined autogrow :model-value="value?.value" label="Value" v-on:update:model-value="updateParameterValue(prompt, parameter, index, {label: value?.label, value: $event})" class="col"/>
+                            </div>
+                            <q-btn icon="las la-trash" flat dense @click="deletePromptParameterValue(prompt, parameter, index)" class="text-red float-right"/>
+                          </q-item>
+                        </q-list>
                         <q-btn label="Add Option" icon="las la-plus" flat dense class="q-my-md" @click="addParameterValue(prompt, parameter)" />
                       </template>
 
@@ -1157,6 +1177,7 @@ import {
   const parameterTypes = [
     'Text',
     'Select',
+    'Select (advanced)'
   ]
 
   function updateParameter(prompt, parameter, args) {
