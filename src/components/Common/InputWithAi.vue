@@ -132,9 +132,6 @@ async function runPrompt(prompt) {
     prompting.value = true;
     promptResultOpen.value = true;
     promptExecuted.value = prompt;
-    debugger;
-
-
 
     const result = await executePromptClick(prompt, props.promptInput, true, null, true, [ createDynamicContext("Input text", props.promptInput) ], true);
 

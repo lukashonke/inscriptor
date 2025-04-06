@@ -74,6 +74,7 @@ export const usePromptStore = defineStore('prompts', {
     previousPromptParameterValue: [], // TODO rename
     promptContext: [],
     savedPromptContexts: [],
+    promptUserInputs: [],
 
     promptCategories: [],
     promptFolders: [],
@@ -120,13 +121,13 @@ export const usePromptStore = defineStore('prompts', {
         this.defaultFileTemplate = createFile('Template file');
       }
     },
-    async promptMultiple(prompt, text, parametersValue, contextTypes, promptType, counts=3, clear = true, appendMessages = null, forceTemperature = null, previewOnly = false, forceInput = null, silent = false, promptSource = null, onOutput = null) {
+    async promptMultiple(prompt, text, parametersValue, contextTypes, userInputs, promptType, counts=3, clear = true, appendMessages = null, forceTemperature = null, previewOnly = false, forceInput = null, silent = false, promptSource = null, onOutput = null) {
       if(!this.canPrompt(prompt)) {
         return;
       }
 
       if(previewOnly) {
-        const input = this.constructPromptInput(null, null, prompt, text, parametersValue, contextTypes, promptType, appendMessages, forceTemperature, silent);
+        const input = this.constructPromptInput(null, null, prompt, text, parametersValue, contextTypes, userInputs, promptType, appendMessages, forceTemperature, silent);
         return input;
       }
 
@@ -176,9 +177,9 @@ export const usePromptStore = defineStore('prompts', {
               textMessages: this.currentOverridePromptParameters?.textMessages ? [...this.currentOverridePromptParameters?.textMessages] : undefined,
             }
 
-            const promptArgs = { prompt, parametersValue, text, promptType, contextTypes, overridePromptParameters };
+            const promptArgs = { prompt, parametersValue, text, promptType, contextTypes, userInputs, overridePromptParameters };
 
-            const result = await this.promptInternal(prompt, text, parametersValue, contextTypes, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource, onOutput);
+            const result = await this.promptInternal(prompt, text, parametersValue, contextTypes, userInputs, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource, onOutput);
 
             if(promptType === "general" || promptType === "selection" || promptType === "selectionAnalysis") {
               const trimmedResultText = result.text.trimStart().replace(/\n/g, '<br>');
@@ -205,9 +206,9 @@ export const usePromptStore = defineStore('prompts', {
               textMessages: this.currentOverridePromptParameters?.textMessages ? [...this.currentOverridePromptParameters?.textMessages] : undefined,
             }
 
-            const promptArgs = { prompt, parametersValue, text, promptType, contextTypes, overridePromptParameters };
+            const promptArgs = { prompt, parametersValue, text, promptType, contextTypes, userInputs, overridePromptParameters };
 
-            const result = await this.promptInternal(prompt, text, parametersValue, contextTypes, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource, onOutput);
+            const result = await this.promptInternal(prompt, text, parametersValue, contextTypes, userInputs, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource, onOutput);
 
             if(promptType === "general" || promptType === "selection" || promptType === "selectionAnalysis") {
               const trimmedResultText = result.text.trimStart().replace(/\n/g, '<br>');
@@ -261,10 +262,9 @@ export const usePromptStore = defineStore('prompts', {
         this.setCurrentOverridePromptParameter(prompt, undefined, undefined, undefined, undefined, promptResult.executedTextMessages)
       }
 
-      return await this.promptMultiple(prompt, promptArgs.text, promptArgs.parametersValue, promptArgs.contextTypes, promptArgs.promptType, promptTimes, false, appendMessages, forceTemperature, previewOnly);
+      return await this.promptMultiple(prompt, promptArgs.text, promptArgs.parametersValue, promptArgs.contextTypes, promptArgs.userInputs, promptArgs.promptType, promptTimes, false, appendMessages, forceTemperature, previewOnly);
     },
     async promptSelectionAnalysisPrompts() {
-
       if(getEditorSelection()?.empty ?? true) {
         return;
       }
@@ -317,7 +317,7 @@ export const usePromptStore = defineStore('prompts', {
 
       return null;
     },
-    constructPromptInput(forceInput, pr, prompt, inputText, parametersValue, contextTypes, promptType, appendMessages, forceTemperature, silent) {
+    constructPromptInput(forceInput, pr, prompt, inputText, parametersValue, contextTypes, userInputs, promptType, appendMessages, forceTemperature, silent) {
       const fileStore = useFileStore();
 
       let modelId = this.getCurrentPromptModelId(prompt);
@@ -604,7 +604,6 @@ export const usePromptStore = defineStore('prompts', {
         for (const parameter of prompt.parameters) {
           const parameterValue = parametersValue.find(p => p.name === parameter.name);
           if(parameterValue) {
-            debugger;
             const parameterValuePlainText = convertHtmlToText(parameterValue.value?.value ?? parameterValue.value ?? '');
 
             let valueWithPrefixSuffix;
@@ -663,7 +662,48 @@ export const usePromptStore = defineStore('prompts', {
         promptResultInput = userPrompt;
       }
 
+      let userInputValue = null;
+
+      if(userInputs && userInputs.length > 0) {
+        userInputValue = '';
+        for (const inputType of contextTypes) {
+          if(inputType.id === 'Current File') {
+            if(text && text.length > 0) {
+              if(userInputs.length > 1) {
+                userInputValue += fileStore.getFileNameWithPath(fileStore.selectedFile) + ' Text: ';
+              }
+              userInputValue += convertHtmlToText(text);
+              if(userInputs.length > 1) {
+                userInputValue += '\n-----\n';
+              }
+            }
+          } else if(inputType.id === 'Selected Text') {
+            if(selectedText && selectedText.length > 0) {
+              if(userInputs.length > 1) {
+                userInputValue += 'Selected Text inside ' + (fileStore.getFileNameWithPath(fileStore.selectedFile)) + ': ';
+              }
+              userInputValue += convertHtmlToText(selectedText);
+
+              if(userInputs.length > 1) {
+                userInputValue += '\n-----\n';
+              }
+            }
+          } else if(inputType.contextType === 'Custom Input') {
+            userInputValue += convertHtmlToText(inputType.value);
+            if(userInputs.length > 1) {
+              userInputValue += '\n-----\n';
+            }
+          }
+        }
+      }
+
       debugger;
+
+      if(userInputValue) {
+        replace('$input', () => userInputValue);
+      } else {
+        replace('$input', () => selectedText);
+      }
 
       if(contextTypes && contextTypes.length > 0) {
         let context = '';
@@ -673,13 +713,13 @@ export const usePromptStore = defineStore('prompts', {
           prefixWithContextWord = false;
         }
 
-        const hasText = userPrompt.includes('$text') || systemPrompt.includes('$text');
+        /*const hasText = userPrompt.includes('$text') || systemPrompt.includes('$text');
         const hasSelection = userPrompt.includes('$selection') || systemPrompt.includes('$selection')
         const hasTextOrSelection = userPrompt.includes('$textOrSelection') || systemPrompt.includes('$textOrSelection')
         const hasTextBefore = userPrompt.includes('$textBefore') || systemPrompt.includes('$textBefore')
                               || userPrompt.includes('$text2000Before') || systemPrompt.includes('$text2000Before')
                               || userPrompt.includes('$text1000Before') || systemPrompt.includes('$text1000Before')
-                              || userPrompt.includes('$text500Before') || systemPrompt.includes('$text500Before')
+                              || userPrompt.includes('$text500Before') || systemPrompt.includes('$text500Before')*/
 
 
         for (const contextType of contextTypes) {
@@ -719,10 +759,9 @@ export const usePromptStore = defineStore('prompts', {
               context += convertHtmlToText(selectedText);
               context += '\n-----\n';
             }
-          } else if(contextType.contextType === 'Dynamic' && contextType.dynamicContextValue) {
-            debugger;
+          } else if(contextType.contextType === 'Dynamic' && contextType.value) {
               context += '' + contextType.label + ':\n';
-              context += convertHtmlToText(contextType.dynamicContextValue);
+              context += convertHtmlToText(contextType.value);
               context += '\n-----\n';
           } else if(contextType.id === 'Current File Summary' || contextType.id === 'Current & Children File Summary') {
             const contextValue = fileStore.selectedFile?.synopsis ?? '';
@@ -944,7 +983,7 @@ export const usePromptStore = defineStore('prompts', {
         jsonMode
       }
     },
-    promptInternal(prompt, inputText, parametersValue, contextTypes, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource, onOutput) {
+    promptInternal(prompt, inputText, parametersValue, contextTypes, userInputs, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource, onOutput) {
       if(this.isPrompting) {
         this.promptAbortController?.abort();
       }
@@ -955,9 +994,9 @@ export const usePromptStore = defineStore('prompts', {
       const layoutStore = useLayoutStore();
       const localDataStore = useLocalDataStore();
 
-      const pr = this.createPromptResult(prompt, contextTypes, parametersValue, promptArgs, silent, promptSource);
+      const pr = this.createPromptResult(prompt, contextTypes, userInputs, parametersValue, promptArgs, silent, promptSource);
 
-      const input = this.constructPromptInput(forceInput, pr, prompt, inputText, parametersValue, contextTypes, promptType, appendMessages, forceTemperature, silent);
+      const input = this.constructPromptInput(forceInput, pr, prompt, inputText, parametersValue, contextTypes, userInputs, promptType, appendMessages, forceTemperature, silent);
 
       if(input.missingVariable !== null) {
         Notify.create({
@@ -1795,7 +1834,7 @@ export const usePromptStore = defineStore('prompts', {
         }
       }
     },
-    createPromptResult(prompt, contextTypes, parametersValue, promptArgs, silent, promptSource) {
+    createPromptResult(prompt, contextTypes, userInputs, parametersValue, promptArgs, silent, promptSource) {
       let pr = {
         prompt: prompt,
         promptArgs: promptArgs,
@@ -1806,6 +1845,7 @@ export const usePromptStore = defineStore('prompts', {
         waitingForResponse: true,
         contextTypes,
         parametersValue,
+        userInputs,
         collapsed: false,
       };
 
@@ -2056,7 +2096,8 @@ export const usePromptStore = defineStore('prompts', {
     onUpdatePrompt(prompt) {
 
       if(prompt.userPrompt || prompt.systemPrompt) {
-        this.toggleTag(prompt, 'context', prompt.userPrompt.includes('$context') || prompt.systemPrompt.includes('$context'));
+        this.toggleTag(prompt, 'context', prompt.userPrompt.includes('$context') || prompt.systemPrompt.includes('$context') || (prompt.userPrompt2 && prompt.userPrompt2.includes('$context')) || (prompt.assistantPrompt && prompt.assistantPrompt.includes('$context')));
+        this.toggleTag(prompt, 'input', prompt.userPrompt.includes('$input') || prompt.systemPrompt.includes('$input') || (prompt.userPrompt2 && prompt.userPrompt2.includes('$input')) || (prompt.assistantPrompt && prompt.assistantPrompt.includes('$input')));
       }
 
       if(prompt.folder) {
@@ -2507,6 +2548,7 @@ export const usePromptStore = defineStore('prompts', {
       ];
 
       this.contextTypes = [];
+      this.promptUserInputs = [];
       this.promptContext = [];
       this.savedPromptContexts = [];
       this.predefinedPromptInstances = [];

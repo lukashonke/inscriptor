@@ -14,5 +14,12 @@ export const currentAndChildrenFileSummaryPromptContext = {id: 'Current & Childr
 export const allPromptContexts = [currentFilePromptContext, selectedTextPromptContext, previousCharactersPromptContext, currentFileSummaryPromptContext];
 
 export function createDynamicContext(title, text) {
-  return {id: 'Context_' + title, contextType: 'Dynamic', parameters: {}, label: title, color: 'blue', description: 'Dynamic Context', dynamicContextValue: text}
+  return {id: 'Context_' + title, contextType: 'Dynamic', parameters: {}, label: title, color: 'blue', description: 'Dynamic Context', value: text}
 }
+
+export function createCustomInput(title, text) {
+  return {id: 'CustomInput_' + title, contextType: 'Custom Input', parameters: {}, label: title, color: 'blue', description: 'Custom Dynamic Input', value: text}
+}
+
+export const currentFilePromptInput = {id: 'Current File', contextType: 'Current File', parameters: {}, label: 'Current File', color: 'yellow', description: 'All text from the current file'};
+export const selectedTextPromptInput = {id: 'Selected Text', contextType: 'Selected Text', parameters: {}, label: 'Selected Text', color: 'green', description: 'Selected text in the current file'};

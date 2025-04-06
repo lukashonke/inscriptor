@@ -1,7 +1,12 @@
 import {convertHtmlToText, replaceParameterEditorText, trimWhitespace} from "src/common/utils/textUtils";
 import {usePromptStore} from "stores/prompt-store";
 import {useFileStore} from "stores/file-store";
-import {allPromptContexts, currentFilePromptContext, selectedTextPromptContext} from "src/common/resources/promptContexts";
+import {
+  allPromptContexts,
+  currentFilePromptContext, currentFilePromptInput,
+  selectedTextPromptContext,
+  selectedTextPromptInput
+} from "src/common/resources/promptContexts";
 import {useLayoutStore} from "stores/layout-store";
 import {getEditor, isEmptySelection} from "src/common/utils/editorUtils";
 
@@ -59,6 +64,7 @@ export async function executePromptClick(prompt, text, clear = true, appendMessa
   // if ctrl is holding down
   const ctrlDown = layoutStore.ctrlDown;
 
+  promptStore.promptUserInputs = [];
   promptStore.promptInput = text;
 
   const model = promptStore.getModel(promptStore.getCurrentPromptModelId(prompt));
@@ -70,18 +76,42 @@ export async function executePromptClick(prompt, text, clear = true, appendMessa
     const fileStore = useFileStore();
     const currentFile = fileStore.selectedFile;
     let fileContext = null;
+    let fileUserInputs = null;
     if(currentFile) {
       const contexts = fileStore.getTemporaryFileMetaProperty(currentFile, 'context-' + prompt.id);
 
       if(contexts) {
         fileContext = [...contexts];
       }
+
+      /*const userInputs = fileStore.getTemporaryFileMetaProperty(currentFile, 'input-' + prompt.id);
+
+      if(userInputs) {
+        fileUserInputs = [...userInputs];
+      }*/
+    }
+
+    if(fileUserInputs) {
+      // do nothing with this information for now
+    }
+
+    const editor = getEditor();
+
+    if(editor) {
+      if(isEmptySelection()) {
+        if(currentFile.content && trimWhitespace(convertHtmlToText(currentFile.content)).length > 0) {
+          promptStore.promptUserInputs = [ currentFilePromptInput ];
+        } else {
+          promptStore.promptUserInputs = [];
+        }
+      } else {
+        promptStore.promptUserInputs = [ selectedTextPromptInput ];
+      }
     }
 
     if(fileContext) {
       promptStore.promptContext = [...fileContext];
     } else {
-      const editor = getEditor();
 
       if(prompt.overrideContexts === true) {
         promptStore.promptContext = [];
@@ -189,9 +219,18 @@ async function executePrompt(text, prompt, clear = true, appendMessages = null, 
     }
   }
 
-  const context = [...promptStore.promptContext];
+  /*if(prompt.info?.tags?.includes("input") && promptStore.promptUserInputs) {
+    const fileStore = useFileStore();
 
-  debugger;
+    const currentFile = fileStore.selectedFile;
+
+    if(currentFile) {
+      fileStore.setTemporaryFileMetaProperty(currentFile, 'input-' + prompt.id, promptStore.promptUserInputs);
+    }
+  }*/
+
+  const context = [...promptStore.promptContext];
+  const userInputs = [...promptStore.promptUserInputs];
 
   if(appendContext) {
     for (const appendContextElement of appendContext) {
@@ -201,7 +240,7 @@ async function executePrompt(text, prompt, clear = true, appendMessages = null, 
     }
   }
 
-  return await promptStore.promptMultiple(prompt, text, promptStore.promptParametersValue, context, prompt.promptType, promptTimes, clear, appendMessages, null, previewOnly, forceInput, silent, promptSource, onOutput);
+  return await promptStore.promptMultiple(prompt, text, promptStore.promptParametersValue, context, userInputs, prompt.promptType, promptTimes, clear, appendMessages, null, previewOnly, forceInput, silent, promptSource, onOutput);
 }
 
 async function executeChatPrompt(text, prompt, clear = true, appendMessages = null, previewOnly = false, forceInput = null, appendContext = null) {
@@ -212,6 +251,7 @@ async function executeChatPrompt(text, prompt, clear = true, appendMessages = nu
   const promptTimes = prompt.overridePromptTimes?.length > 0 ? parseInt(prompt.overridePromptTimes) : model.promptTimes;
 
   const context = [...promptStore.promptContext];
+  const userInputs = [...promptStore.promptUserInputs];
 
   if(appendContext) {
     for (const appendContextElement of appendContext) {
@@ -221,7 +261,7 @@ async function executeChatPrompt(text, prompt, clear = true, appendMessages = nu
     }
   }
 
-  return await promptStore.promptMultiple(prompt, text, promptStore.promptParametersValue, context, prompt.promptType, promptTimes, clear, appendMessages, null, previewOnly, forceInput, appendContext);
+  return await promptStore.promptMultiple(prompt, text, promptStore.promptParametersValue, context, userInputs, input, prompt.promptType, promptTimes, clear, appendMessages, null, previewOnly, forceInput, appendContext);
 }
 
 export async function replyToPrompt(promptResult, message) {

@@ -197,10 +197,86 @@
         </div>
       </q-card-section>
 
-      TODO input selector like context selector when it contains $input
-      preselect input for InputWithAi prompts and for selection analysis and chat prompts
+      <q-separator class="q-mt-sm" />
+
+      <template v-if="prompt.info?.tags?.includes('input')">
+        <q-card-section class="q-px-md q-pt-sm">
+
+          <div class="bordered rounded-borders q-mt-sm" flat>
+            <div class="cursor-pointer context-selector q-px-md q-py-md">
+              <div class="row">
+                <div class="col text-subtitle2 flex items-center"><q-icon name="mdi-import" class="q-mr-xs" />Input</div>
+                <div class="col-auto"><q-icon name="keyboard_arrow_down" size="sm" /></div>
+              </div>
+
+              <template v-if="promptStore.promptUserInputs?.length > 0 ?? false">
+                <template v-for="input in promptStore.promptUserInputs" :key="input.id">
+                  <q-chip :color="input.color + '-3'" removable @remove="removeInput(input)">
+                    {{ input.label }}
+                    &nbsp;<q-badge :color="inputWarning(input).color" v-if="inputWarning(input)">
+                      <q-icon name="error" />&nbsp;
+                      {{ inputWarning(input).warning }}
+                    </q-badge>
+                    <q-tooltip color="primary" >
+                      {{ input.description }}
+                    </q-tooltip>
+                  </q-chip>
+                </template>
+              </template>
+              <template v-else>
+                <div>
+                  No input provided to the prompt
+                </div>
+              </template>
+
+              <q-popup-proxy >
+                <q-card style="width: 668px">
+                  <q-card-section class="no-padding">
+                    <div class="row">
+                      <div class="col q-pa-md">
+                        <div class="row">
+                          <div class="col-auto">
+                            <q-chip :text-color="getInputChipFontColor(selectedTextPromptInput)" :color="getInputChipColor(selectedTextPromptInput)" :icon="getInputChipIcon(selectedTextPromptInput)" :clickable="isInputAllowedForThisPrompt(selectedTextPromptInput)" @click="toggleInput(selectedTextPromptInput)" >
+                              {{ selectedTextPromptInput.label }} &nbsp;
+                              <q-tooltip color="primary">
+                                <div>include selected text</div>
+                                <div>
+                                  <q-badge :color="inputWarning(selectedTextPromptInput).color" v-if="inputWarning(selectedTextPromptInput)">
+                                    {{ inputWarning(selectedTextPromptInput).warning }}
+                                  </q-badge>
+                                </div>
+                              </q-tooltip>
+                            </q-chip>
+                          </div>
+                          <div class="col-auto">
+                            <q-chip :text-color="getInputChipFontColor(currentFilePromptInput)" :color="getInputChipColor(currentFilePromptInput)" :icon="getInputChipIcon(currentFilePromptInput)" :clickable="isInputAllowedForThisPrompt(currentFilePromptInput)" @click="toggleInput(currentFilePromptInput)" >
+                              {{ currentFilePromptInput.label }} &nbsp;
+                              <q-tooltip color="primary">
+                                <div>include all text from {{ currentFile?.title }}</div>
+                                <div>
+                                  <q-badge :color="inputWarning(currentFilePromptContext).color" v-if="inputWarning(currentFilePromptContext)">
+                                    {{ inputWarning(currentFilePromptContext).warning }}
+                                  </q-badge>
+                                </div>
+                              </q-tooltip>
+                            </q-chip>
+
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </q-card-section>
+                </q-card>
+
+              </q-popup-proxy>
+
+            </div>
+          </div>
+        </q-card-section>
+      </template>
 
       <q-separator class="q-mt-sm" />
+
 
       <template v-if="prompt.info?.tags?.includes('context')">
         <q-card-section class="q-px-md q-pt-sm">
@@ -588,8 +664,8 @@
   import {
     currentAndChildrenFilePromptContext,
     currentAndChildrenFileSummaryPromptContext,
-    currentFilePromptContext, currentFileSummaryPromptContext, previousCharactersPromptContext,
-    selectedTextPromptContext
+    currentFilePromptContext, currentFilePromptInput, currentFileSummaryPromptContext, previousCharactersPromptContext,
+    selectedTextPromptContext, selectedTextPromptInput
   } from "src/common/resources/promptContexts";
   import {useLayoutStore} from "stores/layout-store";
   import {Dialog} from "quasar";
@@ -680,7 +756,7 @@
     let match;
     while ((match = regex.exec(text)) !== null) {
       // except $context
-      if(match[0] === '$context') {
+      if(match[0] === '$context' || match[0] === '$input') {
         continue;
       }
 
@@ -707,7 +783,6 @@
   const canConfirmPrompt = computed(() => {
     for (const parameter of promptStore.promptParametersValue) {
       if (parameter.required) {
-        debugger;
         if(parameter.value?.value !== undefined) {
           if(convertHtmlToText(parameter.value.value).trim() === '') {
             return false;
@@ -885,6 +960,14 @@
     addFileContextDialogData.value = null;
   }
 
+  function toggleInput(input, parametersValue = undefined) {
+    if (containsInput(input)) {
+      removeInput(input);
+    } else {
+      addInput(input, parametersValue);
+    }
+  }
+
   function toggleContext(context, parametersValue = undefined) {
     if (containsContext(context)) {
       removeContext(context);
@@ -897,8 +980,30 @@
     promptContextFilesText.value = '';
   }
 
+  function containsInput(input) {
+    return promptStore.promptUserInputs.some(c => c.id === input.id);
+  }
+
   function containsContext(context) {
     return promptStore.promptContext.some(c => c.id === context.id);
+  }
+
+  function isInputAllowedForThisPrompt(input) {
+    if(input === selectedTextPromptInput) {
+      const selection = getEditorSelection();
+
+      if(!selection || selection.empty === true) {
+        return false;
+      }
+    }
+
+    if(input === currentFilePromptInput) {
+      if (!currentFile.value || !currentFile.value.content || removeHtmlTags(currentFile.value.content).trim() === '') {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   function isContextAllowedForThisPrompt(context) {
@@ -908,7 +1013,7 @@
       }
     }
 
-    if(context === selectedTextPromptContext) {
+    if(context === selectedTextPromptContext ) {
       const selection = getEditorSelection();
 
       if(!selection || selection.empty === true) {
@@ -955,12 +1060,28 @@
     return true;
   }
 
+  function getInputChipColor(input) {
+    if(!isInputAllowedForThisPrompt(input)) {
+      //return 'white';
+    }
+
+    return containsInput(input) ? (input.color + '-4') : (input.color + '-1');
+  }
+
   function getContextChipColor(context) {
     if(!isContextAllowedForThisPrompt(context)) {
       //return 'white';
     }
 
     return containsContext(context) ? (context.color + '-4') : (context.color + '-1');
+  }
+
+  function getInputChipIcon(input) {
+    if(!isInputAllowedForThisPrompt(input)) {
+      return undefined;
+    }
+
+    return containsInput(input) ? 'las la-check' : 'las la-plus';
   }
 
   function getContextChipIcon(context) {
@@ -971,12 +1092,36 @@
     return containsContext(context) ? 'las la-check' : 'las la-plus';
   }
 
+  function getInputChipFontColor(context) {
+    if(!isInputAllowedForThisPrompt(context)) {
+      return 'grey-4';
+    }
+
+    return 'black'
+  }
+
   function getContextChipFontColor(context) {
     if(!isContextAllowedForThisPrompt(context)) {
       return 'grey-4';
     }
 
     return 'black'
+  }
+
+  function addInput(input, parametersValue = undefined) {
+    if(input === selectedTextPromptInput) {
+      removeInput(currentFilePromptInput);
+    }
+
+    if(input === currentFilePromptInput) {
+      removeInput(selectedTextPromptInput);
+    }
+
+    if(parametersValue) {
+      input.parameters = parametersValue;
+    }
+
+    promptStore.promptUserInputs.push(input);
   }
 
   function addContext(context, parametersValue = undefined) {
@@ -1002,9 +1147,15 @@
   }
 
   function removeContext(context) {
-    // remove by id and contextType
-
     promptStore.promptContext = promptStore.promptContext.filter(c => c.id !== context.id);
+  }
+
+  function removeInput(input) {
+    promptStore.promptUserInputs = promptStore.promptUserInputs.filter(c => c.id !== input.id);
+  }
+
+  function inputWarning(input) {
+    return null;
   }
 
   function contextWarning(context) {
