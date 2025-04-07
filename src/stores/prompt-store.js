@@ -3,8 +3,8 @@ import {parseFromJson, createFile} from "src/common/utils/fileUtils";
 import {promptStream} from "src/common/apiServices/promptStreamService";
 import {
   applyPromptChatFormat,
-  applyPromptFormatPrefixSuffix,
-  executePromptClick, replyToPrompt
+  applyPromptFormatPrefixSuffix, cloneRequest,
+  executePromptClick2, replyToPrompt2
 } from "src/common/helpers/promptHelper";
 import {
   convertHtmlToText,
@@ -24,10 +24,9 @@ import {
   getSelectedMarkdown
 } from "src/common/utils/editorUtils";
 import {Ollama} from 'ollama/browser'
-import {downloadOllamaModel, removeOllamaModel} from "src/common/apiServices/ollamaApiService";
+import {removeOllamaModel} from "src/common/apiServices/ollamaApiService";
 import {useLayoutStore} from "stores/layout-store";
 import {useCurrentUser} from "vuefire";
-import {useLocalDataStore} from "stores/localdata-store";
 import {getCloudModelApiKey} from "src/common/utils/modelUtils";
 import Anthropic from "@anthropic-ai/sdk";
 
@@ -65,16 +64,14 @@ export const usePromptStore = defineStore('prompts', {
     promptAbortController: null,
 
     promptParametersShown: false,
-    promptInput: '',
-    currentPromptConfirmation: null,
-    currentPromptConfirmationSelectedText: null,
+    currentPromptConfirmationRequest: null,
+
     promptParametersValue:  [],
     promptSourceLanguage: null,
     promptTargetLanguage: null,
-    previousPromptParameterValue: [], // TODO rename
     promptContext: [],
-    savedPromptContexts: [],
     promptUserInputs: [],
+    savedPromptContexts: [],
 
     promptCategories: [],
     promptFolders: [],
@@ -98,8 +95,6 @@ export const usePromptStore = defineStore('prompts', {
 
     lastSettingsSyncHash: null,
 
-    currentOverridePromptParameters: null,
-
     hubPromptPacks: [],
     modelPromptPacks: [],
   }),
@@ -121,17 +116,17 @@ export const usePromptStore = defineStore('prompts', {
         this.defaultFileTemplate = createFile('Template file');
       }
     },
-    async promptMultiple(prompt, text, parametersValue, contextTypes, userInputs, promptType, counts=3, clear = true, appendMessages = null, forceTemperature = null, previewOnly = false, forceInput = null, silent = false, promptSource = null, onOutput = null) {
-      if(!this.canPrompt(prompt)) {
+    async promptMultiple2(request) {
+      if(!this.canPromptRequest(request)) {
         return;
       }
 
-      if(previewOnly) {
-        const input = this.constructPromptInput(null, null, prompt, text, parametersValue, contextTypes, userInputs, promptType, appendMessages, forceTemperature, silent);
+      if(request.previewOnly) {
+        const input = this.constructPromptInput2(request);
         return input;
       }
 
-      if(clear && !silent && prompt.promptType !== "selectionAnalysis" && promptSource !== 'selectionAnalysis') {
+      if(request.clear && !request.silent && request.prompt.promptType !== "selectionAnalysis" && request.promptSource !== 'selectionAnalysis') {
         //this.clearPromptResults();
         this.newPromptResultsPage();
       }
@@ -141,19 +136,19 @@ export const usePromptStore = defineStore('prompts', {
       let lastResult = null;
 
       try {
-        if(prompt.enablePromptRuns === true && prompt.runs && prompt.runs.length > 0 && !silent) {
+        if(request.prompt.enablePromptRuns === true && request.prompt.runs && request.prompt.runs.length > 0 && !request.silent) {
           let runResults = [];
 
-          for (const run of prompt.runs) {
+          for (const run of request.prompt.runs) {
 
-            this.setCurrentOverridePromptParameters(null);
+            const newRequest = cloneRequest(request);
 
             if(run.changeModel === true) {
-              this.setCurrentOverridePromptParameter(prompt, run.changeModelValue, undefined);
+              newRequest.forceModelId = run.changeModelValue;
             }
 
             if(run.changeTemperature === true) {
-              this.setCurrentOverridePromptParameter(prompt, undefined, run.changeTemperatureValue);
+              newRequest.forceTemperature = run.changeTemperatureValue
             }
 
             if(run.changePrompts === true) {
@@ -165,26 +160,16 @@ export const usePromptStore = defineStore('prompts', {
                 userPrompt = userPrompt.replace('$output.' + runResult.runName, runResult.result?.originalText ?? '');
               }
 
-              this.setCurrentOverridePromptParameter(prompt, undefined, undefined, systemPrompt, userPrompt);
+              request.systemPrompt = systemPrompt;
+              request.userPrompt = userPrompt;
             }
 
-            let overridePromptParameters = {
-              prompt: this.currentOverridePromptParameters?.prompt,
-              temperature: this.currentOverridePromptParameters?.temperature,
-              modelId: this.currentOverridePromptParameters?.modelId,
-              systemPrompt: this.currentOverridePromptParameters?.systemPrompt,
-              userPrompt: this.currentOverridePromptParameters?.userPrompt,
-              textMessages: this.currentOverridePromptParameters?.textMessages ? [...this.currentOverridePromptParameters?.textMessages] : undefined,
-            }
+            const result = await this.promptInternal2(request);
 
-            const promptArgs = { prompt, parametersValue, text, promptType, contextTypes, userInputs, overridePromptParameters };
-
-            const result = await this.promptInternal(prompt, text, parametersValue, contextTypes, userInputs, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource, onOutput);
-
-            if(promptType === "general" || promptType === "selection" || promptType === "selectionAnalysis") {
+            if(request.prompt.promptType === "general" || request.prompt.promptType === "selection" || request.prompt.promptType === "selectionAnalysis") {
               const trimmedResultText = result.text.trimStart().replace(/\n/g, '<br>');
               if(trimmedResultText.length > 0) {
-                result.diff = diffStrings(text, trimmedResultText);
+                result.diff = diffStrings(request.text, trimmedResultText);
               }
             }
 
@@ -196,24 +181,14 @@ export const usePromptStore = defineStore('prompts', {
             console.log(result.diff);
           }
         } else {
-          for(let i = 0; i < counts; i++) {
-            let overridePromptParameters = {
-              prompt: this.currentOverridePromptParameters?.prompt,
-              temperature: this.currentOverridePromptParameters?.temperature,
-              modelId: this.currentOverridePromptParameters?.modelId,
-              systemPrompt: this.currentOverridePromptParameters?.systemPrompt,
-              userPrompt: this.currentOverridePromptParameters?.userPrompt,
-              textMessages: this.currentOverridePromptParameters?.textMessages ? [...this.currentOverridePromptParameters?.textMessages] : undefined,
-            }
+          for(let i = 0; i < request.promptTimes; i++) {
 
-            const promptArgs = { prompt, parametersValue, text, promptType, contextTypes, userInputs, overridePromptParameters };
+            const result = await this.promptInternal2(request);
 
-            const result = await this.promptInternal(prompt, text, parametersValue, contextTypes, userInputs, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource, onOutput);
-
-            if(promptType === "general" || promptType === "selection" || promptType === "selectionAnalysis") {
+            if(request.prompt.promptType === "general" || request.prompt.promptType === "selection" || request.prompt.promptType === "selectionAnalysis") {
               const trimmedResultText = result.text.trimStart().replace(/\n/g, '<br>');
               if(trimmedResultText.length > 0) {
-                result.diff = diffStrings(text, trimmedResultText);
+                result.diff = diffStrings(request.text, trimmedResultText);
               }
             }
 
@@ -237,32 +212,8 @@ export const usePromptStore = defineStore('prompts', {
 
       return lastResult;
     },
-    async promptAgain(promptResult, appendMessages, promptAgainArgs, previewOnly = false) {
-      const promptArgs = promptResult.promptArgs;
-      const prompt = promptArgs.prompt;
-
-      this.setCurrentOverridePromptParameters(promptArgs.overridePromptParameters);
-
-      const modelId = this.getCurrentPromptModelId(prompt);
-
-      const model = this.getModel(modelId);
-
-      const promptTimes = prompt.overridePromptTimes?.length > 0 ? parseInt(prompt.overridePromptTimes) : model.promptTimes;
-
-      const forceTemperature = promptAgainArgs?.forceTemperature;
-      if(forceTemperature !== null && forceTemperature !== undefined) {
-        this.setCurrentOverridePromptParameter(prompt, undefined, forceTemperature);
-      }
-      const forceModel = promptAgainArgs?.forceModel;
-      if(forceModel !== null && forceModel !== undefined) {
-        this.setCurrentOverridePromptParameter(prompt, forceModel.id, null);
-      }
-
-      if(promptResult.executedTextMessages) {
-        this.setCurrentOverridePromptParameter(prompt, undefined, undefined, undefined, undefined, promptResult.executedTextMessages)
-      }
-
-      return await this.promptMultiple(prompt, promptArgs.text, promptArgs.parametersValue, promptArgs.contextTypes, promptArgs.userInputs, promptArgs.promptType, promptTimes, false, appendMessages, forceTemperature, previewOnly);
+    async promptAgain2(request) {
+      return await this.promptMultiple2(request);
     },
     async promptSelectionAnalysisPrompts() {
       if(getEditorSelection()?.empty ?? true) {
@@ -281,14 +232,23 @@ export const usePromptStore = defineStore('prompts', {
 
       for (const prompt of prompts) {
         const text = getSelectedMarkdown();
-        await executePromptClick(prompt, text, undefined, null, true, null, undefined, false, 'selectionAnalysis');
+
+        const request = {
+          prompt: prompt,
+          text: text,
+          forceBypassMoreParameters: true,
+          forceShowContextSelection: false,
+          promptSource: 'selectionAnalysis'
+        }
+
+        await executePromptClick2(request);
       }
     },
     clearSelectionAnalysisPrompts() {
       this.selectionPromptResults = [];
     },
-    canPrompt(prompt) {
-      const model = this.getModel(this.getCurrentPromptModelId(prompt));
+    canPromptRequest(request) {
+      const model = this.getModelFromRequest(request);
       if(!model) {
         return false;
       }
@@ -299,103 +259,80 @@ export const usePromptStore = defineStore('prompts', {
 
       return true;
     },
-    getCurrentPromptModelId(prompt) {
-      let modelId = prompt.modelId;
-
-      if(this.currentOverridePromptParameters && this.currentOverridePromptParameters.prompt === prompt) {
-        if(this.currentOverridePromptParameters.modelId) {
-          modelId = this.currentOverridePromptParameters.modelId;
-        }
+    canPrompt(prompt) {
+      const model = this.getModel(prompt.modelId);
+      if(!model) {
+        return false;
+      }
+      const modelReady = model.enabled && model.downloaded;
+      if(!modelReady) {
+        return false;
       }
 
-      return modelId;
+      return true;
     },
-    getCurrentOverrideTemperature(prompt) {
-      if(this.currentOverridePromptParameters && this.currentOverridePromptParameters.prompt === prompt) {
-        return this.currentOverridePromptParameters.temperature;
-      }
-
-      return null;
-    },
-    constructPromptInput(forceInput, pr, prompt, inputText, parametersValue, contextTypes, userInputs, promptType, appendMessages, forceTemperature, silent) {
+    constructPromptInput2(request) {
       const fileStore = useFileStore();
-
-      let modelId = this.getCurrentPromptModelId(prompt);
 
       let forceMessages = undefined;
 
-      if(this.currentOverridePromptParameters && this.currentOverridePromptParameters.prompt === prompt) {
-        if(this.currentOverridePromptParameters.temperature !== undefined && this.currentOverridePromptParameters.temperature !== null) {
-          forceTemperature = this.currentOverridePromptParameters.temperature;
-        }
+      if(request.executedTextMessages) {
+        forceMessages = request.executedTextMessages;
 
-        if(this.currentOverridePromptParameters.textMessages) {
-          forceMessages = this.currentOverridePromptParameters.textMessages;
-
-          if(appendMessages) {
-            // insert if not exists
-            for (const message of appendMessages) {
-              if(!forceMessages.find(m => m.text === message.text)) {
-                forceMessages.push(message);
-              }
+        if(request.appendMessages) {
+          // insert if not exists
+          for (const message of request.appendMessages) {
+            if(!forceMessages.find(m => m.text === message.text)) {
+              forceMessages.push(message);
             }
           }
         }
       }
 
-      const model = this.getModel(modelId);
-      let temperature = forceTemperature != null ? forceTemperature : (prompt.settings.overrideTemperature ?? false) ? prompt.settings.temperature : model.defaultTemperature;
+      const model = this.getModelFromRequest(request);
+      let temperature = request.forceTemperature != null ? request.forceTemperature : (request.prompt.settings.overrideTemperature ?? false) ? request.prompt.settings.temperature : model.defaultTemperature;
 
       // input object already provided from previous run, just use it
-      if(forceInput) {
-        if(pr && forceInput.promptResultInput) {
-          pr.input = forceInput.promptResultInput;
+      if(request.forceInput) {
+        if(request.pr && request.forceInput.promptResultInput) {
+          request.pr.input = request.forceInput.promptResultInput;
         }
 
-        if(pr && forceInput.promptResultAppendMessages) {
-          pr.appendMessages = forceInput.promptResultAppendMessages;
+        if(request.pr && request.forceInput.promptResultAppendMessages) {
+          request.pr.appendMessages = request.forceInput.promptResultAppendMessages;
         }
 
-        forceInput.temperature = temperature;
-        forceInput.model = model;
+        request.forceInput.temperature = temperature;
+        request.forceInput.model = model;
 
-        return forceInput;
+        return request.forceInput;
       }
 
-
-      let maxTokens = (prompt.settings.overrideMaxTokens ?? false) ? prompt.settings.maxTokens : model.defaultMaxTokens;
-      let topP = (prompt.settings.overrideTopP ?? false) ? prompt.settings.topP : model.defaultTopP;
+      let maxTokens = (request.prompt.settings.overrideMaxTokens ?? false) ? request.prompt.settings.maxTokens : model.defaultMaxTokens;
+      let topP = (request.prompt.settings.overrideTopP ?? false) ? request.prompt.settings.topP : model.defaultTopP;
       let minP = model.defaultMinP;
       let topK = model.defaultTopK;
       let repeatPenalty = model.defaultRepeatPenalty;
-      let frequencyPenalty = (prompt.settings.overrideFrequencyPenalty ?? false) ? prompt.settings.frequencyPenalty : model.defaultFrequencyPenalty;
-      let presencePenalty = (prompt.settings.overridePresencePenalty ?? false) ? prompt.settings.presencePenalty : model.defaultPresencePenalty;
+      let frequencyPenalty = (request.prompt.settings.overrideFrequencyPenalty ?? false) ? request.prompt.settings.frequencyPenalty : model.defaultFrequencyPenalty;
+      let presencePenalty = (request.prompt.settings.overridePresencePenalty ?? false) ? request.prompt.settings.presencePenalty : model.defaultPresencePenalty;
 
-      let systemPrefix = prompt.overridePromptFormat ? prompt.systemPromptPrefix : model.defaultSystemPromptPrefix;
-      let systemSuffix = prompt.overridePromptFormat ? prompt.systemPromptSuffix : model.defaultSystemPromptSuffix;
-      let userPrefix = prompt.overridePromptFormat ? prompt.userPromptPrefix : model.defaultUserPromptPrefix;
-      let userSuffix = prompt.overridePromptFormat ? prompt.userPromptSuffix : model.defaultUserPromptSuffix;
-      let assistantPrefix = prompt.overridePromptFormat ? prompt.assistantPromptPrefix : model.defaultAssistantPromptPrefix;
-      let assistantSuffix = prompt.overridePromptFormat ? prompt.assistantPromptSuffix : model.defaultAssistantPromptSuffix;
+      let systemPrefix = request.prompt.overridePromptFormat ? request.prompt.systemPromptPrefix : model.defaultSystemPromptPrefix;
+      let systemSuffix = request.prompt.overridePromptFormat ? request.prompt.systemPromptSuffix : model.defaultSystemPromptSuffix;
+      let userPrefix = request.prompt.overridePromptFormat ? request.prompt.userPromptPrefix : model.defaultUserPromptPrefix;
+      let userSuffix = request.prompt.overridePromptFormat ? request.prompt.userPromptSuffix : model.defaultUserPromptSuffix;
+      let assistantPrefix = request.prompt.overridePromptFormat ? request.prompt.assistantPromptPrefix : model.defaultAssistantPromptPrefix;
+      let assistantSuffix = request.prompt.overridePromptFormat ? request.rompt.assistantPromptSuffix : model.defaultAssistantPromptSuffix;
 
-      let jsonMode = prompt.promptStyle === 'brainstorm';
+      let jsonMode = request.prompt.promptStyle === 'brainstorm';
       jsonMode = false; // disable json mode for now
 
-      let systemPrompt = prompt.overrideSystemPrompt ? prompt.systemPrompt : model.defaultSystemPrompt;
+      let systemPrompt = request.systemPrompt ?? (request.prompt.overrideSystemPrompt ? request.prompt.systemPrompt : model.defaultSystemPrompt);
 
-      let userPrompt = prompt.userPrompt;
-      let assistantPrompt = prompt.hasExtendedChatMessages ? prompt.assistantPrompt : undefined;
-      let userPrompt2 = prompt.hasExtendedChatMessages ? prompt.userPrompt2 : undefined;
+      let userPrompt = request.systemPrompt ?? request.prompt.userPrompt;
+      let assistantPrompt = request.prompt.hasExtendedChatMessages ? request.prompt.assistantPrompt : undefined;
+      let userPrompt2 = request.prompt.hasExtendedChatMessages ? request.prompt.userPrompt2 : undefined;
 
-      if(pr?.promptArgs?.overridePromptParameters) {
-        if(pr.promptArgs.overridePromptParameters.userPrompt !== null && pr.promptArgs.overridePromptParameters.userPrompt !== undefined) {
-          userPrompt = pr.promptArgs.overridePromptParameters.userPrompt;
-        }
-
-        if(pr.promptArgs.overridePromptParameters.systemPrompt !== null && pr.promptArgs.overridePromptParameters.systemPrompt !== undefined) {
-          systemPrompt = pr.promptArgs.overridePromptParameters.systemPrompt;
-        }
-      }
+      //TODO use forceModel & so on values here instead of promptArgs
 
       let textMessages = [];
       // prompt chat messages inserted from included contexts - some contexts are not inserted into $context variable, but as another chat message to fool the AI thinking it wrote it
@@ -427,23 +364,23 @@ export const usePromptStore = defineStore('prompts', {
         userPrompt2 = replaceParameterEditorText(userPrompt2);
       }
 
-      if(Array.isArray(inputText)) {
-        textMessages = [...inputText];
+      if(Array.isArray(request.text)) {
+        textMessages = [...request.text];
         selectedText = null;
         inputIsText = false;
 
-        promptResultInput = inputText[inputText.length - 1].text;
+        promptResultInput = request.text[request.text.length - 1].text;
 
       } else {
-        selectedText = inputText;
+        selectedText = request.text;
         inputIsText = true;
 
-        if(inputText.includes('$$$replaceUserPrompt$$$')) {
-          inputText = inputText.replace('$$$replaceUserPrompt$$$', '');
-          userPrompt = inputText;
+        if(request.text.includes('$$$replaceUserPrompt$$$')) {
+          request.text = request.text.replace('$$$replaceUserPrompt$$$', '');
+          userPrompt = request.text;
         }
 
-        promptResultInput = inputText;
+        promptResultInput = request.text;
       }
 
       for (const textMessage of textMessages) {
@@ -600,9 +537,9 @@ export const usePromptStore = defineStore('prompts', {
       replace('$nodeAfter', () => convertHtmlToText(nodeAfter) ?? '');
       replace('$nodeParent', () => convertHtmlToText(nodeParent) ?? '');
 
-      if(prompt.hasParameters && parametersValue !== null) {
-        for (const parameter of prompt.parameters) {
-          const parameterValue = parametersValue.find(p => p.name === parameter.name);
+      if(request.prompt.hasParameters && request.parametersValue !== null) {
+        for (const parameter of request.prompt.parameters) {
+          const parameterValue = request.parametersValue.find(p => p.name === parameter.name);
           if(parameterValue) {
             const parameterValuePlainText = convertHtmlToText(parameterValue.value?.value ?? parameterValue.value ?? '');
 
@@ -664,40 +601,38 @@ export const usePromptStore = defineStore('prompts', {
 
       let userInputValue = null;
 
-      if(userInputs && userInputs.length > 0) {
+      if(request.userInputs && request.userInputs.length > 0) {
         userInputValue = '';
-        for (const inputType of contextTypes) {
+        for (const inputType of request.userInputs) {
           if(inputType.id === 'Current File') {
             if(text && text.length > 0) {
-              if(userInputs.length > 1) {
+              if(request.userInputs.length > 1) {
                 userInputValue += fileStore.getFileNameWithPath(fileStore.selectedFile) + ' Text: ';
               }
               userInputValue += convertHtmlToText(text);
-              if(userInputs.length > 1) {
+              if(request.userInputs.length > 1) {
                 userInputValue += '\n-----\n';
               }
             }
           } else if(inputType.id === 'Selected Text') {
             if(selectedText && selectedText.length > 0) {
-              if(userInputs.length > 1) {
+              if(request.userInputs.length > 1) {
                 userInputValue += 'Selected Text inside ' + (fileStore.getFileNameWithPath(fileStore.selectedFile)) + ': ';
               }
               userInputValue += convertHtmlToText(selectedText);
 
-              if(userInputs.length > 1) {
+              if(request.userInputs.length > 1) {
                 userInputValue += '\n-----\n';
               }
             }
           } else if(inputType.contextType === 'Custom Input') {
             userInputValue += convertHtmlToText(inputType.value);
-            if(userInputs.length > 1) {
+            if(request.userInputs.length > 1) {
               userInputValue += '\n-----\n';
             }
           }
         }
       }
-
-      debugger;
 
       if(userInputValue) {
         replace('$input', () => userInputValue);
@@ -705,7 +640,7 @@ export const usePromptStore = defineStore('prompts', {
         replace('$input', () => selectedText);
       }
 
-      if(contextTypes && contextTypes.length > 0) {
+      if(request.contextTypes && request.contextTypes.length > 0) {
         let context = '';
 
         let prefixWithContextWord = true;
@@ -722,10 +657,10 @@ export const usePromptStore = defineStore('prompts', {
                               || userPrompt.includes('$text500Before') || systemPrompt.includes('$text500Before')*/
 
 
-        for (const contextType of contextTypes) {
+        for (const contextType of request.contextTypes) {
           if(contextType.id === 'Current File' || contextType.id === 'Current & Children Files') {
             if(text && text.length > 0) {
-              if(contextTypes.length > 1) {
+              if(request.contextTypes.length > 1) {
                 context += fileStore.getFileNameWithPath(fileStore.selectedFile) + ' Text: ';
               }
               context += convertHtmlToText(text);
@@ -753,7 +688,7 @@ export const usePromptStore = defineStore('prompts', {
             }
           } else if(contextType.id === 'Selected Text') {
             if(selectedText && selectedText.length > 0) {
-              if(contextTypes.length > 1) {
+              if(request.contextTypes.length > 1) {
                 context += 'Selected Text inside ' + (fileStore.getFileNameWithPath(fileStore.selectedFile)) + ': ';
               }
               context += convertHtmlToText(selectedText);
@@ -942,22 +877,22 @@ export const usePromptStore = defineStore('prompts', {
         textMessages.splice(3, 0, {type: 'user', text: userPrompt2});
       }
 
-      if(appendMessages) {
+      if(request.appendMessages) {
 
         if(!promptResultAppendMessages) {
           promptResultAppendMessages = [];
         }
 
-        textMessages.push(...appendMessages);
-        promptResultAppendMessages.push(...appendMessages);
+        textMessages.push(...request.appendMessages);
+        promptResultAppendMessages.push(...request.appendMessages);
       }
 
-      if(pr && promptResultInput) {
-        pr.input = promptResultInput;
+      if(request.pr && promptResultInput) {
+        request.pr.input = promptResultInput;
       }
 
-      if(pr && promptResultAppendMessages) {
-        pr.appendMessages = promptResultAppendMessages;
+      if(request.pr && promptResultAppendMessages) {
+        request.pr.appendMessages = promptResultAppendMessages;
       }
 
       if(forceMessages) {
@@ -983,20 +918,20 @@ export const usePromptStore = defineStore('prompts', {
         jsonMode
       }
     },
-    promptInternal(prompt, inputText, parametersValue, contextTypes, userInputs, promptType, appendMessages, forceTemperature, forceInput, promptArgs, silent, promptSource, onOutput) {
+    promptInternal2(request) {
       if(this.isPrompting) {
         this.promptAbortController?.abort();
       }
 
       this.isPrompting = true;
-      this.isSilentPrompting = silent;
+      this.isSilentPrompting = request.silent;
 
       const layoutStore = useLayoutStore();
-      const localDataStore = useLocalDataStore();
 
-      const pr = this.createPromptResult(prompt, contextTypes, userInputs, parametersValue, promptArgs, silent, promptSource);
+      const pr = this.createPromptResult2(request);
+      request.pr = pr;
 
-      const input = this.constructPromptInput(forceInput, pr, prompt, inputText, parametersValue, contextTypes, userInputs, promptType, appendMessages, forceTemperature, silent);
+      const input = this.constructPromptInput2(request);
 
       if(input.missingVariable !== null) {
         Notify.create({
@@ -1008,10 +943,6 @@ export const usePromptStore = defineStore('prompts', {
             { icon: 'close', color: 'white', round: true, handler: () => { /* ... */ } }
           ]
         });
-      }
-
-      if(!silent) {
-        this.setCurrentOverridePromptParameters(null);
       }
 
       this.promptAbortController = new AbortController();
@@ -1098,15 +1029,15 @@ export const usePromptStore = defineStore('prompts', {
 
         if (promptingEngineToUse === 'cloud') {
 
-          let request;
+          let promptRequest;
           let controllerName, actionName;
           let loggedPrompt;
 
           let callType = model.type;
           let inferenceEngine = model.args.inferenceEngine;
 
-          let targetLanguage = prompt.targetLanguage ?? this.promptTargetLanguage;
-          let sourceLanguage = prompt.sourceLanguage ?? this.promptSourceLanguage;
+          let targetLanguage = request.prompt.targetLanguage ?? this.promptTargetLanguage;
+          let sourceLanguage = request.prompt.sourceLanguage ?? this.promptSourceLanguage;
 
           if(model.args.apiCallType === 'raw') {
 
@@ -1134,7 +1065,7 @@ export const usePromptStore = defineStore('prompts', {
               return;
             }
 
-            request = {
+            promptRequest = {
               callType: callType,
               inferenceEngine: inferenceEngine,
               apiUrl: model.args.url,
@@ -1193,7 +1124,7 @@ export const usePromptStore = defineStore('prompts', {
               pr: pr
             });
 
-            request = {
+            promptRequest = {
               callType: callType,
               inferenceEngine: inferenceEngine,
               apiUrl: model.args.url,
@@ -1224,21 +1155,21 @@ export const usePromptStore = defineStore('prompts', {
             }
           }
 
-          console.log('Prompting with:', request);
+          console.log('Prompting with:', promptRequest);
 
           const user = useCurrentUser();
 
           const idToken = await user.value.getIdToken();
 
-          promptStream(idToken, request,
+          promptStream(idToken, promptRequest,
             (text) => {
               pr.waitingForResponse = false;
 
               if(pr.meta === null) {
                 pr.text += text;
                 pr.originalText += text;
-                if(onOutput) {
-                  onOutput(pr.text, text, false);
+                if(request.onOutput) {
+                  request.onOutput(pr.text, text, false);
                 }
 
                 if(pr.text.includes('[[META]]')) {
@@ -1255,6 +1186,10 @@ export const usePromptStore = defineStore('prompts', {
               }
             },
             () => {
+
+              if(request.onOutput) {
+                request.onOutput(pr.text, null, true, false);
+              }
 
               pr.waitingForResponse = false;
 
@@ -1319,6 +1254,10 @@ export const usePromptStore = defineStore('prompts', {
               this.isPrompting = false;
             },
             (err) => {
+              if(request.onOutput) {
+                request.onOutput(pr.text, null, true, true);
+              }
+
               pr.waitingForResponse = false;
 
               if(loggedPrompt) loggedPrompt.error = err;
@@ -1663,7 +1602,7 @@ export const usePromptStore = defineStore('prompts', {
           try {
             let response;
 
-            let request = {
+            let promptRequest = {
               modelName: model.modelName,
               prompt: promptData,
               number: 1,
@@ -1675,15 +1614,7 @@ export const usePromptStore = defineStore('prompts', {
 
             const idToken = await user.value.getIdToken();
 
-            response = await generateImage(idToken, request, this.promptAbortController);
-
-            /*response = await openai.images.generate({
-              model: model.modelName,
-              prompt: promptData,
-              n: 1,
-              size: '1024x1024',
-              quality: 'standard',
-            });*/
+            response = await generateImage(idToken, promptRequest, this.promptAbortController);
 
             pr.type = 'image';
             if(!pr.images) {
@@ -1792,12 +1723,18 @@ export const usePromptStore = defineStore('prompts', {
         this.getTabData(this.currentTab).promptResultsIndex = 0;
       }
     },
-    async runPromptResultAction(promptResult, action, parameter) {
+    async runPromptResultAction(promptResult, action, parameter) { // TODO
       if(action.type === "Run Prompt") {
         const promptToExecute = this.getPromptById(action.typeParameter);
 
         if(promptToExecute) {
-          await executePromptClick(promptToExecute, replaceParameterEditorText(promptResult.originalText ?? promptResult.text));
+
+          const request = {
+            prompt: promptToExecute,
+            text: replaceParameterEditorText(promptResult.originalText ?? promptResult.text)
+          }
+
+          await executePromptClick2(request);
         } else {
           Notify.create({
             icon: 'error',
@@ -1816,7 +1753,7 @@ export const usePromptStore = defineStore('prompts', {
 
         const message = action.typeParameter;
 
-        await replyToPrompt(promptResult, message);
+        await replyToPrompt2(promptResult, message);
       } else if(action.type === "Save to Variable") {
 
         const fileStore = useFileStore();
@@ -1834,26 +1771,27 @@ export const usePromptStore = defineStore('prompts', {
         }
       }
     },
-    createPromptResult(prompt, contextTypes, userInputs, parametersValue, promptArgs, silent, promptSource) {
+    createPromptResult2(request) {
       let pr = {
-        prompt: prompt,
-        promptArgs: promptArgs,
+        request: request,
+
+        prompt: request.prompt,
         text: '',
         originalText: '',
         meta: null,
         type: 'text',
         waitingForResponse: true,
-        contextTypes,
-        parametersValue,
-        userInputs,
+        contextTypes: request.contextTypes,
+        parametersValue: request.parametersValue,
+        userInputs: request.userInputs,
         collapsed: false,
       };
 
-      if(!silent) {
-        if(prompt.promptType === 'selectionAnalysis' || promptSource === 'selectionAnalysis') {
+      if(!request.silent) {
+        if(request.prompt.promptType === 'selectionAnalysis' || request.promptSource === 'selectionAnalysis') {
           this.selectionPromptResults.push(pr);
           pr = this.selectionPromptResults[this.selectionPromptResults.length - 1];
-        } else if (prompt.promptType === 'chat' && this.currentTab.tabType === 'chat') {
+        } else if (request.prompt.promptType === 'chat' && this.currentTab.tabType === 'chat') {
           let results = this.getTabData(this.currentTab).promptResultsHistory[this.getTabData(this.currentTab).promptResultsIndex];
 
           if(!results) {
@@ -1888,11 +1826,6 @@ export const usePromptStore = defineStore('prompts', {
       const results = this.getTabData(this.currentTab).promptResultsHistory[this.getTabData(this.currentTab).promptResultsIndex];
       results.splice(results.indexOf(pr), 1);
 
-    },
-    async spellCheck(text) {
-      //await spellCheckRequest(text, this.currentSpellCheckLanguage.value); // TODO set language
-
-      //TODO cloud spell check
     },
     setCurrentTabResultsIndex(index) {
       this.getTabData(this.currentTab).promptResultsIndex = index;
@@ -2451,6 +2384,9 @@ export const usePromptStore = defineStore('prompts', {
     getModel(id) {
       return this.models.find(m => m.id === id);
     },
+    getModelFromRequest(request) {
+      return this.getModel(request.forceModelId ?? request.prompt.modelId);
+    },
     updateTokens() {
       const fileStore = useFileStore();
       const tokens = fileStore.getCurrentTextTokens();
@@ -2732,7 +2668,6 @@ export const usePromptStore = defineStore('prompts', {
 
       if(aiSettings.selectedAnalysisPrompts) {
         this.selectedAnalysisPrompts = [];
-        debugger;
         for(const analysisPrompt of aiSettings.selectedAnalysisPrompts) {
           const prompt = this.prompts.find(p => p.id === analysisPrompt.value);
 
@@ -2976,34 +2911,6 @@ export const usePromptStore = defineStore('prompts', {
       }
 
       return this.promptFolders.find(f => f.label === label);
-    },
-    setCurrentOverridePromptParameters(params) {
-      this.currentOverridePromptParameters = params;
-    },
-    setCurrentOverridePromptParameter(prompt, modelId, temperature, systemPrompt, userPrompt, textMessages) {
-      if(!this.currentOverridePromptParameters || this.currentOverridePromptParameters.prompt !== prompt) {
-        this.currentOverridePromptParameters = {
-          prompt: prompt,
-        }
-      }
-      if(modelId !== undefined) {
-        this.currentOverridePromptParameters.modelId = modelId;
-      }
-      if(temperature !== undefined) {
-        this.currentOverridePromptParameters.temperature = temperature;
-      }
-
-      if(systemPrompt !== undefined) {
-        this.currentOverridePromptParameters.systemPrompt = systemPrompt;
-      }
-
-      if(userPrompt !== undefined) {
-        this.currentOverridePromptParameters.userPrompt = userPrompt;
-      }
-
-      if(textMessages !== undefined) {
-        this.currentOverridePromptParameters.textMessages = textMessages;
-      }
     },
     onEnablePromptRuns(prompt) {
       if(prompt.enablePromptRuns === true) {
