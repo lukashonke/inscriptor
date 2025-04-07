@@ -226,7 +226,7 @@ async function executePrompt2(request) {
     }
   }
 
-  request.context = context;
+  request.contextTypes = context;
   request.userInputs = userInputs;
   request.forceTemperature = null;
   request.promptTimes = promptTimes;
@@ -253,7 +253,7 @@ async function executeChatPrompt2(request) {
     }
   }
 
-  request.context = context;
+  request.contextTypes = context;
   request.userInputs = userInputs;
   request.forceTemperature = null;
   request.promptTimes = promptTimes;
@@ -288,7 +288,7 @@ export function cloneRequest(request) {
 
     executedTextMessages: request.executedTextMessages ? [...request.executedTextMessages] : null,
     appendMessages: request.appendMessages ? [...request.appendMessages] : null,
-    context: request.context ? [...request.context] : null,
+    contextTypes: request.contextTypes ? [...request.contextTypes] : null,
     promptParametersValue: request.promptParametersValue ? [...request.promptParametersValue] : null,
   }
 }

@@ -249,7 +249,7 @@
                           </div>
                           <div v-if="child.loading">
                             <q-spinner-grid class="q-mt-sm q-mb-md" />
-                            <div v-html="formatPendingBrainstormingPrompt(child.progressText)" class="q-pa-md rounded-borders bg-blue-grey-1" />
+                            <div v-html="formatPendingBrainstormingPrompt(child.progressText, promptResult.prompt.resultsSeparator ?? '&lt;split/&gt;')" class="q-pa-md rounded-borders bg-blue-grey-1" />
                           </div>
 
                           <q-card v-if="child.children && child.children.length > 0" bordered flat class="q-mt-md bg-blue-grey-1 q-mb-md">
@@ -269,13 +269,13 @@
                   </div>
                   <div v-if="idea.loading">
                     <q-spinner-grid class="q-mt-sm q-mb-md" />
-                    <div v-html="formatPendingBrainstormingPrompt(idea.progressText)" class="q-pa-md bordered rounded-borders bg-grey-1" />
+                    <div v-html="formatPendingBrainstormingPrompt(idea.progressText, promptResult.prompt.resultsSeparator ?? '&lt;split/&gt;')" class="q-pa-md bordered rounded-borders bg-grey-1" />
                   </div>
                 </q-card-section>
               </q-card>
             </template>
             <template v-else>
-              <div v-html="formatPendingBrainstormingPrompt(promptResultText)" />
+              <div v-html="formatPendingBrainstormingPrompt(promptResultText, promptResult.prompt.resultsSeparator ?? '&lt;split/&gt;')" />
             </template>
           </template>
           <template v-else-if="promptResult.prompt.promptStyle === 'mermaid'">
@@ -677,8 +677,9 @@
     return props.promptResult.valueTree;
   });
 
-  function formatPendingBrainstormingPrompt(text) {
-    return text.replaceAll('&lt;split/&gt;', '<br><br>').replaceAll('\n', '<br>').replaceAll('<br><br>', '<br>').replaceAll('<br><br>', '<br>');
+  function formatPendingBrainstormingPrompt(text, separator) {
+    //TODO take separator from prompt, encode it
+    return text.replaceAll(separator, '<br><br>').replaceAll('\n', '<br>').replaceAll('<br><br>', '<br>').replaceAll('<br><br>', '<br>');
   }
 
   const promptResultText = computed({
