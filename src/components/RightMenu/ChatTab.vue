@@ -150,7 +150,7 @@
 import {usePromptStore} from "stores/prompt-store";
 import {computed, ref} from "vue";
 import {Dialog} from "quasar";
-import {executePromptClick} from "src/common/helpers/promptHelper";
+import {executePromptClick2} from "src/common/helpers/promptHelper";
 import PromptResult from "components/RightMenu/PromptResult.vue";
 import {useLayoutStore} from "stores/layout-store";
 
@@ -223,7 +223,16 @@ async function sendChat() {
 
   messages.push({type: 'user', text: textCopy});
 
-  await executePromptClick(prompt, messages, false, null, false, null, false, chatWithContext.value);
+  const request = {
+    prompt: prompt,
+    text: messages,
+    clear: false,
+    forceBypassMoreParameters: false,
+    silent: false,
+    forceShowContextSelection: chatWithContext.value
+  };
+
+  await executePromptClick2(request);
 }
 
 const models = computed(() => promptStore.models.map(tab => ({label: tab.name, value: tab.id})));

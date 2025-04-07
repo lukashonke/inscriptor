@@ -257,7 +257,7 @@
   import InputWithAi from "components/Common/InputWithAi.vue";
   import {convertHtmlToText, trimInputWithAi} from "src/common/utils/textUtils";
   import PromptResult from "components/RightMenu/PromptResult.vue";
-  import {executePromptClick} from "src/common/helpers/promptHelper";
+  import {executePromptClick2} from "src/common/helpers/promptHelper";
 
   const user = useCurrentUser();
 
@@ -414,7 +414,16 @@
     try {
       prompting.value = true;
 
-      const result = await executePromptClick(prompt, systemPrompt.value, true, null, true, null, true);
+      const request = {
+        prompt: prompt,
+        text:  systemPrompt.value,
+        clear: true,
+        forceBypassMoreParameters: true,
+        appendContext: null,
+        silent: true
+      }
+
+      const result = await executePromptClick2(request);
 
       refinePromptResult.value = result;
 

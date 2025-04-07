@@ -459,7 +459,7 @@
             <q-input v-model="reactInput" filled dense square label="Message" autofocus autogrow ref="reactInputRef" @keyup="onReplyKeyup" />
           </div>
           <div class="col-auto">
-            <q-btn icon="las la-reply" @click="promptReactClick(promptResult.prompt)" color="primary" />
+            <q-btn icon="las la-reply" @click="promptReactClick()" color="primary" />
           </div>
         </div>
       </q-slide-transition>
@@ -476,12 +476,11 @@
 
 <script setup>
   import {useTextSelection} from '@vueuse/core'
-  import mermaid from 'mermaid';
-  import {computed, ref, watch, watchEffect} from "vue";
+  import {computed, ref, watch} from "vue";
 
   import { writeText } from '@tauri-apps/plugin-clipboard-manager';
   import {usePromptStore} from "stores/prompt-store";
-  import {executePromptClick} from "src/common/helpers/promptHelper";
+  import {cloneRequest, executePromptClick2} from "src/common/helpers/promptHelper";
   import {
     convertHtmlToText,
     convertToParagraphs,
@@ -764,7 +763,15 @@
 
       console.log(message);
 
-      const result = await executePromptClick(prompt, message, false, null, true, null, true);
+      const request = {
+        prompt: prompt,
+        text: message,
+        clear: false,
+        forceBypassMoreParameters: true,
+        silent: true
+      }
+
+      const result = await executePromptClick2(request);
 
       try {
         //TODO to helper
@@ -804,17 +811,28 @@
     return undefined;
   }
 
-  async function promptClick(prompt, promptType) {
-    await executePromptClick(prompt, replaceParameterEditorText(promptResultText.value));
+  async function promptClick(promptClickData) {
+    const prompt = promptClickData.prompt;
+
+    const request = {
+      prompt: prompt,
+      forceModelId: promptClickData.forceModelId,
+      forceTemperature: promptClickData.forceTemperature,
+      text: replaceParameterEditorText(promptResultText.value)
+    }
+
+    await executePromptClick2(request);
   }
 
-  async function promptReactClick(prompt) {
+  async function promptReactClick() {
     if(reactInput.value.trim() === '') return;
+
+    const request = cloneRequest(props.promptResult.request);
 
     const appendMessages = [];
 
     let overrideText = null;
-    if(prompt.promptStyle === 'mermaid') {
+    if(request.prompt.promptStyle === 'mermaid') {
       overrideText = props.promptResult.text;
     }
 
@@ -827,18 +845,23 @@
     reactInput.value = '';
     reactExpanded.value = false;
 
-    promptStore.setCurrentOverridePromptParameters(props.promptResult.promptArgs.overridePromptParameters);
+    request.appendMessages = appendMessages;
+    request.forceBypassMoreParameters = true;
+    request.clear = false;
+    //request.text: props.promptResult.input;
 
     if(props.type === 'inline') {
       replyLoading.value = true;
 
-      const result = await executePromptClick(prompt, props.promptResult.input, false, appendMessages, true, null, true);
+      request.silent = true;
+
+      const result = await executePromptClick2(request);
       replyLoading.value = false;
 
       emits('replaceSelf', result);
     } else {
       collapsed.value = true;
-      await executePromptClick(prompt, props.promptResult.input, false, appendMessages, true);
+      await executePromptClick2(request);
     }
   }
 
@@ -853,19 +876,28 @@
     appendMessages.push({type: 'assistant', text: convertHtmlToText(replaceParameterEditorText(promptResultText.value))});
     appendMessages.push({type: 'user', text: instruction + ': ' + treeItem.text});
 
-    promptStore.setCurrentOverridePromptParameters(props.promptResult.promptArgs.overridePromptParameters);
-
     treeItem.progressText = '';
 
     replyLoading.value = true;
 
     treeItem.loading = true;
 
-    const onOutput = (fullText, newText, isFinished) => {
+    const onOutput = (fullText, newText, isFinished, isError) => {
       treeItem.progressText = fullText;
     };
 
-    const result = await executePromptClick(props.promptResult.prompt, props.promptResult.input, false, appendMessages, true, null, true, false, null, onOutput);
+    const request = {
+      prompt: props.promptResult.prompt,
+      text: props.promptResult.input,
+      clear: false,
+      appendMessages: appendMessages,
+      forceBypassMoreParameters: true,
+      silent: true,
+      forceShowContextSelection: false,
+      onOutput
+    }
+
+    const result = await executePromptClick2(request);
     replyLoading.value = false;
 
     if(!treeItem.children) {
@@ -916,18 +948,28 @@
     appendMessages.push({type: 'assistant', text: convertHtmlToText(replaceParameterEditorText(promptResultText.value))});
     appendMessages.push({type: 'user', text: instruction + ': ' + selectedText});
 
-    promptStore.setCurrentOverridePromptParameters(props.promptResult.promptArgs.overridePromptParameters);
+    const request = {
+      prompt: prompt,
+      text: props.promptResult.input,
+      clear: false,
+      appendMessages: appendMessages,
+      forceBypassMoreParameters: true,
+      silent: true
+    };
 
     if(props.type === 'inline') {
       replyLoading.value = true;
 
-      const result = await executePromptClick(prompt, props.promptResult.input, false, appendMessages, true, null, true);
+      request.silent = true;
+
+      const result = await executePromptClick2(request);
       replyLoading.value = false;
 
       emits('replaceSelf', result);
     } else {
       collapsed.value = true;
-      await executePromptClick(prompt, props.promptResult.input, false, appendMessages, true);
+
+      await executePromptClick2(request);
     }
   }
 
@@ -1100,7 +1142,7 @@
       await removePromptResult(event);
     }
 
-    //await promptStore.reprompt(props.promptResult);
+    const request = cloneRequest(props.promptResult.request);
 
     let appendMessages = null;
 
@@ -1109,17 +1151,33 @@
       appendMessages.push(...props.promptResult.appendMessages);
     }
 
-    let promptAgainArgs = {
-      forceTemperature: forceTemperature,
-      forceModel: forceModel,
-    };
+    if(props.promptResult.executedTextMessages) {
+      request.executedTextMessages = [...props.promptResult.executedTextMessages];
+    }
+
+    if(forceTemperature) {
+      request.forceTemperature = forceTemperature;
+    }
+
+    if(forceModel) {
+      request.forceModelId = forceModel.id;
+    }
+
+    if(appendMessages) {
+      request.appendMessages = appendMessages;
+    }
 
     if(event.ctrlKey) {
-      await promptStore.promptAgain(props.promptResult, appendMessages, promptAgainArgs);
+      //await promptStore.promptAgain(props.promptResult, appendMessages, promptAgainArgs);
+      await promptStore.promptAgain2(request);
     } else {
-      const data = await promptStore.promptAgain(props.promptResult, appendMessages, promptAgainArgs, true);
+
+      request.previewOnly = true;
+
+      const data = await promptStore.promptAgain2(request);
 
       data.isRegenerating = true;
+      promptStore.currentPromptConfirmationRequest = request;
       layoutStore.promptPreview = data;
       layoutStore.promptPreviewShown = true;
     }
@@ -1167,7 +1225,7 @@
 
   function onReplyKeyup(event) {
     if(event.key === 'Enter' && (!event.shiftKey)) {
-      promptReactClick(props.promptResult.prompt);
+      promptReactClick();
       event.preventDefault();
       event.stopPropagation();
     }

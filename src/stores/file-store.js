@@ -409,10 +409,6 @@ export const useFileStore = defineStore('files', {
 
       return this.queryFiles(queryFn, this.files, true);
     },
-    async spellCheck() {
-      const promptStore = usePromptStore();
-      await promptStore.spellCheck(this.selectedFile.content);
-    },
     stickyPrompt(prompt, file) {
       if(!file.settings) {
         file.settings = {};

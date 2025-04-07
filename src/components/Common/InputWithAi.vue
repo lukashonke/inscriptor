@@ -59,7 +59,7 @@
 <script setup>
 import {computed, ref, watch} from 'vue'
 import {usePromptStore} from "stores/prompt-store";
-import {executePromptClick} from "src/common/helpers/promptHelper";
+import {executePromptClick2} from "src/common/helpers/promptHelper";
 import PromptResult from "components/RightMenu/PromptResult.vue";
 import {convertHtmlToText, trimInputWithAi} from "src/common/utils/textUtils";
 import {useLayoutStore} from "stores/layout-store";
@@ -133,7 +133,16 @@ async function runPrompt(prompt) {
     promptResultOpen.value = true;
     promptExecuted.value = prompt;
 
-    const result = await executePromptClick(prompt, props.promptInput, true, null, true, [ createDynamicContext("Input text", props.promptInput) ], true);
+    const request = {
+      prompt: prompt,
+      text: props.promptInput,
+      clear: true,
+      forceBypassMoreParameters: true,
+      appendContext: [ createDynamicContext("Input text", props.promptInput) ],
+      silent: true
+    }
+
+    const result = await executePromptClick2(request);
 
     promptResult.value = result;
 

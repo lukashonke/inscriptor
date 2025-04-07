@@ -217,7 +217,7 @@ import {useEditorStore} from "stores/editor-store";
 import {HardBreak} from "@tiptap/extension-hard-break";
 import { Node } from '@tiptap/core';
 import {
-  executePromptClick
+  executePromptClick2
 } from "src/common/helpers/promptHelper";
 import {Blockquote} from "@tiptap/extension-blockquote";
 import {
@@ -503,8 +503,6 @@ async function runWordFinder(replace = true) {
       message = message.replaceAll('$textAround', getSelectedTextExpanded(300, 300, '...') ?? '');
       message = message.replaceAll('$textOrSelection', getSelectedText() ?? '');
 
-
-
       const previousSuggestions = wordFinderOutput.value ?? [];
       if(previousSuggestions) {
         message = message.replaceAll('$previousSuggestions', JSON.stringify(previousSuggestions, null, 2));
@@ -514,7 +512,15 @@ async function runWordFinder(replace = true) {
 
       console.log(message);
 
-      const result = await executePromptClick(prompt, message, false, null, true, null, true);
+      const request = {
+        prompt: prompt,
+        text: message,
+        clear: false,
+        forceBypassMoreParameters: true,
+        silent: true
+      }
+
+      const result = await executePromptClick2(request);
 
       try {
         //TODO to helper
@@ -612,7 +618,8 @@ async function promptSelectionAnalysisPrompts() {
   await promptStore.promptSelectionAnalysisPrompts();
 }
 
-async function promptClick(prompt, forceAllFileText) {
+async function promptClick(promptClickData, forceAllFileText) {
+  const prompt = promptClickData.prompt;
   let text;
 
   // force feed all text into this prompt
@@ -636,11 +643,15 @@ async function promptClick(prompt, forceAllFileText) {
     }
   }
 
-  await executePromptClick(prompt, text);
+  const request = {
+    prompt: prompt,
+    text: text,
+    forceModelId: promptClickData.forceModelId,
+    forceTemperature: promptClickData.forceTemperature,
+  }
+
+  await executePromptClick2(request);
 }
-
-
-
 
 function getSelectedTextAsChat() {
   const { from, to, empty } = editor.value.state.selection;

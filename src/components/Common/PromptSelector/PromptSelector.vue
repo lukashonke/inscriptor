@@ -233,8 +233,8 @@ const props = defineProps({
 
 const emit = defineEmits(['promptClick'])
 
-function promptClick(prompt) {
-  emit('promptClick', prompt);
+function promptClick(promptClickData) {
+  emit('promptClick', promptClickData);
 }
 
 const currentPromptCategory = ref('');
@@ -281,12 +281,12 @@ const categoryPrompts = computed(() => {
   return prompts;
 });
 
-const promptsGroupedByModel = computed(() => {
+/*const promptsGroupedByModel = computed(() => {
   const prompts = getPrompts().filter(p => promptStore.canPrompt(p)).filter(p => p.category === currentPromptCategory.value || (currentPromptCategory.value === '' && !p.category))
   const grouping = groupBy(prompts, 'modelId');
 
   return groupByToArray(grouping);
-});
+});*/
 
 function getPrompts() {
   if((props.promptTypes === 'selection')) {

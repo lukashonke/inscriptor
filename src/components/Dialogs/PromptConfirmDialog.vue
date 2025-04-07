@@ -656,7 +656,7 @@
 
 <script setup>
   import {usePromptStore} from "stores/prompt-store";
-  import {executeConfirmPrompt} from "src/common/helpers/promptHelper";
+  import {executeConfirmPrompt2} from "src/common/helpers/promptHelper";
   import {computed, ref} from "vue";
   import {convertHtmlToText, removeHtmlTags, tokenise, truncate} from "src/common/utils/textUtils";
   import {useFileStore} from "stores/file-store";
@@ -689,19 +689,20 @@
     .concat(fileStore.variables.map(v => ({label: 'Variable ' + v.title, color: 'green', description: 'Content from variable ' + v.title})))
   );
 
-  const prompt = computed(() => promptStore.currentPromptConfirmation);
+  const request = computed(() => promptStore.currentPromptConfirmationRequest);
+  const prompt = computed(() => promptStore.currentPromptConfirmationRequest.prompt);
   const model = computed({
     get () {
-      return promptStore.getModel(promptStore.getCurrentPromptModelId(prompt.value));
+      return promptStore.getModel(request.value.forceModelId ?? prompt.value.modelId);
     },
     set (value) {
-      promptStore.setCurrentOverridePromptParameter(prompt.value, value.id, undefined, undefined, undefined);
+      request.value.forceModelId = value.id;
     }
   });
 
   const creativity = computed({
     get () {
-      const temperature = promptStore.getCurrentOverrideTemperature(prompt.value);
+      const temperature = request.value.forceTemperature;
 
       if(temperature !== undefined && temperature !== null) {
         return creativityOptions.find(c => c.value === temperature);
@@ -710,7 +711,7 @@
       }
     },
     set (value) {
-      promptStore.setCurrentOverridePromptParameter(prompt.value, undefined, value.value, undefined, undefined);
+      request.value.forceTemperature = value.id;
     }
   });
 
@@ -802,11 +803,15 @@
     }
 
     promptStore.promptParametersShown = false;
+    const request = promptStore.currentPromptConfirmationRequest;
 
     if(forceInput) {
-      await executeConfirmPrompt(false, promptPreview.value);
+      request.previewOnly = false;
+      request.forceInput = promptPreview.value;
+
+      await executeConfirmPrompt2(request);
     } else {
-      await executeConfirmPrompt();
+      await executeConfirmPrompt2(request);
     }
   }
 
@@ -815,7 +820,10 @@
       return;
     }
 
-    const input = await executeConfirmPrompt(true);
+    const request = promptStore.currentPromptConfirmationRequest;
+    request.previewOnly = true;
+
+    const input = await executeConfirmPrompt2(request);
 
     promptPreview.value = input;
     promptPreviewShown.value = true;
