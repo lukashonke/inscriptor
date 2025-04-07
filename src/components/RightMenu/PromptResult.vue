@@ -199,7 +199,10 @@
             </div>
           </div>
 
-          <template v-if="promptResult.prompt.promptStyle === 'brainstorm'">
+          <template v-if="promptResult.prompt.promptStyle === 'brainstorm-ui'">
+            <vue-mermaid-string :value="formatBrainstormBubbles(promptResult.text)" :options="{ securityLevel: 'loose' }" @node-click="brainstormBubbleClick"/>
+          </template>
+          <template v-else-if="promptResult.prompt.promptStyle === 'brainstorm'">
             <template v-if="promptBrainstormValueTree != null && promptBrainstormValueTree.length> 0">
               <q-card v-for="(idea, index) in promptBrainstormValueTree" :key="index" flat class="no-margin">
                 <q-card-section class="q-px-sm q-py-none">
@@ -664,7 +667,8 @@
       }
 
       const pr = props.promptResult;
-      let tree = pr.text.split('<split/>').map(item => ({ text: item })).filter(item => item.text.trim() !== '');
+      const separator = props.promptResult.prompt.resultsSeparator ?? '<split/>'
+      let tree = pr.text.split(separator).map(item => ({ text: item })).filter(item => item.text.trim() !== '');
 
       pr.valueTree = tree;
 
@@ -868,13 +872,36 @@
       treeItem.children = [];
     }
 
-    const childTree = result.text.split('<split/>').map(item => ({ text: item })).filter(item => item.text.trim() !== '');
+    const separator = props.promptResult.prompt.resultsSeparator ?? '<split/>'
+
+    const childTree = result.text.split(separator).map(item => ({ text: item })).filter(item => item.text.trim() !== '');
 
     treeItem.children.push(...childTree);
 
     treeItem.loading = false;
 
     return result;
+  }
+
+  function formatBrainstormBubbles(promptResult) {
+    const separator = props.promptResult.prompt.resultsSeparator ?? '<split/>'
+
+    let mindmap =
+      `graph TD
+`;
+    const ideas = promptResult.split(separator).map((item, index) => ({ title: ('id' + index), text: item })).filter(item => item.text.trim() !== '');
+
+    for (const idea of ideas) {
+      mindmap += '\n    mindmap --> ' + idea.title + '["' + idea.text + '"]';
+    }
+
+    // Keep the click functionality but adapt it to the flowchart syntax
+    for (const idea of ideas) {
+      mindmap += '\n    click ' + idea.title + '';
+    }
+
+    return mindmap;
+
   }
 
   async function promptResultInlinePrompt(prompt, instruction) {

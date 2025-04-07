@@ -65,6 +65,7 @@
       <ExportDialog />
       <FeedbackWindow />
       <EditProjectMetadataDialog />
+      <PromptUiDialog />
     </template>
 
   </q-layout>
@@ -109,6 +110,7 @@ import FeedbackWindow from "components/Dialogs/FeedbackWindow.vue";
 import MessageUsDialog from "components/Dialogs/MessageUsDialog.vue";
 import NewUserWelcomeDialog from "components/Dialogs/NewUserWelcomeDialog.vue";
 import EditProjectMetadataDialog from 'components/Dialogs/EditProjectMetadataDialog.vue';
+import PromptUiDialog from 'components/Dialogs/PromptUiDialog.vue';
 
 const layoutStore = useLayoutStore();
 const promptStore = usePromptStore();

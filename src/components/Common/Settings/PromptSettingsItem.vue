@@ -166,6 +166,9 @@
               <div class="col">
                 <q-select filled dense v-model="promptStyle" label="Prompt UI Style" :options="promptStyles" v-if="showPromptUiStyle" options-dense/>
               </div>
+              <div class="col-auto" v-if="promptStyle === 'brainstorm' || promptStyle === 'brainstorm-ui'">
+                <q-input dense filled square label="Results separator" v-model="resultsSeparator" autogrow />
+              </div>
             </div>
 
             <div class="row q-gutter-x-md" v-if="showPromptToggles">
@@ -650,6 +653,7 @@ import {
     {label: "Change (show colored differences)", value: "change"},
     {label: "Generate (generates new text)", value: "generate"},
     {label: "Brainstorm", value: "brainstorm"},
+    {label: "Brainstorm UI", value: "brainstorm-ui"},
     {label: "Mermaid", value: "mermaid"},
   ]
 
@@ -1003,6 +1007,13 @@ import {
     get: () => props.prompt.overrideContexts ?? false,
     set: (value) => {
       promptStore.updatePrompt(props.prompt, {overrideContexts: value});
+    }
+  });
+
+  const resultsSeparator = computed({
+    get: () => props.prompt.resultsSeparator ?? '<split/>',
+    set: (value) => {
+      promptStore.updatePrompt(props.prompt, {resultsSeparator: value});
     }
   });
 

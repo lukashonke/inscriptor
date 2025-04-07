@@ -1968,6 +1968,9 @@ export const usePromptStore = defineStore('prompts', {
       if(args.guide !== undefined) {
         prompt.guide = args.guide;
       }
+      if(args.resultsSeparator !== undefined) {
+        prompt.resultsSeparator = args.resultsSeparator;
+      }
       if(args.color !== undefined) {
         prompt.color = args.color;
       }
