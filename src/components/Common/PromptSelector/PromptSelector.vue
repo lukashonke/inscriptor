@@ -277,7 +277,7 @@ const categories = computed(() => {
 });
 
 const categoryPrompts = computed(() => {
-  const prompts = getPrompts().filter(p => promptStore.canPrompt(p)).filter(p => p.category === currentPromptCategory.value || (currentPromptCategory.value === '' && !p.category))
+  const prompts = getPrompts().filter(p => promptStore.canPrompt(p)).filter(p => !p.settings.hiddenInPromptSelector && p.category === currentPromptCategory.value || (currentPromptCategory.value === '' && !p.category))
   return prompts;
 });
 

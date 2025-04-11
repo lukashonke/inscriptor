@@ -1,6 +1,5 @@
 <template>
-  <div class="full-height fit q-pt-sm scroll" id="rightPanel">
-
+  <div class="" id="rightPanel" style="height: calc(100vh - 104px); width: 100%">
     <q-expansion-item
       label="File Details"
       icon="las la-info-circle"
@@ -108,62 +107,63 @@
 
       </q-card>
     </q-expansion-item>
+    <div class="fit q-my-sm q-pl-sm q-pr-md">
 
+      <div class="fit ai-panel scroll">
+        <div class="text-center q-mt-md q-mb-md">
+          <q-btn-toggle :options="views" v-model="currentView" unelevated no-caps class="bordered" toggle-color="primary" padding="xs md" id="aiSwitch" />
+        </div>
+        <q-card flat v-if="promptStore.analysisEnabled" class="bg-transparent">
 
-    <q-separator class=""/>
-
-    <div class="text-center q-mt-md q-mb-md">
-      <q-btn-toggle :options="views" v-model="currentView" unelevated no-caps class="bordered" toggle-color="primary" padding="xs md" id="aiSwitch" />
-    </div>
-
-    <q-card flat v-if="promptStore.analysisEnabled">
-
-      <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length === 0">
+          <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length === 0">
           <span class="text-warning">
             <q-icon name="las la-exclamation-triangle" />
             No analysis prompts created
           </span>
-      </q-card-section>
+          </q-card-section>
 
-      <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length > 0">
-        <q-select clearable options-dense v-model="promptStore.selectedAnalysisPrompts" label="Active Analysis prompts" outlined dense filled square :options="availableAnalysisPrompts" multiple use-chips/>
-        <q-linear-progress indeterminate v-if="layoutStore.analysisTriggered" />
-      </q-card-section>
+          <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length > 0">
+            <q-select clearable options-dense v-model="promptStore.selectedAnalysisPrompts" label="Active Analysis prompts" outlined dense filled square :options="availableAnalysisPrompts" multiple use-chips/>
+            <q-linear-progress indeterminate v-if="layoutStore.analysisTriggered" />
+          </q-card-section>
 
-      <q-card-section v-if="promptStore.analysisEnabled && selectionPromptResults?.length > 0">
-        <div class="q-gutter-y-sm">
-          <div v-for="(promptResult, index) in selectionPromptResults" :key="index">
+          <q-card-section v-if="promptStore.analysisEnabled && selectionPromptResults?.length > 0">
+            <div class="q-gutter-y-sm">
+              <div v-for="(promptResult, index) in selectionPromptResults" :key="index">
 
-            <div>
-              <transition
-                appear
-                enter-active-class="animated fadeInDown slower"
-                leave-active-class="animated fadeOut delay-1s"
-              >
-                <PromptResult :promptResult="promptResult"/>
+                <div>
+                  <transition
+                    appear
+                    enter-active-class="animated fadeInDown slower"
+                    leave-active-class="animated fadeOut delay-1s"
+                  >
+                    <PromptResult :promptResult="promptResult"/>
 
-              </transition>
+                  </transition>
+                </div>
+
+
+              </div>
             </div>
+            <q-btn outline @click="promptStore.promptSelectionAnalysisPrompts" icon="las la-sync" class="q-mt-md" color="green" size="sm"/>
+          </q-card-section>
+
+          <q-card-section v-else-if="promptStore.selectedAnalysisPrompts.length > 0 && selectionPromptResults?.length === 0" class="text-center">
+            <div class="">Analysis is active using {{ promptStore.selectedAnalysisPrompts.length }} prompt(s)</div>
+            <div>Select some text to begin analyzing it.</div>
+          </q-card-section>
+
+          <q-card-section v-else-if="promptStore.selectedAnalysisPrompts.length === 0" class="text-center">
+            <div>You have not selected any analysis prompts, so no analysis will be performed.</div>
+          </q-card-section>
+
+        </q-card>
+        <PromptsTab v-if="currentView === 'prompts'"/>
+        <ChatTab v-if="currentView === 'chat'"/>
+      </div>
 
 
-          </div>
-        </div>
-        <q-btn outline @click="promptStore.promptSelectionAnalysisPrompts" icon="las la-sync" class="q-mt-md" color="green" size="sm"/>
-      </q-card-section>
-
-      <q-card-section v-else-if="promptStore.selectedAnalysisPrompts.length > 0 && selectionPromptResults?.length === 0" class="text-center">
-        <div class="">Analysis is active using {{ promptStore.selectedAnalysisPrompts.length }} prompt(s)</div>
-        <div>Select some text to begin analyzing it.</div>
-      </q-card-section>
-
-      <q-card-section v-else-if="promptStore.selectedAnalysisPrompts.length === 0" class="text-center">
-        <div>You have not selected any analysis prompts, so no analysis will be performed.</div>
-      </q-card-section>
-
-    </q-card>
-
-    <PromptsTab v-if="currentView === 'prompts'"/>
-    <ChatTab v-if="currentView === 'chat'"/>
+    </div>
 
   </div>
 </template>

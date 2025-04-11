@@ -230,7 +230,18 @@ async function executePrompt2(request) {
   request.userInputs = userInputs;
   request.forceTemperature = null;
   request.promptTimes = promptTimes;
-  request.promptParametersValue = promptStore.promptParametersValue;
+  debugger;
+
+  if(!request.parametersValue) {
+    request.parametersValue = promptStore.promptParametersValue;
+  } else {
+    for (const param of promptStore.promptParametersValue) {
+      const foundParam = request.parametersValue.find(p => p.name === param.name);
+      if(!foundParam) {
+        request.parametersValue.push(param);
+      }
+    }
+  }
 
   return await promptStore.promptMultiple2(request);
 }
@@ -257,7 +268,17 @@ async function executeChatPrompt2(request) {
   request.userInputs = userInputs;
   request.forceTemperature = null;
   request.promptTimes = promptTimes;
-  request.promptParametersValue = promptStore.promptParametersValue;
+
+  if(!request.parametersValue) {
+    request.parametersValue = promptStore.promptParametersValue;
+  } else {
+    for (const param of promptStore.promptParametersValue) {
+      const foundParam = request.parametersValue.find(p => p.name === param.name);
+      if(!foundParam) {
+        request.parametersValue.push(param);
+      }
+    }
+  }
 
   return await promptStore.promptMultiple2(request);
 }
@@ -289,7 +310,7 @@ export function cloneRequest(request) {
     executedTextMessages: request.executedTextMessages ? [...request.executedTextMessages] : null,
     appendMessages: request.appendMessages ? [...request.appendMessages] : null,
     contextTypes: request.contextTypes ? [...request.contextTypes] : null,
-    promptParametersValue: request.promptParametersValue ? [...request.promptParametersValue] : null,
+    parametersValue: request.parametersValue ? [...request.parametersValue] : null,
   }
 }
 

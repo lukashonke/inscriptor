@@ -435,6 +435,14 @@
                     </div>
                   </div>
 
+                  <div class="row q-gutter-x-md">
+                    <div class="col-auto">
+                      <div class="col-auto">
+                        <q-checkbox v-model="hiddenInPromptSelector" dense label="Hidden in prompt selector" />
+                      </div>
+                    </div>
+                  </div>
+
                   <div v-if="overrideTemperature">
                     <q-badge>Temperature: {{ temperature }}</q-badge>
                     <HelpIcon :tooltip="$t('tooltips.parameters.temperature')"></HelpIcon>
@@ -489,7 +497,7 @@
                     </q-card-section>
 
                     <q-card-section v-if="action.type === 'Run Prompt'" >
-                      <q-select dense filled square label="Prompt" :model-value="getPrompt(action.typeParameter)?.title" v-on:update:model-value="updateAction(prompt, action, {typeParameter: $event})" :options="runPromptTypeParameters" emit-value>
+                      <q-select dense filled square label="Prompt" :model-value="getPrompt(action.typeParameter)?.title" v-on:update:model-value="updateAction(prompt, action, {typeParameter: $event})" :options="runPromptTypeParameters" emit-value options-dense>
                       </q-select>
                     </q-card-section>
 
@@ -575,7 +583,7 @@
 
                         <div class="row q-gutter-x-sm full-width q-mt-sm">
                           <div class="col-auto ">
-                            <q-select v-if="run.changeModel" v-model="run.changeModelValue" filled dense label="Model" :options="models" emit-value />
+                            <q-select v-if="run.changeModel" v-model="run.changeModelValue" filled dense label="Model" :options="models" emit-value options-dense />
                           </div>
 
                           <div class="col-auto">
@@ -597,6 +605,22 @@
                     </q-card>
                   </div>
                   <q-btn color="primary" icon="las la-plus" label="Add run" @click="promptStore.addPromptRun(prompt)" class="q-mx-md q-mt-md q-mb-md"/>
+                </q-card-section>
+              </q-card>
+            </q-expansion-item>
+
+            <q-expansion-item label="Brainstorm Settings" switch-toggle-side dense v-if="promptStyle === 'brainstorm-ui'">
+              <q-card bordered>
+                <q-card-section class="">
+                  <div class="full-width" bordered>
+                    <CodeEditor :model-value="getDynamicSettings('brainstorm_expandPromptMessage')" v-on:update:model-value="setDynamicSettings('brainstorm_expandPromptMessage', $event)" :parameters="parameters" label="Expand Prompt" />
+                  </div>
+                  <div class="full-width" bordered>
+                    <CodeEditor :model-value="getDynamicSettings('brainstorm_similarIdeasMessage')" v-on:update:model-value="setDynamicSettings('brainstorm_similarIdeasMessage', $event)" :parameters="parameters" label="Similar Ideas Prompt" />
+                  </div>
+                  <div class="full-width" bordered>
+                    <CodeEditor :model-value="getDynamicSettings('brainstorm_subIdeasMessage')" v-on:update:model-value="setDynamicSettings('brainstorm_subIdeasMessage', $event)" :parameters="parameters" label="Sub-Ideas Prompt" />
+                  </div>
                 </q-card-section>
               </q-card>
             </q-expansion-item>
@@ -625,6 +649,8 @@ import InputWithAi from "components/Common/InputWithAi.vue";
 import {
   allPromptContexts
 } from "src/common/resources/promptContexts";
+import PromptSelectMultiple from 'components/Common/PredefinedPromptSelect.vue';
+import MultiplePromptsSelect from 'components/Common/MultiplePromptsSelect.vue';
 
   const promptStore = usePromptStore();
   const fileStore = useFileStore();
@@ -816,6 +842,13 @@ import {
     get: () => props.prompt.excludedContextTypes,
     set: (value) => {
       promptStore.updatePrompt(props.prompt, {excludedContextTypes: value});
+    }
+  });
+
+  const brainstormExpandPrompt = computed({
+    get: () => props.prompt.settings.expandPrompts,
+    set: (value) => {
+      promptStore.updatePrompt(props.prompt, {expandPrompts: value});
     }
   });
 
@@ -1090,6 +1123,13 @@ import {
     }
   });
 
+  const hiddenInPromptSelector = computed({
+    get: () => props.prompt.settings.hiddenInPromptSelector ?? false,
+    set: (value) => {
+      promptStore.updatePrompt(props.prompt, {hiddenInPromptSelector: value});
+    }
+  });
+
   const overrideTopP = computed({
     get: () => props.prompt.settings.overrideTopP ?? false,
     set: (value) => {
@@ -1221,6 +1261,14 @@ import {
 
   function updateAction(prompt, action, args) {
     promptStore.updatePromptAction(prompt, action, args);
+  }
+
+  function setDynamicSettings(key, value) {
+    promptStore.updatePromptSettingsDynamic(props.prompt, key, value);
+  }
+
+  function getDynamicSettings(key) {
+    return props.prompt.settings[key] ?? '';
   }
 
   function deleteParameter(prompt, parameter) {

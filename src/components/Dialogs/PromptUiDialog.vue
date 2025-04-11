@@ -1,21 +1,37 @@
 <template>
-  <q-dialog v-model="layoutStore.promptUiDialogOpen" v-if="promptResult" full-width full-height transition-show="slide-down" transition-hide="slide-up" @show="onShow">
-    <q-card class="pattern-bg">
-      <q-card-section class="row items-center q-pb-none">
-        <div class="text-h6">{{ prompt.title }}</div>
-        <q-space />
-        <q-btn icon="close" flat round dense v-close-popup />
-      </q-card-section>
+  <q-dialog v-model="layoutStore.promptUiDialogOpen" v-if="promptResult" maximized transition-show="slide-down" transition-hide="slide-up" @show="onShow">
+    <div class="gradient-bg-text-container">
+      <q-card class="full-width full-height transparent">
+        <q-card-section class="row items-center bg-accent text-white rounded-borders shadow-4 q-px-md q-py-xs q-my-md q-mx-md sticky">
+          <div class="text-h6 text-aleo text-center">
+            {{  prompt.title }}
+          </div>
+          <q-space />
+          <q-btn icon="close" flat round dense v-close-popup />
+        </q-card-section>
 
-      <q-card-section>
-        <template v-if="prompt.promptStyle === 'brainstorm-ui'">
-          <BrainstormPromptUi
-            ref="brainstormUiRef"
-            :prompt-result="layoutStore.promptUiDialogPromptResult"
-          />
-        </template>
-      </q-card-section>
-    </q-card>
+        <q-card-section class="q-mt-lg">
+          <template v-if="prompt.promptStyle === 'brainstorm-ui'">
+            <BrainstormPromptUi
+              ref="brainstormUiRef"
+              :prompt-result="layoutStore.promptUiDialogPromptResult"
+            />
+          </template>
+        </q-card-section>
+      </q-card>
+    </div>
+
+    <div class="gradient-bg" >
+      <video
+        style="opacity: 0.3;"
+        class="full-width full-height"
+        src="/brainstormbg.mp4"
+        autoplay
+        loop
+        muted
+        playsinline
+      ></video>
+    </div>
   </q-dialog>
 </template>
 
@@ -31,16 +47,9 @@
   const promptResult = computed(() => layoutStore.promptUiDialogPromptResult);
   const prompt = computed(() => promptResult.value.prompt);
 
-  onMounted(() => {
-    console.log('START!!');
-  })
-
   async function onShow() {
-    console.log('GENERATING in PromptUiDialog!!');
     if (brainstormUiRef.value) {
       brainstormUiRef.value.onShow('Data from parent');
-    } else {
-      console.error('Brainstorm UI component ref not available');
     }
   }
 

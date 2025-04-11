@@ -41,7 +41,7 @@
 
   <transition appear enter-active-class="animated fadeIn slow" leave-active-class="animated fadeOut">
 
-    <q-card bordered ref="myHoverableElement" :class="isReactionToAnotherPrompt ? 'q-ml-md' : ''">
+    <q-card flatbordered ref="myHoverableElement" :class="isReactionToAnotherPrompt ? 'q-ml-md' : ''">
       <div class="prompt-actions sticky-top">
         <div class="row no-wrap ellipsis">
           <div class="col-auto">
@@ -93,8 +93,8 @@
           <div class="col ellipsis">
             <q-badge class="q-ml-md q-gutter-x-xs">
               <span>{{ promptResultTitle }}</span>
-              <span><q-icon name="las la-microchip" v-if="promptResultModel" /> {{ promptResultModel }}</span>
-              <span><q-icon v-if="promptResultTemperature" name="mdi-thermometer-low" /> {{ promptResultTemperature }}</span>
+              <span v-if="promptResultModel?.length > 0"><q-icon name="las la-microchip"  />{{ promptResultModel }}</span>
+              <span v-if="promptResultTemperature"><q-icon  name="mdi-thermometer-low" /> {{ promptResultTemperature }}</span>
             </q-badge>
           </div>
 
@@ -199,10 +199,12 @@
             </div>
           </div>
 
-          <template v-if="promptResult.prompt.promptStyle === 'brainstorm-ui'">
-            <vue-mermaid-string :value="formatBrainstormBubbles(promptResult.text)" :options="{ securityLevel: 'loose' }" @node-click="brainstormBubbleClick"/>
-          </template>
-          <template v-else-if="promptResult.prompt.promptStyle === 'brainstorm'">
+          <div v-if="promptResult.prompt.promptStyle === 'brainstorm-ui'" class="q-mb-md">
+            <q-btn color="primary" label="Open" no-caps size="sm" icon="mdi-open-in-new" @click="useLayoutStore().openPromptUiDialog(promptResult)">
+            </q-btn>
+          </div>
+
+          <template v-if="promptResult.prompt.promptStyle === 'brainstorm'">
             <template v-if="promptBrainstormValueTree != null && promptBrainstormValueTree.length> 0">
               <q-card v-for="(idea, index) in promptBrainstormValueTree" :key="index" flat class="no-margin">
                 <q-card-section class="q-px-sm q-py-none">
@@ -316,13 +318,11 @@
       </q-card-actions>
 
       <q-card-actions
-        v-if="!isPrompting && allowRegenerate && collapsed === false && promptResult.prompt.promptType !== 'chat'"
+        v-if="!isPrompting && allowRegenerate && collapsed === false && promptResult.prompt.promptType !== 'chat' && promptResult.prompt.promptStyle !== 'brainstorm-ui'"
         class="row">
         <q-btn class="text-weight-bold" label="Reply" flat color="primary" unelevated size="sm" icon="las la-reply" @click.prevent="toggleReply()">
           <q-tooltip>Reply on this prompt to AI</q-tooltip>
         </q-btn>
-
-
 
         <div class="col q-ml-md">
           <q-btn class="col-auto text-weight-bold" flat color="primary" unelevated size="sm"
@@ -1213,7 +1213,7 @@
   });
 
   const promptResultModel = computed(() => {
-    return '' + truncate(promptStore.getModel(props.promptResult.model?.id)?.name, 12) + '';
+    return truncate(promptStore.getModel(props.promptResult.model?.id)?.name, 12);
   });
 
   const promptResultTemperature = computed(() => {

@@ -328,7 +328,7 @@ export const usePromptStore = defineStore('prompts', {
 
       let systemPrompt = request.systemPrompt ?? (request.prompt.overrideSystemPrompt ? request.prompt.systemPrompt : model.defaultSystemPrompt);
 
-      let userPrompt = request.systemPrompt ?? request.prompt.userPrompt;
+      let userPrompt = request.userPrompt ?? request.prompt.userPrompt;
       let assistantPrompt = request.prompt.hasExtendedChatMessages ? request.prompt.assistantPrompt : undefined;
       let userPrompt2 = request.prompt.hasExtendedChatMessages ? request.prompt.userPrompt2 : undefined;
 
@@ -640,7 +640,7 @@ export const usePromptStore = defineStore('prompts', {
         replace('$input', () => selectedText);
       }
 
-      debugger;
+      //debugger;
 
       if(request.contextTypes && request.contextTypes.length > 0) {
         let context = '';
@@ -1907,6 +1907,12 @@ export const usePromptStore = defineStore('prompts', {
 
       this.promptCategories.splice(index, 0, this.promptCategories.splice(this.promptCategories.indexOf(category), 1)[0]);
     },
+    updatePromptSettingsDynamic(prompt, key, value) {
+      if(!prompt || !key) return;
+      prompt.settings[key] = value;
+
+      this.onUpdatePrompt(prompt);
+    },
     updatePrompt(prompt, args) {
       if(!prompt) return;
       if(args.enabled !== undefined) {
@@ -2003,6 +2009,7 @@ export const usePromptStore = defineStore('prompts', {
       if(args.tabId !== undefined) {
         prompt.tabId = args.tabId.value;
       }
+
       if(args.modelId !== undefined) {
         if(prompt.id.startsWith(prompt.modelId)) {
           prompt.id = prompt.id.replace(prompt.modelId, args.modelId.value);
@@ -2023,6 +2030,12 @@ export const usePromptStore = defineStore('prompts', {
       }
       if(args.overrideFrequencyPenalty !== undefined) {
         prompt.settings.overrideFrequencyPenalty = args.overrideFrequencyPenalty;
+      }
+      if(args.expandPrompts !== undefined) {
+        prompt.settings.expandPrompts = args.expandPrompts;
+      }
+      if(args.hiddenInPromptSelector !== undefined) {
+        prompt.settings.hiddenInPromptSelector = args.hiddenInPromptSelector;
       }
       if(args.temperature !== undefined) {
         prompt.settings.temperature = args.temperature;

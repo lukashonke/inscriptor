@@ -5,26 +5,26 @@
       <AppToolbar />
     </q-header>
 
-    <q-drawer show-if-above v-model="layoutStore.leftDrawerOpen" side="left" bordered behavior="desktop" :width="333">
-      <q-scroll-area class="fit"  style="background-color: rgba(0,0,0,0.02)" >
-        <div class="q-pa-none">
-          <LeftMenuComponent />
-        </div>
-        <div class="absolute full-width" style="bottom: 0">
-          <q-separator />
-          <div class="row items-center q-pl-md" id="variables">
-            <div class="col">
-              <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="las la-database" label="Variables" @click="layoutStore.setVariableSettingsOpen(true)" />
-            </div>
-            <div class="col">
-              <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="las la-cog" label="Settings" @click="layoutStore.setSettingsOpen(true)" id="settingsButton" />
-            </div>
-            <div class="col">
-              <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="las la-history" label="History" @click="layoutStore.setConsoleOpen(!layoutStore.consoleOpen)"/>
+    <q-drawer show-if-above v-model="layoutStore.leftDrawerOpen" side="left" behavior="desktop" :width="333" class="right-border" style="border-color: rgb(217, 218, 218);">
+        <q-scroll-area class="fit"  style="background-color: rgba(0,0,0,0.02); border-color: red" >
+          <div class="q-pa-none">
+            <LeftMenuComponent />
+          </div>
+          <div class="absolute full-width" style="bottom: 0">
+            <q-separator />
+            <div class="row items-center q-pl-md" id="variables">
+              <div class="col">
+                <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="las la-database" label="Variables" @click="layoutStore.setVariableSettingsOpen(true)" />
+              </div>
+              <div class="col">
+                <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="las la-cog" label="Settings" @click="layoutStore.setSettingsOpen(true)" id="settingsButton" />
+              </div>
+              <div class="col">
+                <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="las la-history" label="History" @click="layoutStore.setConsoleOpen(!layoutStore.consoleOpen)"/>
+              </div>
             </div>
           </div>
-        </div>
-      </q-scroll-area>
+        </q-scroll-area>
     </q-drawer>
 
     <!--<q-drawer show-if-above v-model="layoutStore.rightDrawerOpen" side="right" bordered :width="400">
