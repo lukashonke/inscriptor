@@ -1,16 +1,16 @@
 <template>
   <q-dialog v-model="layoutStore.promptUiDialogOpen" v-if="promptResult" maximized transition-show="slide-down" transition-hide="slide-up" @show="onShow">
     <div class="gradient-bg-text-container">
-      <q-card class="full-width full-height transparent">
-        <q-card-section class="row items-center bg-accent text-white rounded-borders shadow-4 q-px-md q-py-xs q-my-md q-mx-md sticky">
+      <q-card class="full-width full-height transparent" flat>
+        <q-card-section class="row items-center bg-accent text-white rounded-borders q-px-md q-py-xs q-mx-md sticky">
           <div class="text-h6 text-aleo text-center">
-            {{  prompt.title }}
+            {{ prompt.title }}
           </div>
           <q-space />
           <q-btn icon="close" flat round dense v-close-popup />
         </q-card-section>
 
-        <q-card-section class="q-mt-lg">
+        <q-card-section class="">
           <template v-if="prompt.promptStyle === 'brainstorm-ui'">
             <BrainstormPromptUi
               ref="brainstormUiRef"

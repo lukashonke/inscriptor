@@ -18,9 +18,9 @@
         </q-btn>
 
         <q-btn v-if="predefinedWordFinderPrompts && predefinedWordFinderPrompts.length > 0" size="12px" dense flat icon="mdi-auto-fix" padding="4px 6px" class="bg-white bordered" color="accent" @click="runWordFinder()" :loading="wordFinderLoading">
-          <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" >
-            <q-card style="width: 400px; min-height: 50px;" class="no-scroll">
-              <div class="row" style="min-width: 100px; min-height: 50px;">
+          <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="ai-panel-solid">
+            <q-card style="width: 400px; min-height: 50px;" flat class="no-scroll ai-panel-solid">
+              <div class="row" style="min-width: 100px; min-height: 50px; max-height: 400px; overflow: auto;">
                 <template v-for="(word, i) in wordFinderOutput" :key="i">
                   <div class="col-auto">
                     <q-item clickable v-close-popup @click="replaceSelectedWord(word)" dense>
@@ -32,8 +32,9 @@
                 </template>
               </div>
               <div class="full-width flex justify-center" v-if="wordFinderOutput && wordFinderOutput.length > 0">
-                <q-btn label="More" no-caps @click="runWordFinder(false)" dense flat class="text-center full-width" :loading="wordFinderLoading"/>
+                <q-btn icon="mdi-plus" color="primary" no-caps @click="runWordFinder(false)" dense flat class="text-center full-width" :loading="wordFinderLoading"/>
               </div>
+              <q-skeleton v-else animation="fade"/>
 
 
             </q-card>
@@ -512,17 +513,24 @@ async function runWordFinder(replace = true) {
 
       console.log(message);
 
+      const onOutput = (fullText, newText, isFinished, isError) => {
+        console.log(fullText);
+      };
+
       const request = {
         prompt: prompt,
         text: message,
         clear: false,
         forceBypassMoreParameters: true,
-        silent: true
+        silent: true,
+        onOutput: onOutput
       }
 
       const result = await executePromptClick2(request);
 
       try {
+
+
         //TODO to helper
 
         // remove ```json and ```

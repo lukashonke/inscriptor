@@ -1,80 +1,99 @@
 <template>
 
-  <div class="row q-gutter-x-md">
-    <div class="col justify-center">
+  <div class="row q-gutter-x-md q-mt-md">
+    <div class="col flex justify-end">
       <div class="row">
         <div class="col-auto" v-for="variable in uiData?.variables ?? []" :key="variable.title">
           <q-input dense filled square  v-model="variable.value" :label="variable.title" :placeholder="variable.defaultValue" />
         </div>
       </div>
     </div>
-  </div>
-
-  <div class="row q-gutter-x-md">
-    <div class="col flex">
-
-    </div>
-    <div class="col-auto q-gutter-x-sm flex justify-center">
-      <q-btn @click="generate(false)" icon="mdi-creation-outline" color="accent" label="Generate more" :loading="isGenerating" />
-
+    <div class="col q-gutter-x-sm flex justify-center">
+      <q-btn @click="generate(false)" icon="mdi-creation-outline" color="accent" label="Generate more" :loading="isGenerating"  >
+        <template v-slot:loading>
+          <q-spinner-dots />
+        </template>
+      </q-btn>
     </div>
     <div class="col flex justify-start">
-      <q-btn @click="expandLikedIdeas()" icon="mdi-creation-outline" color="primary" label="Expand Liked" :loading="isGenerating" v-if="uiData?.likedIdeas.length > 0" />
-      <q-btn @click="removeDislikedIdeas()" color="negative" flat  icon="mdi-delete" label="Remove Disliked" :loading="isGenerating" class="q-ml-xl" no-caps v-if="uiData?.dislikedIdeas.length > 0" />
+      <q-btn @click="expandLikedIdeas()" icon="mdi-creation-outline" color="primary" label="Expand Liked" :disable="isGenerating" v-if="uiData?.likedIdeas.length > 0" />
+      <q-btn @click="removeDislikedIdeas()" color="negative" flat  icon="mdi-delete" label="Remove Disliked" :disable="isGenerating" class="q-ml-xl" no-caps v-if="uiData?.dislikedIdeas.length > 0" />
     </div>
   </div>
 
-  TODO:
-  - hide buttons unless hovered
-  - highlight text
-  - work it in practice
-
   <div class="q-pa-md">
-
     <div class="row">
-      <div v-for="(idea, i) in uiData?.ideas ?? []" :key="i" class="example-cell" tabindex="0" style="max-width: 450px;">
+      <div v-for="(idea, i) in uiData?.ideas ?? []" :key="i" class="col-auto q-ma-sm" tabindex="0" style="max-width: 450px;">
         <transition appear enter-active-class="animated bounceInUp slower" leave-active-class="animated fadeOut">
-          <q-card bordered flat class="q-ma-xs" :class="getCardClass(idea)">
-            <q-card-section>
-              <q-btn icon="mdi-pin-outline" :color="idea.pinned ? 'accent' : 'grey-6'" size="10px" @click="pinIdea(idea)" flat dense class="float-right"/>
-              <q-btn icon="mdi-thumb-down-outline" :color="idea.disliked ? 'red' : 'grey-6'" size="10px" @click="setIdeaDisliked(idea, !idea.disliked)" flat dense class="float-right"/>
-              <q-btn icon="mdi-thumb-up-outline" :color="idea.liked ? 'accent' : 'grey-6'" size="10px" @click="setIdeaLiked(idea, !idea.liked)" flat dense class="float-right"/>
+          <q-card bordered flat class="q-ma-xs hoverable-card no-p-margin idea-card" :class="getCardClass(idea)">
+            <q-card-section class="q-px-md q-py-sm justify-end flex">
+              <q-btn icon="mdi-pin-outline" :color="idea.pinned ? 'accent' : 'grey-6'" size="10px" @click="pinIdea(idea)" flat dense class="hoverable-btn"/>
+              <q-btn icon="mdi-thumb-up-outline" :color="idea.liked ? 'accent' : 'grey-6'" size="10px" @click="setIdeaLiked(idea, !idea.liked)" flat dense class="hoverable-btn"/>
+              <q-btn icon="mdi-thumb-down-outline" :color="idea.disliked ? 'red' : 'grey-6'" size="10px" @click="setIdeaDisliked(idea, !idea.disliked)" flat dense class="hoverable-btn"/>
+            </q-card-section>
 
-              <div v-html="markdownToHtml(idea.text ?? '')" />
+            <q-card-section class="q-px-md q-py-none">
+              <div v-html="markdownToHtml(idea.text ?? '')" class="text-subtitle2" />
+            </q-card-section>
 
-              <template v-if="idea.description">
-                <div class="q-mt-sm text-subtitle2 text-grey-7">
+            <q-card-section v-if="idea.description" class="q-px-md q-py-none">
+              <div class="q-mt-sm">
+                <div class="text-subtitle2 text-grey-7">
                   Details:
-                  <q-btn @click="idea.description = ''" icon="mdi-delete-outline" size="12px" color="grey-7" flat dense no-caps class="float-right"/>
+                  <q-btn @click="idea.description = ''" icon="mdi-delete-outline" size="10px" color="grey-7" flat dense no-caps class="float-right hoverable-btn"/>
                 </div>
                 <div v-html="markdownToHtml(idea.description ?? '')" />
                 <div v-html="markdownToHtml(idea.descriptionAppend ?? '')" />
-              </template>
+              </div>
+            </q-card-section>
 
-              <q-btn @click="expandIdea(idea)" icon="mdi-creation-outline" label="Expand" size="12px" :loading="idea.generating" color="grey-7" flat dense no-caps/>
-
-              <template v-if="idea.reply?.length > 0">
-                <div class="q-mt-sm text-italic">
-                  Reply:
+            <q-card-section v-if="idea.children?.length > 0" class="q-px-md q-py-none" >
+              <div class="q-mt-sm">
+                <div class="q-mt-sm text-subtitle2 text-grey-7">
+                  Related ideas:
                 </div>
-                <div v-html="markdownToHtml(idea.reply ?? '')" />
-              </template>
+                <div v-for="(subIdea, i) in idea.children" :key="i" class="row">
+                  <div class="col">
+                    <div v-html="markdownToHtml(subIdea.text ?? '')" />
+                  </div>
+                  <div class="col-auto flex items-center">
+                    <q-btn @click="separateSubIdea(subIdea, idea)" icon="mdi-open-in-new" size="12px" :disable="idea.generating" color="grey-7" flat dense no-caps class="hoverable-btn"/>
+                  </div>
+                </div>
+              </div>
+            </q-card-section>
 
-            </q-card-section>
-            <q-card-section v-if="idea.children?.length > 0">
-              <div class="q-mt-sm text-subtitle2 text-grey-7">
-                Related ideas:
+            <q-card-section class="q-px-md q-py-none" v-if="idea.reply?.length > 0" >
+              <div class="q-mt-sm">
+                <div class="bordered bg-yellow-1 q-pa-sm q-my-sm">
+                  <div class="text-subtitle2 text-grey-7">
+                    AI Reply:
+                    <q-btn @click="idea.reply = ''" icon="mdi-delete-outline" size="10px" color="grey-7" flat dense no-caps class="float-right hoverable-btn"/>
+                  </div>
+                  <div v-html="markdownToHtml('\'' + (idea.reply ?? '') + '\'')" class="text-italic" />
+                </div>
               </div>
-              <div v-for="(subIdea, i) in idea.children" :key="i">
-                <q-btn @click="separateSubIdea(subIdea, idea)" icon="mdi-arrow-expand-all" size="12px" :loading="idea.generating" color="grey-7" flat dense no-caps class="float-right"/>
-                <div v-html="markdownToHtml(subIdea.text ?? '')" />
-              </div>
             </q-card-section>
-            <q-card-actions class="justify-between">
-              <q-btn @click="idea.replyEnabled = !idea.replyEnabled" icon="las la-reply" label="Reply" size="12px" :loading="idea.generating" color="grey-7" flat dense no-caps/>
-              <q-btn @click="generateSubIdeas(idea)" icon="mdi-creation-outline" label="Related ideas" size="12px" :loading="idea.generating" color="grey-7" flat dense no-caps/>
-              <q-btn @click="generateSimilarIdeas(idea)" icon="mdi-creation-outline" label="Similar ideas" size="12px" :loading="idea.generating" color="grey-7" flat dense no-caps/>
+
+            <q-card-actions class="justify-between q-px-md q-pt-sm q-pb-sm">
+              <q-btn @click="idea.replyEnabled = !idea.replyEnabled" icon="las la-reply" label="Reply" size="12px" :disable="idea.generating" color="grey-7" flat dense no-caps class="hoverable-btn"/>
+
+              <q-btn-dropdown split @click="expandIdea(idea)" icon="mdi-creation-outline" label="Expand" size="12px" :disable="idea.generating" color="grey-7" flat dense no-caps class="hoverable-btn">
+                <q-list>
+                  <q-item clickable dense v-close-popup @click="generateSubIdeas(idea)" :disable="idea.generating">
+                    <q-item-section side>
+                      <q-icon name="mdi-creation-outline" />
+                    </q-item-section>
+                    <q-item-section>
+                      Generate related ideas
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-btn-dropdown>
+
+              <q-btn @click="generateSimilarIdeas(idea)" icon="mdi-creation-outline" label="Similar ideas" size="12px" :disable="idea.generating" color="grey-7" flat dense no-caps class="hoverable-btn"/>
             </q-card-actions>
+
             <q-card-actions v-if="idea.replyEnabled">
               <div class="row full-width">
                 <div class="col flex items-center">
@@ -82,10 +101,13 @@
                 </div>
                 <div class="col-auto flex items-center q-ml-sm">
                   <q-btn @click="replyToIdea(idea, idea.replyMessage)" icon="mdi-send-outline" size="12px" :loading="idea.generating" color="grey-7" flat dense no-caps/>
-                  <q-btn @click="idea.replyEnabled = false" icon="mdi-close" size="12px" :loading="idea.generating" color="grey-7" flat dense no-caps/>
                 </div>
               </div>
             </q-card-actions>
+
+            <q-inner-loading :showing="idea.generating">
+              <q-spinner size="50px" color="primary" />
+            </q-inner-loading>
           </q-card>
         </transition>
       </div>
@@ -123,8 +145,6 @@ async function generate(replace = true) {
 
     const newRequest = cloneRequest(request.value);
 
-    debugger;
-
     prepareRequest(newRequest);
     if(!uiData.value.variables) {
       initialiseVariables(newRequest);
@@ -136,8 +156,6 @@ async function generate(replace = true) {
     };
 
     newRequest.onOutput = onOutput;
-
-    debugger;
 
     await executePromptClick2(newRequest);
 
@@ -305,16 +323,19 @@ async function replyToIdea(idea, message) {
   try {
     isGenerating.value = true;
     idea.generating = true;
+    idea.replyMessage = '';
+    idea.replyEnabled = false;
 
     const newRequest = cloneRequest(request.value);
 
-    //const ideasString = generateExistingIdeasString(uiData.value.ideas, false);
     const ideaString = idea.text + '\n\n' + (idea.description || '') + '\n\n' + (idea.reply || '');
-    //const combinedString = ideasString + '\n\n' + 'CURRENT IDEA DETAILS:\n' + ideaString.trim();
+
+    let replyMessage = prompt.value.settings.brainstorm_replyMessage ?? '$Message';
+    replyMessage = replyMessage.replaceAll('$Message', message);
 
     const appendMessages = [];
     appendMessages.push({type: 'assistant', text: convertHtmlToText(ideaString)});
-    appendMessages.push({type: 'user', text: message});
+    appendMessages.push({type: 'user', text: replyMessage});
 
     newRequest.appendMessages = appendMessages;
 
@@ -433,7 +454,6 @@ function processOutput(text, outputCollection) {
 }
 
 async function onShow(payload) {
-  debugger;
   if(!uiData.value) {
     initialiseUiData();
 
@@ -442,7 +462,6 @@ async function onShow(payload) {
 }
 
 function initialiseUiData() {
-  debugger;
   if(!uiData.value) {
     uiData.value = {
       ideas: [],
@@ -472,8 +491,15 @@ function replaceVariables(request, existingIdeas) {
   request.userPrompt = request.userPrompt.replaceAll('$ExistingIdeas', existingIdeasString)
 
   for (const variable of uiData.value.variables) {
-    request.systemPrompt = request.systemPrompt.replaceAll(variable.fullName, variable.value);
-    request.userPrompt = request.userPrompt.replaceAll(variable.fullName, variable.value);
+    if(variable.isFromPromptParameter) {
+      const parameterValue = request.parametersValue.find(p => p.name === variable.title);
+      if(parameterValue) {
+        parameterValue.value = variable.value;
+      }
+    } else {
+      request.systemPrompt = request.systemPrompt.replaceAll(variable.fullName, variable.value);
+      request.userPrompt = request.userPrompt.replaceAll(variable.fullName, variable.value);
+    }
   }
 }
 
@@ -511,6 +537,17 @@ function initialiseVariables(request) {
     }
 
     return matches;
+  }
+
+  for (const promptParameter of request.parametersValue) {
+    vars.push({
+      title: promptParameter.name,
+      defaultValue: promptParameter.value,
+      value: promptParameter.value,
+      fullName: promptParameter.name,
+      isFromPromptParameter: true,
+      hint: promptParameter.hint
+    });
   }
 
   uiData.value.variables = vars;
@@ -577,13 +614,18 @@ function setIdeaLiked(idea, likedState) {
 
   updatePromptResultText();
 }
-
 function updatePromptResultText() {
   const likedIdeas = uiData.value.ideas.filter(idea => idea.liked);
   // eslint-disable-next-line vue/no-mutating-props
-  props.promptResult.originalText = likedIdeas.map(idea => idea.text).join('\n\n');
+  props.promptResult.originalText = likedIdeas.map(idea => {
+    let text = idea.text;
+    if (idea.description) {
+      text += '\n\nDetails: ' + idea.description;
+    }
+    return text;
+  }).join('\n\n\n');
   // eslint-disable-next-line vue/no-mutating-props
-  props.promptResult.text = likedIdeas.map(idea => idea.text).join('\n\n');
+  props.promptResult.text = props.promptResult.originalText;
 }
 
 function setIdeaDisliked(idea, dislikedState) {
@@ -628,6 +670,10 @@ function getCardClass(idea) {
   };
 }
 
+function trimLines(text) {
+  return text.split('\n').map(line => line.trim()).join('\n');
+}
+
 defineExpose({
   onShow
 });
@@ -655,5 +701,15 @@ defineExpose({
     transition: opacity 0.5s ease, transform 0.5s ease;
   }
 
+  /* Hide hoverable buttons by default */
+  .hoverable-btn {
+    opacity: 0;
+    transition: all 0.3s ease;
+  }
+
+  /* Show hoverable buttons on hover */
+  .hoverable-card:hover .hoverable-btn {
+    opacity: 1;
+  }
 
 </style>

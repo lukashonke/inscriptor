@@ -2006,6 +2006,9 @@ export const usePromptStore = defineStore('prompts', {
       if(args.hasExtendedChatMessages !== undefined) {
         prompt.hasExtendedChatMessages = args.hasExtendedChatMessages;
       }
+      if(args.hasResultsSeparator !== undefined) {
+        prompt.hasResultsSeparator = args.hasResultsSeparator;
+      }
       if(args.tabId !== undefined) {
         prompt.tabId = args.tabId.value;
       }

@@ -166,7 +166,7 @@
               <div class="col">
                 <q-select filled dense v-model="promptStyle" label="Prompt UI Style" :options="promptStyles" v-if="showPromptUiStyle" options-dense/>
               </div>
-              <div class="col-auto" v-if="promptStyle === 'brainstorm' || promptStyle === 'brainstorm-ui'">
+              <div class="col-auto" v-if="hasResultsSeparator || promptStyle === 'brainstorm' || promptStyle === 'brainstorm-ui'">
                 <q-input dense filled square label="Results separator" v-model="resultsSeparator" autogrow />
               </div>
             </div>
@@ -187,6 +187,9 @@
               </div>
               <div class="col-auto">
                 <q-checkbox v-model="hasExtendedChatMessages" dense label="Include more prompt messages" />
+              </div>
+              <div class="col-auto">
+                <q-checkbox v-model="hasResultsSeparator" dense label="Separator of results" />
               </div>
 
             </div>
@@ -619,7 +622,10 @@
                     <CodeEditor :model-value="getDynamicSettings('brainstorm_similarIdeasMessage')" v-on:update:model-value="setDynamicSettings('brainstorm_similarIdeasMessage', $event)" :parameters="parameters" label="Similar Ideas Prompt" />
                   </div>
                   <div class="full-width" bordered>
-                    <CodeEditor :model-value="getDynamicSettings('brainstorm_subIdeasMessage')" v-on:update:model-value="setDynamicSettings('brainstorm_subIdeasMessage', $event)" :parameters="parameters" label="Sub-Ideas Prompt" />
+                    <CodeEditor :model-value="getDynamicSettings('brainstorm_subIdeasMessage')" v-on:update:model-value="setDynamicSettings('brainstorm_subIdeasMessage', $event)" :parameters="parameters" label="Related Ideas Prompt" />
+                  </div>
+                  <div class="full-width" bordered>
+                    <CodeEditor :model-value="getDynamicSettings('brainstorm_replyMessage')" v-on:update:model-value="setDynamicSettings('brainstorm_replyMessage', $event)" :parameters="parameters" label="Reply to Idea Prompt" />
                   </div>
                 </q-card-section>
               </q-card>
@@ -1028,6 +1034,13 @@ import MultiplePromptsSelect from 'components/Common/MultiplePromptsSelect.vue';
       promptStore.updatePrompt(props.prompt, {hasExtendedChatMessages: value});
     }
   });
+
+const hasResultsSeparator = computed({
+  get: () => props.prompt.hasResultsSeparator ?? false,
+  set: (value) => {
+    promptStore.updatePrompt(props.prompt, {hasResultsSeparator: value});
+  }
+});
 
   const overridePromptFormat = computed({
     get: () => props.prompt.overridePromptFormat,
