@@ -25,6 +25,7 @@
     <div class="col flex justify-start">
       <q-btn @click="expandLikedIdeas()" icon="mdi-creation-outline" no-caps flat color="primary" label="Expand Liked" :disable="isGenerating" v-if="uiData?.likedIdeas.length > 0" />
       <q-btn @click="removeDislikedIdeas()" color="negative" flat  icon="mdi-delete" label="Remove Disliked" :disable="isGenerating" class="q-ml-xl" no-caps v-if="uiData?.dislikedIdeas.length > 0" />
+      <q-btn @click="removeAll()" icon="mdi-delete" no-caps flat color="negative" label="Remove All" :disable="isGenerating" v-if="uiData?.ideas.length > 0" />
     </div>
     <div class="col-auto flex items-center">
       <span class="q-mr-xs">Columns:</span>
@@ -40,9 +41,9 @@
   <div class="q-pa-md">
     <!-- Pinned ideas row -->
     <div class="row q-mb-md pinned-ideas-section" v-if="pinnedIdeas.length > 0">
-      <div class="col-12 q-mb-sm pinned-section-header">
-        <q-chip color="primary" text-color="white" icon="mdi-pin" size="sm">
-          Pinned Ideas
+      <div class="col-12 q-mb-sm pinned-section-header q-ml-sm">
+        <q-chip color="accent" text-color="white" icon="mdi-pin" size="sm">
+          Pinned
         </q-chip>
       </div>
       <div class="row masonry-container full-width">
@@ -218,6 +219,28 @@ async function removeDislikedIdeas() {
     // After animation completes, remove the ideas
     setTimeout(() => {
       uiData.value.ideas = uiData.value.ideas.filter(idea => !idea.disliked);
+    }, 500); // 500ms animation duration
+  };
+
+  // Execute the animated removal
+  animateRemoval();
+}
+
+function removeAll() {
+  initialiseUiData();
+
+  // Add a visual fade-out effect before removal
+  const animateRemoval = () => {
+    // Add a temporary class for animation to all ideas
+    for (const idea of uiData.value.ideas) {
+      idea.removing = true;
+    }
+
+    // After animation completes, remove all ideas
+    setTimeout(() => {
+      uiData.value.ideas = [];
+      uiData.value.likedIdeas = [];
+      uiData.value.dislikedIdeas = [];
     }, 500); // 500ms animation duration
   };
 
@@ -512,11 +535,11 @@ function calculateOptimalColumns() {
   const cardWidth = 350;
   const screenWidth = window.innerWidth;
   const padding = 32; // Account for container padding
-  
+
   // Calculate how many cards can fit in the available width
   const availableWidth = screenWidth - padding;
   const columns = Math.max(1, Math.floor(availableWidth / cardWidth));
-  
+
   // Limit to a reasonable range (1-5 columns)
   return Math.min(5, Math.max(1, columns));
 }
@@ -744,13 +767,12 @@ defineExpose({
 
   .pinned-ideas-section {
     background-color: rgba(0, 0, 0, 0.02);
-    border-radius: 8px;
+    border-radius: 22px;
     padding: 8px;
     margin-bottom: 16px;
   }
 
   .pinned-section-header {
-    margin-left: 8px;
   }
 
   /* Transitions for idea movement */

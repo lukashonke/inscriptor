@@ -100,12 +100,24 @@ const props = defineProps({
 
 const replyMessage = ref('');
 
+const getVariationClass = computed(() => {
+  if (props.idea.liked || props.idea.disliked) return '';
+
+  // Use the idea's ID to deterministically assign a variation
+  const idNumber = props.idea.id ? parseInt(props.idea.id.replace(/\D/g, '')) || 0 : 0;
+  const variationIndex = idNumber % 5; // 5 different variations
+
+  return `variation-${variationIndex}`;
+});
+
 const cardClass = computed(() => {
   return {
     'liked-card': props.idea.liked,
     'disliked-card': props.idea.disliked,
+    'neutral-card': !props.idea.liked && !props.idea.disliked,
     'card': true,
-    'removing-card': props.idea.removing
+    'removing-card': props.idea.removing,
+    [getVariationClass.value]: !props.idea.liked && !props.idea.disliked
   };
 });
 
@@ -137,6 +149,31 @@ defineEmits([
 .disliked-card {
   transform: scale(0.95);
   opacity: 0.5;
+}
+
+.neutral-card {
+  background-color: #f8f8f8;
+}
+
+/* Subtle gradient background variations for neutral cards */
+.variation-0 {
+  background: linear-gradient(135deg, #f8f8f8 80%, #ededf8 100%);
+}
+
+.variation-1 {
+  background: linear-gradient(135deg, #f8f8f8 80%, #ededf8 100%);
+}
+
+.variation-2 {
+  background: linear-gradient(135deg, #f8f8f8 80%, #ededf8 100%);
+}
+
+.variation-3 {
+  background: linear-gradient(135deg, #f8f8f8 80%, #ededf8 100%);
+}
+
+.variation-4 {
+  background: linear-gradient(135deg, #f8f8f8 80%, #ededf8 100%);
 }
 
 .removing-card {
