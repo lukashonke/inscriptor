@@ -4,9 +4,9 @@
     <div class="col flex justify-end">
       <q-expansion-item
       label="Brainstorming Parameters" class="full-width" switch-toggle-side>
-        <div class="row q-gutter-sm">
-          <div class="col-4 col-grow" v-for="variable in uiData?.variables ?? []" :key="variable.title">
-            <q-input dense filled square  v-model="variable.value" :label="variable.title" :placeholder="variable.defaultValue" />
+        <div class="row q-gutter-md">
+          <div class="col-12 col-grow" v-for="variable in uiData?.variables ?? []" :key="variable.title">
+            <q-input dense filled square  v-model="variable.value" :label="variable.title" :placeholder="variable.defaultValue" :hint="variable.hint" />
           </div>
         </div>
       </q-expansion-item>
@@ -22,10 +22,12 @@
         </div>
       </div>
     </div>
-    <div class="col flex justify-start">
-      <q-btn @click="expandLikedIdeas()" icon="mdi-creation-outline" no-caps flat color="primary" label="Expand Liked" :disable="isGenerating" v-if="uiData?.likedIdeas.length > 0" />
-      <q-btn @click="removeDislikedIdeas()" color="negative" flat  icon="mdi-delete" label="Remove Disliked" :disable="isGenerating" class="q-ml-xl" no-caps v-if="uiData?.dislikedIdeas.length > 0" />
-      <q-btn @click="removeAll()" icon="mdi-delete" no-caps flat color="negative" label="Remove All" :disable="isGenerating" v-if="uiData?.ideas.length > 0" />
+    <div class="col flex items-center">
+      <div class="row full-width">
+        <q-btn @click="expandLikedIdeas()" icon="mdi-creation-outline" no-caps flat color="primary" label="Expand Liked" :disable="isGenerating" v-if="uiData?.likedIdeas.length > 0" />
+        <q-btn @click="removeDislikedIdeas()" color="negative" flat  icon="mdi-delete" label="Remove Disliked" :disable="isGenerating" class="q-ml-xl" no-caps v-if="uiData?.dislikedIdeas.length > 0" />
+        <q-btn @click="removeAll()" icon="mdi-delete" no-caps flat color="negative" label="Remove All" :disable="isGenerating" v-if="uiData?.ideas.length > 0" />
+      </div>
     </div>
     <div class="col-auto flex items-center">
       <span class="q-mr-xs">Columns:</span>
@@ -157,6 +159,9 @@ async function generate(replace = true) {
 
     const newRequest = cloneRequest(request.value);
 
+    // Create a new batch ID for this generation
+    const batchId = new Date().getTime();
+
     prepareRequest(newRequest);
     if(!uiData.value.variables) {
       initialiseVariables(newRequest);
@@ -179,9 +184,13 @@ async function generate(replace = true) {
       if (!uiData.value.ideas.some(existing => existing.text === idea.text)) {
         // Assign an ID to the new idea
         idea.id = `idea-${uiData.value.nextIdeaId++}`;
+        // Assign the batch ID to track which generation batch this idea belongs to
+        idea.generationBatchId = batchId;
         uiData.value.ideas.push(idea);
       }
     }
+    
+    updatePromptResultText();
   } finally {
     isGenerating.value = false;
   }
@@ -195,11 +204,9 @@ async function expandLikedIdeas() {
 
   // Generate sub-ideas for each liked idea
   for (const idea of likedIdeas) {
-    // EXPAND
     await expandIdea(idea);
 
-    // GENERATE SUB-IDEAS
-    await generateSubIdeas(idea, true);
+    await generateSubIdeas(idea, false);
   }
 }
 
@@ -218,7 +225,11 @@ async function removeDislikedIdeas() {
 
     // After animation completes, remove the ideas
     setTimeout(() => {
+      // Remove from disliked ideas collection first
+      uiData.value.dislikedIdeas = [];
+      // Then remove from main ideas collection
       uiData.value.ideas = uiData.value.ideas.filter(idea => !idea.disliked);
+      updatePromptResultText();
     }, 500); // 500ms animation duration
   };
 
@@ -241,6 +252,7 @@ function removeAll() {
       uiData.value.ideas = [];
       uiData.value.likedIdeas = [];
       uiData.value.dislikedIdeas = [];
+      updatePromptResultText();
     }, 500); // 500ms animation duration
   };
 
@@ -297,6 +309,8 @@ async function generateSubIdeas(idea, replace = false) {
         idea.children.push(child);
       }
     }
+    
+    updatePromptResultText();
   } finally {
     isGenerating.value = false;
     idea.generating = false;
@@ -347,6 +361,8 @@ async function expandIdea(idea) {
     }
 
     idea.descriptionAppend = '';
+    
+    updatePromptResultText();
   } finally {
     isGenerating.value = false;
     idea.generating = false;
@@ -388,6 +404,8 @@ async function replyToIdea(idea, message) {
     newRequest.onOutput = onOutput;
 
     await executePromptClick2(newRequest);
+    
+    updatePromptResultText();
   } finally {
     isGenerating.value = false;
     idea.generating = false;
@@ -402,6 +420,9 @@ async function generateSimilarIdeas(idea, replace = false) {
     idea.generating = true;
 
     const newRequest = cloneRequest(request.value);
+
+    // Create a new batch ID for this generation
+    const batchId = new Date().getTime();
 
     const ideasString = generateExistingIdeasString(uiData.value.ideas, true);
 
@@ -441,9 +462,17 @@ async function generateSimilarIdeas(idea, replace = false) {
 
     for (const idea of uiData.value.pendingNewIdeas) {
       if (!uiData.value.ideas.some(existing => existing.text === idea.text)) {
+        // Assign the batch ID to track which generation batch this idea belongs to
+        idea.generationBatchId = batchId;
+        // Add an ID if it doesn't have one
+        if (!idea.id) {
+          idea.id = `idea-${uiData.value.nextIdeaId++}`;
+        }
         uiData.value.ideas.push(idea);
       }
     }
+    
+    updatePromptResultText();
   } finally {
     isGenerating.value = false;
     idea.generating = false;
@@ -469,6 +498,8 @@ function separateSubIdea(subIdea, parentIdea) {
       parentIdea.children.splice(index, 1);
     }
   }
+  
+  updatePromptResultText();
 }
 
 function processOutput(text, outputCollection) {
@@ -685,14 +716,37 @@ function setIdeaLiked(idea, likedState) {
 
   updatePromptResultText();
 }
+
 function updatePromptResultText() {
   const likedIdeas = uiData.value.ideas.filter(idea => idea.liked);
   // eslint-disable-next-line vue/no-mutating-props
   props.promptResult.originalText = likedIdeas.map(idea => {
-    let text = idea.text;
+    let text = `${idea.text}`;
+    
+    // Add description if available
     if (idea.description) {
       text += '\n\nDetails: ' + idea.description;
     }
+    
+    // Add AI reply if available
+    if (idea.reply) {
+      text += '\n\nAI Reply: ' + idea.reply;
+    }
+    
+    // Add related/child ideas if available
+    if (idea.children && idea.children.length > 0) {
+      text += '\n\nRelated Ideas:';
+      idea.children.forEach(child => {
+        text += '\n- ' + child.text;
+        if (child.description) {
+          text += ': ' + child.description;
+        }
+      });
+    }
+
+    // Add a markdown separator between sections for better readability
+    text += '\n\n---\n\n';
+    
     return text;
   }).join('\n\n\n');
   // eslint-disable-next-line vue/no-mutating-props
@@ -725,11 +779,26 @@ function pinIdea(idea) {
   updatePromptResultText();
 }
 
-function removeIdea(collection, idea) {
-  const index = collection.findIndex(i => i === idea);
+function removeIdea(idea) {
+  // Remove from main ideas collection
+  const index = uiData.value.ideas.findIndex(i => i === idea);
   if (index !== -1) {
-    collection.splice(index, 1);
+    uiData.value.ideas.splice(index, 1);
   }
+  
+  // Remove from liked collection if present
+  const likedIndex = uiData.value.likedIdeas.findIndex(i => i === idea);
+  if (likedIndex !== -1) {
+    uiData.value.likedIdeas.splice(likedIndex, 1);
+  }
+  
+  // Remove from disliked collection if present
+  const dislikedIndex = uiData.value.dislikedIdeas.findIndex(i => i === idea);
+  if (dislikedIndex !== -1) {
+    uiData.value.dislikedIdeas.splice(dislikedIndex, 1);
+  }
+  
+  updatePromptResultText();
 }
 
 function trimLines(text) {

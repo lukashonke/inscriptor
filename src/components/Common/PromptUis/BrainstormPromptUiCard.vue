@@ -1,5 +1,5 @@
 <template>
-  <transition appear enter-active-class="animated bounceInUp slower" leave-active-class="animated fadeOut">
+  <transition appear enter-active-class="animated zoomIn" leave-active-class="animated fadeOut">
     <q-card bordered flat class="q-ma-xs hoverable-card no-p-margin idea-card" :class="cardClass">
       <q-card-section class="q-px-md q-py-sm justify-end flex">
         <q-btn icon="mdi-pin-outline" :color="idea.pinned ? 'accent' : 'grey-6'" size="10px" @click="$emit('pin-idea', idea)" flat dense class="hoverable-btn"/>
@@ -8,7 +8,7 @@
       </q-card-section>
 
       <q-card-section class="q-px-md q-py-none">
-        <div v-html="markdownToHtml(idea.text ?? '')" class="text-subtitle2" />
+        <div v-html="markdownToHtml(idea.text ?? '')" class="" />
       </q-card-section>
 
       <q-card-section v-if="idea.description" class="q-px-md q-py-none">
@@ -103,9 +103,10 @@ const replyMessage = ref('');
 const getVariationClass = computed(() => {
   if (props.idea.liked || props.idea.disliked) return '';
 
-  // Use the idea's ID to deterministically assign a variation
-  const idNumber = props.idea.id ? parseInt(props.idea.id.replace(/\D/g, '')) || 0 : 0;
-  const variationIndex = idNumber % 5; // 5 different variations
+  // Use the generation batch ID to assign a variation
+  // This ensures all ideas from the same generation get the same color
+  const batchId = props.idea.generationBatchId || 0;
+  const variationIndex = batchId % 5; // 5 different variations
 
   return `variation-${variationIndex}`;
 });
@@ -143,12 +144,12 @@ defineEmits([
 
 .liked-card {
   transform: scale(1.01);
-  background-color: #f3f4ff;
+  background: linear-gradient(135deg, #f3f4ff 85%, #d9dcf3 100%);
 }
 
 .disliked-card {
   transform: scale(0.95);
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .neutral-card {
@@ -161,19 +162,19 @@ defineEmits([
 }
 
 .variation-1 {
-  background: linear-gradient(135deg, #f8f8f8 80%, #ededf8 100%);
+  background: linear-gradient(135deg, #f8f8f8 80%, #edf6f8 100%);
 }
 
 .variation-2 {
-  background: linear-gradient(135deg, #f8f8f8 80%, #ededf8 100%);
+  background: linear-gradient(135deg, #f8f8f8 80%, #f3f8ed 100%);
 }
 
 .variation-3 {
-  background: linear-gradient(135deg, #f8f8f8 80%, #ededf8 100%);
+  background: linear-gradient(135deg, #f8f8f8 80%, #f8f5ed 100%);
 }
 
 .variation-4 {
-  background: linear-gradient(135deg, #f8f8f8 80%, #ededf8 100%);
+  background: linear-gradient(135deg, #f8f8f8 80%, #f4edf8 100%);
 }
 
 .removing-card {
