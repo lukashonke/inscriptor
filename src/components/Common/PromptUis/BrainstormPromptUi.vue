@@ -2,114 +2,94 @@
 
   <div class="row q-gutter-x-md q-mt-md">
     <div class="col flex justify-end">
-      <div class="row">
-        <div class="col-auto" v-for="variable in uiData?.variables ?? []" :key="variable.title">
-          <q-input dense filled square  v-model="variable.value" :label="variable.title" :placeholder="variable.defaultValue" />
+      <q-expansion-item
+      label="Brainstorming Parameters" class="full-width" switch-toggle-side>
+        <div class="row q-gutter-sm">
+          <div class="col-4 col-grow" v-for="variable in uiData?.variables ?? []" :key="variable.title">
+            <q-input dense filled square  v-model="variable.value" :label="variable.title" :placeholder="variable.defaultValue" />
+          </div>
+        </div>
+      </q-expansion-item>
+    </div>
+    <div class="col q-gutter-x-sm flex items-center">
+      <div class="row full-width">
+        <div class="col flex justify-center" >
+          <q-btn @click="generate(false)" icon="mdi-creation-outline" color="accent" label="Generate more" :loading="isGenerating"  >
+            <template v-slot:loading>
+              <q-spinner-dots />
+            </template>
+          </q-btn>
         </div>
       </div>
     </div>
-    <div class="col q-gutter-x-sm flex justify-center">
-      <q-btn @click="generate(false)" icon="mdi-creation-outline" color="accent" label="Generate more" :loading="isGenerating"  >
-        <template v-slot:loading>
-          <q-spinner-dots />
-        </template>
-      </q-btn>
-    </div>
     <div class="col flex justify-start">
-      <q-btn @click="expandLikedIdeas()" icon="mdi-creation-outline" color="primary" label="Expand Liked" :disable="isGenerating" v-if="uiData?.likedIdeas.length > 0" />
+      <q-btn @click="expandLikedIdeas()" icon="mdi-creation-outline" no-caps flat color="primary" label="Expand Liked" :disable="isGenerating" v-if="uiData?.likedIdeas.length > 0" />
       <q-btn @click="removeDislikedIdeas()" color="negative" flat  icon="mdi-delete" label="Remove Disliked" :disable="isGenerating" class="q-ml-xl" no-caps v-if="uiData?.dislikedIdeas.length > 0" />
+    </div>
+    <div class="col-auto flex items-center">
+      <span class="q-mr-xs">Columns:</span>
+      <q-btn-toggle :options="[{value: 3, label: 3},{value: 4, label: 4},{value: 5, label: 5}]" :model-value="columnCount" @update:model-value="setColumnCount" unelevated no-caps class="bordered" toggle-color="accent" padding="xs md" id="aiSwitch" />
     </div>
   </div>
 
+  <div class="row q-pa-md q-mb-md">
+    <div class="col-grow"></div>
+
+  </div>
+
   <div class="q-pa-md">
-    <div class="row">
-      <div v-for="(idea, i) in uiData?.ideas ?? []" :key="i" class="col-auto q-ma-sm" tabindex="0" style="max-width: 450px;">
-        <transition appear enter-active-class="animated bounceInUp slower" leave-active-class="animated fadeOut">
-          <q-card bordered flat class="q-ma-xs hoverable-card no-p-margin idea-card" :class="getCardClass(idea)">
-            <q-card-section class="q-px-md q-py-sm justify-end flex">
-              <q-btn icon="mdi-pin-outline" :color="idea.pinned ? 'accent' : 'grey-6'" size="10px" @click="pinIdea(idea)" flat dense class="hoverable-btn"/>
-              <q-btn icon="mdi-thumb-up-outline" :color="idea.liked ? 'accent' : 'grey-6'" size="10px" @click="setIdeaLiked(idea, !idea.liked)" flat dense class="hoverable-btn"/>
-              <q-btn icon="mdi-thumb-down-outline" :color="idea.disliked ? 'red' : 'grey-6'" size="10px" @click="setIdeaDisliked(idea, !idea.disliked)" flat dense class="hoverable-btn"/>
-            </q-card-section>
+    <!-- Pinned ideas row -->
+    <div class="row q-mb-md pinned-ideas-section" v-if="pinnedIdeas.length > 0">
+      <div class="col-12 q-mb-sm pinned-section-header">
+        <q-chip color="primary" text-color="white" icon="mdi-pin" size="sm">
+          Pinned Ideas
+        </q-chip>
+      </div>
+      <div class="row masonry-container full-width">
+        <div v-for="columnIndex in columns" :key="'pinned-column-'+columnIndex" class="masonry-column" :style="{ width: `${100/columns}%` }">
+          <transition-group name="idea-move" tag="div" class="column">
+            <div v-for="(idea, i) in getPinnedColumnIdeas(columnIndex-1)" :key="idea.id || 'pinned-'+i" class="q-mb-md idea-card-wrapper" tabindex="0">
+              <BrainstormPromptUiCard
+                :idea="idea"
+                @pin-idea="pinIdea"
+                @like-idea="setIdeaLiked"
+                @dislike-idea="setIdeaDisliked"
+                @clear-description="idea => idea.description = ''"
+                @separate-sub-idea="separateSubIdea"
+                @clear-reply="idea => idea.reply = ''"
+                @toggle-reply="idea => idea.replyEnabled = !idea.replyEnabled"
+                @expand-idea="expandIdea"
+                @generate-sub-ideas="generateSubIdeas"
+                @generate-similar="generateSimilarIdeas"
+                @reply-to-idea="replyToIdea"
+              />
+            </div>
+          </transition-group>
+        </div>
+      </div>
+    </div>
 
-            <q-card-section class="q-px-md q-py-none">
-              <div v-html="markdownToHtml(idea.text ?? '')" class="text-subtitle2" />
-            </q-card-section>
-
-            <q-card-section v-if="idea.description" class="q-px-md q-py-none">
-              <div class="q-mt-sm">
-                <div class="text-subtitle2 text-grey-7">
-                  Details:
-                  <q-btn @click="idea.description = ''" icon="mdi-delete-outline" size="10px" color="grey-7" flat dense no-caps class="float-right hoverable-btn"/>
-                </div>
-                <div v-html="markdownToHtml(idea.description ?? '')" />
-                <div v-html="markdownToHtml(idea.descriptionAppend ?? '')" />
-              </div>
-            </q-card-section>
-
-            <q-card-section v-if="idea.children?.length > 0" class="q-px-md q-py-none" >
-              <div class="q-mt-sm">
-                <div class="q-mt-sm text-subtitle2 text-grey-7">
-                  Related ideas:
-                </div>
-                <div v-for="(subIdea, i) in idea.children" :key="i" class="row">
-                  <div class="col">
-                    <div v-html="markdownToHtml(subIdea.text ?? '')" />
-                  </div>
-                  <div class="col-auto flex items-center">
-                    <q-btn @click="separateSubIdea(subIdea, idea)" icon="mdi-open-in-new" size="12px" :disable="idea.generating" color="grey-7" flat dense no-caps class="hoverable-btn"/>
-                  </div>
-                </div>
-              </div>
-            </q-card-section>
-
-            <q-card-section class="q-px-md q-py-none" v-if="idea.reply?.length > 0" >
-              <div class="q-mt-sm">
-                <div class="bordered bg-yellow-1 q-pa-sm q-my-sm">
-                  <div class="text-subtitle2 text-grey-7">
-                    AI Reply:
-                    <q-btn @click="idea.reply = ''" icon="mdi-delete-outline" size="10px" color="grey-7" flat dense no-caps class="float-right hoverable-btn"/>
-                  </div>
-                  <div v-html="markdownToHtml('\'' + (idea.reply ?? '') + '\'')" class="text-italic" />
-                </div>
-              </div>
-            </q-card-section>
-
-            <q-card-actions class="justify-between q-px-md q-pt-sm q-pb-sm">
-              <q-btn @click="idea.replyEnabled = !idea.replyEnabled" icon="las la-reply" label="Reply" size="12px" :disable="idea.generating" color="grey-7" flat dense no-caps class="hoverable-btn"/>
-
-              <q-btn-dropdown split @click="expandIdea(idea)" icon="mdi-creation-outline" label="Expand" size="12px" :disable="idea.generating" color="grey-7" flat dense no-caps class="hoverable-btn">
-                <q-list>
-                  <q-item clickable dense v-close-popup @click="generateSubIdeas(idea)" :disable="idea.generating">
-                    <q-item-section side>
-                      <q-icon name="mdi-creation-outline" />
-                    </q-item-section>
-                    <q-item-section>
-                      Generate related ideas
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-btn-dropdown>
-
-              <q-btn @click="generateSimilarIdeas(idea)" icon="mdi-creation-outline" label="Similar ideas" size="12px" :disable="idea.generating" color="grey-7" flat dense no-caps class="hoverable-btn"/>
-            </q-card-actions>
-
-            <q-card-actions v-if="idea.replyEnabled">
-              <div class="row full-width">
-                <div class="col flex items-center">
-                  <q-input v-model="idea.replyMessage" label="Ask about this idea..." dense filled square class="full-width" autofocus/>
-                </div>
-                <div class="col-auto flex items-center q-ml-sm">
-                  <q-btn @click="replyToIdea(idea, idea.replyMessage)" icon="mdi-send-outline" size="12px" :loading="idea.generating" color="grey-7" flat dense no-caps/>
-                </div>
-              </div>
-            </q-card-actions>
-
-            <q-inner-loading :showing="idea.generating">
-              <q-spinner size="50px" color="primary" />
-            </q-inner-loading>
-          </q-card>
-        </transition>
+    <!-- Masonry-style layout for non-pinned ideas -->
+    <div class="row masonry-container">
+      <div v-for="columnIndex in columns" :key="'column-'+columnIndex" class="masonry-column" :style="{ width: `${100/columns}%` }">
+        <transition-group name="idea-move" tag="div" class="column">
+          <div v-for="(idea, i) in getColumnIdeas(columnIndex-1)" :key="idea.id || i" class="q-mb-md idea-card-wrapper" tabindex="0">
+            <BrainstormPromptUiCard
+              :idea="idea"
+              @pin-idea="pinIdea"
+              @like-idea="setIdeaLiked"
+              @dislike-idea="setIdeaDisliked"
+              @clear-description="idea => idea.description = ''"
+              @separate-sub-idea="separateSubIdea"
+              @clear-reply="idea => idea.reply = ''"
+              @toggle-reply="idea => idea.replyEnabled = !idea.replyEnabled"
+              @expand-idea="expandIdea"
+              @generate-sub-ideas="generateSubIdeas"
+              @generate-similar="generateSimilarIdeas"
+              @reply-to-idea="replyToIdea"
+            />
+          </div>
+        </transition-group>
       </div>
     </div>
   </div>
@@ -119,6 +99,7 @@
 import {ref, defineExpose, computed} from 'vue';
 import {cloneRequest, executePromptClick2} from 'src/common/helpers/promptHelper';
 import {convertHtmlToText, markdownToHtml} from 'src/common/utils/textUtils';
+import BrainstormPromptUiCard from 'src/components/Common/PromptUis/BrainstormPromptUiCard.vue';
 
 const props = defineProps({
   promptResult: {
@@ -128,6 +109,16 @@ const props = defineProps({
 });
 
 const isGenerating = ref(false);
+// Number of columns for masonry layout
+const columns = computed(() => uiData.value?.columns || 3);
+const columnCount = computed({
+  get: () => columns.value,
+  set: (value) => {
+    if (uiData.value) {
+      uiData.value.columns = value;
+    }
+  }
+});
 
 const request = computed(() => props.promptResult.request);
 const prompt = computed(() => props.promptResult.prompt);
@@ -136,6 +127,26 @@ const uiData = computed({
   // eslint-disable-next-line vue/no-mutating-props
   set: (value) => props.promptResult.uiData = value
 });
+
+// Separate pinned ideas
+const pinnedIdeas = computed(() => {
+  return uiData.value?.ideas?.filter(idea => idea.pinned) || [];
+});
+
+// Get non-pinned ideas
+const nonPinnedIdeas = computed(() => {
+  return uiData.value?.ideas?.filter(idea => !idea.pinned) || [];
+});
+
+// Get ideas for a specific column (masonry-style)
+function getColumnIdeas(columnIndex) {
+  return nonPinnedIdeas.value.filter((_, index) => index % columns.value === columnIndex);
+}
+
+// Get pinned ideas for a specific column (masonry-style)
+function getPinnedColumnIdeas(columnIndex) {
+  return pinnedIdeas.value.filter((_, index) => index % columns.value === columnIndex);
+}
 
 async function generate(replace = true) {
   initialiseUiData();
@@ -165,6 +176,8 @@ async function generate(replace = true) {
 
     for (const idea of uiData.value.pendingNewIdeas) {
       if (!uiData.value.ideas.some(existing => existing.text === idea.text)) {
+        // Assign an ID to the new idea
+        idea.id = `idea-${uiData.value.nextIdeaId++}`;
         uiData.value.ideas.push(idea);
       }
     }
@@ -466,11 +479,46 @@ function initialiseUiData() {
     uiData.value = {
       ideas: [],
       pendingNewIdeas: [],
-
       dislikedIdeas: [],
       likedIdeas: [],
+      columns: calculateOptimalColumns(),
+      nextIdeaId: 1
     };
   }
+
+  // Ensure columns is initialized if not present
+  if (uiData.value.columns === undefined) {
+    uiData.value.columns = calculateOptimalColumns();
+  }
+
+  // Ensure nextIdeaId is initialized
+  if (uiData.value.nextIdeaId === undefined) {
+    uiData.value.nextIdeaId = 1;
+  }
+
+  // Assign IDs to any ideas that don't have them yet
+  if (uiData.value.ideas) {
+    for (const idea of uiData.value.ideas) {
+      if (!idea.id) {
+        idea.id = `idea-${uiData.value.nextIdeaId++}`;
+      }
+    }
+  }
+}
+
+function calculateOptimalColumns() {
+  // Calculate optimal number of columns based on screen width
+  // Assuming each card is about 350px wide
+  const cardWidth = 350;
+  const screenWidth = window.innerWidth;
+  const padding = 32; // Account for container padding
+  
+  // Calculate how many cards can fit in the available width
+  const availableWidth = screenWidth - padding;
+  const columns = Math.max(1, Math.floor(availableWidth / cardWidth));
+  
+  // Limit to a reasonable range (1-5 columns)
+  return Math.min(5, Math.max(1, columns));
 }
 
 function prepareRequest(request) {
@@ -661,17 +709,12 @@ function removeIdea(collection, idea) {
   }
 }
 
-function getCardClass(idea) {
-  return {
-    'liked-card': idea.liked,
-    'disliked-card': idea.disliked,
-    'card': true,
-    'removing-card': idea.removing
-  };
-}
-
 function trimLines(text) {
   return text.split('\n').map(line => line.trim()).join('\n');
+}
+
+function setColumnCount(count) {
+  columnCount.value = count;
 }
 
 defineExpose({
@@ -680,36 +723,60 @@ defineExpose({
 </script>
 
 <style scoped>
-
-  .card {
-    transition: transform 0.5s ease;
+  /* Card styles have been moved to BrainstormPromptUiCard.vue */
+  .no-p-margin p {
+    margin: 0;
   }
 
-  .liked-card {
-    transform: scale(1.01);
-    background-color: #f3f4ff;
+  .masonry-column {
+    padding: 0 8px;
+    display: flex;
+    flex-direction: column;
   }
 
-  .disliked-card {
-    transform: scale(0.95);
-    opacity: 0.5;
-  }
-
-  .removing-card {
-    opacity: 0;
-    transform: scale(0.55);
-    transition: opacity 0.5s ease, transform 0.5s ease;
-  }
-
-  /* Hide hoverable buttons by default */
-  .hoverable-btn {
-    opacity: 0;
+  .idea-card-wrapper {
     transition: all 0.3s ease;
   }
 
-  /* Show hoverable buttons on hover */
-  .hoverable-card:hover .hoverable-btn {
-    opacity: 1;
+  .masonry-container {
+    margin: 0 -8px;
   }
 
+  .pinned-ideas-section {
+    background-color: rgba(0, 0, 0, 0.02);
+    border-radius: 8px;
+    padding: 8px;
+    margin-bottom: 16px;
+  }
+
+  .pinned-section-header {
+    margin-left: 8px;
+  }
+
+  /* Transitions for idea movement */
+  .idea-move {
+    transition: transform 0.5s ease;
+  }
+
+  .idea-enter-active, .idea-leave-active {
+    transition: all 0.5s ease;
+  }
+
+  .idea-enter-from, .idea-leave-to {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+
+  /* Add media queries for responsive column adjustment */
+  @media (max-width: 768px) {
+    .masonry-column {
+      width: 50% !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .masonry-column {
+      width: 100% !important;
+    }
+  }
 </style>
