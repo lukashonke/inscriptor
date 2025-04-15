@@ -59,7 +59,7 @@
                 @dislike-idea="setIdeaDisliked"
                 @clear-description="idea => idea.description = ''"
                 @separate-sub-idea="separateSubIdea"
-                @clear-reply="idea => idea.reply = ''"
+                @clear-reply="clearConversation"
                 @toggle-reply="idea => idea.replyEnabled = !idea.replyEnabled"
                 @expand-idea="expandIdea"
                 @generate-sub-ideas="generateSubIdeas"
@@ -84,7 +84,7 @@
               @dislike-idea="setIdeaDisliked"
               @clear-description="idea => idea.description = ''"
               @separate-sub-idea="separateSubIdea"
-              @clear-reply="idea => idea.reply = ''"
+              @clear-reply="clearConversation"
               @toggle-reply="idea => idea.replyEnabled = !idea.replyEnabled"
               @expand-idea="expandIdea"
               @generate-sub-ideas="generateSubIdeas"
@@ -378,15 +378,44 @@ async function replyToIdea(idea, message) {
     idea.replyMessage = '';
     idea.replyEnabled = false;
 
+    // Initialize conversation array if it doesn't exist
+    if (!idea.conversation) {
+      idea.conversation = [];
+    }
+    
+    // Add user message to conversation history
+    idea.conversation.push({
+      role: 'user',
+      text: message,
+      timestamp: new Date().toISOString()
+    });
+
     const newRequest = cloneRequest(request.value);
 
-    const ideaString = idea.text + '\n\n' + (idea.description || '') + '\n\n' + (idea.reply || '');
-
+    // Add messages to appendMessages
+    const appendMessages = [];
+    
+    // Start with idea context
+    appendMessages.push({
+      type: 'assistant', 
+      text: `Idea: ${idea.text}${idea.description ? '\n\nDetails: ' + idea.description : ''}`
+    });
+    
+    // Add each conversation message as a separate entry with the appropriate role
+    if (idea.conversation && idea.conversation.length > 0) {
+      // Add all conversation messages except the most recent one (which we'll add separately)
+      for (let i = 0; i < idea.conversation.length - 1; i++) {
+        const msg = idea.conversation[i];
+        appendMessages.push({
+          type: msg.role === 'user' ? 'user' : 'assistant',
+          text: msg.text
+        });
+      }
+    }
+    
+    // Add the most recent user message with any special formatting from the prompt settings
     let replyMessage = prompt.value.settings.brainstorm_replyMessage ?? '$Message';
     replyMessage = replyMessage.replaceAll('$Message', message);
-
-    const appendMessages = [];
-    appendMessages.push({type: 'assistant', text: convertHtmlToText(ideaString)});
     appendMessages.push({type: 'user', text: replyMessage});
 
     newRequest.appendMessages = appendMessages;
@@ -397,19 +426,34 @@ async function replyToIdea(idea, message) {
     }
     replaceVariables(newRequest, []);
 
+    // We'll store the AI's response here temporarily
+    let aiResponse = '';
+    
     const onOutput = (fullText, newText, isFinished, isError) => {
-      idea.reply = fullText;
+      aiResponse = fullText;
     };
 
     newRequest.onOutput = onOutput;
 
     await executePromptClick2(newRequest);
     
+    // Add AI response to conversation history
+    idea.conversation.push({
+      role: 'assistant',
+      text: aiResponse,
+      timestamp: new Date().toISOString()
+    });
+    
     updatePromptResultText();
   } finally {
     isGenerating.value = false;
     idea.generating = false;
   }
+}
+
+// Also update the clear-reply emit to clear conversation
+function clearConversation(idea) {
+  idea.conversation = [];
 }
 
 async function generateSimilarIdeas(idea, replace = false) {
@@ -550,11 +594,15 @@ function initialiseUiData() {
     uiData.value.nextIdeaId = 1;
   }
 
-  // Assign IDs to any ideas that don't have them yet
+  // Assign IDs to any ideas that don't have them yet and initialize conversation arrays
   if (uiData.value.ideas) {
     for (const idea of uiData.value.ideas) {
       if (!idea.id) {
         idea.id = `idea-${uiData.value.nextIdeaId++}`;
+      }
+      // Initialize conversation array if not present
+      if (!idea.conversation) {
+        idea.conversation = [];
       }
     }
   }
@@ -728,11 +776,6 @@ function updatePromptResultText() {
       text += '\n\nDetails: ' + idea.description;
     }
     
-    // Add AI reply if available
-    if (idea.reply) {
-      text += '\n\nAI Reply: ' + idea.reply;
-    }
-    
     // Add related/child ideas if available
     if (idea.children && idea.children.length > 0) {
       text += '\n\nRelated Ideas:';
@@ -743,7 +786,7 @@ function updatePromptResultText() {
         }
       });
     }
-
+    
     // Add a markdown separator between sections for better readability
     text += '\n\n---\n\n';
     

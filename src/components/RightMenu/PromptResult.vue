@@ -27,21 +27,22 @@
   </bubble-menu>
 
   <template v-if="showAsChat">
-    <q-card flat ref="myHoverableElement" class="bg-grey-4" :class="classes">
-      <q-card-section>
-        <div class="write-serif">
-          You:
-          <contenteditable tag="span" ref="userPromptInput" contenteditable="true" v-model="promptResultInput" :no-html="false">
-          </contenteditable>
-        </div>
-      </q-card-section>
 
-    </q-card>
+    <div class="chat-message chat-user-message" style="max-width: 50%">
+      <div class="chat-message-header">
+        <span class="chat-message-role">You:</span>
+      </div>
+      <div class="chat-message-content">
+        <contenteditable tag="span" ref="userPromptInput" contenteditable="true" v-model="promptResultInput" :no-html="false">
+        </contenteditable>
+      </div>
+    </div>
+
   </template>
 
   <transition appear enter-active-class="animated fadeIn slow" leave-active-class="animated fadeOut">
 
-    <q-card flatbordered ref="myHoverableElement" :class="isReactionToAnotherPrompt ? 'q-ml-md' : ''">
+    <q-card flatbordered :class="isReactionToAnotherPrompt ? 'q-ml-md' : ''">
       <div class="prompt-actions sticky-top">
         <div class="row no-wrap ellipsis">
           <div class="col-auto">
@@ -182,18 +183,44 @@
             <q-img v-for="(image, index) in promptResult.images" :src="imageUrl(image)" :key="index" fit="contain" height="400px" />
           </template>
 
-          <div v-if="hasAppendMessages" class="cursor-pointer">
-            <div v-if="!appendMessagesExpanded" class="write-serif bg-grey-4 q-pa-none q-my-sm cursor-pointer" @click="appendMessagesExpanded = true">
-              You: {{ lastUserAppendMessage.text }}
-              <span class="text-italic">({{ appendMessagesCount}} more messages)</span>
-            </div>
+          <div v-if="hasAppendMessages" class="chat-history-container q-mb-md">
+            <div class="chat-messages-container cursor-pointer">
+              <div v-if="!appendMessagesExpanded" class="chat-message chat-user-message q-my-sm" @click="appendMessagesExpanded = true">
+                <div class="chat-message-header">
+                  <span class="chat-message-role">You:</span>
+                  <span class="chat-message-time">
+                    <q-btn icon="mdi-expand-all-outline" size="sm" @click="appendMessagesExpanded = true" color="primary" flat dense no-caps />
+                  </span>
+                </div>
+                <div class="chat-message-content">
+                  {{ lastUserAppendMessage.text }}
+                </div>
+              </div>
 
-            <div v-if="appendMessagesExpanded" @click="appendMessagesExpanded = false">
-              <div v-for="(message, index) in promptResult.appendMessages" :key="index">
-                <div v-if="message.type === 'assistant'" class="write-serif all-border" v-html="message.text" />
-                <div v-if="message.type === 'user'" class="bg-grey-4 all-border">
-                  You:
-                  <span :class="writeClasses" v-html="message.text" />
+              <div v-if="appendMessagesExpanded" @click="appendMessagesExpanded = false">
+                <div v-for="(message, index) in promptResult.appendMessages" :key="index">
+                  <div v-if="message.type === 'assistant'" >
+                    <div class="chat-message chat-ai-message q-my-sm">
+                      <div class="chat-message-header">
+                        <span class="chat-message-role">AI:</span>
+                      </div>
+                      <div class="chat-message-content">
+                        <div v-html="markdownToHtml(message.text)" />
+                      </div>
+                    </div>
+
+
+                  </div>
+                  <template v-if="message.type === 'user'">
+                    <div class="chat-message chat-user-message q-my-sm">
+                      <div class="chat-message-header">
+                        <span class="chat-message-role">You:</span>
+                      </div>
+                      <div class="chat-message-content">
+                        <span v-html="message.text" />
+                      </div>
+                    </div>
+                  </template>
                 </div>
               </div>
             </div>
@@ -454,9 +481,9 @@
       </q-card-actions>
 
       <q-slide-transition>
-        <div v-show="reactExpanded" class="row q-mx-md q-mb-md">
+        <div v-show="reactExpanded" class="row q-mx-md q-mb-md q-pb-sm">
           <div class="col q-mr-sm">
-            <q-input v-model="reactInput" filled dense square label="Message" autofocus autogrow ref="reactInputRef" @keyup="onReplyKeyup" />
+            <q-input v-model="reactInput" borderless dense square label="Message" autofocus autogrow ref="reactInputRef" @keyup="onReplyKeyup" />
           </div>
           <div class="col-auto">
             <q-btn icon="las la-reply" @click="promptReactClick()" color="primary" />
@@ -725,8 +752,6 @@
       pr.originalText = value;
     }
   });
-
-  const myHoverableElement = ref()
 
   async function doPromptAction(action, parameter) {
     await promptStore.runPromptResultAction(props.promptResult, action, parameter);

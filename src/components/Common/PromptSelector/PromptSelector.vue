@@ -216,7 +216,7 @@ async function customPromptClick() {
 
   const customPrompt = createAdhocPrompt(userPrompt);
 
-  promptClick(customPrompt);
+  promptClick({prompt: customPrompt});
 }
 
 async function turnIntoPrompt() {

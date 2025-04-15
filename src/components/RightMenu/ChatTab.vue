@@ -70,11 +70,12 @@
       </div>
 
       <div class="col">
-        <div class="q-gutter-y-sm q-ml-xs" style="margin-bottom: 100px;">
-
-          <template v-for="(promptResult, index) in results" :key="index">
-            <PromptResult :promptResult="promptResult" :show-as-chat="true" :allow-regenerate="index === results.length - 1"/>
-          </template>
+        <div class="q-gutter-y-sm q-ml-xs chat-history-container" style="margin-bottom: 100px;">
+          <div class="chat-messages-container-unhinged">
+            <template v-for="(promptResult, index) in results" :key="index">
+              <PromptResult :promptResult="promptResult" :show-as-chat="true" :allow-regenerate="index === results.length - 1"/>
+            </template>
+          </div>
 
         </div>
       </div>
@@ -99,9 +100,9 @@
 
               </div>
 
-              <div class="row">
-                <div class="col">
-                  <q-input square v-model="promptText" :label="'Write message to AI...'" filled class="full-width" rows="4" type="textarea" lines dense ref="searchRef" @keydown="onInputKey">
+              <div class="row q-mb-lg">
+                <div class="col q-ml-sm rounded-borders q-px-sm">
+                  <q-input square v-model="promptText" :label="'Write message to AI...'" borderless class="full-width" rows="4" type="textarea" lines dense ref="searchRef" @keydown="onInputKey">
                   </q-input>
                 </div>
                 <div class="col-auto q-ml-sm">

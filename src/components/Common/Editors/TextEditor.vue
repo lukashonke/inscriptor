@@ -189,7 +189,7 @@
       direction="up"
     >
       <template v-for="prompt in promptStore.getStickyPrompts(fileStore.selectedFile)" :key="prompt.id">
-        <q-fab-action @click="promptClick(prompt)" color="white" text-color="black" square >
+        <q-fab-action @click="promptClick({prompt: prompt})" color="white" text-color="black" square >
           {{ prompt.title }}&nbsp;
           <q-badge color="secondary" :label="promptStore.getModel(prompt.modelId)?.name" />
         </q-fab-action>

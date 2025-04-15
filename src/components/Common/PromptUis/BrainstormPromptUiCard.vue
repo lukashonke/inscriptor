@@ -38,14 +38,26 @@
         </div>
       </q-card-section>
 
-      <q-card-section class="q-px-md q-py-none" v-if="idea.reply?.length > 0" >
+      <q-card-section class="q-px-md q-py-none" v-if="idea.conversation?.length > 0" >
         <div class="q-mt-sm">
-          <div class="bordered bg-yellow-1 q-pa-sm q-my-sm">
+          <div class="bordered chat-history-container q-pa-sm q-my-sm bg-white">
             <div class="text-subtitle2 text-grey-7">
-              AI Reply:
-              <q-btn @click="$emit('clear-reply', idea)" icon="mdi-delete-outline" size="10px" color="grey-7" flat dense no-caps class="float-right hoverable-btn"/>
+              Chat:
+              <q-btn @click="$emit('clear-reply', idea)" icon="mdi-delete-outline" size="10px" color="grey-7" flat dense no-caps class="float-right hoverable-btn" title="Clear conversation"/>
             </div>
-            <div v-html="markdownToHtml('\'' + (idea.reply ?? '') + '\'')" class="text-italic" />
+
+            <!-- Scrollable chat history -->
+            <div class="chat-messages-container q-mt-sm">
+              <div v-for="(msg, i) in idea.conversation" :key="i" :class="['chat-message', msg.role === 'user' ? 'chat-user-message' : 'chat-ai-message']">
+                <div class="chat-message-header">
+                  <span class="chat-message-role">{{ msg.role === 'user' ? 'You' : 'AI' }}</span>
+                  <span class="chat-message-time" v-if="msg.timestamp">
+                    {{ new Date(msg.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) }}
+                  </span>
+                </div>
+                <div class="chat-message-content" v-html="markdownToHtml(msg.text)"></div>
+              </div>
+            </div>
           </div>
         </div>
       </q-card-section>
@@ -71,8 +83,8 @@
 
       <q-card-actions v-if="idea.replyEnabled">
         <div class="row full-width">
-          <div class="col flex items-center">
-            <q-input v-model="replyMessage" label="Ask about this idea..." dense filled square class="full-width" autofocus @keyup.enter="$emit('reply-to-idea', idea, replyMessage); replyMessage = ''"/>
+          <div class="col flex items-center q-px-sm">
+            <q-input v-model="replyMessage" label="Reply to this idea..." dense borderless square class="full-width" autofocus @keyup.enter="$emit('reply-to-idea', idea, replyMessage); replyMessage = ''"/>
           </div>
           <div class="col-auto flex items-center q-ml-sm">
             <q-btn @click="$emit('reply-to-idea', idea, replyMessage); replyMessage = ''" icon="mdi-send-outline" size="12px" :loading="idea.generating" color="grey-7" flat dense no-caps/>
@@ -155,6 +167,7 @@ defineEmits([
 .neutral-card {
   background-color: #f8f8f8;
 }
+
 
 /* Subtle gradient background variations for neutral cards */
 .variation-0 {

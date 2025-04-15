@@ -2414,9 +2414,6 @@ export const usePromptStore = defineStore('prompts', {
         this.currentTab = this.tabs.find(t => t.id === id);
       }
     },
-    getTab(id) {
-      return this.tabs.find(t => t.id === id);
-    },
     getModel(id) {
       return this.models.find(m => m.id === id);
     },
