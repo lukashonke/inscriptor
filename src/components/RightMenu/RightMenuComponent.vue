@@ -183,12 +183,12 @@
   import {useCurrentUser} from "vuefire";
   import {uint8ArrayToBase64} from "src/common/utils/textUtils";
   import {useElementHover} from "@vueuse/core";
+  import {chatTabId, promptTabId} from 'src/common/resources/tabs';
 
   const promptStore = usePromptStore();
   const fileStore = useFileStore();
   const layoutStore = useLayoutStore();
   const tabs = computed(() => promptStore.tabs);
-  //const currentTab = ref(tabs.value[0].id);
 
   const uploadingImage = ref(false);
   const fileImg = ref(null);
@@ -212,13 +212,13 @@
 
   watch(currentView, (newValue) => {
     if(newValue === 'prompts') {
-      currentTab.value = 1;
+      currentTab.value = promptTabId;
       promptStore.analysisEnabled = false;
     } else if(newValue === 'analysis') {
       promptStore.analysisEnabled = true;
     } else if(newValue === 'chat') {
       promptStore.analysisEnabled = false;
-      currentTab.value = 2;
+      currentTab.value = chatTabId;
     }
   });
 
@@ -287,13 +287,6 @@
 
   const selectionPromptResults = computed(() => {
     return promptStore.selectionPromptResults ?? [];
-  });
-
-  const page = computed({
-    get: () => (promptStore.getTabData(promptStore.currentTab)?.promptResultsIndex ?? 0) + 1,
-    set: (value) => {
-      promptStore.setCurrentTabResultsIndex(value - 1);
-    }
   });
 
   const writeClasses = computed(() => {

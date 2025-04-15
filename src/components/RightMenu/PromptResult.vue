@@ -28,15 +28,18 @@
 
   <template v-if="showAsChat">
 
-    <div class="chat-message chat-user-message" style="max-width: 50%">
-      <div class="chat-message-header">
-        <span class="chat-message-role">You:</span>
-      </div>
-      <div class="chat-message-content">
-        <contenteditable tag="span" ref="userPromptInput" contenteditable="true" v-model="promptResultInput" :no-html="false">
-        </contenteditable>
+    <div class="row">
+      <div class="chat-message chat-user-message q-mt-md" style="">
+        <div class="chat-message-header">
+          <span class="chat-message-role">You:</span>
+        </div>
+        <div class="chat-message-content">
+          <contenteditable tag="span" ref="userPromptInput" contenteditable="true" v-model="promptResultInput" :no-html="false">
+          </contenteditable>
+        </div>
       </div>
     </div>
+
 
   </template>
 

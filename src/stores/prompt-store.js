@@ -29,6 +29,7 @@ import {useLayoutStore} from "stores/layout-store";
 import {useCurrentUser} from "vuefire";
 import {getCloudModelApiKey} from "src/common/utils/modelUtils";
 import Anthropic from "@anthropic-ai/sdk";
+import {chatTabId, getPromptTabId, promptTabId} from 'src/common/resources/tabs';
 
 export const usePromptStore = defineStore('prompts', {
   state: () => ({
@@ -97,6 +98,8 @@ export const usePromptStore = defineStore('prompts', {
 
     hubPromptPacks: [],
     modelPromptPacks: [],
+
+    defaultCustomPromptInstructions: '',
   }),
   getters: {
     selectionPrompts: (state) => state.prompts.filter(p => (p.promptType === "selection" || p.promptType === "general") && p.enabled),
@@ -128,7 +131,7 @@ export const usePromptStore = defineStore('prompts', {
 
       if(request.clear && !request.silent && request.prompt.promptType !== "selectionAnalysis" && request.promptSource !== 'selectionAnalysis') {
         //this.clearPromptResults();
-        this.newPromptResultsPage();
+        this.newPromptResultsPage(getPromptTabId(request.prompt.promptType));
       }
 
       this.updateTokens();
@@ -1728,19 +1731,19 @@ export const usePromptStore = defineStore('prompts', {
       this.lastPrompts.push(prompt);
       return prompt;
     },
-    newPromptResultsHistory() {
-      this.getTabData(this.currentTab).promptResultsHistory.push([]);
-      this.getTabData(this.currentTab).promptResultsIndex = this.getTabData(this.currentTab).promptResultsHistory.length - 1;
+    newPromptResultsHistory(tabId) {
+      this.getTabData(tabId).promptResultsHistory.push([]);
+      this.getTabData(tabId).promptResultsIndex = this.getTabData(tabId).promptResultsHistory.length - 1;
     },
-    removePromptResultsHistoryItem(index) {
-      if(index === null || index < 0 || index >= this.getTabData(this.currentTab).promptResultsHistory.length) {
+    removePromptResultsHistoryItem(tabId, index) {
+      if(index === null || index < 0 || index >= this.getTabData(tabId).promptResultsHistory.length) {
         return;
       }
 
-      this.getTabData(this.currentTab).promptResultsHistory.splice(index, 1);
-      this.getTabData(this.currentTab).promptResultsIndex --;
-      if(this.getTabData(this.currentTab).promptResultsIndex < 0) {
-        this.getTabData(this.currentTab).promptResultsIndex = 0;
+      this.getTabData(tabId).promptResultsHistory.splice(index, 1);
+      this.getTabData(tabId).promptResultsIndex --;
+      if(this.getTabData(tabId).promptResultsIndex < 0) {
+        this.getTabData(tabId).promptResultsIndex = 0;
       }
     },
     async runPromptResultAction(promptResult, action, parameter) { // TODO
@@ -1811,30 +1814,37 @@ export const usePromptStore = defineStore('prompts', {
         if(request.prompt.promptType === 'selectionAnalysis' || request.promptSource === 'selectionAnalysis') {
           this.selectionPromptResults.push(pr);
           pr = this.selectionPromptResults[this.selectionPromptResults.length - 1];
-        } else if (request.prompt.promptType === 'chat' && this.currentTab.tabType === 'chat') {
-          let results = this.getTabData(this.currentTab).promptResultsHistory[this.getTabData(this.currentTab).promptResultsIndex];
+        } else if (request.prompt.promptType === 'chat') {
+          let results = this.getTabData(chatTabId).promptResultsHistory[this.getTabData(chatTabId).promptResultsIndex];
 
           if(!results) {
-            this.newPromptResultsHistory();
+            this.newPromptResultsHistory(chatTabId);
 
-            results = this.getTabData(this.currentTab).promptResultsHistory[this.getTabData(this.currentTab).promptResultsIndex];
+            results = this.getTabData(chatTabId).promptResultsHistory[this.getTabData(chatTabId).promptResultsIndex];
           }
 
           results.push(pr);
           pr = results[results.length - 1];
 
         } else {
-          //const results = this.getTabData(this.currentTab).promptResultsHistory[this.getTabData(this.currentTab).promptResultsHistory.length - 1];
-          let results = this.getTabData(this.currentTab).promptResultsHistory[this.getTabData(this.currentTab).promptResultsIndex];
+          let results = this.getTabData(promptTabId).promptResultsHistory[this.getTabData(promptTabId).promptResultsIndex];
+
+          if(!results) {
+            this.newPromptResultsHistory(promptTabId);
+
+            results = this.getTabData(promptTabId).promptResultsHistory[this.getTabData(promptTabId).promptResultsIndex];
+          }
+
+          //TODO PR history add?
 
           results.push(pr);
           pr = results[results.length - 1];
-        }
 
-        const resultGroupsCount = this.getTabData(this.currentTab).promptResultsHistory.length;
-        if(resultGroupsCount > 30) {
-          this.getTabData(this.currentTab).promptResultsHistory.splice(0, 1);
-          this.getTabData(this.currentTab).promptResultsIndex -= 1;
+          const resultGroupsCount = this.getTabData(promptTabId).promptResultsHistory.length;
+          if(resultGroupsCount > 30) {
+            this.getTabData(promptTabId).promptResultsHistory.splice(0, 1);
+            this.getTabData(promptTabId).promptResultsIndex -= 1;
+          }
         }
       }
 
@@ -1843,29 +1853,29 @@ export const usePromptStore = defineStore('prompts', {
     removePromptResult(pr) {
       this.stopPrompt();
 
-      const results = this.getTabData(this.currentTab).promptResultsHistory[this.getTabData(this.currentTab).promptResultsIndex];
+      const results = this.getTabData(getPromptTabId(pr.prompt.promptType)).promptResultsHistory[this.getTabData(getPromptTabId(pr.prompt.promptType)).promptResultsIndex];
       results.splice(results.indexOf(pr), 1);
 
     },
-    setCurrentTabResultsIndex(index) {
-      this.getTabData(this.currentTab).promptResultsIndex = index;
+    setCurrentTabResultsIndex(tabId, index) {
+      this.getTabData(tabId).promptResultsIndex = index;
     },
-    newPromptResultsPage() {
-      this.getTabData(this.currentTab).promptResultsIndex = this.getTabData(this.currentTab).promptResultsHistory.length;
-      this.getTabData(this.currentTab).promptResultsHistory.push([]);
-      this.getTabData(this.currentTab).promptResultsIndex = this.getTabData(this.currentTab).promptResultsHistory.length - 1;
+    newPromptResultsPage(tabId) {
+      this.getTabData(tabId).promptResultsIndex = this.getTabData(tabId).promptResultsHistory.length;
+      this.getTabData(tabId).promptResultsHistory.push([]);
+      this.getTabData(tabId).promptResultsIndex = this.getTabData(tabId).promptResultsHistory.length - 1;
 
       //
     },
-    clearPromptHistory() {
-      this.getTabData(this.currentTab).promptResultsHistory.splice(0, this.getTabData(this.currentTab).promptResultsHistory.length);
-      this.getTabData(this.currentTab).promptResultsIndex = 0;
+    clearPromptHistory(tabId) {
+      this.getTabData(tabId).promptResultsHistory.splice(0, this.getTabData(tabId).promptResultsHistory.length);
+      this.getTabData(tabId).promptResultsIndex = 0;
     },
     removePromptsAndResults() {
       this.prompts.splice(0, this.prompts.length);
 
       for (const tab of this.tabs) {
-        this.getTabData(tab).promptResultsHistory = [];
+        this.getTabData(tab.id).promptResultsHistory = [];
       }
     },
     removePrompt(prompt) {
@@ -2455,6 +2465,7 @@ export const usePromptStore = defineStore('prompts', {
         savedPromptContexts: this.savedPromptContexts,
         hubPromptPacks: this.hubPromptPacks,
         modelPromptPacks: this.modelPromptPacks,
+        defaultCustomPromptInstructions: this.defaultCustomPromptInstructions,
       }
 
       return aiSettings;
@@ -2467,6 +2478,8 @@ export const usePromptStore = defineStore('prompts', {
 
       this.promptCategories = [];
       this.promptFolders = [];
+
+      this.defaultCustomPromptInstructions = 'You are an AI text editor assistant. You will read the user\'s input text and additional context provided and fullfil the following task as best as you can. Remember that you are integrated in text editor UI, your primary job is not to converse with user, but to provide useful output, unless the user specifies otherwise.';
 
       this.removePromptsAndResults();
       this.prompts = [];
@@ -2560,6 +2573,10 @@ export const usePromptStore = defineStore('prompts', {
         for(const pack of aiSettings.hubPromptPacks) {
           this.hubPromptPacks.push(pack);
         }
+      }
+
+      if(aiSettings.defaultCustomPromptInstructions) {
+        this.defaultCustomPromptInstructions = aiSettings.defaultCustomPromptInstructions;
       }
 
       if(aiSettings.modelPromptPacks) {
@@ -2874,21 +2891,21 @@ export const usePromptStore = defineStore('prompts', {
 
       return enabledPrompts.filter(p => file.settings.stickyPrompts.includes(p.id));
     },
-    getTabData(tab) {
-      if(!tab) {
+    getTabData(tabId) {
+      if(!tabId) {
         return null;
       }
 
-      if(this.tabData[tab.id] === undefined) {
+      if(this.tabData[tabId] === undefined) {
 
-        this.tabData[tab.id] = {
+        this.tabData[tabId] = {
           promptResultsHistory: [],
           promptResultsIndex: 0,
           chats: [],
         }
       }
 
-      return this.tabData[tab.id];
+      return this.tabData[tabId];
     },
     getCustomAdhocPrompt(promptType, systemPrompt, userPrompt) {
       return {
@@ -2911,7 +2928,7 @@ export const usePromptStore = defineStore('prompts', {
         "parameters": [],
         "settings": {},
         "info": {
-          "tags": [ "context" ]
+          "tags": [ "context", "input" ]
         },
         "category": "Text",
         "overrideContexts": true,

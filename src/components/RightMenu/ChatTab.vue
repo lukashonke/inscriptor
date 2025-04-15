@@ -63,12 +63,6 @@
         </div>
       </div>
 
-      <div class="col-auto">
-        <div class="text-center">
-
-        </div>
-      </div>
-
       <div class="col">
         <div class="q-gutter-y-sm q-ml-xs chat-history-container" style="margin-bottom: 100px;">
           <div class="chat-messages-container-unhinged">
@@ -76,7 +70,6 @@
               <PromptResult :promptResult="promptResult" :show-as-chat="true" :allow-regenerate="index === results.length - 1"/>
             </template>
           </div>
-
         </div>
       </div>
 
@@ -154,6 +147,7 @@ import {Dialog} from "quasar";
 import {executePromptClick2} from "src/common/helpers/promptHelper";
 import PromptResult from "components/RightMenu/PromptResult.vue";
 import {useLayoutStore} from "stores/layout-store";
+import {chatTabId} from 'src/common/resources/tabs';
 
 const promptStore = usePromptStore();
 const layoutStore = useLayoutStore();
@@ -163,18 +157,18 @@ const promptText = ref('');
 const settingsOpen = ref(false);
 
 const results = computed(() => {
-  const index = promptStore.getTabData(promptStore.currentTab)?.promptResultsIndex ?? 0;
-  return promptStore.getTabData(promptStore.currentTab)?.promptResultsHistory[index] ?? [];
+  const index = promptStore.getTabData(chatTabId)?.promptResultsIndex ?? 0;
+  return promptStore.getTabData(chatTabId)?.promptResultsHistory[index] ?? [];
 });
 
 const maxResultsPage = computed(() => {
-  return promptStore.getTabData(promptStore.currentTab)?.promptResultsHistory.length ?? 0;
+  return promptStore.getTabData(chatTabId)?.promptResultsHistory.length ?? 0;
 });
 
 const page = computed({
-  get: () => (promptStore.getTabData(promptStore.currentTab)?.promptResultsIndex ?? 0) + 1,
+  get: () => (promptStore.getTabData(chatTabId)?.promptResultsIndex ?? 0) + 1,
   set: (value) => {
-    promptStore.setCurrentTabResultsIndex(value - 1);
+    promptStore.setCurrentTabResultsIndex(chatTabId, value - 1);
   }
 });
 
@@ -295,13 +289,13 @@ function updateSystemPromptText() {
 }
 
 function newConversation() {
-  promptStore.newPromptResultsHistory();
+  promptStore.newPromptResultsHistory(chatTabId);
 
   updateSystemPromptText();
 }
 
 function removeConversation() {
-  promptStore.removePromptResultsHistoryItem(promptStore.getTabData(promptStore.currentTab)?.promptResultsIndex ?? null);
+  promptStore.removePromptResultsHistoryItem(chatTabId, promptStore.getTabData(chatTabId)?.promptResultsIndex ?? null);
 }
 
 function removeAllConversations() {
@@ -313,7 +307,7 @@ function removeAllConversations() {
       cancel: true,
       persistent: true
     }).onOk(() => {
-    promptStore.clearPromptHistory();
+    promptStore.clearPromptHistory(chatTabId);
   }).onCancel(() => {
   }).onDismiss(() => {
     }

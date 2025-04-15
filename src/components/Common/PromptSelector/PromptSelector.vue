@@ -104,6 +104,29 @@
 
 
         <q-card-section v-if="currentPromptCategory === '-custom-'" class="q-gutter-y-sm" style="width: 480px;" id="promptSelectorCustomPrompt">
+
+          <!--<q-card class="q-pa-sm bordered" flat>
+            <q-card-section class="no-padding">
+
+              <template v-if="props.promptTypes === 'insert'">
+                <q-chip text-color="black" :color="currentFilePromptInput.color + '-3'" icon="las la-check" >
+                  {{currentFilePromptInput.label}} included
+                  <q-tooltip color="primary">
+                    <div>all text from file</div>
+                  </q-tooltip>
+                </q-chip>
+              </template>
+              <template v-else>
+                <q-chip text-color="black" :color="selectedTextPromptInput.color + '-3'" icon="las la-check" >
+                  {{selectedTextPromptInput.label}}
+                  <q-tooltip color="primary">
+                    <div>selected text it included</div>
+                  </q-tooltip>
+                </q-chip>
+              </template>
+            </q-card-section>
+          </q-card>-->
+
           <InputWithAi v-model="customPromptText" :autofocus="true" :filled="true" label="Instructions for AI" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Prompt Refiner')" :prompt-input="customPromptText" class="write-monospace" :automatic-text-correction="false"/>
           <div class="row">
             <div class="col-auto">
@@ -147,7 +170,6 @@
 <script setup>
 import {computed, onMounted, ref} from "vue";
 import {usePromptStore} from "stores/prompt-store";
-import {groupBy} from "src/common/utils/arrayUtils";
 import {useFileStore} from "stores/file-store";
 import PromptSelectorItem from "components/Common/PromptSelector/PromptSelectorItem.vue";
 import {isTextLlm} from "src/common/utils/modelUtils";
@@ -159,6 +181,7 @@ const promptStore = usePromptStore();
 const layoutStore = useLayoutStore();
 const fileStore = useFileStore();
 
+const customPromptPrefix = computed(() => promptStore.defaultCustomPromptInstructions);
 const customPromptText = ref('');
 
 const customPromptModelValue = computed({
@@ -196,12 +219,12 @@ const canCustomPrompt = computed(() => customPromptText.value.length > 0 && prom
 
 function createAdhocPrompt(userPrompt) {
   let userPromptText = userPrompt;
-  let systemPromptText = customPromptText.value + "\n\n$context\n";
+  let systemPromptText = customPromptPrefix.value + "\n\n" + customPromptText.value + "\n\n$context\n";
 
-  if(!fileStore.selectedFile || fileStore.selectedFile.content.trim() == '') {
+  /*if(!fileStore.selectedFile || fileStore.selectedFile.content.trim() == '') {
     userPromptText = systemPromptText;
-    systemPromptText = 'You are a helpful assistant. Perform the following task to the best of your ability.';
-  }
+    systemPromptText = customPromptPrefix.value;
+  }*/
 
   const customPrompt = promptStore.getCustomAdhocPrompt(props.promptTypes, systemPromptText, userPromptText);
 
@@ -212,9 +235,7 @@ function createAdhocPrompt(userPrompt) {
 }
 
 async function customPromptClick() {
-  const userPrompt = props.promptTypes === 'insert' ? "$text" : "$selection"
-
-  const customPrompt = createAdhocPrompt(userPrompt);
+  const customPrompt = createAdhocPrompt('$input');
 
   promptClick({prompt: customPrompt});
 }

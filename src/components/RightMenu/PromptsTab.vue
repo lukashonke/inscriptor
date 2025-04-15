@@ -94,28 +94,29 @@ import {computed} from "vue";
 import {Dialog} from "quasar";
 import {useLayoutStore} from "stores/layout-store";
 import FakePromptResult from "components/RightMenu/FakePromptResult.vue";
+import {promptTabId} from 'src/common/resources/tabs';
 
 const promptStore = usePromptStore();
 const layoutStore = useLayoutStore();
 
 const results = computed(() => {
-  const index = promptStore.getTabData(promptStore.currentTab)?.promptResultsIndex ?? 0;
-  return promptStore.getTabData(promptStore.currentTab)?.promptResultsHistory[index] ?? [];
+  const index = promptStore.getTabData(promptTabId)?.promptResultsIndex ?? 0;
+  return promptStore.getTabData(promptTabId)?.promptResultsHistory[index] ?? [];
 });
 
 const maxResultsPage = computed(() => {
-  return promptStore.getTabData(promptStore.currentTab)?.promptResultsHistory.length ?? 0;
+  return promptStore.getTabData(promptTabId)?.promptResultsHistory.length ?? 0;
 });
 
 const page = computed({
-  get: () => (promptStore.getTabData(promptStore.currentTab)?.promptResultsIndex ?? 0) + 1,
+  get: () => (promptStore.getTabData(promptTabId)?.promptResultsIndex ?? 0) + 1,
   set: (value) => {
-    promptStore.setCurrentTabResultsIndex(value - 1);
+    promptStore.setCurrentTabResultsIndex(promptTabId, value - 1);
   }
 });
 
 function removeConversation() {
-  promptStore.removePromptResultsHistoryItem(promptStore.getTabData(promptStore.currentTab)?.promptResultsIndex ?? null);
+  promptStore.removePromptResultsHistoryItem(promptTabId, promptStore.getTabData(promptTabId)?.promptResultsIndex ?? null);
 }
 
 function clearPromptHistory() {
@@ -127,7 +128,7 @@ function clearPromptHistory() {
       cancel: true,
       persistent: true
     }).onOk(() => {
-    promptStore.clearPromptHistory();
+    promptStore.clearPromptHistory(promptTabId);
   }).onCancel(() => {
   }).onDismiss(() => {
     }
