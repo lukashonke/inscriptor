@@ -7,14 +7,14 @@
         <q-btn icon="mdi-thumb-down-outline" :color="idea.disliked ? 'red' : 'grey-6'" size="10px" @click="$emit('dislike-idea', idea, !idea.disliked)" flat dense class="hoverable-btn"/>
       </q-card-section>
 
-      <q-card-section class="q-px-md q-py-none">
+      <q-card-section class="q-px-md q-py-none" style="font-size: 14px;">
         <div v-html="markdownToHtml(idea.text ?? '')" class="" />
       </q-card-section>
 
       <q-card-section v-if="idea.description" class="q-px-md q-py-none">
         <div class="q-mt-sm">
           <div class="text-subtitle2 text-grey-7">
-            Details:
+            <q-icon name="mdi-information-box-outline" class="q-mr-xs" />
             <q-btn @click="$emit('clear-description', idea)" icon="mdi-delete-outline" size="10px" color="grey-7" flat dense no-caps class="float-right hoverable-btn"/>
           </div>
           <div v-html="markdownToHtml(idea.description ?? '')" />
@@ -25,7 +25,7 @@
       <q-card-section v-if="idea.children?.length > 0" class="q-px-md q-py-none" >
         <div class="q-mt-sm">
           <div class="q-mt-sm text-subtitle2 text-grey-7">
-            Related ideas:
+            <q-icon name="mdi-lightbulb" class="q-mr-xs" />
           </div>
           <div v-for="(subIdea, i) in idea.children" :key="i" class="row">
             <div class="col">
@@ -42,7 +42,7 @@
         <div class="q-mt-sm">
           <div class="bordered chat-history-container q-pa-sm q-my-sm bg-white">
             <div class="text-subtitle2 text-grey-7">
-              Chat:
+              <q-icon name="mdi-chat" class="q-mr-xs" />
               <q-btn @click="$emit('clear-reply', idea)" icon="mdi-delete-outline" size="10px" color="grey-7" flat dense no-caps class="float-right hoverable-btn" title="Clear conversation"/>
             </div>
 

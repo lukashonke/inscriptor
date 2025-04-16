@@ -25,11 +25,26 @@
     <div class="col flex items-center">
       <div class="row full-width">
         <q-btn @click="expandLikedIdeas()" icon="mdi-creation-outline" no-caps flat color="primary" label="Expand Liked" :disable="isGenerating" v-if="uiData?.likedIdeas.length > 0" />
-        <q-btn @click="removeDislikedIdeas()" color="negative" flat  icon="mdi-delete" label="Remove Disliked" :disable="isGenerating" class="q-ml-xl" no-caps v-if="uiData?.dislikedIdeas.length > 0" />
-        <q-btn @click="removeAll()" icon="mdi-delete" no-caps flat color="negative" label="Remove All" :disable="isGenerating" v-if="uiData?.ideas.length > 0" />
+        <q-btn-dropdown color="negative" flat icon="mdi-delete" label="Remove" :disable="isGenerating" no-caps>
+          <q-list dense>
+            <q-item clickable v-close-popup @click="removeDislikedIdeas()" v-if="uiData?.dislikedIdeas.length > 0">
+              <q-item-section>
+                <q-item-label>Remove Disliked</q-item-label>
+              </q-item-section>
+            </q-item>
+            <q-item clickable v-close-popup @click="removeAll()" v-if="uiData?.ideas.length > 0">
+              <q-item-section>
+                <q-item-label>Remove All Ideas</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
       </div>
     </div>
-    <div class="col-auto flex items-center">
+    <div class="col-auto flex items-center q-ml-md">
+      <q-btn-toggle :options="[{value: 'grid', label: 'Grid', icon: 'mdi-view-grid'},{value: 'list', label: 'List', icon: 'mdi-view-sequential'}]" :model-value="viewMode" @update:model-value="setViewMode" unelevated no-caps class="bordered" toggle-color="accent" padding="xs md" />
+    </div>
+    <div class="col-auto flex items-center" v-if="viewMode === 'grid'">
       <span class="q-mr-xs">Columns:</span>
       <q-btn-toggle :options="[{value: 3, label: 3},{value: 4, label: 4},{value: 5, label: 5}]" :model-value="columnCount" @update:model-value="setColumnCount" unelevated no-caps class="bordered" toggle-color="accent" padding="xs md" id="aiSwitch" />
     </div>
@@ -40,7 +55,100 @@
 
   </div>
 
-  <div class="q-pa-md">
+  <!-- List View Layout -->
+  <div class="q-pa-md" v-if="viewMode === 'list'">
+    <div class="row list-view-container">
+      <!-- Left column (Disliked) -->
+      <div class="col-4 list-view-column disliked-column">
+        <div class="column-header q-mb-sm">
+          <q-chip color="negative" text-color="white" icon="mdi-thumb-down" size="sm">
+            Disliked
+          </q-chip>
+        </div>
+        <div class="column-content">
+          <transition-group name="idea-move" tag="div" class="column">
+            <div v-for="idea in dislikedIdeas" :key="idea.id" class="q-mb-md idea-card-wrapper">
+              <BrainstormPromptUiCard
+                :idea="idea"
+                @pin-idea="pinIdea"
+                @like-idea="setIdeaLiked"
+                @dislike-idea="setIdeaDisliked"
+                @clear-description="idea => idea.description = ''"
+                @separate-sub-idea="separateSubIdea"
+                @clear-reply="clearConversation"
+                @toggle-reply="idea => idea.replyEnabled = !idea.replyEnabled"
+                @expand-idea="expandIdea"
+                @generate-sub-ideas="generateSubIdeas"
+                @generate-similar="generateSimilarIdeas"
+                @reply-to-idea="replyToIdea"
+              />
+            </div>
+          </transition-group>
+        </div>
+      </div>
+
+      <!-- Middle column (Neutral) -->
+      <div class="col-4 list-view-column neutral-column">
+        <div class="column-header q-mb-sm">
+          <q-chip color="grey" text-color="white" icon="mdi-lightbulb" size="sm">
+            New Ideas
+          </q-chip>
+        </div>
+        <div class="column-content">
+          <transition-group name="idea-move" tag="div" class="column">
+            <div v-for="idea in neutralIdeas" :key="idea.id" class="q-mb-md idea-card-wrapper">
+              <BrainstormPromptUiCard
+                :idea="idea"
+                @pin-idea="pinIdea"
+                @like-idea="setIdeaLiked"
+                @dislike-idea="setIdeaDisliked"
+                @clear-description="idea => idea.description = ''"
+                @separate-sub-idea="separateSubIdea"
+                @clear-reply="clearConversation"
+                @toggle-reply="idea => idea.replyEnabled = !idea.replyEnabled"
+                @expand-idea="expandIdea"
+                @generate-sub-ideas="generateSubIdeas"
+                @generate-similar="generateSimilarIdeas"
+                @reply-to-idea="replyToIdea"
+              />
+            </div>
+          </transition-group>
+        </div>
+      </div>
+
+      <!-- Right column (Liked and Pinned) -->
+      <div class="col-4 list-view-column liked-column">
+        <div class="column-header q-mb-sm">
+          <q-chip color="positive" text-color="white" icon="mdi-thumb-up" size="sm">
+            Liked & Pinned
+          </q-chip>
+        </div>
+        <div class="column-content">
+          <transition-group name="idea-move" tag="div" class="column">
+            <div v-for="idea in likedAndPinnedIdeas" :key="idea.id" class="q-mb-md idea-card-wrapper">
+              <BrainstormPromptUiCard
+                :idea="idea"
+                @pin-idea="pinIdea"
+                @like-idea="setIdeaLiked"
+                @dislike-idea="setIdeaDisliked"
+                @clear-description="idea => idea.description = ''"
+                @separate-sub-idea="separateSubIdea"
+                @clear-reply="clearConversation"
+                @toggle-reply="idea => idea.replyEnabled = !idea.replyEnabled"
+                @expand-idea="expandIdea"
+                @generate-sub-ideas="generateSubIdeas"
+                @generate-similar="generateSimilarIdeas"
+                @reply-to-idea="replyToIdea"
+              />
+            </div>
+          </transition-group>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Grid View Layout (Original) -->
+  <div class="q-pa-md" v-else>
     <!-- Pinned ideas row -->
     <div class="row q-mb-md pinned-ideas-section" v-if="pinnedIdeas.length > 0">
       <div class="col-12 q-mb-sm pinned-section-header q-ml-sm">
@@ -123,6 +231,14 @@ const columnCount = computed({
   }
 });
 
+// View mode toggle between grid and list views
+const viewMode = ref('grid');
+
+// Initialize viewMode from uiData if available
+if (props.promptResult?.uiData?.viewMode) {
+  viewMode.value = props.promptResult.uiData.viewMode;
+}
+
 const request = computed(() => props.promptResult.request);
 const prompt = computed(() => props.promptResult.prompt);
 const uiData = computed({
@@ -145,6 +261,19 @@ const nonPinnedIdeas = computed(() => {
 function getColumnIdeas(columnIndex) {
   return nonPinnedIdeas.value.filter((_, index) => index % columns.value === columnIndex);
 }
+
+// Computed properties for list view
+const dislikedIdeas = computed(() => {
+  return uiData.value?.ideas?.filter(idea => idea.disliked) || [];
+});
+
+const neutralIdeas = computed(() => {
+  return uiData.value?.ideas?.filter(idea => !idea.liked && !idea.disliked && !idea.pinned) || [];
+});
+
+const likedAndPinnedIdeas = computed(() => {
+  return uiData.value?.ideas?.filter(idea => idea.liked || idea.pinned) || [];
+});
 
 // Get pinned ideas for a specific column (masonry-style)
 function getPinnedColumnIdeas(columnIndex) {
@@ -580,13 +709,22 @@ function initialiseUiData() {
       dislikedIdeas: [],
       likedIdeas: [],
       columns: calculateOptimalColumns(),
-      nextIdeaId: 1
+      nextIdeaId: 1,
+      viewMode: viewMode.value // Initialize with current view mode
     };
   }
 
   // Ensure columns is initialized if not present
   if (uiData.value.columns === undefined) {
     uiData.value.columns = calculateOptimalColumns();
+  }
+
+  // Ensure viewMode is initialized if not present
+  if (uiData.value.viewMode === undefined) {
+    uiData.value.viewMode = viewMode.value;
+  } else {
+    // Sync with uiData if it exists
+    viewMode.value = uiData.value.viewMode;
   }
 
   // Ensure nextIdeaId is initialized
@@ -852,6 +990,15 @@ function setColumnCount(count) {
   columnCount.value = count;
 }
 
+function setViewMode(mode) {
+  viewMode.value = mode;
+
+  // Save the preference to uiData
+  if (uiData.value) {
+    uiData.value.viewMode = mode;
+  }
+}
+
 defineExpose({
   onShow
 });
@@ -887,18 +1034,37 @@ defineExpose({
   .pinned-section-header {
   }
 
-  /* Transitions for idea movement */
-  .idea-move {
-    transition: transform 0.5s ease;
+  /* List view styles */
+  .list-view-container {
   }
 
-  .idea-enter-active, .idea-leave-active {
-    transition: all 0.5s ease;
+  .list-view-column {
+    padding: 0 24px;
+    max-height: 85vh;
+    overflow: auto;
   }
 
-  .idea-enter-from, .idea-leave-to {
-    opacity: 0;
-    transform: translateY(30px);
+  .list-view-column .column-header {
+    padding: 8px 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+  }
+
+  .list-view-column .column-content {
+    border-radius: 8px;
+    height: 100%;
+  }
+
+  .disliked-column .column-content {
+    background-color: rgba(0, 0, 0, 0.02);
+  }
+
+  .neutral-column .column-content {
+  }
+
+  .liked-column .column-content {
+    background-color: rgba(82, 91, 177, 0.04);
   }
 
   /* Add media queries for responsive column adjustment */
@@ -906,11 +1072,24 @@ defineExpose({
     .masonry-column {
       width: 50% !important;
     }
+
+    .list-view-column {
+      padding: 0 8px;
+    }
   }
 
   @media (max-width: 480px) {
     .masonry-column {
       width: 100% !important;
+    }
+
+    .list-view-column {
+      width: 100% !important;
+      margin-bottom: 16px;
+    }
+
+    .list-view-container {
+      flex-direction: column;
     }
   }
 </style>
