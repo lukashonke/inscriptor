@@ -45,7 +45,7 @@
 
 
     <div style="position: relative;" v-if="promptResult && promptResult.prompt === promptExecuted">
-      <div class="bordered" style="position: absolute; top: 100%; right: 0; z-index: 10; ">
+      <div class="bordered" style="position: absolute; top: 100%; left: 0; z-index: 10; ">
         <q-spinner v-if="prompting" />
         <PromptResult :promptResult="promptResult" :insert-target="(text) => onInput(trimInputWithAi(convertHtmlToText(text, true)))" type="inline" :has-close="true" @close="promptResult = null" @replace-self="replacePromptResult"/>
       </div>

@@ -49,7 +49,7 @@
           icon="mdi-account-outline"
           class="sm-hide xs-hide"
           no-caps
-          :label="currentUser"
+          label="user@email.com"
           :loading="userSyncing"
           v-if="currentUser">
           <q-item clickable v-ripple @click="layoutStore.showUserDialog" dense v-if="currentUser !== 'Guest'">
