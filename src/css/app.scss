@@ -1,5 +1,8 @@
 // app global css in SCSS form
 @import "editor";
+@import "overrides";
+@import "dark";
+@import "day";
 
 body {
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Helvetica Neue", "Segoe UI", "Fira Sans", Roboto, Oxygen, Ubuntu, "Droid Sans", Arial, sans-serif;
@@ -192,345 +195,6 @@ div.sticky {
   transform: translateY(-50%);
 }
 
-
-
-.dark-mode {
-  .bg-accent-1 {
-    background-color: rgba(178, 163, 45, 0.95);
-  }
-
-  .bg-file-list-hover {
-    background-color: #212121;
-  }
-
-  .bg-file-list-selected {
-    background-color: #434343;
-  }
-
-  .left-border {
-    border-left: 1px solid rgba(255, 255, 255, 0.88);
-  }
-
-  .all-border {
-    border: 1px solid rgba(255, 255, 255, 0.88);
-  }
-
-  .bottom-border {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.88);
-  }
-
-  .right-border {
-    border-right: 1px solid rgba(255, 255, 255, 0.88);
-  }
-
-  .top-border {
-    border-top: 1px solid rgba(255, 255, 255, 0.88);
-  }
-
-  .menu-title {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: lightblue;
-  }
-
-  .menu-subtitle {
-    font-size: 0.9em;
-    color: lightblue;
-  }
-
-  .text-light {
-    color: #212121;
-  }
-
-  .bordered {
-    border: 1px solid #212121;
-    border-radius: 5px;
-  }
-
-  .file-list-item {
-    border: 1px solid rgba(0, 0, 0, 0);
-    border-radius: 5px;
-  }
-
-  .file-list-item-hover {
-    border: 1px solid #212121;
-    border-radius: 5px;
-  }
-
-  .square-bordered {
-    border: 1px solid #212121;
-    border-radius: 0px;
-  }
-
-  .searchinput {
-    background-color: rgba(0, 0, 0, 0.9);
-    border: 0;
-    height: 26px;
-    border-radius: 2px;
-    color: black;
-    font-size: 0.9rem;
-    padding: 5px 5px 5px 5px;
-    &:hover,
-    &:focus {
-      outline: none;
-    }
-  }
-
-  .bg-primary-1 {
-    background-color: rgb(12, 12, 0);
-  }
-
-  .bg-secondary-1 {
-    background-color: rgba(17, 33, 42, 0.49);
-  }
-
-  .bg-primary-light {
-    background-color: rgb(0, 0, 0, 0.75);
-  }
-
-  .bg-primary-2 {
-    background-color: rgb(19, 19, 7);
-  }
-
-  .bg-primary-3 {
-    background-color: rgba(176, 161, 41, 0.75);
-  }
-
-  .bg-primary-4 {
-    background-color: rgba(176, 161, 41, 0.667);
-  }
-
-  .bg-primary-5 {
-    background-color: rgba(176, 161, 41, 0.583);
-  }
-
-  .bg-primary-6 {
-    background-color: rgba(176, 161, 41, 0.5);
-  }
-
-  .bg-primary-7 {
-    background-color: rgba(176, 161, 41, 0.417);
-  }
-
-  .bg-primary-8 {
-    background-color: rgba(176, 161, 41, 0.333);
-  }
-
-  .bg-primary-9 {
-    background-color: rgba(176, 161, 41, 0.25);
-  }
-
-  .bg-primary-10 {
-    background-color: rgba(176, 161, 41, 0.167);
-  }
-
-  .bg-primary-11 {
-    background-color: rgba(176, 161, 41, 0.083);
-  }
-
-  .bg-primary-12 {
-    background-color: rgba(176, 161, 41, 0);
-  }
-
-  .bg-inscriptorblue-dark {
-    background-color: #e6e2bc;
-  }
-
-  .bg-inscriptorblue {
-    background-color: #dcd7a3;
-  }
-
-  .bg-inscriptorblue-light {
-    background-color: #c0b751;
-  }
-
-  .text-inscriptorblue-dark {
-    color: #9d9487;
-  }
-
-  .text-inscriptorblue-light {
-    color: #302e17;
-  }
-
-  .highlight {
-    background-color: rgba(177, 162, 43, 0.75) !important;
-  }
-}
-
-
-.day-mode {
-
-  .bg-accent-1 {
-    background-color: rgba(77, 92, 210, 0.05);
-  }
-
-  .bg-file-list-hover {
-    background-color: #eeeeee;
-  }
-
-  .bg-file-list-selected {
-    background-color: #e0e0e0;
-  }
-
-  .left-border {
-    border-left: 1px solid rgba(0, 0, 0, 0.12);
-  }
-
-  .all-border {
-    border: 1px solid rgba(0, 0, 0, 0.12);
-  }
-
-  .bottom-border {
-    border-bottom: 1px solid rgba(0, 0, 0, 0.12);
-  }
-
-  .right-border {
-    border-right: 1px solid rgba(0, 0, 0, 0.12);
-  }
-
-  .top-border {
-    border-top: 1px solid rgba(0, 0, 0, 0.12);
-  }
-
-  .left-border {
-    border-left: 1px solid rgba(0, 0, 0, 0.12);
-  }
-
-
-
-  .menu-title {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: lightslategrey;
-  }
-
-  .menu-subtitle {
-    font-size: 0.9em;
-    color: lightslategrey;
-  }
-
-  .text-light {
-    color: #dedede;
-  }
-
-
-
-  .bordered {
-    border: 1px solid #dedede;
-    border-radius: 5px;
-  }
-
-  .file-list-item {
-    border: 1px solid rgba(255, 255, 255, 0);
-    border-radius: 5px;
-  }
-
-  .file-list-item-hover {
-    border: 1px solid #dedede;
-    border-radius: 5px;
-  }
-
-  .square-bordered {
-    border: 1px solid #dedede;
-    border-radius: 0px;
-  }
-
-  .searchinput {
-    background-color: rgba(255,255,255, 0.1);
-    border: 0;
-    height: 26px;
-    border-radius: 2px;
-    color: white;
-    font-size: 0.9rem;
-    padding: 5px 5px 5px 5px;
-    &:hover,
-    &:focus {
-      outline: none;
-    }
-  }
-
-  .bg-primary-1 {
-    background-color: rgb(243, 243, 255);
-  }
-
-  .bg-secondary-1 {
-    background-color: rgba(238, 222, 213, 0.51);
-  }
-
-  .bg-primary-light {
-    background-color: rgb(255,255,255, 0.25);
-  }
-
-  .bg-primary-2 {
-    background-color: rgb(236, 236, 248);
-  }
-
-  .bg-primary-3 {
-    background-color: rgba(79, 94, 214, 0.25);
-  }
-
-  .bg-primary-4 {
-    background-color: rgba(79, 94, 214, 0.333);
-  }
-
-  .bg-primary-5 {
-    background-color: rgba(79, 94, 214, 0.417);
-  }
-
-  .bg-primary-6 {
-    background-color: rgba(79, 94, 214, 0.5);
-  }
-
-  .bg-primary-7 {
-    background-color: rgba(79, 94, 214, 0.583);
-  }
-
-  .bg-primary-8 {
-    background-color: rgba(79, 94, 214, 0.667);
-  }
-
-  .bg-primary-9 {
-    background-color: rgba(79, 94, 214, 0.75);
-  }
-
-  .bg-primary-10 {
-    background-color: rgba(79, 94, 214, 0.833);
-  }
-
-  .bg-primary-11 {
-    background-color: rgba(79, 94, 214, 0.917);
-  }
-
-  .bg-primary-12 {
-    background-color: rgba(79, 94, 214, 1);
-  }
-
-  .bg-inscriptorblue-dark {
-    background-color: #191d43;
-  }
-
-  .bg-inscriptorblue {
-    background-color: #23285c;
-  }
-
-  .bg-inscriptorblue-light {
-    background-color: #3f48a8;
-  }
-
-  .text-inscriptorblue-dark {
-    color: #626bb8;
-  }
-
-  .text-inscriptorblue-light {
-    color: #cfd1e8;
-  }
-
-  .highlight {
-    background-color: rgba(78, 93, 212, 0.25) !important;
-  }
-
-}
-
 /* Style the scrollbar */
 textarea::-webkit-scrollbar {
   width: 6px; /* Keep the same width */
@@ -563,11 +227,6 @@ textarea::-webkit-scrollbar-button {
 }
 
 .ai-panel {
-  background-color: rgba(0, 0, 0, 0.02);
-  border-color: rgb(228, 228, 228);
-  border-style: solid;
-  border-width: 1px;
-  border-radius: 22px;
 }
 
 .ai-panel-solid {
@@ -575,7 +234,7 @@ textarea::-webkit-scrollbar-button {
   border-color: rgb(248, 248, 248);
   border-style: solid;
   border-width: 1px;
-  border-radius: 22px;
+  border-radius: 12px;
 }
 
 .no-p-margin {
@@ -584,7 +243,23 @@ textarea::-webkit-scrollbar-button {
   }
 }
 
-.idea-card {
+.inscriptor-shadow-1 {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.inscriptor-shadow-bottom {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.inscriptor-insert-shadow-top {
+  box-shadow: inset 0px 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.inscriptor-insert-shadow-bottom {
+  box-shadow: inset 0px -1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.idea-card-rounded {
   background-color: #f8f8f8;
   border-color: rgb(228, 228, 228);
   border-style: solid;
@@ -592,6 +267,17 @@ textarea::-webkit-scrollbar-button {
   border-radius: 22px;
 }
 
+.idea-card {
+  background-color: #f8f8f8;
+  border-color: rgb(228, 228, 228);
+  border-style: solid;
+  border-width: 1px;
+  border-radius: 12px;
+}
+
+.inscriptor-highlight-btn {
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
 
 .gradient-bg-text-container {
   z-index: 100;
@@ -658,6 +344,27 @@ textarea::-webkit-scrollbar-button {
 
 .chat-message-content {
   word-break: break-word;
+}
+
+/* Hide hoverable buttons by default */
+.hoverable-btn {
+  opacity: 0;
+  transition: all 0.3s ease;
+}
+
+/* Hide hoverable buttons by default */
+.hoverable-btn-semi {
+  opacity: 0.85;
+  transition: all 0.3s ease;
+}
+
+/* Show hoverable buttons on hover */
+.hoverable-card:hover .hoverable-btn {
+  opacity: 1;
+}
+
+.hoverable-card:hover .hoverable-btn-semi {
+  opacity: 1;
 }
 
 :root {

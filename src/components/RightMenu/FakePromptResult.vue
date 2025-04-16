@@ -9,16 +9,16 @@
     <q-card bordered ref="myHoverableElement" id="fakePromptResult">
       <div class="prompt-actions sticky-top">
         <div>
-          <q-btn color="primary" flat unelevated size="sm" icon="las la-angle-double-left" id="fakePromptResultAdd">
+          <q-btn color="primary" flat unelevated size="sm" icon="mdi-chevron-double-left" id="fakePromptResultAdd">
           </q-btn>
-          <q-btn-dropdown color="primary" flat unelevated size="sm" icon="las la-copy">
+          <q-btn-dropdown color="primary" flat unelevated size="sm" icon="mdi-content-copy">
             <q-list dense>
             </q-list>
           </q-btn-dropdown>
 
           <q-badge class="q-ml-md">Shorten text</q-badge>
 
-          <q-btn class="float-right" flat color="negative" unelevated size="sm" icon="las la-trash" >
+          <q-btn class="float-right" flat color="negative" unelevated size="sm" icon="mdi-delete-outline" >
           </q-btn>
         </div>
         <q-separator />
@@ -38,13 +38,13 @@
       <q-separator />
 
       <q-card-actions >
-        <q-btn class="text-weight-bold" label="Reply" flat color="primary" unelevated size="sm" icon="las la-reply"  id="fakePromptResultReply">
+        <q-btn class="text-weight-bold" label="Reply" flat color="primary" unelevated size="sm" icon="mdi-reply-outline"  id="fakePromptResultReply">
           <q-tooltip>Reply on this prompt to AI</q-tooltip>
         </q-btn>
 
         <q-space />
 
-        <q-btn class="text-weight-bold float-right" label="Prompt Again" flat color="primary" unelevated size="sm" icon="las la-sync" id="fakePromptResultRegenerate">
+        <q-btn class="text-weight-bold float-right" label="Prompt Again" flat color="primary" unelevated size="sm" icon="mdi-sync" id="fakePromptResultRegenerate">
           <q-tooltip>Generate this prompt again</q-tooltip>
         </q-btn>
 

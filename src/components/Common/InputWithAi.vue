@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="relative-position bg-red">
+    <div class="relative-position">
       <div class="" style="position: absolute; top: 5px; right: 5px; z-index: 10; ">
         <q-btn @click.prevent.stop icon="mdi-creation-outline" flat outline dense color="accent" size="10px" :loading="prompting">
           <q-menu v-model="visible">
@@ -34,7 +34,6 @@
       :borderless="borderless"
       :filled="filled"
       :dense="dense"
-      square
       :autofocus="autofocus"
       :spellcheck="automaticTextCorrection"
       @update:modelValue="onInput"

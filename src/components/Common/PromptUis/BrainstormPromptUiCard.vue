@@ -1,6 +1,6 @@
 <template>
   <transition appear enter-active-class="animated zoomIn" leave-active-class="animated fadeOut">
-    <q-card bordered flat class="q-ma-xs hoverable-card no-p-margin idea-card" :class="cardClass">
+    <q-card bordered flat class="q-ma-xs hoverable-card no-p-margin idea-card-rounded" :class="cardClass">
       <q-card-section class="q-px-md q-py-sm justify-end flex">
         <q-btn icon="mdi-pin-outline" :color="idea.pinned ? 'accent' : 'grey-6'" size="10px" @click="$emit('pin-idea', idea)" flat dense class="hoverable-btn"/>
         <q-btn icon="mdi-thumb-up-outline" :color="idea.liked ? 'accent' : 'grey-6'" size="10px" @click="$emit('like-idea', idea, !idea.liked)" flat dense class="hoverable-btn"/>
@@ -63,7 +63,7 @@
       </q-card-section>
 
       <q-card-actions class="justify-between q-px-md q-pt-sm q-pb-sm">
-        <q-btn @click="$emit('toggle-reply', idea)" icon="las la-reply" label="Reply" size="12px" :disable="idea.generating" color="grey-7" flat dense no-caps class="hoverable-btn"/>
+        <q-btn @click="$emit('toggle-reply', idea)" icon="mdi-reply-outline" label="Reply" size="12px" :disable="idea.generating" color="grey-7" flat dense no-caps class="hoverable-btn"/>
 
         <q-btn-dropdown split @click="$emit('expand-idea', idea)" icon="mdi-creation-outline" label="Expand" size="12px" :disable="idea.generating" color="grey-7" flat dense no-caps class="hoverable-btn">
           <q-list>
@@ -84,7 +84,7 @@
       <q-card-actions v-if="idea.replyEnabled">
         <div class="row full-width">
           <div class="col flex items-center q-px-sm">
-            <q-input v-model="replyMessage" label="Reply to this idea..." dense borderless square class="full-width" autofocus @keyup.enter="$emit('reply-to-idea', idea, replyMessage); replyMessage = ''"/>
+            <q-input v-model="replyMessage" label="Reply to this idea..." dense borderless class="full-width" autofocus @keyup.enter="$emit('reply-to-idea', idea, replyMessage); replyMessage = ''"/>
           </div>
           <div class="col-auto flex items-center q-ml-sm">
             <q-btn @click="$emit('reply-to-idea', idea, replyMessage); replyMessage = ''" icon="mdi-send-outline" size="12px" :loading="idea.generating" color="grey-7" flat dense no-caps/>
@@ -152,6 +152,7 @@ defineEmits([
 <style scoped>
 .card {
   transition: transform 0.5s ease;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1) !important;
 }
 
 .liked-card {
@@ -171,39 +172,28 @@ defineEmits([
 
 /* Subtle gradient background variations for neutral cards */
 .variation-0 {
-  background: linear-gradient(135deg, #f8f8f8 80%, #ededf8 100%);
+  background: linear-gradient(135deg, #ffffff 80%, #ededf8 100%);
 }
 
 .variation-1 {
-  background: linear-gradient(135deg, #f8f8f8 80%, #edf6f8 100%);
+  background: linear-gradient(135deg, #ffffff 80%, #edf6f8 100%);
 }
 
 .variation-2 {
-  background: linear-gradient(135deg, #f8f8f8 80%, #f3f8ed 100%);
+  background: linear-gradient(135deg, #ffffff 80%, #f3f8ed 100%);
 }
 
 .variation-3 {
-  background: linear-gradient(135deg, #f8f8f8 80%, #f8f5ed 100%);
+  background: linear-gradient(135deg, #ffffff 80%, #f8f5ed 100%);
 }
 
 .variation-4 {
-  background: linear-gradient(135deg, #f8f8f8 80%, #f4edf8 100%);
+  background: linear-gradient(135deg, #ffffff 80%, #f4edf8 100%);
 }
 
 .removing-card {
   opacity: 0;
   transform: scale(0.55);
   transition: opacity 0.5s ease, transform 0.5s ease;
-}
-
-/* Hide hoverable buttons by default */
-.hoverable-btn {
-  opacity: 0;
-  transition: all 0.3s ease;
-}
-
-/* Show hoverable buttons on hover */
-.hoverable-card:hover .hoverable-btn {
-  opacity: 1;
 }
 </style>

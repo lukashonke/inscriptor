@@ -14,7 +14,7 @@
       <q-separator />
 
       <q-card-actions align="right">
-        <q-btn icon="las la-download" label="Download Project" color="primary" @click="downloadProject" no-caps/>
+        <q-btn icon="mdi-download" label="Download Project" color="primary" @click="downloadProject" no-caps/>
       </q-card-actions>
     </q-card>
 

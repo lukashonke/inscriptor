@@ -14,18 +14,18 @@
       </div>
 
       <div class="col-auto flex items-center">
-        <q-btn dense flat color="negative" icon="las la-trash" size="md">
+        <q-btn dense flat color="negative" icon="mdi-delete-outline" size="md">
           <q-menu>
             <q-list dense>
               <q-item clickable v-ripple @click="removeConversation" class="text-negative">
                 <q-item-section side>
-                  <q-icon name="las la-times" size="xs" />
+                  <q-icon name="mdi-close" size="xs" />
                 </q-item-section>
                 <q-item-section>Delete current conversation</q-item-section>
               </q-item>
               <q-item clickable v-ripple @click="clearPromptHistory" class="text-negative">
                 <q-item-section side>
-                  <q-icon name="las la-trash" size="xs" />
+                  <q-icon name="mdi-delete-outline" size="xs" />
                 </q-item-section>
                 <q-item-section>Delete all conversations</q-item-section>
               </q-item>
@@ -56,7 +56,7 @@
           </div>
           <!--<template v-else>
             <div class="menu-subtitle q-ml-xs q-my-lg">
-              <q-icon name="las la-check" color="grey" size="xs" class="q-mr-xs"/> generated
+              <q-icon name="mdi-check" color="grey" size="xs" class="q-mr-xs"/> generated
             </div>
           </template>-->
 

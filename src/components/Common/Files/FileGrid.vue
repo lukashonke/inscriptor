@@ -13,7 +13,7 @@
             </span>
           </div>
           <div class="col-auto">
-            <q-btn icon="las la-ellipsis-h" color="grey" flat dense padding="xs" size="0.7rem" square @click.stop class="">
+            <q-btn icon="mdi-dots-horizontal" color="grey" flat dense padding="xs" size="0.7rem" @click.stop class="">
               <q-menu>
                 <FileListRowContextMenu :file="child"/>
               </q-menu>
@@ -41,7 +41,7 @@
                   </span>
                   </div>
                   <div class="col-auto">
-                    <q-btn icon="las la-ellipsis-h" color="grey" flat dense padding="xs" size="0.7rem" square @click.stop class="">
+                    <q-btn icon="mdi-dots-horizontal" color="grey" flat dense padding="xs" size="0.7rem" @click.stop class="">
                       <q-menu>
                         <FileListRowContextMenu :file="nestedChild"/>
                       </q-menu>
@@ -69,7 +69,7 @@
                           </span>
                           </div>
                           <div class="col-auto">
-                            <q-btn icon="las la-ellipsis-h" color="grey" flat dense padding="xs" size="0.7rem" square @click.stop class="float-right">
+                            <q-btn icon="mdi-dots-horizontal" color="grey" flat dense padding="xs" size="0.7rem" @click.stop class="float-right">
                               <q-menu>
                                 <FileListRowContextMenu :file="nestedNestedChild"/>
                               </q-menu>

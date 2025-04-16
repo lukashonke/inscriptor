@@ -7,8 +7,8 @@
         <div class="q-mb-md">
           <span class="text-h6">Projects:</span>
 
-          <q-btn flat dense @click="layoutStore.projectSelectionDialogOpen = false" class="float-right q-ml-md" icon="las la-times" v-if="fileStore.projectId"  />
-          <q-btn flat dense @click="loadCloudProjects()" class="float-right" icon="las la-sync" :loading="cloudProjectsLoading" />
+          <q-btn flat dense @click="layoutStore.projectSelectionDialogOpen = false" class="float-right q-ml-md" icon="mdi-close" v-if="fileStore.projectId"  />
+          <q-btn flat dense @click="loadCloudProjects()" class="float-right" icon="mdi-sync" :loading="cloudProjectsLoading" />
         </div>
 
         <div class="q-mb-lg">
@@ -45,11 +45,11 @@
             </q-item-section>
             <q-item-section top side>
               <div class="text-grey-8 q-gutter-xs">
-                <q-btn-dropdown class="gt-xs q-mr-md" padding="xs sm" size="12px" flat dense color="primary" label="Open" icon="las la-folder-open" @click="loadProject(project.projectId)" v-if="fileStore.projectId !== project.projectId" split :loading="loadingProject === project.projectId">
+                <q-btn-dropdown class="gt-xs q-mr-md" padding="xs sm" size="12px" flat dense color="primary" label="Open" icon="mdi-folder-open-outline" @click="loadProject(project.projectId)" v-if="fileStore.projectId !== project.projectId" split :loading="loadingProject === project.projectId">
                   <q-list>
                     <q-item clickable v-ripple dense @click="downloadProject(project.projectId)">
                       <q-item-section side>
-                        <q-icon name="las la-download" />
+                        <q-icon name="mdi-download" />
                       </q-item-section>
 
                       <q-item-section>
@@ -59,8 +59,8 @@
                   </q-list>
                 </q-btn-dropdown>
 
-                <q-btn class="gt-xs" size="12px" flat dense icon="las la-sync"  @click="doSyncCurrentProjectToCloud()" v-if="fileStore.projectId === project.projectId && !fileStore.projectSettings?.syncToCloud"/>
-                <q-btn size="12px" flat dense icon="las la-trash" color="negative" @click="removeProjectFromCloud(project.projectId)" v-if="!isCloudProjectLoaded(project) || fileStore.projectSettings?.syncToCloud"/>
+                <q-btn class="gt-xs" size="12px" flat dense icon="mdi-sync"  @click="doSyncCurrentProjectToCloud()" v-if="fileStore.projectId === project.projectId && !fileStore.projectSettings?.syncToCloud"/>
+                <q-btn size="12px" flat dense icon="mdi-delete-outline" color="negative" @click="removeProjectFromCloud(project.projectId)" v-if="!isCloudProjectLoaded(project) || fileStore.projectSettings?.syncToCloud"/>
               </div>
             </q-item-section>
             <q-tooltip :delay="700">
@@ -112,7 +112,7 @@
 
               <q-item-section top side>
                 <div class="text-grey-8 q-gutter-xs">
-                  <q-btn class="gt-xs q-mr-sm" padding="xs sm" size="12px" flat dense color="primary" label="Open" icon="las la-folder-open" @click="loadLocalProject(project)" v-if="fileStore.currentLocalProjectDataFile !== project">
+                  <q-btn class="gt-xs q-mr-sm" padding="xs sm" size="12px" flat dense color="primary" label="Open" icon="mdi-folder-open-outline-open" @click="loadLocalProject(project)" v-if="fileStore.currentLocalProjectDataFile !== project">
                   </q-btn>
                   <q-btn icon="mdi-close" color="primary" flat dense @click="removeRecentProject(index)"/>
                 </div>
@@ -136,11 +136,9 @@
       </q-card-section>
 
 
-      <q-separator />
-
       <q-card-actions class="row" v-if="!creatingNewProject">
         <div class="col-auto">
-          <q-btn color="accent" @click="creatingNewProject = true" icon="las la-plus" >New Project</q-btn>
+          <q-btn color="accent" @click="creatingNewProject = true" icon="mdi-plus" >New Project</q-btn>
         </div>
         <div class="col">
         </div>
@@ -151,14 +149,14 @@
 
         </div>
         <div class="col-auto" v-if="layoutStore.runsInDesktopApp()">
-          <q-btn icon="las la-upload"  flat color="secondary" @click="importLocalProject()" class="float-right">Open Local Project</q-btn>
+          <q-btn icon="mdi-upload"  flat color="secondary" @click="importLocalProject()" class="float-right">Open Local Project</q-btn>
         </div>
       </q-card-actions>
 
       <ProjectCreator v-if="creatingNewProject" :default-project-type="projectType"/>
       <q-separator />
       <q-card-actions v-if="creatingNewProject">
-        <q-btn icon="las la-arrow-left" flat color="primary" @click="creatingNewProject = false">Back</q-btn>
+        <q-btn icon="mdi-arrow-left-thin" flat color="primary" @click="creatingNewProject = false">Back</q-btn>
       </q-card-actions>
     </q-card>
   </q-dialog>
@@ -182,8 +180,8 @@
 
   const projectType = ref('cloud');
   const projectTypes = [
-    {label: 'Cloud projects', value: 'cloud', icon: 'las la-cloud'},
-    {label: 'Local projects', value: 'local', icon: 'las la-folder'},
+    {label: 'Cloud projects', value: 'cloud', icon: 'mdi-cloud-outline'},
+    {label: 'Local projects', value: 'local', icon: 'mdi-folder-outline'},
   ];
 
   const creatingNewProject = ref(false);

@@ -15,7 +15,7 @@
       <q-separator />
 
       <q-card-actions align="right">
-        <q-btn icon="las la-download" label="Export" color="primary" @click="download" :loading="downloading"/>
+        <q-btn icon="mdi-download" label="Export" color="primary" @click="download" :loading="downloading"/>
       </q-card-actions>
     </q-card>
 

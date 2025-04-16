@@ -6,7 +6,7 @@
       label="Brainstorming Parameters" class="full-width" switch-toggle-side>
         <div class="row q-gutter-md">
           <div class="col-12 col-grow" v-for="variable in uiData?.variables ?? []" :key="variable.title">
-            <q-input dense filled square  v-model="variable.value" :label="variable.title" :placeholder="variable.defaultValue" :hint="variable.hint" />
+            <q-input dense filled  v-model="variable.value" :label="variable.title" :placeholder="variable.defaultValue" :hint="variable.hint" />
           </div>
         </div>
       </q-expansion-item>
@@ -189,7 +189,7 @@ async function generate(replace = true) {
         uiData.value.ideas.push(idea);
       }
     }
-    
+
     updatePromptResultText();
   } finally {
     isGenerating.value = false;
@@ -309,7 +309,7 @@ async function generateSubIdeas(idea, replace = false) {
         idea.children.push(child);
       }
     }
-    
+
     updatePromptResultText();
   } finally {
     isGenerating.value = false;
@@ -361,7 +361,7 @@ async function expandIdea(idea) {
     }
 
     idea.descriptionAppend = '';
-    
+
     updatePromptResultText();
   } finally {
     isGenerating.value = false;
@@ -382,7 +382,7 @@ async function replyToIdea(idea, message) {
     if (!idea.conversation) {
       idea.conversation = [];
     }
-    
+
     // Add user message to conversation history
     idea.conversation.push({
       role: 'user',
@@ -394,13 +394,13 @@ async function replyToIdea(idea, message) {
 
     // Add messages to appendMessages
     const appendMessages = [];
-    
+
     // Start with idea context
     appendMessages.push({
-      type: 'assistant', 
+      type: 'assistant',
       text: `Idea: ${idea.text}${idea.description ? '\n\nDetails: ' + idea.description : ''}`
     });
-    
+
     // Add each conversation message as a separate entry with the appropriate role
     if (idea.conversation && idea.conversation.length > 0) {
       // Add all conversation messages except the most recent one (which we'll add separately)
@@ -412,7 +412,7 @@ async function replyToIdea(idea, message) {
         });
       }
     }
-    
+
     // Add the most recent user message with any special formatting from the prompt settings
     let replyMessage = prompt.value.settings.brainstorm_replyMessage ?? '$Message';
     replyMessage = replyMessage.replaceAll('$Message', message);
@@ -428,7 +428,7 @@ async function replyToIdea(idea, message) {
 
     // We'll store the AI's response here temporarily
     let aiResponse = '';
-    
+
     const onOutput = (fullText, newText, isFinished, isError) => {
       aiResponse = fullText;
     };
@@ -436,14 +436,14 @@ async function replyToIdea(idea, message) {
     newRequest.onOutput = onOutput;
 
     await executePromptClick2(newRequest);
-    
+
     // Add AI response to conversation history
     idea.conversation.push({
       role: 'assistant',
       text: aiResponse,
       timestamp: new Date().toISOString()
     });
-    
+
     updatePromptResultText();
   } finally {
     isGenerating.value = false;
@@ -515,7 +515,7 @@ async function generateSimilarIdeas(idea, replace = false) {
         uiData.value.ideas.push(idea);
       }
     }
-    
+
     updatePromptResultText();
   } finally {
     isGenerating.value = false;
@@ -542,7 +542,7 @@ function separateSubIdea(subIdea, parentIdea) {
       parentIdea.children.splice(index, 1);
     }
   }
-  
+
   updatePromptResultText();
 }
 
@@ -770,12 +770,12 @@ function updatePromptResultText() {
   // eslint-disable-next-line vue/no-mutating-props
   props.promptResult.originalText = likedIdeas.map(idea => {
     let text = `${idea.text}`;
-    
+
     // Add description if available
     if (idea.description) {
       text += '\n\nDetails: ' + idea.description;
     }
-    
+
     // Add related/child ideas if available
     if (idea.children && idea.children.length > 0) {
       text += '\n\nRelated Ideas:';
@@ -786,10 +786,10 @@ function updatePromptResultText() {
         }
       });
     }
-    
+
     // Add a markdown separator between sections for better readability
     text += '\n\n---\n\n';
-    
+
     return text;
   }).join('\n\n\n');
   // eslint-disable-next-line vue/no-mutating-props
@@ -828,19 +828,19 @@ function removeIdea(idea) {
   if (index !== -1) {
     uiData.value.ideas.splice(index, 1);
   }
-  
+
   // Remove from liked collection if present
   const likedIndex = uiData.value.likedIdeas.findIndex(i => i === idea);
   if (likedIndex !== -1) {
     uiData.value.likedIdeas.splice(likedIndex, 1);
   }
-  
+
   // Remove from disliked collection if present
   const dislikedIndex = uiData.value.dislikedIdeas.findIndex(i => i === idea);
   if (dislikedIndex !== -1) {
     uiData.value.dislikedIdeas.splice(dislikedIndex, 1);
   }
-  
+
   updatePromptResultText();
 }
 

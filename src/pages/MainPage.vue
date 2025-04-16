@@ -10,7 +10,7 @@
 
         <template v-slot:before>
           <div class="" style="height: calc(100vh - 50px)">
-            <div class="fit" style="background-color: rgba(0,0,0,0)">
+            <div class="fit bg-white-transparent">
               <div class="" id="file">
                 <FileDetail />
               </div>
@@ -23,7 +23,7 @@
 
           <div class="" style="height: calc(100vh - 33px)">
             <div class="absolute fit">
-                <div class="fit" style="background-color: rgba(0,0,0,0)">
+                <div class="fit bg-white-transparent">
                   <RightMenuComponent />
                 </div>
             </div>

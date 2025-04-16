@@ -21,7 +21,7 @@
           </div>
 
           <div class="col-auto flex items-center q-mr-sm">
-            <q-btn color="primary" @click="newConversation" size="md" icon="las la-pen-square" class="" label="New chat">
+            <q-btn color="primary" @click="newConversation" size="md" icon="mdi-pencil-box-outline" class="" label="New chat">
               <q-tooltip>
                 Start a new conversation with AI model
               </q-tooltip>
@@ -29,12 +29,12 @@
           </div>
 
           <div class="col-auto flex items-center">
-            <q-btn flat color="negative" icon="las la-trash" size="md">
+            <q-btn flat color="negative" icon="mdi-delete-outline" size="md">
               <q-menu>
                 <q-list dense>
                   <q-item clickable @click="removeConversation" v-close-popup>
                     <q-item-section side>
-                      <q-icon name="las la-times" />
+                      <q-icon name="mdi-close" />
                     </q-item-section>
                     <q-item-section>
                       Remove current conversation
@@ -43,7 +43,7 @@
                   <q-separator />
                   <q-item clickable @click="removeAllConversations">
                     <q-item-section side>
-                      <q-icon name="las la-trash" color="negative" />
+                      <q-icon name="mdi-delete-outline" color="negative" />
                     </q-item-section>
                     <q-item-section>
                       Remove all conversations
@@ -75,7 +75,7 @@
 
       <div class="col">
         <div class="full-width" style="position: absolute; bottom: 0; right: 0; z-index: 1000" >
-          <div class="q-mr-sm q-ml-xs transparent">
+          <div class="q-mr-lg bg-white">
             <div class="" >
 
               <div class="text-caption q-pa-md q-pb-sm q-pt-sm text-grey-7 left-border" v-if="results.length === 0">
@@ -93,18 +93,18 @@
 
               </div>
 
-              <div class="row q-mb-lg">
+              <div class="row left-border">
                 <div class="col q-ml-sm rounded-borders q-px-sm">
-                  <q-input square v-model="promptText" :label="'Write message to AI...'" borderless class="full-width" rows="4" type="textarea" lines dense ref="searchRef" @keydown="onInputKey">
+                  <q-input v-model="promptText" :label="'Write message to AI...'" borderless class="full-width" rows="4" type="textarea" lines dense ref="searchRef" @keydown="onInputKey">
                   </q-input>
                 </div>
                 <div class="col-auto q-ml-sm">
                   <div class="column">
                     <div class="col">
-                      <q-btn icon="las la-paper-plane" color="accent" @click="sendChat()" :disable="promptForChatId === null" />
+                      <q-btn icon="mdi-send-outline" color="accent" @click="sendChat()" :disable="promptForChatId === null" />
                     </div>
                     <div class="col q-mt-md">
-                      <q-btn flat icon="las la-cog" @click="settingsOpen = !settingsOpen" />
+                      <q-btn flat icon="mdi-cog" @click="settingsOpen = !settingsOpen" />
                     </div>
                   </div>
                 </div>

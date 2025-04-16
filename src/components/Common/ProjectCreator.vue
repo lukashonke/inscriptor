@@ -11,7 +11,7 @@
         <q-input autofocus outlined flat v-model="newProjectName" label="New Project Name" />
       </div>
       <div class="col-auto flex items-center">
-        <q-btn flat dense icon="las la-cog" @click="settingsExpanded = !settingsExpanded" />
+        <q-btn flat dense icon="mdi-cog" @click="settingsExpanded = !settingsExpanded" />
       </div>
     </div>
   </q-card-section>
@@ -20,7 +20,7 @@
     <q-slide-transition>
       <div v-show="settingsExpanded" class="">
         <div class="full-width">
-          <q-select square filled dense :options="projectTemplates" v-model="newProjectType" label="Project Template" emit-value option-label="label" option-value="id" style="max-width: 400px">
+          <q-select filled dense :options="projectTemplates" v-model="newProjectType" label="Project Template" emit-value option-label="label" option-value="id" style="max-width: 400px">
             <template v-slot:option="scope">
               <q-item v-bind="scope.itemProps">
                 <q-item-section avatar>
@@ -130,19 +130,19 @@ const projectTemplates = [
   {
     label: 'Fiction Template',
     description: 'Kick off a new novel, short story or any other narrative project.',
-    icon: 'las la-book',
+    icon: 'mdi-book-open-variant-outline',
     id: 'story',
   },
   {
     label: 'Non-Fiction Template',
     description: 'Kick off any kind of a non-fiction project.',
-    icon: 'las la-folder',
+    icon: 'mdi-text-box-outline',
     id: 'nonfiction',
   },
   {
     label: 'Blank Project',
     description: 'Create a new project from scratch.',
-    icon: 'las la-file',
+    icon: 'mdi-file-outline',
     id: 'blank',
   },
 ]

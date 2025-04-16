@@ -5,22 +5,22 @@
       <AppToolbar />
     </q-header>
 
-    <q-drawer show-if-above v-model="layoutStore.leftDrawerOpen" side="left" behavior="desktop" :width="333" class="right-border" style="border-color: rgb(217, 218, 218);">
-        <q-scroll-area class="fit"  style="background-color: rgba(0,0,0,0.02); border-color: red" >
+    <q-drawer show-if-above v-model="layoutStore.leftDrawerOpen" side="left" behavior="desktop" :width="333" class="right-border">
+        <q-scroll-area class="fit left-menu-scroll"  >
           <div class="q-pa-none">
             <LeftMenuComponent />
           </div>
           <div class="absolute full-width" style="bottom: 0">
             <q-separator />
-            <div class="row items-center q-pl-md" id="variables">
+            <div class="row items-center q-pl-md inscriptor-insert-shadow-top" id="variables">
               <div class="col">
-                <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="las la-database" label="Variables" @click="layoutStore.setVariableSettingsOpen(true)" />
+                <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="mdi-database-outline" label="Variables" @click="layoutStore.setVariableSettingsOpen(true)" />
               </div>
               <div class="col">
-                <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="las la-cog" label="Settings" @click="layoutStore.setSettingsOpen(true)" id="settingsButton" />
+                <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="mdi-cog" label="Settings" @click="layoutStore.setSettingsOpen(true)" id="settingsButton" />
               </div>
               <div class="col">
-                <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="las la-history" label="History" @click="layoutStore.setConsoleOpen(!layoutStore.consoleOpen)"/>
+                <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="mdi-history" label="History" @click="layoutStore.setConsoleOpen(!layoutStore.consoleOpen)"/>
               </div>
             </div>
           </div>
@@ -182,7 +182,7 @@ onMounted(async () => {
 
     Notify.create({
       message: 'Logged in as ' + currentUser.email,
-      icon: 'las la-user',
+      icon: 'mdi-account-outline',
       color: 'positive',
       position: 'top',
       timeout: 4000,

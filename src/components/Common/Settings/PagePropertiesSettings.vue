@@ -71,7 +71,7 @@
                   </q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-btn icon="las la-trash" flat color="negative" @click="promptStore.removeFileTemplate(template)" />
+                  <q-btn icon="mdi-delete-outline" flat color="negative" @click="promptStore.removeFileTemplate(template)" />
                 </q-item-section>
               </q-item>
             </q-list>

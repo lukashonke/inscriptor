@@ -1,5 +1,5 @@
 <template>
-  <div v-if="editor" class="bg-red">
+  <div v-if="editor" class="">
     <bubble-menu
       class="bubble-menu"
       :tippy-options="{ duration: 100, placement: 'right', maxWidth: '600px', zIndex: 99999 }"
@@ -67,16 +67,16 @@
     </floating-menu>
   </div>
 
-  <div v-if="editor" class="q-mb-md sticky">
-    <q-card class="row justify-center q-gutter-x-xs" bordered flat>
+  <div v-if="editor" class="q-mb-md sticky inscriptor-shadow-1">
+    <q-card class="row justify-center q-gutter-x-xs " bordered flat>
       <div class="col-auto">
-        <q-btn size="11px" dense flat square icon="format_bold" @click="editor.chain().focus().toggleBold().run()" :class="{ 'text-grey-5': !editor.isActive('bold'), 'text-primary': editor.isActive('bold') }" />
+        <q-btn size="11px" dense flat icon="format_bold" @click="editor.chain().focus().toggleBold().run()" :class="{ 'text-grey-5': !editor.isActive('bold'), 'text-primary': editor.isActive('bold') }" />
       </div>
       <div class="col-auto">
-        <q-btn size="11px" dense flat square icon="format_italic"  @click="editor.chain().focus().toggleItalic().run()" :class="{ 'text-grey-5': !editor.isActive('italic'), 'text-primary': editor.isActive('italic') }"/>
+        <q-btn size="11px" dense flat icon="format_italic"  @click="editor.chain().focus().toggleItalic().run()" :class="{ 'text-grey-5': !editor.isActive('italic'), 'text-primary': editor.isActive('italic') }"/>
       </div>
       <div class="col-auto">
-        <q-btn-dropdown size="11px" dense flat square label="Style" class="text-grey-5">
+        <q-btn-dropdown size="11px" dense flat label="Style" class="text-grey-5">
           <q-list>
             <q-item clickable v-close-popup @click="editor.chain().focus().toggleHeading({ level: 1 }).run()" :class="{ 'text-grey-5': !editor.isActive('heading', { level: 1 }), 'text-primary': editor.isActive('heading', { level: 1 }) }">
               <q-item-section>
@@ -106,7 +106,7 @@
         <q-btn size="11px" dense flat square icon="format_list_numbered"  @click="editor.chain().focus().toggleOrderedList().run()" :class="{ 'text-light': !editor.isActive('orderedList'), 'text-primary': editor.isActive('orderedList') }"/>
       </div>-->
       <div class="col-auto">
-        <q-btn size="11px" dense flat square icon="code"  @click="editor.chain().focus().toggleCodeBlock().run()" :class="{ 'text-grey-5': !editor.isActive('codeBlock'), 'text-primary': editor.isActive('codeBlock') }"/>
+        <q-btn size="11px" dense flat icon="code"  @click="editor.chain().focus().toggleCodeBlock().run()" :class="{ 'text-grey-5': !editor.isActive('codeBlock'), 'text-primary': editor.isActive('codeBlock') }"/>
       </div>
 
       <div class="col text-grey-5 text-caption flex items-center justify-center no-wrap ellipsis q-mx-md" ref="fileInfo">
@@ -123,7 +123,7 @@
           </span>
         </transition>
 
-        <q-chip dense v-if="fileStore.projectSettings.syncToCloud && promptStore.currentCharsCount >= layoutStore.getMaxFileSize()" color="negative" text-color="white" label="Max file size for your subscription plan reached." icon="las la-exclamation-triangle" class="text-caption" clickable @click="layoutStore.showUserDialog" />
+        <q-chip dense v-if="fileStore.projectSettings.syncToCloud && promptStore.currentCharsCount >= layoutStore.getMaxFileSize()" color="negative" text-color="white" label="Max file size for your subscription plan reached." icon="mdi-exclamation-thick" class="text-caption" clickable @click="layoutStore.showUserDialog" />
       </div>
 
       <!--<div class="col-auto">
@@ -131,7 +131,7 @@
       </div>-->
 
       <div class="col-auto">
-        <q-btn size="11px" id="togglePrompts" dense flat square icon="mdi-creation-outline" class="text-accent" :class="{ 'text-primary': showPrompts }">
+        <q-btn size="11px" id="togglePrompts" dense flat icon="mdi-creation-outline" class="text-accent" :class="{ 'text-primary': showPrompts }">
           <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" anchor="bottom start">
             <q-card v-show="showPrompts">
               <PromptSelector prompt-types="insert" @promptClick="promptClick" />
@@ -144,7 +144,7 @@
       </div>
 
       <div class="col-auto">
-        <q-btn size="11px" dense flat square icon="las la-font" @click="toggleAutomaticCorrections" class="" :class="{ 'text-primary': automaticCorrections, 'text-grey-5': !automaticCorrections }">
+        <q-btn size="11px" dense flat icon="mdi-alpha-g-box" @click="toggleAutomaticCorrections" class="" :class="{ 'text-primary': automaticCorrections, 'text-grey-5': !automaticCorrections }">
           <q-tooltip>
             Toggle Automatic Text Corrections
           </q-tooltip>
@@ -152,10 +152,10 @@
       </div>
 
       <div class="col-auto">
-        <q-btn size="11px" dense flat square icon="undo" @click="editor.chain().focus().undo().run()" :disabled="!editor.can().chain().focus().undo().run()" class="text-primary" />
+        <q-btn size="11px" dense flat icon="mdi-undo" @click="editor.chain().focus().undo().run()" :disabled="!editor.can().chain().focus().undo().run()" class="text-primary" />
       </div>
       <div class="col-auto">
-        <q-btn size="11px" dense flat square icon="redo" @click="editor.chain().focus().redo().run()" :disabled="!editor.can().chain().focus().redo().run()" class="text-primary" />
+        <q-btn size="11px" dense flat icon="mdi-redo" @click="editor.chain().focus().redo().run()" :disabled="!editor.can().chain().focus().redo().run()" class="text-primary" />
       </div>
 
     </q-card>
@@ -189,7 +189,7 @@
       direction="up"
     >
       <template v-for="prompt in promptStore.getStickyPrompts(fileStore.selectedFile)" :key="prompt.id">
-        <q-fab-action @click="promptClick({prompt: prompt})" color="white" text-color="black" square >
+        <q-fab-action @click="promptClick({prompt: prompt})" color="white" text-color="black" >
           {{ prompt.title }}&nbsp;
           <q-badge color="secondary" :label="promptStore.getModel(prompt.modelId)?.name" />
         </q-fab-action>

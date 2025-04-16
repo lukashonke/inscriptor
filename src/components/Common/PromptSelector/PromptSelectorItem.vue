@@ -3,7 +3,7 @@
     <template v-if="prompt.prompts">
       <q-btn flat size="10px" class="items-start row full-width" padding="5px 7px" no-caps>
         <div class="col-auto flex items-centers">
-          <q-icon name="las la-folder" />
+          <q-icon name="mdi-folder-outline" />
         </div>
         <div class="col text-left q-ml-sm q-mr-sm prompt-select-text">
           {{ truncate(prompt.label, 50) }}
@@ -37,7 +37,7 @@
           </q-btn>
         </div>
         <div class="col-auto flex items-center">
-          <q-btn flat size="sm" icon="las la-ellipsis-v" :class="[menuButtonColor]" class="q-px-xs float-right">
+          <q-btn flat size="sm" icon="mdi-dots-vertical" :class="[menuButtonColor]" class="q-px-xs float-right">
             <q-menu>
               <q-list dense>
 
@@ -62,7 +62,7 @@
                         clickable
                       >
                         <q-item-section side>
-                          <q-icon name="las la-microchip" size="xs" />
+                          <q-icon name="mdi-chip" size="xs" />
                         </q-item-section>
                         <q-item-section>{{ model.name }}</q-item-section>
                       </q-item>
@@ -144,7 +144,7 @@
 
                 <q-item clickable v-ripple>
                   <q-item-section side>
-                    <q-icon name="las la-table" :color="pinColor(prompt)" size="xs" />
+                    <q-icon name="mdi-table-column" :color="pinColor(prompt)" size="xs" />
                   </q-item-section>
                   <q-item-section>Move to Category</q-item-section>
                   <q-item-section side>
@@ -173,7 +173,7 @@
                         clickable
                       >
                         <q-item-section side>
-                          <q-icon name="las la-plus" size="xs" />
+                          <q-icon name="mdi-plus" size="xs" />
                         </q-item-section>
                         <q-item-section>Create new</q-item-section>
                       </q-item>
@@ -194,7 +194,7 @@
 
                 <q-item clickable v-ripple>
                   <q-item-section side>
-                    <q-icon name="las la-folder" :color="pinColor(prompt)" size="xs" />
+                    <q-icon name="mdi-folder-outline" :color="pinColor(prompt)" size="xs" />
                   </q-item-section>
                   <q-item-section>Move to Folder</q-item-section>
                   <q-item-section side>
@@ -214,7 +214,7 @@
                         :class="folder.color + '-3'"
                       >
                         <q-item-section side>
-                          <q-icon :name="folder.icon ?? 'las la-folder'" size="xs" />
+                          <q-icon :name="folder.icon ?? 'mdi-folder-outline'" size="xs" />
                         </q-item-section>
                         <q-item-section>{{ folder.label }}</q-item-section>
                       </q-item>
@@ -225,7 +225,7 @@
                         clickable
                       >
                         <q-item-section side>
-                          <q-icon name="las la-plus" size="xs" />
+                          <q-icon name="mdi-plus" size="xs" />
                         </q-item-section>
                         <q-item-section>Create new</q-item-section>
                       </q-item>
@@ -251,7 +251,7 @@
                   clickable
                 >
                   <q-item-section side>
-                    <q-icon name="las la-folder" size="xs" />
+                    <q-icon name="mdi-folder-outline" size="xs" />
                   </q-item-section>
                   <q-item-section>Remove from folder</q-item-section>
                 </q-item>
@@ -260,7 +260,7 @@
 
                 <q-item clickable v-ripple @click="openSettings(prompt)">
                   <q-item-section side>
-                    <q-icon name="las la-cog" size="xs" />
+                    <q-icon name="mdi-cog" size="xs" />
                   </q-item-section>
                   <q-item-section>Settings</q-item-section>
                 </q-item>
@@ -268,7 +268,7 @@
                 <q-separator />
                 <q-item clickable v-ripple @click="deletePrompt(prompt)" class="text-negative">
                   <q-item-section side>
-                    <q-icon name="las la-times" color="negative" size="xs" />
+                    <q-icon name="mdi-close" color="negative" size="xs" />
                   </q-item-section>
                   <q-item-section>Delete prompt</q-item-section>
                 </q-item>
@@ -306,7 +306,7 @@ const buttonRef = ref(null);
 const isHovered = useElementHover(buttonRef);
 
 const icon = computed(() => {
-  return props.prompt.icon ? props.prompt.icon : 'las la-circle';
+  return props.prompt.icon ? props.prompt.icon : 'mdi-circle-outline';
 });
 
 const emit = defineEmits(['promptClick'])

@@ -37,6 +37,7 @@ export const useFileStore = defineStore('files', {
     },
     files: [],
     selectedFile: null,
+    loadedUserSettings: false,
 
     temporaryFileMeta: {},
 
@@ -489,13 +490,14 @@ export const useFileStore = defineStore('files', {
     },
     async loadProject(project, initialiseProjectFromTemplate = false, forceSyncToCloudValue = null, importRecommendedPromptsFromTemplate = false, setWritingStyle = false) {
 
+      const promptStore = usePromptStore();
+
+      promptStore.restoreDefaultSettings();
+
+      let userSettingsLoaded = false;
       if(project.userSettings) {
-        const promptStore = usePromptStore();
-
-        promptStore.restoreDefaultSettings();
-
         await promptStore.applySettings(project.userSettings);
-        //promptStore.setCurrentHashToCurrentSettings();
+        userSettingsLoaded = true;
       }
 
       const data = project.data;
@@ -507,6 +509,15 @@ export const useFileStore = defineStore('files', {
       this.projectType = data.projectType;
       this.projectSettings = {};
       this.projectSettings.syncToCloud = forceSyncToCloudValue ?? data.projectSettings?.syncToCloud ?? false;
+      this.loadedUserSettings = userSettingsLoaded;
+
+      if(!userSettingsLoaded) {
+        Notify.create({
+          message: 'User Settings load problem. Please restart the application.',
+          color: 'negative',
+          position: 'top'
+        });
+      }
 
       this.lastUserProjectSettingsHash = this.computeUserProjectSettingsHash();
       this.lastProjectDataHash = this.computerProjectDataHash();
@@ -615,7 +626,7 @@ export const useFileStore = defineStore('files', {
 
       // -- save user project settings --
 
-      if(force || userProjectSettingsChanged) {
+      if((force || userProjectSettingsChanged) && this.loadedUserSettings) {
         this.lastUserProjectSettingsHash = userSettingsHash;
 
         try {

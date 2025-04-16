@@ -1,8 +1,8 @@
 <template>
-  <div class="" id="rightPanel" style="height: calc(100vh - 104px); width: 100%">
+  <div class="left-border" id="rightPanel" style="height: calc(100vh - 104px); width: 100%">
     <q-expansion-item
       label="File Details"
-      icon="las la-info-circle"
+      icon="mdi-information-outline"
       v-model="layoutStore.fileDetailsOpen"
       id="fileDetails"
     >
@@ -10,14 +10,14 @@
         <q-card-section class="q-pb-sm">
           <div class="row q-gutter-x-sm">
             <div class="col">
-              <q-select v-model="fileState" label="State" filled dense square :options="promptStore.statuses" option-label="label" option-value="label" clearable options-dense>
+              <q-select v-model="fileState" label="State" filled dense :options="promptStore.statuses" option-label="label" option-value="label" clearable options-dense>
                 <template v-slot:prepend>
-                  <q-icon name="las la-flag" />
+                  <q-icon name="mdi-flag-outline" />
                 </template>
                 <template v-slot:option="scope">
                   <q-item v-bind="scope.itemProps">
                     <q-item-section avatar>
-                      <q-icon name="las la-flag" :color="scope.opt.color ?? 'black'" />
+                      <q-icon name="mdi-flag-outline" :color="scope.opt.color ?? 'black'" />
                     </q-item-section>
                     <q-item-section>
                       <q-item-label>{{ scope.opt.label }}</q-item-label>
@@ -33,9 +33,9 @@
               </q-select>
             </div>
             <div class="col">
-              <q-select v-model="fileLabels" label="Labels" filled dense square :options="promptStore.labels" option-label="label" option-value="label" multiple clearable use-chips options-dense>
+              <q-select v-model="fileLabels" label="Labels" filled dense :options="promptStore.labels" option-label="label" option-value="label" multiple clearable use-chips options-dense>
                 <template v-slot:prepend>
-                  <q-icon name="las la-tag" />
+                  <q-icon name="mdi-tag-outline" />
                 </template>
                 <template v-slot:option="scope">
                   <q-item v-bind="scope.itemProps">
@@ -60,12 +60,12 @@
         <q-card-section class="q-py-sm">
           <q-img v-if="file.imageUrl" :src="file.imageUrl" class="full-width" ref="fileImg" style="max-height: 400px;" fit="contain">
             <div class="absolute all-pointer-events q-gutter-y-xs no-padding flex column" style="" v-if="imageHovered">
-              <q-btn  flat size="12px" icon="las la-upload"  @click="uploadImage">
+              <q-btn  flat size="12px" icon="mdi-upload"  @click="uploadImage">
                 <q-tooltip>
                   Replace image
                 </q-tooltip>
               </q-btn>
-              <q-btn flat size="12px" icon="las la-times" @click="deleteFileImage">
+              <q-btn flat size="12px" icon="mdi-close" @click="deleteFileImage">
                 <q-tooltip>
                   Delete image
                 </q-tooltip>
@@ -73,13 +73,13 @@
             </div>
 
           </q-img>
-          <q-btn v-else flat no-caps :loading="uploadingImage" @click="uploadImage" icon="las la-image" color="grey-7" label="Add Image" class="full-width" />
+          <q-btn v-else flat no-caps :loading="uploadingImage" @click="uploadImage" icon="mdi-image-outline" color="grey-7" label="Add Image" class="full-width" />
         </q-card-section>
         <q-card-section class="q-py-sm">
           <InputWithAi v-model="fileSynopsis" label="Synopsis" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" :prompt-input="file.content" :class="writeClasses" />
         </q-card-section>
         <q-card-section class="q-py-sm">
-          <q-input label="Note" v-model="fileNote" type="textarea" filled :class="layoutStore.darkMode ? 'bg-brown-10' : 'bg-yellow-2'" dense square/>
+          <q-input label="Note" v-model="fileNote" type="textarea" filled :class="layoutStore.darkMode ? 'bg-brown-10' : 'bg-yellow-2'" dense/>
         </q-card-section>
         <q-card-section class="q-pt-sm">
           <div class="">
@@ -111,19 +111,19 @@
 
       <div class="fit ai-panel scroll">
         <div class="text-center q-mt-md q-mb-md">
-          <q-btn-toggle :options="views" v-model="currentView" unelevated no-caps class="bordered" toggle-color="primary" padding="xs md" id="aiSwitch" />
+          <q-btn-toggle :options="views" v-model="currentView" unelevated no-caps class="bordered inscriptor-highlight-btn" toggle-color="primary" padding="xs md" id="aiSwitch" />
         </div>
         <q-card flat v-if="promptStore.analysisEnabled" class="bg-transparent">
 
           <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length === 0">
           <span class="text-warning">
-            <q-icon name="las la-exclamation-triangle" />
+            <q-icon name="mdi-exclamation-thick" />
             No analysis prompts created
           </span>
           </q-card-section>
 
           <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length > 0">
-            <q-select clearable options-dense v-model="promptStore.selectedAnalysisPrompts" label="Active Analysis prompts" outlined dense filled square :options="availableAnalysisPrompts" multiple use-chips/>
+            <q-select clearable options-dense v-model="promptStore.selectedAnalysisPrompts" label="Active Analysis prompts" outlined dense filled :options="availableAnalysisPrompts" multiple use-chips/>
             <q-linear-progress indeterminate v-if="layoutStore.analysisTriggered" />
           </q-card-section>
 
@@ -145,7 +145,7 @@
 
               </div>
             </div>
-            <q-btn outline @click="promptStore.promptSelectionAnalysisPrompts" icon="las la-sync" class="q-mt-md" color="green" size="sm"/>
+            <q-btn outline @click="promptStore.promptSelectionAnalysisPrompts" icon="mdi-sync" class="q-mt-md" color="green" size="sm"/>
           </q-card-section>
 
           <q-card-section v-else-if="promptStore.selectedAnalysisPrompts.length > 0 && selectionPromptResults?.length === 0" class="text-center">

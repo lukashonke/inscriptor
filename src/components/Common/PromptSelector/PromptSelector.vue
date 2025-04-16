@@ -26,7 +26,7 @@
             size="12px"
             no-caps
             :label="category.label.length === 0 ? 'Default' : category.label"
-            :icon="category.icon ?? 'las la-circle'"
+            :icon="category.icon ?? 'mdi-circle-outline'"
             :class="[
               'bg-' + (category.color ?? 'blue') + (currentPromptCategory === category.label ? '-1' : '-0'),
                'text-' + (category.color ?? 'blue') + '-9'
@@ -38,20 +38,20 @@
               <q-list dense>
                 <q-item clickable v-ripple class="" @click="promptStore.pushCategoryOrder(category, -1)">
                   <q-item-section side>
-                    <q-icon name="las la-arrow-up" size="xs" />
+                    <q-icon name="mdi-arrow-up-thin" size="xs" />
                   </q-item-section>
                   <q-item-section>Move Up</q-item-section>
                 </q-item>
                 <q-item clickable v-ripple class="" @click="promptStore.pushCategoryOrder(category, 1)">
                   <q-item-section side>
-                    <q-icon name="las la-arrow-down" size="xs" />
+                    <q-icon name="mdi-arrow-down-thin" size="xs" />
                   </q-item-section>
                   <q-item-section>Move Down</q-item-section>
                 </q-item>
                 <q-separator />
                 <q-item clickable v-ripple class="text-negative" @click="deleteAllPrompts(category)">
                   <q-item-section side>
-                    <q-icon name="las la-times" size="xs" />
+                    <q-icon name="mdi-close" size="xs" />
                   </q-item-section>
                   <q-item-section>Delete prompts in this category</q-item-section>
                 </q-item>
@@ -79,7 +79,7 @@
             no-caps
             size="12px"
             label="Open Inscriptor Hub"
-            icon="las la-store"
+            icon="mdi-storefront-outline"
             :class="[
               'bg-primary-0',
                'text-black'
@@ -109,7 +109,7 @@
             <q-card-section class="no-padding">
 
               <template v-if="props.promptTypes === 'insert'">
-                <q-chip text-color="black" :color="currentFilePromptInput.color + '-3'" icon="las la-check" >
+                <q-chip text-color="black" :color="currentFilePromptInput.color + '-3'" icon="mdi-check" >
                   {{currentFilePromptInput.label}} included
                   <q-tooltip color="primary">
                     <div>all text from file</div>
@@ -117,7 +117,7 @@
                 </q-chip>
               </template>
               <template v-else>
-                <q-chip text-color="black" :color="selectedTextPromptInput.color + '-3'" icon="las la-check" >
+                <q-chip text-color="black" :color="selectedTextPromptInput.color + '-3'" icon="mdi-check" >
                   {{selectedTextPromptInput.label}}
                   <q-tooltip color="primary">
                     <div>selected text it included</div>
@@ -130,7 +130,7 @@
           <InputWithAi v-model="customPromptText" :autofocus="true" :filled="true" label="Instructions for AI" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Prompt Refiner')" :prompt-input="customPromptText" class="write-monospace" :automatic-text-correction="false"/>
           <div class="row">
             <div class="col-auto">
-              <q-select v-model="customPromptModel" :options="models" filled dense options-dense square label="AI Model" class="" />
+              <q-select v-model="customPromptModel" :options="models" filled dense options-dense label="AI Model" class="" />
             </div>
             <div class="col-12 q-mt-lg">
               <q-btn-dropdown icon="mdi-creation-outline" split label="Prompt" :disable="!canCustomPrompt" color="accent" @click="customPromptClick" class="full-width">
@@ -289,7 +289,7 @@ const categories = computed(() => {
     if (!existingCategory) {
       retValue.push({
         label: pd,
-        icon: 'las la-circle'
+        icon: 'mdi-circle-outline'
       });
     }
   }
@@ -365,7 +365,7 @@ function groupPromptsByFolder(prompts) {
       } else {
         usedFolder = {
           label: prompt.folder,
-          icon: folder?.icon ?? 'las la-folder',
+          icon: folder?.icon ?? 'mdi-folder-outline',
           color: folder?.color ?? 'black',
           prompts: [prompt]
         };

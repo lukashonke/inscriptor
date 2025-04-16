@@ -15,7 +15,7 @@
         </div>
         <div class="row">
           <div class="col">
-            <q-input square autofocus dense filled v-model="inlineReactText" label="Instruction" />
+            <q-input autofocus dense filled v-model="inlineReactText" label="Instruction" />
           </div>
           <div class="col-auto flex items-center">
             <q-btn @click="promptResultInlinePrompt(promptResult.prompt, inlineReactText)" no-caps size="12px" dense flat icon="mdi-send" padding="4px 6px" class="bg-white" color="primary">
@@ -40,29 +40,28 @@
       </div>
     </div>
 
-
   </template>
 
   <transition appear enter-active-class="animated fadeIn slow" leave-active-class="animated fadeOut">
 
-    <q-card flatbordered :class="isReactionToAnotherPrompt ? 'q-ml-md' : ''">
+    <q-card :class="isReactionToAnotherPrompt ? 'q-ml-md' : ''" class="hoverable-card idea-card gradient-variation-1 q-pa-xs no-p-margin">
       <div class="prompt-actions sticky-top">
         <div class="row no-wrap ellipsis">
           <div class="col-auto">
-            <q-btn color="primary" flat unelevated size="sm" :icon="type === 'inline' ? 'las la-plus' : 'las la-angle-double-left'" @click="insert" :loading="copying">
+            <q-btn color="grey-7" flat unelevated size="sm" :icon="type === 'inline' ? 'mdi-plus' : 'mdi-chevron-double-left'" @click="insert" :loading="copying" class="hoverable-btn-semi">
               <q-tooltip :delay="1000">
                 Click to insert
               </q-tooltip>
             </q-btn>
           </div>
           <div class="col-auto">
-            <q-btn color="primary" flat unelevated size="sm" icon="las la-copy" v-if="type !== 'inline'">
+            <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-content-copy" v-if="type !== 'inline'" class="hoverable-btn-semi">
               <q-menu>
                 <q-list dense>
                   <template v-if="!hasImages">
                     <q-item clickable @click="copyToClipboard($event)">
                       <q-item-section side>
-                        <q-icon name="las la-clipboard" size="xs" />
+                        <q-icon name="mdi-clipboard-multiple-outline" size="xs" />
                       </q-item-section>
                       <q-item-section>
                         Copy to clipboard
@@ -71,7 +70,7 @@
                     <q-separator />
                     <q-item clickable @click="copyToVariable($event, variable)" v-for="variable in variables" :key="variable.title">
                       <q-item-section side>
-                        <q-icon name="las la-cogs" size="xs" />
+                        <q-icon name="mdi-cogs" size="xs" />
                       </q-item-section>
                       <q-item-section>
                         Copy to variable ${{variable.title}}
@@ -82,7 +81,7 @@
                     <q-separator />
                     <q-item clickable @click="copyToFileImage($event)">
                       <q-item-section side>
-                        <q-icon name="las la-image" size="xs" />
+                        <q-icon name="mdi-image-outline" size="xs" />
                       </q-item-section>
                       <q-item-section>
                         Copy to file cover image
@@ -95,30 +94,30 @@
           </div>
 
           <div class="col ellipsis">
-            <q-badge class="q-ml-md q-gutter-x-xs">
+            <q-badge class="q-ml-md q-gutter-x-xs hoverable-btn-semi">
               <span>{{ promptResultTitle }}</span>
-              <span v-if="promptResultModel?.length > 0"><q-icon name="las la-microchip"  />{{ promptResultModel }}</span>
+              <span v-if="promptResultModel?.length > 0"><q-icon name="mdi-chip"  />{{ promptResultModel }}</span>
               <span v-if="promptResultTemperature"><q-icon  name="mdi-thermometer-low" /> {{ promptResultTemperature }}</span>
             </q-badge>
           </div>
 
           <div class="col-auto" v-if="collapsed">
-            <q-btn color="primary" flat unelevated size="sm" :icon="collapsed ? 'las la-plus-square' : 'las la-minus-square'" @click="collapsed = !collapsed">
+            <q-btn color="grey-7" flat unelevated size="sm" :icon="collapsed ? 'mdi-plus-square' : 'mdi-minus-box-outline'" @click="collapsed = !collapsed" class="hoverable-btn-semi">
             </q-btn>
           </div>
 
           <div class="col-auto" v-if="hasClose">
-            <q-btn color="primary" flat unelevated size="sm" icon="las la-times" @click="onClose">
+            <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-close" @click="onClose" class="hoverable-btn-semi">
             </q-btn>
           </div>
           <div class="col-auto" v-else>
             <div class="col-auto">
-              <q-btn color="primary" flat unelevated size="sm" icon="las la-ellipsis-v">
+              <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-dots-vertical" class="hoverable-btn-semi">
                 <q-menu>
                   <q-list dense>
                     <q-item clickable @click="expanded = !expanded; collapsed = false">
                       <q-item-section side>
-                        <q-icon name="las la-expand-arrows-alt" size="xs" />
+                        <q-icon name="mdi-arrow-expand" size="xs" />
                       </q-item-section>
                       <q-item-section>
                         {{ expanded ? 'Collapse' : 'Expand' }}
@@ -126,7 +125,7 @@
                     </q-item>
                     <q-item clickable @click="collapsed = !collapsed" v-if="!isPrompting && type !== 'inline'">
                       <q-item-section side>
-                        <q-icon :name="collapsed ? 'las la-plus-square' : 'las la-minus-square'" size="xs" />
+                        <q-icon :name="collapsed ? 'mdi-plus-square' : 'mdi-minus-box-outline'" size="xs" />
                       </q-item-section>
                       <q-item-section>
                         {{ collapsed ? 'Maximize' : 'Minimize' }}
@@ -151,7 +150,7 @@
                     <q-separator />
                     <q-item clickable @click="removePromptResult($event)" v-if="!isPrompting && type !== 'inline'" class="text-negative">
                       <q-item-section side>
-                        <q-icon name="las la-trash" size="xs" />
+                        <q-icon name="mdi-delete-outline" size="xs" />
                       </q-item-section>
                       <q-item-section>
                         Delete
@@ -163,22 +162,13 @@
             </div>
           </div>
           <div class="col-auto">
-            <q-btn class="float-right" flat color="warning" unelevated size="sm" icon="las la-stop" @click.prevent="stopPrompting($event)" v-if="isPrompting">
+            <q-btn class="float-right hoverable-btn-semi" flat color="warning" unelevated size="sm" icon="mdi-stop" @click.prevent="stopPrompting($event)" v-if="isPrompting" >
               <q-tooltip>Stop</q-tooltip>
             </q-btn>
           </div>
-          <!--<q-btn class="float-right" flat color="primary" unelevated size="sm" icon="las la-robot" v-if="!isPrompting">
-          <q-tooltip>Prompt this</q-tooltip>
-          <q-menu>
-            <q-card>
-              <PromptSelector prompt-types="inline" @promptClick="promptClick"></PromptSelector>
-            </q-card>
-          </q-menu>
-        </q-btn>-->
         </div>
-        <q-separator />
       </div>
-      <q-card-section v-if="collapsed === false">
+      <q-card-section v-if="collapsed === false" class="">
         <q-spinner-grid v-if="promptResult.waitingForResponse" />
 
         <div class="q-pa-none" :class="classes">
@@ -230,7 +220,7 @@
           </div>
 
           <div v-if="promptResult.prompt.promptStyle === 'brainstorm-ui'" class="q-mb-md">
-            <q-btn color="primary" label="Open" no-caps size="sm" icon="mdi-open-in-new" @click="useLayoutStore().openPromptUiDialog(promptResult)">
+            <q-btn color="grey-7" label="Open" no-caps size="sm" icon="mdi-open-in-new" @click="useLayoutStore().openPromptUiDialog(promptResult)">
             </q-btn>
           </div>
 
@@ -239,7 +229,7 @@
               <q-card v-for="(idea, index) in promptBrainstormValueTree" :key="index" flat class="no-margin">
                 <q-card-section class="q-px-sm q-py-none">
                   <div class="prompt-brainstorm-idea">
-                    <q-btn @click="promptBrainstormValueTree.splice(index, 1)" flat size="sm" class="float-right" icon="las la-times" color="negative" dense />
+                    <q-btn @click="promptBrainstormValueTree.splice(index, 1)" flat size="sm" class="float-right" icon="mdi-close" color="negative" dense />
                     <span v-html="markdownToHtml(idea.text)"></span>
 
                     <div class="full-width flex q-my-xs prompt-brainstorm-actions">
@@ -247,9 +237,9 @@
                         <q-btn flat padding="xs xs" no-caps color="primary" size="sm" icon="mdi-creation-outline" label="Expand" @click="promptTreeRespond(idea, 'Create ideas that are building on this idea')" class="q-mr-md"/>
                         <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Similar" @click="promptTreeRespond(idea, 'Create ideas similar to this idea')"  class="q-mr-md"/>
                         <template v-if="idea.customReplyEnabled">
-                          <q-input v-model="idea.customReply" filled dense square autofocus autogrow/>
-                          <q-btn flat padding="xs sm" no-caps color="primary" icon="las la-reply" size="sm" @click="idea.customReplyEnabled = false; promptTreeRespond(idea, 'Perform this custom instruction - \'' + idea.customReply + '\'')" class="q-mr-sm"/>
-                          <q-btn flat padding="xs sm" no-caps color="primary" icon="las la-times" size="sm" @click="idea.customReplyEnabled = false"  class="q-mr-sm"/>
+                          <q-input v-model="idea.customReply" filled dense autofocus autogrow/>
+                          <q-btn flat padding="xs sm" no-caps color="primary" icon="mdi-reply-outline" size="sm" @click="idea.customReplyEnabled = false; promptTreeRespond(idea, 'Perform this custom instruction - \'' + idea.customReply + '\'')" class="q-mr-sm"/>
+                          <q-btn flat padding="xs sm" no-caps color="primary" icon="mdi-close" size="sm" @click="idea.customReplyEnabled = false"  class="q-mr-sm"/>
                         </template>
                         <template v-else>
                           <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply" @click="idea.customReplyEnabled = true"  class="q-mr-sm"/>
@@ -261,7 +251,7 @@
                     <q-card v-if="idea.children && idea.children.length > 0" bordered flat class="bg-grey-1 q-py-md q-mb-md">
                       <template v-for="(child, i) in idea.children " :key="i">
                         <q-card-section class="q-px-md q-py-none" >
-                          <q-btn @click="idea.children.splice(i, 1)" flat size="sm" class="float-right" icon="las la-times" color="negative" dense />
+                          <q-btn @click="idea.children.splice(i, 1)" flat size="sm" class="float-right" icon="mdi-close" color="negative" dense />
                           <span v-html="markdownToHtml(child.text)" class=""></span>
 
 
@@ -270,9 +260,9 @@
                               <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Expand" @click="promptTreeRespond(child, 'Create ideas that are expanding on this idea')"  class="q-mr-sm"/>
                               <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Similar" @click="promptTreeRespond(child, 'Create ideas similar to this idea')"  class="q-mr-sm"/>
                               <template v-if="child.customReplyEnabled">
-                                <q-input v-model="child.customReply" filled dense square autofocus autogrow/>
-                                <q-btn flat padding="xs sm" no-caps color="primary" icon="las la-reply" size="sm" @click="child.customReplyEnabled = false; promptTreeRespond(child, 'Perform this custom instruction - \'' + child.customReply + '\'')" class="q-mr-sm"/>
-                                <q-btn flat padding="xs sm" no-caps color="primary" icon="las la-times" size="sm" @click="child.customReplyEnabled = false"  class="q-mr-sm"/>
+                                <q-input v-model="child.customReply" filled dense autofocus autogrow/>
+                                <q-btn flat padding="xs sm" no-caps color="primary" icon="mdi-reply-outline" size="sm" @click="child.customReplyEnabled = false; promptTreeRespond(child, 'Perform this custom instruction - \'' + child.customReply + '\'')" class="q-mr-sm"/>
+                                <q-btn flat padding="xs sm" no-caps color="primary" icon="mdi-close" size="sm" @click="child.customReplyEnabled = false"  class="q-mr-sm"/>
                               </template>
                               <template v-else>
                                 <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply" @click="child.customReplyEnabled = true"  class="q-mr-sm"/>
@@ -288,7 +278,7 @@
 
                             <template v-for="(childChild, ii) in child.children " :key="ii">
                               <q-card-section class="q-pa-md">
-                                <q-btn @click="child.children.splice(ii, 1)" flat size="sm" class="float-right" icon="las la-times" color="negative" dense />
+                                <q-btn @click="child.children.splice(ii, 1)" flat size="sm" class="float-right" icon="mdi-close" color="negative" dense />
                                 <span v-html="markdownToHtml(childChild.text)"></span>
                               </q-card-section>
                             </template>
@@ -314,7 +304,7 @@
             <vue-mermaid-string :value="promptResult.text" :options="{ securityLevel: 'loose' }"/>
           </template>
           <template v-else>
-            <q-input v-if="!hasImages && editEnabled" filled dense square v-model="promptResultText" type="textarea"
+            <q-input v-if="!hasImages && editEnabled" filled dense v-model="promptResultText" type="textarea"
               autogrow />
             <template v-else-if="promptResultText">
               <contenteditable tag="div" :class="writeClasses" class="no-outline" v-model="promptResultText"
@@ -333,29 +323,25 @@
 
         <div v-if="promptResult.error">
           <span class="text-negative">
-            <q-icon name="las la-exclamation-triangle" />
+            <q-icon name="mdi-exclamation-thick" />
             Error while prompting: {{ promptResult.error }}
           </span>
         </div>
       </q-card-section>
 
-      <q-separator />
-
-      <q-card-actions v-if="type === 'inline'">
-        <q-btn class="text-weight-bold" label="Reply" flat color="primary" unelevated size="sm" icon="las la-reply" @click.prevent="toggleReply()" :loading="replyLoading">
+      <div v-if="type === 'inline'" class="row prompt-actions">
+        <q-btn class="text-weight-bold hoverable-btn-semi" label="Reply" no-caps flat color="grey-7" unelevated size="sm" icon="mdi-reply-outline" @click.prevent="toggleReply()" :loading="replyLoading" >
           <q-tooltip>Reply on this prompt to AI</q-tooltip>
         </q-btn>
-      </q-card-actions>
+      </div>
 
-      <q-card-actions
-        v-if="!isPrompting && allowRegenerate && collapsed === false && promptResult.prompt.promptType !== 'chat' && promptResult.prompt.promptStyle !== 'brainstorm-ui'"
-        class="row">
-        <q-btn class="text-weight-bold" label="Reply" flat color="primary" unelevated size="sm" icon="las la-reply" @click.prevent="toggleReply()">
+      <div v-if="!isPrompting && allowRegenerate && collapsed === false && promptResult.prompt.promptType !== 'chat' && promptResult.prompt.promptStyle !== 'brainstorm-ui'" class="row prompt-actions">
+        <q-btn class="text-weight-bold hoverable-btn-semi" label="Reply" no-caps flat color="grey-7" unelevated size="sm" icon="mdi-reply-outline" @click.prevent="toggleReply()">
           <q-tooltip>Reply on this prompt to AI</q-tooltip>
         </q-btn>
 
         <div class="col q-ml-md">
-          <q-btn class="col-auto text-weight-bold" flat color="primary" unelevated size="sm"
+          <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm"
             @click.prevent="generateFollowUpQuestions()" icon="mdi-creation-outline"
             v-if="promptStore.getPredefinedPromptId('Prompt Follow-Up Generator')"
             :loading="promptStore.isPrompting && promptStore.isSilentPrompting">
@@ -365,20 +351,20 @@
           </q-btn>
           <template v-if="promptResult.followUpQuestions">
             <template v-for="question in promptResult.followUpQuestions" :key="question.title">
-              <q-btn class="col-auto text-weight-bold" :label="question.title" flat color="accent" unelevated size="sm"
+              <q-btn class="col-auto text-weight-bold hoverable-btn-semi" :label="question.title" flat color="accent" unelevated size="sm"
                 @click.prevent="doPromptAction({type: 'Reply', typeParameter: question.followUp})">
                 <q-tooltip>
                   Reply: '{{ question.followUp }}'
                 </q-tooltip>
               </q-btn>
             </template>
-            <q-btn class="col-auto text-weight-bold" flat color="primary" unelevated size="sm"
-              @click.prevent="removeFollowUpQuestions()" icon="las la-times">
+            <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm"
+              @click.prevent="removeFollowUpQuestions()" icon="mdi-close">
             </q-btn>
           </template>
           <template v-else>
             <template v-for="(promptAction, index) in promptResult.prompt.actions ?? []" :key="index">
-              <q-btn class="col-auto text-weight-bold" :label="promptAction.title" flat color="primary" unelevated
+              <q-btn class="col-auto text-weight-bold hoverable-btn-semi" :label="promptAction.title" flat color="grey-7" unelevated
                 size="sm" @click.prevent="doPromptAction(promptAction)" :icon="getPromptActionIcon(promptAction)">
                 <q-tooltip v-if="promptAction.type === 'Add to Context'">
                   Add this text to a file with context '{{promptAction.typeParameter}}'
@@ -399,12 +385,12 @@
 
         <q-space />
 
-        <q-btn class="text-weight-bold float-right" label="Prompt Again" flat color="primary" unelevated size="sm"
-          icon="las la-sync" @click.prevent="regeneratePrompt($event, false)">
+        <q-btn class="text-weight-bold float-right hoverable-btn-semi" label="Prompt Again" flat color="grey-7" unelevated size="sm" no-caps
+          icon="mdi-sync" @click.prevent="regeneratePrompt($event, false)">
           <q-tooltip>Generate this prompt again</q-tooltip>
         </q-btn>
 
-        <q-btn v-if="!promptResult.prompt.enablePromptRuns" class="text-weight-bold float-right" flat color="primary"
+        <q-btn v-if="!promptResult.prompt.enablePromptRuns" class="text-weight-bold float-right hoverable-btn-semi" flat color="grey-7"
           unelevated size="sm" icon="arrow_drop_down">
           <q-menu>
             <q-list dense>
@@ -469,7 +455,7 @@
                     <q-item v-for="model in promptStore.models" :key="model"
                       @click="regeneratePrompt($event, false, undefined, model)" dense clickable>
                       <q-item-section side>
-                        <q-icon name="las la-microchip" size="xs" />
+                        <q-icon name="mdi-chip" size="xs" />
                       </q-item-section>
                       <q-item-section>{{ model.name }}</q-item-section>
                     </q-item>
@@ -481,15 +467,15 @@
           </q-menu>
         </q-btn>
 
-      </q-card-actions>
+      </div>
 
       <q-slide-transition>
         <div v-show="reactExpanded" class="row q-mx-md q-mb-md q-pb-sm">
           <div class="col q-mr-sm">
-            <q-input v-model="reactInput" borderless dense square label="Message" autofocus autogrow ref="reactInputRef" @keyup="onReplyKeyup" />
+            <q-input v-model="reactInput" borderless dense label="Message" autofocus autogrow ref="reactInputRef" @keyup="onReplyKeyup" />
           </div>
           <div class="col-auto">
-            <q-btn icon="las la-reply" @click="promptReactClick()" color="primary" />
+            <q-btn icon="mdi-reply-outline" @click="promptReactClick()" color="grey-7" />
           </div>
         </div>
       </q-slide-transition>
@@ -826,13 +812,13 @@
 
   function getPromptActionIcon(action) {
     if(action.type === 'Add to Context') {
-      return 'las la-file-alt';
+      return 'mdi-file-document-outline';
     }
     if(action.type === 'Run Prompt') {
       return 'mdi-creation-outline';
     }
     if(action.type === 'Save to Variable') {
-      return 'las la-cogs';
+      return 'mdi-cogs';
     }
     if(action.type === 'Reply') {
       return undefined;
@@ -1314,7 +1300,6 @@
 
 <style scoped>
   .prompt-actions{
-    background-color: white;
     z-index: 1000;
     height: 1.7rem;
   }
@@ -1327,5 +1312,10 @@
   }
   h1 {
     font-size: 1.3rem;
+  }
+
+  .gradient-variation-1 {
+    background: linear-gradient(135deg, #ffffff 80%, #ededf8 100%);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   }
 </style>

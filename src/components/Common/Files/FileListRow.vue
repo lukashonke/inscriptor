@@ -23,8 +23,8 @@
 
         <div class="no-wrap  flex items-center inline" @dragstart="startDrag($event, file)" @dragend="endDrag($event, file)" draggable="true">
           <template v-if="true || (file.children?.length > 0 ?? false)">
-            <q-btn :color="props.file.state?.color" flat dense @click.prevent="clickExpandFile($event, file)" square padding="4px 1px" size="10px" class="q-mr-xs">
-              <q-icon :name="isMainRowHovered ? (file.expanded ? 'expand_less' : 'expand_more') : (file.icon ?? ('las la-folder'))" size="16px" class="no-margin no-padding"/>
+            <q-btn :color="props.file.state?.color" flat dense @click.prevent="clickExpandFile($event, file)" padding="4px 1px" size="10px" class="q-mr-xs">
+              <q-icon :name="isMainRowHovered ? (file.expanded ? 'expand_less' : 'expand_more') : (file.icon ?? ('mdi-folder-outline'))" size="16px" class="no-margin no-padding"/>
               <q-tooltip :delay="500" v-if="props.file.state?.color">
                 State: {{ props.file.state?.label }}
               </q-tooltip>
@@ -34,7 +34,7 @@
             <!-- empty element with 14 px width -->
             <div class="inline-block" style="width: 1px">&nbsp;</div>
 
-            <q-icon :name="file.icon ?? 'las la-file-alt'" :color="file.state?.color" class="no-padding no-margin" size="17px" />
+            <q-icon :name="file.icon ?? 'mdi-file-outline'" :color="file.state?.color" class="no-padding no-margin" size="17px" />
             <div class="inline-block" style="width: 5px">&nbsp;</div>
 
           </template>
@@ -68,7 +68,7 @@
       </div>
 
       <div class="col-auto flex items-center" :style="{ visibility: isMainRowHovered ? 'visible' : 'hidden' }">
-        <q-btn icon="las la-ellipsis-h" color="grey" flat dense size="10px" padding="3px 2px" square @click.stop class="q-ml-xs">
+        <q-btn icon="mdi-dots-horizontal" color="grey" flat dense size="10px" padding="3px 2px" @click.stop class="q-ml-xs">
           <q-menu>
             <FileListRowContextMenu :file="file"/>
           </q-menu>

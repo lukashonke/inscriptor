@@ -2,7 +2,7 @@
   <q-list dense style="min-width: 100px">
     <q-item v-if="fileStore.checkCanHaveChildren(file)" clickable v-close-popup @click.prevent="addFile(file, $event)">
       <q-item-section avatar>
-        <q-icon name="las la-plus"/>
+        <q-icon name="mdi-plus"/>
       </q-item-section>
       <q-item-section>Add</q-item-section>
     </q-item>
@@ -11,14 +11,14 @@
 
     <q-item clickable v-close-popup @click.prevent="renameFile(file, $event)">
       <q-item-section avatar>
-        <q-icon name="las la-pen"/>
+        <q-icon name="mdi-pencil-outline"/>
       </q-item-section>
       <q-item-section>Rename</q-item-section>
     </q-item>
 
     <q-item clickable v-if="fileTemplates?.length > 0 && fileStore.checkCanHaveChildren(file)">
       <q-item-section avatar>
-        <q-icon name="las la-plus"/>
+        <q-icon name="mdi-plus"/>
       </q-item-section>
 
       <q-item-section>Add from template</q-item-section>
@@ -44,7 +44,7 @@
 
     <q-item clickable>
       <q-item-section avatar>
-        <q-icon name="las la-flag"/>
+        <q-icon name="mdi-flag-outline"/>
       </q-item-section>
 
       <q-item-section>State</q-item-section>
@@ -56,7 +56,7 @@
         <q-list dense>
           <q-item clickable v-close-popup @click="fileStore.setFileState(file, null)" >
             <q-item-section side>
-              <q-icon name="las la-times" color="transparent"/>
+              <q-icon name="mdi-close" color="transparent"/>
             </q-item-section>
             <q-item-section>
               <q-item-label>Clear</q-item-label>
@@ -64,7 +64,7 @@
           </q-item>
           <q-item clickable v-close-popup @click="fileStore.setFileState(file, label)" v-for="label in promptStore.statuses" :key="label.label" :active="file.state?.label === label.label" active-class="text-weight-bold">
             <q-item-section side>
-              <q-icon name="las la-flag" :color="label.color"/>
+              <q-icon name="mdi-flag-outline" :color="label.color"/>
             </q-item-section>
             <q-item-section>
               <q-item-label>{{ label.label }}</q-item-label>
@@ -86,7 +86,7 @@
 
     <q-item clickable>
       <q-item-section avatar>
-        <q-icon name="las la-tag"/>
+        <q-icon name="mdi-tag-outline"/>
       </q-item-section>
 
       <q-item-section>Label</q-item-section>
@@ -98,7 +98,7 @@
         <q-list dense>
           <q-item clickable v-close-popup @click="fileStore.clearFileLabels(file)" >
             <q-item-section side>
-              <q-icon name="las la-times" color="transparent"/>
+              <q-icon name="mdi-close" color="transparent"/>
             </q-item-section>
             <q-item-section>
               <q-item-label>Clear</q-item-label>
@@ -128,7 +128,7 @@
 
     <q-item clickable>
       <q-item-section avatar>
-        <q-icon name="las la-copy"/>
+        <q-icon name="mdi-content-copy"/>
       </q-item-section>
 
       <q-item-section>Copy Settings</q-item-section>
@@ -140,7 +140,7 @@
         <q-list dense>
           <q-item clickable v-close-popup @click="applyToChildren(file)" >
             <q-item-section side>
-              <q-icon name="las la-copy"/>
+              <q-icon name="mdi-content-copy"/>
             </q-item-section>
             <q-item-section>
               <q-item-label>Copy Settings to Children</q-item-label>
@@ -155,7 +155,7 @@
 
     <q-item clickable v-close-popup @click="exportFile">
       <q-item-section avatar>
-        <q-icon name="las la-download"/>
+        <q-icon name="mdi-download"/>
       </q-item-section>
       <q-item-section>Export...</q-item-section>
     </q-item>
@@ -163,7 +163,7 @@
     <q-separator/>
     <q-item clickable v-close-popup @click="deleteFile">
       <q-item-section avatar>
-        <q-icon name="las la-trash" color="negative"/>
+        <q-icon name="mdi-delete-outline" color="negative"/>
       </q-item-section>
       <q-item-section class="text-negative">Delete</q-item-section>
     </q-item>

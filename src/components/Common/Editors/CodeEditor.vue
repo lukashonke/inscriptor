@@ -102,6 +102,7 @@ onDeactivated(() => {
 .cm-editor {
   background-color: rgba(0, 0, 0, 0.05);
   min-height: 120px;
+  border-radius: 6px !important;
 }
 
 .cm-content,
@@ -125,7 +126,7 @@ onDeactivated(() => {
 
 .code-editor {
   border: 0px solid #cbd5e0;
-  border-radius: 0.5rem;
+  border-radius: 6px !important;
 }
 
 .cm-focused {

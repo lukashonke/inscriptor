@@ -44,7 +44,7 @@
             <div class="column">
               <div class="row q-mb-lg">
                 <div class="col flex items-center">
-                  <q-icon name="las la-microchip" class="q-mr-xs"/>
+                  <q-icon name="mdi-chip" class="q-mr-xs"/>
                   Default AI model:
 
                   <q-select v-if="changingModel" dense filled :options="models" emit-value v-model="promptModel" option-value="id" option-label="name" options-dense class="q-ml-xs" />
@@ -191,7 +191,7 @@
                 <div class="col">
                   <q-select outlined filled dense label="Category (optional)" v-model="promptCategory" :options="promptStore.promptCategories" option-label="label" option-value="label" emit-value use-input clearable hide-dropdown-icon @new-value="(val, done) => promptStore.addListItem(promptStore.promptCategories, val, 'white', done)" options-dense >
                     <template v-slot:prepend>
-                      <q-icon name="las la-table" />
+                      <q-icon name="mdi-table-column" />
                     </template>
                     <template v-slot:option="scope">
                       <q-item v-bind="scope.itemProps">
@@ -211,12 +211,12 @@
                 <div class="col q-ml-sm">
                   <q-select outlined filled dense label="Folder (optional)" v-model="promptFolder" :options="promptStore.promptFolders" option-label="label" option-value="label" emit-value use-input clearable hide-dropdown-icon @new-value="(val, done) => promptStore.addListItem(promptStore.promptFolders, val, 'white', done)" options-dense >
                     <template v-slot:prepend>
-                      <q-icon name="las la-folder" />
+                      <q-icon name="mdi-folder-outline" />
                     </template>
                     <template v-slot:option="scope">
                       <q-item v-bind="scope.itemProps">
                         <q-item-section avatar>
-                          <q-icon :name="scope.opt.icon ?? 'las la-folder'" />
+                          <q-icon :name="scope.opt.icon ?? 'mdi-folder-outline'" />
                         </q-item-section>
                         <q-item-section>
                           <q-item-label>{{ scope.opt.label }}</q-item-label>

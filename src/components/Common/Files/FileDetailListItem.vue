@@ -2,25 +2,29 @@
   <div class="">
     <div class="row full-width q-gutter-x-xs" :class="[hover]" ref="mainFileDivRow">
       <div class="col-auto flex items-center" style="width: 20px">
-        <q-btn v-if="file.children && file.children.length > 0" no-caps size="12px" dense flat square :icon="expanded ? 'arrow_drop_down' : 'arrow_right'"  @click="expanded = !expanded" padding="1px 1px" />
+        <q-btn v-if="file.children && file.children.length > 0" no-caps size="12px" dense flat :icon="expanded ? 'arrow_drop_down' : 'arrow_right'"  @click="expanded = !expanded" padding="1px 1px" />
       </div>
       <div class="col self-center q-ml-xs flex cursor-pointer"  @click="fileStore.selectFile(file)">
-        <FileDetailItem :file="file" >
-        </FileDetailItem>
-        <q-space />
-        <span class="q-mr-md text-grey-6 text-caption">
+        <div class="row full-width">
+          <div class="col-auto">
+            <FileDetailItem :file="file" />
+          </div>
+          <div class="col flex justify-end">
+            <span class="q-mr-md text-grey-6 text-caption">
           {{ fileStore.getTextWords(file, true, true)}}
         </span>
+          </div>
+        </div>
       </div>
       <div class="col-3">
-        <q-select v-model="fileState" borderless dense square :options="promptStore.statuses" option-label="label" option-value="label" clearable options-dense>
+        <q-select v-model="fileState" borderless dense :options="promptStore.statuses" option-label="label" option-value="label" clearable options-dense>
           <template v-slot:prepend>
-            <q-icon name="las la-flag" />
+            <q-icon name="mdi-flag-outline" />
           </template>
           <template v-slot:option="scope">
             <q-item v-bind="scope.itemProps">
               <q-item-section avatar>
-                <q-icon name="las la-flag" :color="scope.opt.color ?? 'black'" />
+                <q-icon name="mdi-flag-outline" :color="scope.opt.color ?? 'black'" />
               </q-item-section>
               <q-item-section>
                 <q-item-label>{{ scope.opt.label }}</q-item-label>
@@ -36,9 +40,9 @@
         </q-select>
       </div>
       <div class="col-3">
-        <q-select v-model="fileLabels" borderless dense square :options="promptStore.labels" option-label="label" option-value="label" multiple clearable options-dense>
+        <q-select v-model="fileLabels" borderless dense :options="promptStore.labels" option-label="label" option-value="label" multiple clearable options-dense>
           <template v-slot:prepend>
-            <q-icon name="las la-tag" />
+            <q-icon name="mdi-tag-outline" />
           </template>
           <template v-slot:option="scope">
             <q-item v-bind="scope.itemProps">
@@ -64,7 +68,7 @@
         <InputWithAi v-model="fileSynopsis" borderless :filled="false" :label="file.synopsis ? undefined : ('Enter ' + file.title + ' synopsis...')" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" :prompt-input="file.content" :class="writeClasses" @update:model-value="() => fileStore.setDirty(file)" :automatic-text-correction="automaticTextCorrection"/>
       </div>
       <div class="col q-mb-md" v-if="viewNote">
-        <q-input v-model="fileNote" filled dense square rows="5" :label="file.note ? undefined : 'Note'" type="textarea" class="bg-yellow-2" :spellcheck="automaticTextCorrection"  />
+        <q-input v-model="fileNote" filled dense rows="5" :label="file.note ? undefined : 'Note'" type="textarea" class="bg-yellow-2" :spellcheck="automaticTextCorrection"  />
       </div>
     </div>
 

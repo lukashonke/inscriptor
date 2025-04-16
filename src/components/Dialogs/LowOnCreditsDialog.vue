@@ -14,7 +14,7 @@
           <div class="bordered q-pa-sm" v-if="credits">You currently have {{ credits }} credits.</div>
 
           <div v-if="subscriptionLevel === 1" class="q-mt-md q-pa-sm bordered bg-amber-1">
-            <q-icon name="las la-crown" color="amber" class=""/>
+            <q-icon name="mdi-crown-outline" color="amber" class=""/>
             You are currently on the <span class="text-weight-regular">Basic plan</span>, you can consider upgrading to the <span class="text-weight-bold text-accent">Inscriptor Premium</span> plan, which gives you a monthly amount of 2250 credits.
           </div>
 
@@ -25,7 +25,7 @@
       <q-separator />
 
       <q-card-actions align="right">
-        <q-btn icon="las la-user" label="Open Plan Settings" color="accent" @click="layoutStore.showUserDialog(); layoutStore.lowOnCreditsDialog = false"/>
+        <q-btn icon="mdi-account-outline" label="Open Plan Settings" color="accent" @click="layoutStore.showUserDialog(); layoutStore.lowOnCreditsDialog = false"/>
       </q-card-actions>
     </q-card>
 

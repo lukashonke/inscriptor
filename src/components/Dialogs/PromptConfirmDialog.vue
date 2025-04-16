@@ -16,7 +16,7 @@
               {{ textMessage.type }} message:
             </div>
             <div class="col-auto">
-              <q-btn class="q-ml-sm" flat dense icon="las la-ellipsis-h" size="10px" >
+              <q-btn class="q-ml-sm" flat dense icon="mdi-dots-horizontal" size="10px" >
                 <q-menu anchor="center middle">
                   <q-list dense>
                     <q-item
@@ -123,10 +123,10 @@
           <div class="">
             <div class="row q-gutter-x-md q-mb-md">
               <div class="col">
-                <q-select filled dense label="AI model" square :options="models" v-model="model" option-label="name" option-value="id" />
+                <q-select filled dense label="AI model" :options="models" v-model="model" option-label="name" option-value="id" />
               </div>
               <div class="col">
-                <q-select filled dense label="Creativity" square :options="creativityOptions" v-model="creativity" options-dense >
+                <q-select filled dense label="Creativity" :options="creativityOptions" v-model="creativity" options-dense >
                   <template v-slot:prepend>
                     <q-icon :name="creativity.icon" v-if="creativity.icon" />
                   </template>
@@ -188,7 +188,7 @@
 
       <q-card-section class="q-px-md q-pt-none q-pb-none" v-if="promptVariablesIncluded.length > 0">
         <div class="row q-px-md text-grey-7 text-weight-regular">
-          <div class=" flex items-center"><q-icon name="las la-check" class="q-mr-xs" />Prompt Includes:</div>
+          <div class=" flex items-center"><q-icon name="mdi-check" class="q-mr-xs" />Prompt Includes:</div>
           <template v-for="variable in promptVariablesIncluded" :key="variable">
             <q-chip color="transparent" text-color="grey-7">
               {{ variable }}
@@ -311,7 +311,7 @@
           <div class="bordered rounded-borders q-mt-sm" flat>
             <div class="cursor-pointer context-selector q-px-md q-py-md">
               <div class="row">
-                <div class="col text-subtitle2 flex items-center"><q-icon name="las la-book" class="q-mr-xs" />Context</div>
+                <div class="col text-subtitle2 flex items-center"><q-icon name="mdi-book-outline" class="q-mr-xs" />Context</div>
                 <div class="col-auto"><q-icon name="keyboard_arrow_down" size="sm" /></div>
               </div>
 
@@ -343,7 +343,7 @@
                   <q-card-section class="no-padding">
                     <div class="row">
                       <div class="col-3 q-pa-md bg-grey-1">
-                        <q-btn dense flat color="primary" icon="las la-save" label="Save Context" size="13px" @click="saveCurrentContext()" />
+                        <q-btn dense flat color="primary" icon="mdi-content-save-outline" label="Save Context" size="13px" @click="saveCurrentContext()" />
 
                         <template v-if="promptStore.savedPromptContexts.length > 0">
                           <div class="text-subtitle2 q-mt-md">Saved Contexts:</div>
@@ -356,7 +356,7 @@
                                   </q-tooltip>
                                 </q-btn>
                               </q-item-section>
-                              <q-item-section side><q-btn dense flat icon="las la-trash"  color="red" @click="deleteSavedContext(savedContext)"></q-btn></q-item-section>
+                              <q-item-section side><q-btn dense flat icon="mdi-delete-outline"  color="red" @click="deleteSavedContext(savedContext)"></q-btn></q-item-section>
                             </q-item>
                           </q-list>
                         </template>
@@ -449,19 +449,19 @@
                                 <q-menu>
                                   <q-list style="min-width: 100px" dense>
                                     <q-item clickable v-close-popup @click="toggleContext(previousCharactersPromptContext, 3000)">
-                                      <q-item-section side><q-icon name="las la-plus" /></q-item-section>
+                                      <q-item-section side><q-icon name="mdi-plus" /></q-item-section>
                                       <q-item-section>Previous 3000 Characters</q-item-section>
                                     </q-item>
                                     <q-item clickable v-close-popup @click="toggleContext(previousCharactersPromptContext, 2000)">
-                                      <q-item-section side><q-icon name="las la-plus" /></q-item-section>
+                                      <q-item-section side><q-icon name="mdi-plus" /></q-item-section>
                                       <q-item-section>Previous 2000 Characters</q-item-section>
                                     </q-item>
                                     <q-item clickable v-close-popup @click="toggleContext(previousCharactersPromptContext, 1000)">
-                                      <q-item-section side><q-icon name="las la-plus" /></q-item-section>
+                                      <q-item-section side><q-icon name="mdi-plus" /></q-item-section>
                                       <q-item-section>Previous 1000 Characters</q-item-section>
                                     </q-item>
                                     <q-item clickable v-close-popup @click="toggleContext(previousCharactersPromptContext, 500)">
-                                      <q-item-section side><q-icon name="las la-plus" /></q-item-section>
+                                      <q-item-section side><q-icon name="mdi-plus" /></q-item-section>
                                       <q-item-section>Previous 500 Characters</q-item-section>
                                     </q-item>
                                   </q-list>
@@ -523,7 +523,7 @@
                         <div class="text-subtitle2 q-mt-md">Individual Files:</div>
                         <div class="row q-gutter-x-sm">
                           <div class="col-12">
-                            <q-select label="Add single file" input-debounce="0" @filter="filterFnFile" use-input options-dense dense filled square dropdown-icon="add" v-model="promptContextFile" :options="promptContextFiles" @update:model-value="(val) => addFileContext(val)" >
+                            <q-select label="Add single file" input-debounce="0" @filter="filterFnFile" use-input options-dense dense filled dropdown-icon="add" v-model="promptContextFile" :options="promptContextFiles" @update:model-value="(val) => addFileContext(val)" >
                             </q-select>
                           </div>
                         </div>
@@ -619,14 +619,14 @@
             <div class="col">
               <q-select v-model="promptStore.promptSourceLanguage" :options="sourceLanguages" label="Source Language" filled dense clearable :hint="sourceLanguageHint" @focus="enterConfirms.value = false" @blur="enterConfirms.value = true">
                 <template v-slot:prepend>
-                  <q-icon name="las la-language" />
+                  <q-icon name="mdi-translate" />
                 </template>
               </q-select>
             </div>
             <div class="col">
               <q-select v-model="promptStore.promptTargetLanguage" :options="targetLanguages" label="Target Language" filled dense  @focus="enterConfirms.value = false" @blur="enterConfirms.value = true">
                 <template v-slot:prepend>
-                  <q-icon name="las la-language" />
+                  <q-icon name="mdi-translate" />
                 </template>
               </q-select>
             </div>
@@ -639,7 +639,7 @@
       <q-card-actions class="text-primary">
 
         <div class="col-auto">
-          <q-select filled dense label="AI model" square :options="models" v-model="model" option-label="name" option-value="id" options-dense />
+          <q-select filled dense label="AI model" :options="models" v-model="model" option-label="name" option-value="id" options-dense />
         </div>
         <div class="col">
         </div>
@@ -1089,7 +1089,7 @@
       return undefined;
     }
 
-    return containsInput(input) ? 'las la-check' : 'las la-plus';
+    return containsInput(input) ? 'mdi-check' : 'mdi-plus';
   }
 
   function getContextChipIcon(context) {
@@ -1097,7 +1097,7 @@
       return undefined;
     }
 
-    return containsContext(context) ? 'las la-check' : 'las la-plus';
+    return containsContext(context) ? 'mdi-check' : 'mdi-plus';
   }
 
   function getInputChipFontColor(context) {

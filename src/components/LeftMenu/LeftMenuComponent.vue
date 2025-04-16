@@ -1,15 +1,15 @@
 <template>
   <div class="q-py-sm column">
-    <div class="text-primary text-subtitle2 q-ml-sm q-mr-sm q-mb-md">
-      <q-btn color="primary" dense class="q-ml-xs full-width" no-caps @click="layoutStore.projectSelectionDialogOpen = true" v-if="fileStore.projectId">
+    <div class="text-primary text-subtitle2 q-px-sm q-pb-sm">
+      <q-btn flat dense class="q-ml-xs full-width" no-caps @click="layoutStore.projectSelectionDialogOpen = true" v-if="fileStore.projectId">
         <div class="row full-width">
           <div class="col-auto q-ml-xs">
             <template v-if="fileStore.projectSettings?.syncToCloud">
               <q-spinner v-if="layoutStore.projectSyncIndicator" class="absolute" />
-              <q-icon v-else name="las la-cloud" class="absolute" />
+              <q-icon v-else name="mdi-cloud-outline" class="absolute" />
             </template>
             <template v-else>
-              <q-icon name="las la-folder" class="absolute" />
+              <q-icon name="mdi-folder-outline" class="absolute" />
             </template>
 
           </div>
@@ -23,13 +23,15 @@
       </q-btn>
     </div>
 
-    <div class="col-auto" id="files">
+    <q-separator />
+
+    <div class="col-auto q-mt-sm" id="files">
       <FileList />
     </div>
-    <div class="col-auto flex justify-center q-mt-md">
+    <div class="col-auto flex justify-center q-mt-md ">
       <q-btn dense unelevated icon="add" color="primary" flat @click="add" v-if="fileTemplates.length === 0" class="full-width">
       </q-btn>
-      <q-btn-dropdown v-else dense unelevated icon="las la-plus" @click="add" split>
+      <q-btn-dropdown v-else dense unelevated icon="mdi-plus" @click="add" split>
         <q-list>
           <q-item clickable v-close-popup @click="addTemplate(file)" v-for="file in fileTemplates" :key="file.id">
             <q-item-section>
