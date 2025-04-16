@@ -1,9 +1,9 @@
 <template>
 
-  <div class="row q-gutter-x-md q-mt-md">
+  <div class="row q-gutter-x-md q-mt-md q-mb-sm">
     <div class="col flex justify-end">
       <q-expansion-item
-      label="Brainstorming Parameters" class="full-width" switch-toggle-side>
+      label="Parameters" class="full-width" switch-toggle-side>
         <div class="row q-gutter-md">
           <div class="col-12 col-grow" v-for="variable in uiData?.variables ?? []" :key="variable.title">
             <q-input dense filled  v-model="variable.value" :label="variable.title" :placeholder="variable.defaultValue" :hint="variable.hint" />
@@ -14,7 +14,7 @@
     <div class="col q-gutter-x-sm flex items-center">
       <div class="row full-width">
         <div class="col flex justify-center" >
-          <q-btn @click="generate(false)" icon="mdi-creation-outline" color="accent" label="Generate more" :loading="isGenerating"  >
+          <q-btn @click="generate(false)" icon="mdi-creation-outline" color="accent" label="Generate more" :loading="isGenerating">
             <template v-slot:loading>
               <q-spinner-dots />
             </template>
@@ -24,35 +24,32 @@
     </div>
     <div class="col flex items-center">
       <div class="row full-width">
-        <q-btn @click="expandLikedIdeas()" icon="mdi-creation-outline" no-caps flat color="primary" label="Expand Liked" :disable="isGenerating" v-if="uiData?.likedIdeas.length > 0" />
-        <q-btn-dropdown color="negative" flat icon="mdi-delete" label="Remove" :disable="isGenerating" no-caps>
-          <q-list dense>
-            <q-item clickable v-close-popup @click="removeDislikedIdeas()" v-if="uiData?.dislikedIdeas.length > 0">
-              <q-item-section>
-                <q-item-label>Remove Disliked</q-item-label>
-              </q-item-section>
-            </q-item>
-            <q-item clickable v-close-popup @click="removeAll()" v-if="uiData?.ideas.length > 0">
-              <q-item-section>
-                <q-item-label>Remove All Ideas</q-item-label>
-              </q-item-section>
-            </q-item>
-          </q-list>
-        </q-btn-dropdown>
+        <div class="col">
+          <q-btn @click="expandLikedIdeas()" icon="mdi-creation-outline" no-caps flat color="primary" label="Expand Liked" :disable="isGenerating" v-if="uiData?.likedIdeas.length > 0" />
+          <q-btn-dropdown color="negative" flat icon="mdi-delete" label="Remove" :disable="isGenerating" no-caps>
+            <q-list dense>
+              <q-item clickable v-close-popup @click="removeDislikedIdeas()" v-if="uiData?.dislikedIdeas.length > 0">
+                <q-item-section>
+                  <q-item-label>Remove Disliked</q-item-label>
+                </q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="removeAll()" v-if="uiData?.ideas.length > 0">
+                <q-item-section>
+                  <q-item-label>Remove All Ideas</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-btn-dropdown>
+        </div>
+        <div class="col-auto flex items-center q-ml-md">
+          <q-btn-toggle :options="[{value: 'grid', label: 'Grid', icon: 'mdi-view-grid'},{value: 'list', label: 'List', icon: 'mdi-view-sequential'}]" :model-value="viewMode" @update:model-value="setViewMode" unelevated no-caps class="bordered" toggle-color="primary" padding="xs md" />
+        </div>
+        <div class="col-auto flex items-center" v-if="viewMode === 'grid'">
+          <span class="q-mr-xs">Columns:</span>
+          <q-btn-toggle :options="[{value: 3, label: 3},{value: 4, label: 4},{value: 5, label: 5}]" :model-value="columnCount" @update:model-value="setColumnCount" unelevated no-caps class="bordered" toggle-color="primary" padding="xs sm" id="aiSwitch" />
+        </div>
       </div>
     </div>
-    <div class="col-auto flex items-center q-ml-md">
-      <q-btn-toggle :options="[{value: 'grid', label: 'Grid', icon: 'mdi-view-grid'},{value: 'list', label: 'List', icon: 'mdi-view-sequential'}]" :model-value="viewMode" @update:model-value="setViewMode" unelevated no-caps class="bordered" toggle-color="accent" padding="xs md" />
-    </div>
-    <div class="col-auto flex items-center" v-if="viewMode === 'grid'">
-      <span class="q-mr-xs">Columns:</span>
-      <q-btn-toggle :options="[{value: 3, label: 3},{value: 4, label: 4},{value: 5, label: 5}]" :model-value="columnCount" @update:model-value="setColumnCount" unelevated no-caps class="bordered" toggle-color="accent" padding="xs md" id="aiSwitch" />
-    </div>
-  </div>
-
-  <div class="row q-pa-md q-mb-md">
-    <div class="col-grow"></div>
-
   </div>
 
   <!-- List View Layout -->
@@ -403,7 +400,7 @@ async function generateSubIdeas(idea, replace = false) {
     const appendMessages = [];
     appendMessages.push({type: 'assistant', text: convertHtmlToText(ideasString)});
     let expandMessage = prompt.value.settings.brainstorm_subIdeasMessage ?? 'Generate sub-ideas similar: $Idea';
-    expandMessage = expandMessage.replaceAll('$Idea', idea.text);
+    expandMessage = expandMessage.replaceAll('$Idea', getIdeaContext(idea));
 
     appendMessages.push({type: 'user', text: expandMessage});
 
@@ -461,7 +458,7 @@ async function expandIdea(idea) {
     appendMessages.push({type: 'assistant', text: convertHtmlToText(ideasString)});
 
     let expandMessage = prompt.value.settings.brainstorm_expandPromptMessage ?? 'Expand this idea: $Idea';
-    expandMessage = expandMessage.replaceAll('$Idea', idea.text + (idea.description ? '\n' + idea.description : ''));
+    expandMessage = expandMessage.replaceAll('$Idea', getIdeaContext(idea));
 
     appendMessages.push({type: 'user', text: expandMessage});
 
@@ -527,7 +524,7 @@ async function replyToIdea(idea, message) {
     // Start with idea context
     appendMessages.push({
       type: 'assistant',
-      text: `Idea: ${idea.text}${idea.description ? '\n\nDetails: ' + idea.description : ''}`
+      text: getIdeaContext(idea)
     });
 
     // Add each conversation message as a separate entry with the appropriate role
@@ -603,7 +600,7 @@ async function generateSimilarIdeas(idea, replace = false) {
     appendMessages.push({type: 'assistant', text: convertHtmlToText(ideasString)});
 
     let expandMessage = prompt.value.settings.brainstorm_similarIdeasMessage ?? 'Create ideas similar to this idea:\n$Idea';
-    expandMessage = expandMessage.replaceAll('$Idea', idea.text);
+    expandMessage = expandMessage.replaceAll('$Idea', getIdeaContext(idea));
 
     appendMessages.push({type: 'user', text: expandMessage});
 
@@ -763,9 +760,9 @@ function calculateOptimalColumns() {
 
 function prepareRequest(request) {
   request.silent = true;
-  request.forceBypassMoreParameters = true;
   request.previewOnly = false;
   request.clear = false;
+  request.forceBypassMoreParameters = true;
   request.executeCustomPromptUi = true;
 
   request.systemPrompt = request.prompt.systemPrompt;
@@ -883,6 +880,28 @@ function generateExistingIdeasString(collection, includeDetails = false) {
   return ideasString.trim();
 }
 
+function getIdeaContext(idea) {
+  let context = `Idea: ${idea.text}`;
+
+  // Add description if available
+  if (idea.description) {
+    context += `\n\nDetails: ${idea.description}`;
+  }
+
+  // Add child/related ideas if available
+  if (idea.children && idea.children.length > 0) {
+    context += '\n\nRelated Ideas:';
+    idea.children.forEach(child => {
+      context += `\n- ${child.text}`;
+      if (child.description) {
+        context += `: ${child.description}`;
+      }
+    });
+  }
+
+  return context;
+}
+
 function setIdeaLiked(idea, likedState) {
   if(idea.disliked) {
     setIdeaDisliked(idea, false);
@@ -904,29 +923,26 @@ function setIdeaLiked(idea, likedState) {
 }
 
 function updatePromptResultText() {
-  const likedIdeas = uiData.value.ideas.filter(idea => idea.liked);
+  const likedIdeas = uiData.value.ideas.filter(idea => idea.liked || idea.pinned);
   // eslint-disable-next-line vue/no-mutating-props
   props.promptResult.originalText = likedIdeas.map(idea => {
     let text = `${idea.text}`;
 
     // Add description if available
     if (idea.description) {
-      text += '\n\nDetails: ' + idea.description;
+      text += '\n\n\n Details:\n\n ' + idea.description;
     }
 
     // Add related/child ideas if available
     if (idea.children && idea.children.length > 0) {
-      text += '\n\nRelated Ideas:';
+      text += '\n\nRelated Ideas:\n\n';
       idea.children.forEach(child => {
-        text += '\n- ' + child.text;
-        if (child.description) {
-          text += ': ' + child.description;
-        }
+        text += '\n' + child.text;
       });
     }
 
     // Add a markdown separator between sections for better readability
-    text += '\n\n---\n\n';
+    text += '\n\n===\n\n';
 
     return text;
   }).join('\n\n\n');

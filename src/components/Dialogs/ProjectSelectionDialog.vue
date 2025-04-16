@@ -25,7 +25,7 @@
           <div class="q-mt-lg text-center">
             <q-btn-toggle
               v-model="projectType"
-              unelevated no-caps class="bordered" toggle-color="primary" padding="xs md"
+              unelevated no-caps class="bordered inscriptor-highlight-btn" toggle-color="primary"
               :options="projectTypes"
             />
           </div>

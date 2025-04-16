@@ -8,13 +8,13 @@
       </q-card-section>
 
       <q-card-section class="q-px-md q-py-none" style="font-size: 14px;">
-        <div v-html="markdownToHtml(idea.text ?? '')" class="" />
+        <div v-html="markdownToHtml(idea.text ?? '')" />
       </q-card-section>
 
       <q-card-section v-if="idea.description" class="q-px-md q-py-none">
         <div class="q-mt-sm">
           <div class="text-subtitle2 text-grey-7">
-            <q-icon name="mdi-information-box-outline" class="q-mr-xs" />
+            <q-icon name="mdi-information-box-outline" class="q-mr-xs" /> Details:
             <q-btn @click="$emit('clear-description', idea)" icon="mdi-delete-outline" size="10px" color="grey-7" flat dense no-caps class="float-right hoverable-btn"/>
           </div>
           <div v-html="markdownToHtml(idea.description ?? '')" />
@@ -25,9 +25,9 @@
       <q-card-section v-if="idea.children?.length > 0" class="q-px-md q-py-none" >
         <div class="q-mt-sm">
           <div class="q-mt-sm text-subtitle2 text-grey-7">
-            <q-icon name="mdi-lightbulb" class="q-mr-xs" />
+            <q-icon name="mdi-lightbulb" class="q-mr-xs" /> Related:
           </div>
-          <div v-for="(subIdea, i) in idea.children" :key="i" class="row">
+          <div v-for="(subIdea, i) in idea.children" :key="i" class="row q-my-xs">
             <div class="col">
               <div v-html="markdownToHtml(subIdea.text ?? '')" />
             </div>
@@ -40,9 +40,9 @@
 
       <q-card-section class="q-px-md q-py-none" v-if="idea.conversation?.length > 0" >
         <div class="q-mt-sm">
-          <div class="bordered chat-history-container q-pa-sm q-my-sm bg-white">
+          <div class="bordered chat-history-container q-pa-sm q-my-sm">
             <div class="text-subtitle2 text-grey-7">
-              <q-icon name="mdi-chat" class="q-mr-xs" />
+              <q-icon name="mdi-chat" class="q-mr-xs" /> Chat
               <q-btn @click="$emit('clear-reply', idea)" icon="mdi-delete-outline" size="10px" color="grey-7" flat dense no-caps class="float-right hoverable-btn" title="Clear conversation"/>
             </div>
 
@@ -156,8 +156,8 @@ defineEmits([
 }
 
 .liked-card {
-  transform: scale(1.01);
-  background: linear-gradient(135deg, #f3f4ff 85%, #d9dcf3 100%);
+  transform: scale(1.02);
+  background: linear-gradient(135deg, #ededf8 85%, #d9dcf3 100%);
 }
 
 .disliked-card {

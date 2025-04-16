@@ -1,3 +1,7 @@
+.bordered {
+  border: 1px solid #dedede;
+  border-radius: 6px;
+}
 
 .day-mode {
 
@@ -7,10 +11,12 @@
 
   .bg-file-list-hover {
     background-color: #efefef;
+    box-shadow: 0 0px 1px rgb(237, 237, 237);
   }
 
   .bg-file-list-selected {
     background-color: #e5e5f3;
+    box-shadow: 0 0px 1px rgb(227, 227, 241);
   }
 
   .left-border {
