@@ -1,5 +1,5 @@
 <template>
-  <div v-if="editor" class="bg-red">
+  <div v-if="editor" class="">
     <bubble-menu
       class="bubble-menu"
       :tippy-options="{ duration: 100, placement: 'right', maxWidth: '600px', zIndex: 99999 }"
@@ -18,9 +18,15 @@
         </q-btn>
 
         <q-btn v-if="predefinedWordFinderPrompts && predefinedWordFinderPrompts.length > 0" size="12px" dense flat icon="mdi-auto-fix" padding="4px 6px" class="bg-white bordered" color="accent" @click="runWordFinder()" :loading="wordFinderLoading">
-          <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" >
-            <q-card style="width: 400px; min-height: 50px;" class="no-scroll">
-              <div class="row" style="min-width: 100px; min-height: 50px;">
+          <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="ai-panel-solid">
+            <q-card style="width: 400px; min-height: 50px;" flat class="no-scroll ai-panel-solid">
+              <div class=" text-center bg-accent q-py-xs q-px-md q-mb-sm row">
+                <div class="col justify-start flex">
+                  <span class=text-white>{{ truncate(getSelectedText(), 40) }}</span>
+                </div>
+              </div>
+              <div class="row" style="min-width: 100px; min-height: 50px; max-height: 400px; overflow: auto;">
+
                 <template v-for="(word, i) in wordFinderOutput" :key="i">
                   <div class="col-auto">
                     <q-item clickable v-close-popup @click="replaceSelectedWord(word)" dense>
@@ -32,8 +38,9 @@
                 </template>
               </div>
               <div class="full-width flex justify-center" v-if="wordFinderOutput && wordFinderOutput.length > 0">
-                <q-btn label="More" no-caps @click="runWordFinder(false)" dense flat class="text-center full-width" :loading="wordFinderLoading"/>
+                <q-btn icon="mdi-plus" color="primary" no-caps @click="runWordFinder(false)" dense flat class="text-center full-width" :loading="wordFinderLoading"/>
               </div>
+              <q-skeleton v-else animation="fade"/>
 
 
             </q-card>
@@ -66,16 +73,16 @@
     </floating-menu>
   </div>
 
-  <div v-if="editor" class="q-mb-md sticky">
-    <q-card class="row justify-center q-gutter-x-xs" bordered flat>
+  <div v-if="editor" class="q-mb-md sticky inscriptor-shadow-1">
+    <q-card class="row justify-center q-gutter-x-xs " bordered flat>
       <div class="col-auto">
-        <q-btn size="11px" dense flat square icon="format_bold" @click="editor.chain().focus().toggleBold().run()" :class="{ 'text-grey-5': !editor.isActive('bold'), 'text-primary': editor.isActive('bold') }" />
+        <q-btn size="11px" dense flat icon="format_bold" @click="editor.chain().focus().toggleBold().run()" :class="{ 'text-grey-5': !editor.isActive('bold'), 'text-primary': editor.isActive('bold') }" />
       </div>
       <div class="col-auto">
-        <q-btn size="11px" dense flat square icon="format_italic"  @click="editor.chain().focus().toggleItalic().run()" :class="{ 'text-grey-5': !editor.isActive('italic'), 'text-primary': editor.isActive('italic') }"/>
+        <q-btn size="11px" dense flat icon="format_italic"  @click="editor.chain().focus().toggleItalic().run()" :class="{ 'text-grey-5': !editor.isActive('italic'), 'text-primary': editor.isActive('italic') }"/>
       </div>
       <div class="col-auto">
-        <q-btn-dropdown size="11px" dense flat square label="Style" class="text-grey-5">
+        <q-btn-dropdown size="11px" dense flat label="Style" class="text-grey-5">
           <q-list>
             <q-item clickable v-close-popup @click="editor.chain().focus().toggleHeading({ level: 1 }).run()" :class="{ 'text-grey-5': !editor.isActive('heading', { level: 1 }), 'text-primary': editor.isActive('heading', { level: 1 }) }">
               <q-item-section>
@@ -105,7 +112,7 @@
         <q-btn size="11px" dense flat square icon="format_list_numbered"  @click="editor.chain().focus().toggleOrderedList().run()" :class="{ 'text-light': !editor.isActive('orderedList'), 'text-primary': editor.isActive('orderedList') }"/>
       </div>-->
       <div class="col-auto">
-        <q-btn size="11px" dense flat square icon="code"  @click="editor.chain().focus().toggleCodeBlock().run()" :class="{ 'text-grey-5': !editor.isActive('codeBlock'), 'text-primary': editor.isActive('codeBlock') }"/>
+        <q-btn size="11px" dense flat icon="code"  @click="editor.chain().focus().toggleCodeBlock().run()" :class="{ 'text-grey-5': !editor.isActive('codeBlock'), 'text-primary': editor.isActive('codeBlock') }"/>
       </div>
 
       <div class="col text-grey-5 text-caption flex items-center justify-center no-wrap ellipsis q-mx-md" ref="fileInfo">
@@ -122,7 +129,7 @@
           </span>
         </transition>
 
-        <q-chip dense v-if="fileStore.projectSettings.syncToCloud && promptStore.currentCharsCount >= layoutStore.getMaxFileSize()" color="negative" text-color="white" label="Max file size for your subscription plan reached." icon="las la-exclamation-triangle" class="text-caption" clickable @click="layoutStore.showUserDialog" />
+        <q-chip dense v-if="fileStore.projectSettings.syncToCloud && promptStore.currentCharsCount >= layoutStore.getMaxFileSize()" color="negative" text-color="white" label="Max file size for your subscription plan reached." icon="mdi-exclamation-thick" class="text-caption" clickable @click="layoutStore.showUserDialog" />
       </div>
 
       <!--<div class="col-auto">
@@ -130,7 +137,7 @@
       </div>-->
 
       <div class="col-auto">
-        <q-btn size="11px" id="togglePrompts" dense flat square icon="mdi-creation-outline" class="text-accent" :class="{ 'text-primary': showPrompts }">
+        <q-btn size="11px" id="togglePrompts" dense flat icon="mdi-creation-outline" class="text-accent" :class="{ 'text-primary': showPrompts }">
           <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" anchor="bottom start">
             <q-card v-show="showPrompts">
               <PromptSelector prompt-types="insert" @promptClick="promptClick" />
@@ -143,7 +150,7 @@
       </div>
 
       <div class="col-auto">
-        <q-btn size="11px" dense flat square icon="las la-font" @click="toggleAutomaticCorrections" class="" :class="{ 'text-primary': automaticCorrections, 'text-grey-5': !automaticCorrections }">
+        <q-btn size="11px" dense flat icon="mdi-alpha-g-box" @click="toggleAutomaticCorrections" class="" :class="{ 'text-primary': automaticCorrections, 'text-grey-5': !automaticCorrections }">
           <q-tooltip>
             Toggle Automatic Text Corrections
           </q-tooltip>
@@ -151,10 +158,10 @@
       </div>
 
       <div class="col-auto">
-        <q-btn size="11px" dense flat square icon="undo" @click="editor.chain().focus().undo().run()" :disabled="!editor.can().chain().focus().undo().run()" class="text-primary" />
+        <q-btn size="11px" dense flat icon="mdi-undo" @click="editor.chain().focus().undo().run()" :disabled="!editor.can().chain().focus().undo().run()" class="text-primary" />
       </div>
       <div class="col-auto">
-        <q-btn size="11px" dense flat square icon="redo" @click="editor.chain().focus().redo().run()" :disabled="!editor.can().chain().focus().redo().run()" class="text-primary" />
+        <q-btn size="11px" dense flat icon="mdi-redo" @click="editor.chain().focus().redo().run()" :disabled="!editor.can().chain().focus().redo().run()" class="text-primary" />
       </div>
 
     </q-card>
@@ -188,7 +195,7 @@
       direction="up"
     >
       <template v-for="prompt in promptStore.getStickyPrompts(fileStore.selectedFile)" :key="prompt.id">
-        <q-fab-action @click="promptClick(prompt)" color="white" text-color="black" square >
+        <q-fab-action @click="promptClick({prompt: prompt})" color="white" text-color="black" >
           {{ prompt.title }}&nbsp;
           <q-badge color="secondary" :label="promptStore.getModel(prompt.modelId)?.name" />
         </q-fab-action>
@@ -217,7 +224,7 @@ import {useEditorStore} from "stores/editor-store";
 import {HardBreak} from "@tiptap/extension-hard-break";
 import { Node } from '@tiptap/core';
 import {
-  executePromptClick
+  executePromptClick2
 } from "src/common/helpers/promptHelper";
 import {Blockquote} from "@tiptap/extension-blockquote";
 import {
@@ -239,6 +246,8 @@ import {CharacterCount} from "@tiptap/extension-character-count";
 import {OrderedList} from "@tiptap/extension-ordered-list";
 import {BulletList} from "@tiptap/extension-bullet-list";
 import {ListItem} from "@tiptap/extension-list-item";
+import {selectedTextPromptInput} from 'src/common/resources/promptContexts';
+import {truncate} from 'src/common/utils/textUtils';
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
@@ -503,8 +512,6 @@ async function runWordFinder(replace = true) {
       message = message.replaceAll('$textAround', getSelectedTextExpanded(300, 300, '...') ?? '');
       message = message.replaceAll('$textOrSelection', getSelectedText() ?? '');
 
-
-
       const previousSuggestions = wordFinderOutput.value ?? [];
       if(previousSuggestions) {
         message = message.replaceAll('$previousSuggestions', JSON.stringify(previousSuggestions, null, 2));
@@ -514,9 +521,25 @@ async function runWordFinder(replace = true) {
 
       console.log(message);
 
-      const result = await executePromptClick(prompt, message, false, null, true, null, true);
+      const onOutput = (fullText, newText, isFinished, isError) => {
+        console.log(fullText);
+      };
+
+      const request = {
+        prompt: prompt,
+        text: message,
+        clear: false,
+        forceBypassMoreParameters: true,
+        silent: true,
+        userInputs: [selectedTextPromptInput],
+        onOutput: onOutput
+      }
+
+      const result = await executePromptClick2(request);
 
       try {
+
+
         //TODO to helper
 
         // remove ```json and ```
@@ -612,7 +635,8 @@ async function promptSelectionAnalysisPrompts() {
   await promptStore.promptSelectionAnalysisPrompts();
 }
 
-async function promptClick(prompt, forceAllFileText) {
+async function promptClick(promptClickData, forceAllFileText) {
+  const prompt = promptClickData.prompt;
   let text;
 
   // force feed all text into this prompt
@@ -636,11 +660,15 @@ async function promptClick(prompt, forceAllFileText) {
     }
   }
 
-  await executePromptClick(prompt, text);
+  const request = {
+    prompt: prompt,
+    text: text,
+    forceModelId: promptClickData.forceModelId,
+    forceTemperature: promptClickData.forceTemperature,
+  }
+
+  await executePromptClick2(request);
 }
-
-
-
 
 function getSelectedTextAsChat() {
   const { from, to, empty } = editor.value.state.selection;

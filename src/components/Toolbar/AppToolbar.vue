@@ -7,14 +7,14 @@
         <q-btn flat :icon="layoutStore.leftDrawerOpen ? 'chevron_left' : 'chevron_right'" @click="toggleLeftDrawer" class=""/>
 
         <q-btn flat class="text-aleo" no-wrap @click="layoutStore.promptMarketplaceOpen = true" id="hubButton">
-          <q-icon name="las la-store" class="q-mr-sm"/>
+          <q-icon name="mdi-storefront-outline" class="q-mr-sm"/>
           <span class="xs-hide">Hub</span>
         </q-btn>
       </div>
       <div class="col-3 col-md-2 col-lg-2 row items-center justify-center">
         <div class="col">
           <q-btn class="q-ml-lg bg-primary-light full-width" dense unelevated no-caps @click="layoutStore.searchOpen = true">
-            <q-icon name="las la-search" />
+            <q-icon name="mdi-magnify" />
             <q-space />
           </q-btn>
         </div>
@@ -31,7 +31,7 @@
         <q-btn flat icon="mdi-account" class="md-hide lg-hide xl-hide" @click="layoutStore.showUserDialog" v-if="currentUser" no-caps />
 
         <q-btn flat class="sm-hide xs-hide" @click="layoutStore.showUserDialog" v-if="currentUser && currentUser !== 'Guest' && (credits < 1)" no-caps >
-          <q-icon name="las la-exclamation-circle" color="amber" class="q-mr-sm"/>
+          <q-icon name="mdi-exclamation-thick" color="amber" class="q-mr-sm"/>
           Low on Cloud AI credits
           <q-tooltip>
             You currently have no AI credits left. It will not be possible to trigger AI on cloud. You can get more credits by clicking on this button.
@@ -78,7 +78,7 @@
               <q-item-label class="no-link-decoration">
                 <a :href="roadmapUrl" target="_blank" class="no-link-decoration text-black">
                   Development Roadmap
-                  <q-icon name="las la-external-link-alt" />
+                  <q-icon name="mdi-open-in-new" />
                 </a>
               </q-item-label>
             </q-item-section>

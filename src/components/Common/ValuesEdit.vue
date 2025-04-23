@@ -7,7 +7,7 @@
             <ColorPicker v-model="listItem.color" />
           </div>
           <div class="col-auto flex items-center bordered q-ml-xs">
-            <IconPicker v-model="listItem.icon" :color="listItem.color" default-icon="las la-circle"/>
+            <IconPicker v-model="listItem.icon" :color="listItem.color" default-icon="mdi-circle-outline"/>
           </div>
         </div>
 
@@ -16,25 +16,25 @@
       <q-item-section>
         <div class="row">
           <div class="col">
-            <q-input v-model="listItem.label" label="name" filled dense square/>
+            <q-input v-model="listItem.label" label="name" filled dense/>
           </div>
           <div class="col q-ml-sm" v-if="includeDescription">
-            <q-input v-model="listItem.description" label="description" filled dense square/>
+            <q-input v-model="listItem.description" label="description" filled dense/>
           </div>
           <div class="col-auto">
-            <q-btn icon="las la-trash" flat color="red" @click="promptStore.removeListItem(list, listItem)" />
+            <q-btn icon="mdi-delete-outline" flat color="red" @click="promptStore.removeListItem(list, listItem)" />
           </div>
           <div class="col-auto">
-            <q-btn icon="las la-arrow-up" dense flat color="primary" @click="promptStore.moveListItemUp(list, listItem)" />
+            <q-btn icon="mdi-arrow-up-thin" dense flat color="primary" @click="promptStore.moveListItemUp(list, listItem)" />
           </div>
           <div class="col-auto">
-            <q-btn icon="las la-arrow-down" dense flat color="primary" @click="promptStore.moveListItemDown(list, listItem)" />
+            <q-btn icon="mdi-arrow-down-thin" dense flat color="primary" @click="promptStore.moveListItemDown(list, listItem)" />
           </div>
         </div>
       </q-item-section>
     </q-item>
   </q-list>
-  <q-btn color="primary" icon="las la-plus" label="Add" @click="promptStore.addListItem(list, newItemName, 'blue')" class="q-mx-md q-mt-md q-mb-md"/>
+  <q-btn color="primary" icon="mdi-plus" label="Add" @click="promptStore.addListItem(list, newItemName, 'blue')" class="q-mx-md q-mt-md q-mb-md"/>
 </template>
 
 <script setup>

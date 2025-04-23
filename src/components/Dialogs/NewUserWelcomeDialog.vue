@@ -37,7 +37,7 @@
               leave-active-class="animated fadeOut "
             >
               <div class="flex q-gutter-x-md justify-center q-mt-md">
-                <q-input filled color="accent" bg-color="grey-3" autofocus v-model="promoCode" dense square />
+                <q-input filled color="accent" bg-color="grey-3" autofocus v-model="promoCode" dense />
                 <q-btn no-caps label="Confirm" color="accent" @click="confirmPromoCode()" />
                 <q-btn no-caps label="Skip" color="primary" @click="step = 5; scheduleStep(7)" />
               </div>

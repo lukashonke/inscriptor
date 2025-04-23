@@ -50,18 +50,12 @@ function myCompletions(context) {
     }
   }));
 
-  options.push(...fileStore.files.map(file => {
+  /*options.push(...fileStore.files.map(file => {
     return {
       label: file.title, type: "variable", apply: '@file(' + file.id + ',' + file.title + ')' , info: '', icon: null, detail: 'file'
       //value: parameter.title, description: null, caption: 'Variable'
     }
-  }));
-
-  /*[
-    {label: "match", type: "keyword"},
-    {label: "hello", type: "variable", info: "(World)"},
-    {label: "magic", type: "text", apply: "⠁⭒*.✩.*⭒⠁", detail: "macro"}
-  ]*/
+  }));*/
 
   return {
     from: word.from,
@@ -108,6 +102,7 @@ onDeactivated(() => {
 .cm-editor {
   background-color: rgba(0, 0, 0, 0.05);
   min-height: 120px;
+  border-radius: 6px !important;
 }
 
 .cm-content,
@@ -131,7 +126,7 @@ onDeactivated(() => {
 
 .code-editor {
   border: 0px solid #cbd5e0;
-  border-radius: 0.5rem;
+  border-radius: 6px !important;
 }
 
 .cm-focused {

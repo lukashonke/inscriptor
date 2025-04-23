@@ -7,7 +7,7 @@ export function createFile(title) {
     title: title,
     content: '',
     order: -1,
-    icon: 'las la-file',
+    icon: 'mdi-file-outline',
     expanded: false,
     synopsis: '',
     note: '',

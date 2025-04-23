@@ -5,7 +5,7 @@
       <div class="absolute-top flex items-center bg-transparent">
         <template v-if="item.featured">
           <q-badge color="amber-8"  >
-            <q-icon name="las la-star" />&nbsp;Featured
+            <q-icon name="mdi-star-four-points" />&nbsp;Featured
           </q-badge>&nbsp;
         </template>
         <template v-for="(tag, index) in item.tags" :key="index">
@@ -110,11 +110,11 @@
       <q-btn color="accent" v-if="isImporting" no-caps>
         <q-spinner /> &nbsp;Importing...
       </q-btn>
-      <q-btn v-else-if="isAlreadyImported" unelevated label="Imported" icon="las la-check">
+      <q-btn v-else-if="isAlreadyImported" unelevated label="Imported" icon="mdi-check">
       </q-btn>
       <q-btn v-else-if="!canImportItem" unelevated label="No models available. Import model first" color="negative"/>
-      <q-btn v-else-if="imported.includes(item.id)" unelevated label="Imported" icon="las la-check"/>
-      <q-btn v-else color="accent" text-color="white" label="Import" icon="las la-plus" @click="importItem()" clickable :disable="!canImportModel"/>
+      <q-btn v-else-if="imported.includes(item.id)" unelevated label="Imported" icon="mdi-check"/>
+      <q-btn v-else color="accent" text-color="white" label="Import" icon="mdi-plus" @click="importItem()" clickable :disable="!canImportModel"/>
     </q-card-actions>
   </q-card>
 </template>

@@ -7,9 +7,9 @@
         class="text-primary"
       >
         <q-tab name="prompts" icon="mdi-creation-outline" label="Promps" />
-        <q-tab name="models" icon="las la-microchip" label="Models" />
-        <q-tab name="files" icon="las la-file" label="Files" />
-        <q-tab name="apikeys" icon="las la-cloud" label="API Keys" />
+        <q-tab name="models" icon="mdi-chip" label="Models" />
+        <q-tab name="files" icon="mdi-file-outline" label="Files" />
+        <q-tab name="apikeys" icon="mdi-cloud-outline" label="API Keys" />
       </q-tabs>
     </div>
     <div class="col">
@@ -52,7 +52,7 @@
           </div>
 
           <div>
-            <q-btn color="primary" label="Inscriptor Hub" icon="las la-store" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
+            <q-btn color="primary" label="Inscriptor Hub" icon="mdi-storefront-outline" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
           </div>
           <!-- <q-btn color="primary" label="Add model" @click="promptStore.addNewModel" /> -->
         </q-tab-panel>
@@ -64,13 +64,13 @@
               <span class="text-caption">No models available. Add a model first. </span>
             </div>
             <div>
-              <q-btn color="primary" label="Inscriptor Hub" icon="las la-store" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
+              <q-btn color="primary" label="Inscriptor Hub" icon="mdi-storefront-outline" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
             </div>
           </div>
 
           <div class="q-gutter-x-sm q-mb-md" v-else>
-            <q-btn color="primary" icon="las la-plus" label="Add prompt" @click="layoutStore.openAddPromptDialog(true, promptModel)" />
-            <q-btn color="accent" label="Inscriptor Hub" icon="las la-store" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
+            <q-btn color="primary" icon="mdi-plus" label="Add prompt" @click="layoutStore.openAddPromptDialog(true, promptModel)" />
+            <q-btn color="accent" label="Inscriptor Hub" icon="mdi-storefront-outline" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
           </div>
 
           <div v-for="prompt in prompts" :key="prompt.id">

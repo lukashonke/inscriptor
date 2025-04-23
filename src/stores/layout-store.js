@@ -50,6 +50,9 @@ export const useLayoutStore = defineStore('layout', {
     browserDialogOpen: false,
     browserDialogUrl: "",
 
+    promptUiDialogOpen: false,
+    promptUiDialogPromptResult: null,
+
     promptActionDialogOpen: false,
     promptAction: null,
     promptActionPromptResult: null,
@@ -331,6 +334,10 @@ export const useLayoutStore = defineStore('layout', {
         this.setSettingsOpen(true);
         this.settingsTab = 'apikeys';
       }
+    },
+    openPromptUiDialog(promptResult) {
+      this.promptUiDialogOpen = true;
+      this.promptUiDialogPromptResult = promptResult;
     }
   }
 });

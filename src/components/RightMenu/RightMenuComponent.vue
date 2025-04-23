@@ -1,9 +1,8 @@
 <template>
-  <div class="full-height fit q-pt-sm scroll" id="rightPanel">
-
+  <div class="left-border" id="rightPanel" style="height: calc(100vh - 104px); width: 100%">
     <q-expansion-item
       label="File Details"
-      icon="las la-info-circle"
+      icon="mdi-information-outline"
       v-model="layoutStore.fileDetailsOpen"
       id="fileDetails"
     >
@@ -11,14 +10,14 @@
         <q-card-section class="q-pb-sm">
           <div class="row q-gutter-x-sm">
             <div class="col">
-              <q-select v-model="fileState" label="State" filled dense square :options="promptStore.statuses" option-label="label" option-value="label" clearable options-dense>
+              <q-select v-model="fileState" label="State" filled dense :options="promptStore.statuses" option-label="label" option-value="label" clearable options-dense>
                 <template v-slot:prepend>
-                  <q-icon name="las la-flag" />
+                  <q-icon name="mdi-flag-outline" />
                 </template>
                 <template v-slot:option="scope">
                   <q-item v-bind="scope.itemProps">
                     <q-item-section avatar>
-                      <q-icon name="las la-flag" :color="scope.opt.color ?? 'black'" />
+                      <q-icon name="mdi-flag-outline" :color="scope.opt.color ?? 'black'" />
                     </q-item-section>
                     <q-item-section>
                       <q-item-label>{{ scope.opt.label }}</q-item-label>
@@ -34,9 +33,9 @@
               </q-select>
             </div>
             <div class="col">
-              <q-select v-model="fileLabels" label="Labels" filled dense square :options="promptStore.labels" option-label="label" option-value="label" multiple clearable use-chips options-dense>
+              <q-select v-model="fileLabels" label="Labels" filled dense :options="promptStore.labels" option-label="label" option-value="label" multiple clearable use-chips options-dense>
                 <template v-slot:prepend>
-                  <q-icon name="las la-tag" />
+                  <q-icon name="mdi-tag-outline" />
                 </template>
                 <template v-slot:option="scope">
                   <q-item v-bind="scope.itemProps">
@@ -61,12 +60,12 @@
         <q-card-section class="q-py-sm">
           <q-img v-if="file.imageUrl" :src="file.imageUrl" class="full-width" ref="fileImg" style="max-height: 400px;" fit="contain">
             <div class="absolute all-pointer-events q-gutter-y-xs no-padding flex column" style="" v-if="imageHovered">
-              <q-btn  flat size="12px" icon="las la-upload"  @click="uploadImage">
+              <q-btn  flat size="12px" icon="mdi-upload"  @click="uploadImage">
                 <q-tooltip>
                   Replace image
                 </q-tooltip>
               </q-btn>
-              <q-btn flat size="12px" icon="las la-times" @click="deleteFileImage">
+              <q-btn flat size="12px" icon="mdi-close" @click="deleteFileImage">
                 <q-tooltip>
                   Delete image
                 </q-tooltip>
@@ -74,13 +73,13 @@
             </div>
 
           </q-img>
-          <q-btn v-else flat no-caps :loading="uploadingImage" @click="uploadImage" icon="las la-image" color="grey-7" label="Add Image" class="full-width" />
+          <q-btn v-else flat no-caps :loading="uploadingImage" @click="uploadImage" icon="mdi-image-outline" color="grey-7" label="Add Image" class="full-width" />
         </q-card-section>
         <q-card-section class="q-py-sm">
           <InputWithAi v-model="fileSynopsis" label="Synopsis" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" :prompt-input="file.content" :class="writeClasses" />
         </q-card-section>
         <q-card-section class="q-py-sm">
-          <q-input label="Note" v-model="fileNote" type="textarea" filled :class="layoutStore.darkMode ? 'bg-brown-10' : 'bg-yellow-2'" dense square/>
+          <q-input label="Note" v-model="fileNote" type="textarea" filled :class="layoutStore.darkMode ? 'bg-brown-10' : 'bg-yellow-2'" dense/>
         </q-card-section>
         <q-card-section class="q-pt-sm">
           <div class="">
@@ -108,62 +107,63 @@
 
       </q-card>
     </q-expansion-item>
+    <div class="fit q-my-sm q-pl-sm q-pr-md">
 
+      <div class="fit ai-panel scroll">
+        <div class="text-center q-mt-md q-mb-md">
+          <q-btn-toggle :options="views" v-model="currentView" unelevated no-caps class="bordered inscriptor-highlight-btn" toggle-color="primary" padding="xs md" id="aiSwitch" />
+        </div>
+        <q-card flat v-if="promptStore.analysisEnabled" class="bg-transparent">
 
-    <q-separator class=""/>
-
-    <div class="text-center q-mt-md q-mb-md">
-      <q-btn-toggle :options="views" v-model="currentView" unelevated no-caps class="bordered" toggle-color="primary" padding="xs md" id="aiSwitch" />
-    </div>
-
-    <q-card flat v-if="promptStore.analysisEnabled">
-
-      <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length === 0">
+          <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length === 0">
           <span class="text-warning">
-            <q-icon name="las la-exclamation-triangle" />
+            <q-icon name="mdi-exclamation-thick" />
             No analysis prompts created
           </span>
-      </q-card-section>
+          </q-card-section>
 
-      <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length > 0">
-        <q-select clearable options-dense v-model="promptStore.selectedAnalysisPrompts" label="Active Analysis prompts" outlined dense filled square :options="availableAnalysisPrompts" multiple use-chips/>
-        <q-linear-progress indeterminate v-if="layoutStore.analysisTriggered" />
-      </q-card-section>
+          <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length > 0">
+            <q-select clearable options-dense v-model="promptStore.selectedAnalysisPrompts" label="Active Analysis prompts" outlined dense filled :options="availableAnalysisPrompts" multiple use-chips/>
+            <q-linear-progress indeterminate v-if="layoutStore.analysisTriggered" />
+          </q-card-section>
 
-      <q-card-section v-if="promptStore.analysisEnabled && selectionPromptResults?.length > 0">
-        <div class="q-gutter-y-sm">
-          <div v-for="(promptResult, index) in selectionPromptResults" :key="index">
+          <q-card-section v-if="promptStore.analysisEnabled && selectionPromptResults?.length > 0">
+            <div class="q-gutter-y-sm">
+              <div v-for="(promptResult, index) in selectionPromptResults" :key="index">
 
-            <div>
-              <transition
-                appear
-                enter-active-class="animated fadeInDown slower"
-                leave-active-class="animated fadeOut delay-1s"
-              >
-                <PromptResult :promptResult="promptResult"/>
+                <div>
+                  <transition
+                    appear
+                    enter-active-class="animated fadeInDown slower"
+                    leave-active-class="animated fadeOut delay-1s"
+                  >
+                    <PromptResult :promptResult="promptResult"/>
 
-              </transition>
+                  </transition>
+                </div>
+
+
+              </div>
             </div>
+            <q-btn outline @click="promptStore.promptSelectionAnalysisPrompts" icon="mdi-sync" class="q-mt-md" color="green" size="sm"/>
+          </q-card-section>
+
+          <q-card-section v-else-if="promptStore.selectedAnalysisPrompts.length > 0 && selectionPromptResults?.length === 0" class="text-center">
+            <div class="">Analysis is active using {{ promptStore.selectedAnalysisPrompts.length }} prompt(s)</div>
+            <div>Select some text to begin analyzing it.</div>
+          </q-card-section>
+
+          <q-card-section v-else-if="promptStore.selectedAnalysisPrompts.length === 0" class="text-center">
+            <div>You have not selected any analysis prompts, so no analysis will be performed.</div>
+          </q-card-section>
+
+        </q-card>
+        <PromptsTab v-if="currentView === 'prompts'"/>
+        <ChatTab v-if="currentView === 'chat'"/>
+      </div>
 
 
-          </div>
-        </div>
-        <q-btn outline @click="promptStore.promptSelectionAnalysisPrompts" icon="las la-sync" class="q-mt-md" color="green" size="sm"/>
-      </q-card-section>
-
-      <q-card-section v-else-if="promptStore.selectedAnalysisPrompts.length > 0 && selectionPromptResults?.length === 0" class="text-center">
-        <div class="">Analysis is active using {{ promptStore.selectedAnalysisPrompts.length }} prompt(s)</div>
-        <div>Select some text to begin analyzing it.</div>
-      </q-card-section>
-
-      <q-card-section v-else-if="promptStore.selectedAnalysisPrompts.length === 0" class="text-center">
-        <div>You have not selected any analysis prompts, so no analysis will be performed.</div>
-      </q-card-section>
-
-    </q-card>
-
-    <PromptsTab v-if="currentView === 'prompts'"/>
-    <ChatTab v-if="currentView === 'chat'"/>
+    </div>
 
   </div>
 </template>
@@ -183,12 +183,12 @@
   import {useCurrentUser} from "vuefire";
   import {uint8ArrayToBase64} from "src/common/utils/textUtils";
   import {useElementHover} from "@vueuse/core";
+  import {chatTabId, promptTabId} from 'src/common/resources/tabs';
 
   const promptStore = usePromptStore();
   const fileStore = useFileStore();
   const layoutStore = useLayoutStore();
   const tabs = computed(() => promptStore.tabs);
-  //const currentTab = ref(tabs.value[0].id);
 
   const uploadingImage = ref(false);
   const fileImg = ref(null);
@@ -212,13 +212,13 @@
 
   watch(currentView, (newValue) => {
     if(newValue === 'prompts') {
-      currentTab.value = 1;
+      currentTab.value = promptTabId;
       promptStore.analysisEnabled = false;
     } else if(newValue === 'analysis') {
       promptStore.analysisEnabled = true;
     } else if(newValue === 'chat') {
       promptStore.analysisEnabled = false;
-      currentTab.value = 2;
+      currentTab.value = chatTabId;
     }
   });
 
@@ -287,13 +287,6 @@
 
   const selectionPromptResults = computed(() => {
     return promptStore.selectionPromptResults ?? [];
-  });
-
-  const page = computed({
-    get: () => (promptStore.getTabData(promptStore.currentTab)?.promptResultsIndex ?? 0) + 1,
-    set: (value) => {
-      promptStore.setCurrentTabResultsIndex(value - 1);
-    }
   });
 
   const writeClasses = computed(() => {

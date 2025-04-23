@@ -1,8 +1,8 @@
 <template>
   <div>
-    <div class="relative-position bg-red">
+    <div class="relative-position">
       <div class="" style="position: absolute; top: 5px; right: 5px; z-index: 10; ">
-        <q-btn @click.prevent.stop icon="mdi-creation-outline" flat outline dense color="accent" size="10px" :loading="prompting">
+        <q-btn @click.prevent.stop icon="mdi-creation-outline" flat outline dense color="primary" size="11px" :loading="prompting">
           <q-menu v-model="visible">
             <q-list dense>
               <q-item dense v-for="prompt in promptSelection" :key="prompt.id" clickable @click="runPrompt(prompt); visible = false;">
@@ -34,19 +34,15 @@
       :borderless="borderless"
       :filled="filled"
       :dense="dense"
-      square
       :autofocus="autofocus"
       :spellcheck="automaticTextCorrection"
       @update:modelValue="onInput"
     >
-      <template v-slot:append >
-
-      </template>
     </q-input>
 
 
     <div style="position: relative;" v-if="promptResult && promptResult.prompt === promptExecuted">
-      <div class="bordered" style="position: absolute; top: 100%; right: 0; z-index: 10; ">
+      <div class="bordered" style="position: absolute; top: 100%; left: 0; z-index: 10; ">
         <q-spinner v-if="prompting" />
         <PromptResult :promptResult="promptResult" :insert-target="(text) => onInput(trimInputWithAi(convertHtmlToText(text, true)))" type="inline" :has-close="true" @close="promptResult = null" @replace-self="replacePromptResult"/>
       </div>
@@ -59,10 +55,11 @@
 <script setup>
 import {computed, ref, watch} from 'vue'
 import {usePromptStore} from "stores/prompt-store";
-import {executePromptClick} from "src/common/helpers/promptHelper";
+import {executePromptClick2} from "src/common/helpers/promptHelper";
 import PromptResult from "components/RightMenu/PromptResult.vue";
 import {convertHtmlToText, trimInputWithAi} from "src/common/utils/textUtils";
 import {useLayoutStore} from "stores/layout-store";
+import {createDynamicContext} from 'src/common/resources/promptContexts';
 
 const promptStore = usePromptStore();
 const layoutStore = useLayoutStore();
@@ -131,7 +128,17 @@ async function runPrompt(prompt) {
     prompting.value = true;
     promptResultOpen.value = true;
     promptExecuted.value = prompt;
-    const result = await executePromptClick(prompt, props.promptInput, true, null, true, null, true);
+
+    const request = {
+      prompt: prompt,
+      text: props.promptInput,
+      clear: true,
+      forceBypassMoreParameters: true,
+      appendContext: [ createDynamicContext("Input text", props.promptInput) ],
+      silent: true
+    }
+
+    const result = await executePromptClick2(request);
 
     promptResult.value = result;
 

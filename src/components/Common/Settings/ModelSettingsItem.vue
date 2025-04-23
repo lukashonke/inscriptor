@@ -32,32 +32,32 @@
           <q-checkbox v-model="enabled" label="Enabled" />
         </div>-->
 
-        <div class="col-auto row q-ml-sm" v-if="model.canBeDeleted"><q-btn dense icon="las la-trash" color="red" flat @click="promptStore.askRemoveModel(model)" label="" class="float-right"/></div>
+        <div class="col-auto row q-ml-sm" v-if="model.canBeDeleted"><q-btn dense icon="mdi-delete-outline" color="red" flat @click="promptStore.askRemoveModel(model)" label="" class="float-right"/></div>
 
         <div class="col-auto row q-ml-sm">
-          <q-btn dense icon="las la-arrow-up" color="primary" flat @click="promptStore.pushModelOrder(model, -1)" label="" class="float-right"/>
-          <q-btn dense icon="las la-arrow-down" color="primary" flat @click="promptStore.pushModelOrder(model, 1)" label="" class="float-right"/>
+          <q-btn dense icon="mdi-arrow-up-thin" color="primary" flat @click="promptStore.pushModelOrder(model, -1)" label="" class="float-right"/>
+          <q-btn dense icon="mdi-arrow-down-thin" color="primary" flat @click="promptStore.pushModelOrder(model, 1)" label="" class="float-right"/>
         </div>
 
-        <div class="col-auto row q-ml-sm"><q-btn icon="las la-cog" color="primary" flat @click="settingsExpanded = !settingsExpanded" label="" class="float-right" dense/></div>
+        <div class="col-auto row q-ml-sm"><q-btn icon="mdi-cog" color="primary" flat @click="settingsExpanded = !settingsExpanded" label="" class="float-right" dense/></div>
       </div>
 
       <q-slide-transition v-show="settingsExpanded">
         <q-card bordered class="">
           <q-card-section class="q-gutter-y-sm">
             <div class="row q-gutter-x-sm">
-              <div class="col"><q-input dense borderless square filled placeholder="Name" v-model="name" label="Visible Name" :readonly="!canEditModelMeta"/></div>
+              <div class="col"><q-input dense borderless filled placeholder="Name" v-model="name" label="Visible Name" :readonly="!canEditModelMeta"/></div>
 
-              <div class="col"><q-input dense borderless square filled label="LLM Model Name" v-model="modelName" readonly  /></div>
+              <div class="col"><q-input dense borderless filled label="LLM Model Name" v-model="modelName" readonly  /></div>
 
-              <div class="col"><q-input dense borderless square filled label="Inference Engine" :model-value="model.args?.inferenceEngine" readonly /></div>
+              <div class="col"><q-input dense borderless filled label="Inference Engine" :model-value="model.args?.inferenceEngine" readonly /></div>
 
-              <div class="col-auto"><q-select v-if="model.type === 'local'" dense borderless square filled label="Quants" v-model="modelQuants" :options="availableModelQuants"/></div>
+              <div class="col-auto"><q-select v-if="model.type === 'local'" dense borderless filled label="Quants" v-model="modelQuants" :options="availableModelQuants"/></div>
             </div>
 
             <div class="row">
               <div class="col">
-                <q-input dense borderless square filled label="Description" v-model="description" :readonly="!canEditModelMeta" autogrow />
+                <q-input dense borderless filled label="Description" v-model="description" :readonly="!canEditModelMeta" autogrow />
               </div>
             </div>
 
@@ -65,7 +65,7 @@
               <div class="col">
                 <div class="row">
                   <div class="col-12">
-                    <q-icon name="las la-check" class="q-mr-xs" />
+                    <q-icon name="mdi-check" class="q-mr-xs" />
                     <span>Using custom API key: {{ getCloudModelApiKey(model.id, model.args.inferenceEngine).key }}</span>
                   </div>
                 </div>
@@ -120,7 +120,7 @@
 
               <div class="row" v-if="false">
                 <div class="col">
-                  <q-select dense borderless square filled label="Call type" v-model="apiCallType" :options="apiCallTypes" />
+                  <q-select dense borderless filled label="Call type" v-model="apiCallType" :options="apiCallTypes" />
                 </div>
                 <div class="col-auto items-center flex">
                   <HelpIcon tooltip="Type of API to use. Recommended is Chat."></HelpIcon>
@@ -129,7 +129,7 @@
 
               <div class="row">
                 <div class="col">
-                  <q-input dense filled square autogrow label="API URL" v-model="url" />
+                  <q-input dense filled autogrow label="API URL" v-model="url" />
                 </div>
                 <div class="col-auto items-center flex">
                   <HelpIcon tooltip="URL to the OpenAI-compatible API."></HelpIcon>
@@ -140,7 +140,7 @@
 
             <div class="row">
               <div class="col">
-                <q-input dense filled square label="Default Prompt Result Number" v-model="promptTimes" type="number" />
+                <q-input dense filled label="Default Prompt Result Number" v-model="promptTimes" type="number" />
               </div>
               <div class="col-auto items-center flex">
                 <HelpIcon :tooltip="$t('tooltips.parameters.promptTimes')"></HelpIcon>
@@ -150,12 +150,12 @@
             <div class="row" v-if="showPromptFormatSettings">
               <div class="col q-gutter-y-xs">
                 <div class="text-subtitle2 q-mt-sm ">Default Prompt Format</div>
-                <q-input dense filled square label="System Prompt Prefix" v-model="defaultSystemPromptPrefix" autogrow />
-                <q-input dense filled square label="System Prompt Suffix" v-model="defaultSystemPromptSuffix" autogrow />
-                <q-input dense filled square label="User Prompt Prefix" v-model="defaultUserPromptPrefix" autogrow />
-                <q-input dense filled square label="User Prompt Suffix" v-model="defaultUserPromptSuffix" autogrow />
-                <q-input dense filled square label="Assistant Prompt Prefix" v-model="defaultAssistantPromptPrefix" autogrow />
-                <q-input dense filled square label="Assistant Prompt Suffix" v-model="defaultAssistantPromptSuffix" autogrow />
+                <q-input dense filled label="System Prompt Prefix" v-model="defaultSystemPromptPrefix" autogrow />
+                <q-input dense filled label="System Prompt Suffix" v-model="defaultSystemPromptSuffix" autogrow />
+                <q-input dense filled label="User Prompt Prefix" v-model="defaultUserPromptPrefix" autogrow />
+                <q-input dense filled label="User Prompt Suffix" v-model="defaultUserPromptSuffix" autogrow />
+                <q-input dense filled label="Assistant Prompt Prefix" v-model="defaultAssistantPromptPrefix" autogrow />
+                <q-input dense filled label="Assistant Prompt Suffix" v-model="defaultAssistantPromptSuffix" autogrow />
               </div>
               <div class="col-auto items-center flex">
                 <HelpIcon :tooltip="$t('tooltips.parameters.promptFormat')"></HelpIcon>
@@ -173,7 +173,7 @@
 
             <div class="row" v-if="showPromptFormatSettings">
               <div class="col">
-                <q-input dense square label="Prompt Format Preview" v-model="defaultPromptFormat" readonly autogrow />
+                <q-input dense label="Prompt Format Preview" v-model="defaultPromptFormat" readonly autogrow />
               </div>
               <div class="col-auto items-center flex">
                 <HelpIcon tooltip="Preview of prompt with default system message"></HelpIcon>
@@ -182,14 +182,14 @@
 
             <template v-if="model.type === 'client-openai' || model.type === 'client-dall-e'">
               <div v-if="model.auth" >
-                <q-input dense borderless square filled label="API Key" v-model="apiKey" />
+                <q-input dense borderless filled label="API Key" v-model="apiKey" />
               </div>
             </template>
 
             <template v-if="model.type === 'local' || model.type === 'client-ollama' || model.type === 'lmstudio'">
               <div class="row" v-if="showStopWords">
                 <div class="col">
-                  <q-input dense filled square label="Default Stop Strings" v-model="defaultStopStrings" autogrow />
+                  <q-input dense filled label="Default Stop Strings" v-model="defaultStopStrings" autogrow />
                 </div>
                 <div class="col-auto items-center flex">
                   <HelpIcon :tooltip="$t('tooltips.parameters.stopStrings')"></HelpIcon>
@@ -198,14 +198,14 @@
 
               <div class="row q-gutter-x-md">
                 <div class="col">
-                  <q-input dense filled square v-model="contextSize" label="Set Context Size"/>
+                  <q-input dense filled v-model="contextSize" label="Set Context Size"/>
                 </div>
                 <div class="col-auto items-center flex">
                   <HelpIcon tooltip="You can restrict context size here."></HelpIcon>
                 </div>
 
                 <div class="col">
-                  <q-input dense filled square autogrow label="Default Max Tokens" v-model="defaultMaxTokens" />
+                  <q-input dense filled autogrow label="Default Max Tokens" v-model="defaultMaxTokens" />
                 </div>
                 <div class="col-auto items-center flex">
                   <HelpIcon :tooltip="$t('tooltips.parameters.maxTokens')"></HelpIcon>
@@ -276,7 +276,7 @@
             <template v-if="model.type === 'automatic1111-sd'">
               <div class="row">
                 <div class="col">
-                  <q-input dense filled square autogrow label="API URL" v-model="url" />
+                  <q-input dense filled autogrow label="API URL" v-model="url" />
                 </div>
                 <div class="col-auto items-center flex">
                   <HelpIcon tooltip="URL to the AUTOMATIC1111 API."></HelpIcon>

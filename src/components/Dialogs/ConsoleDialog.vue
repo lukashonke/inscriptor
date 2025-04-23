@@ -17,7 +17,7 @@
                 </span>
 
                 <span class="text-negative text-bold" v-if="prompt.error">
-                  <q-icon name="las la-exclamation-triangle" />
+                  <q-icon name="mdi-exclamation-thick" />
                   An error occured: ({{ prompt.error }})
                 </span>
                 <p class="write-serif scroll" v-html="formatPromptInput(prompt)">

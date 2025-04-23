@@ -1,0 +1,201 @@
+.dark-mode {
+
+
+  .bg-accent-1 {
+    background-color: rgba(178, 163, 45, 0.95);
+  }
+
+  .gradient-variation-1 {
+    background: linear-gradient(135deg, #ffffff 80%, #ededf8 100%);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .bg-file-list-hover {
+    background-color: #212121;
+  }
+
+  .bg-file-list-selected {
+    background-color: #434343;
+  }
+
+  .left-border {
+    border-left: 1px solid rgba(255, 255, 255, 0.88);
+  }
+
+  .all-border {
+    border: 1px solid rgba(255, 255, 255, 0.88);
+  }
+
+  .bottom-border {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.88);
+  }
+
+  .right-border {
+    border-right: 1px solid rgba(255, 255, 255, 0.88);
+  }
+
+  .top-border {
+    border-top: 1px solid rgba(255, 255, 255, 0.88);
+  }
+
+  .menu-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: lightblue;
+  }
+
+  .menu-subtitle {
+    font-size: 0.9em;
+    color: lightblue;
+  }
+
+  .text-light {
+    color: #212121;
+  }
+
+  .bordered {
+    border: 1px solid #212121;
+    border-radius: 6px;
+  }
+
+  .file-list-item {
+    border: 1px solid rgba(0, 0, 0, 0);
+    border-radius: 6px;
+  }
+
+  .file-list-item-hover {
+    border: 1px solid #212121;
+    border-radius: 6px;
+  }
+
+  .square-bordered {
+    border: 1px solid #212121;
+    border-radius: 0px;
+  }
+
+  .searchinput {
+    background-color: rgba(0, 0, 0, 0.9);
+    border: 0;
+    height: 26px;
+    border-radius: 2px;
+    color: black;
+    font-size: 0.9rem;
+    padding: 5px 5px 5px 5px;
+    &:hover,
+    &:focus {
+      outline: none;
+    }
+  }
+
+  body {
+    background-color: #212121;
+  }
+
+  .left-menu-panel {
+    border-color: #212121 !important;
+  }
+
+  .left-menu-scroll {
+    background-color: #212121 !important;
+  }
+
+  .bg-white {
+    background-color: #212121 !important;
+  }
+
+  .bg-white-transparent {
+    background-color: #212121 !important;
+  }
+
+  .bg-yellow-1 {
+    background-color: rgba(178, 163, 45, 0.95);
+  }
+
+  .bg-yellow-2 {
+    background-color: rgba(178, 163, 45, 0.75);
+  }
+
+  .bg-grey-2 {
+    background-color: rgba(69, 69, 69, 0.5);
+  }
+
+  .bg-primary-1 {
+    background-color: rgb(12, 12, 0);
+  }
+
+  .bg-secondary-1 {
+    background-color: rgba(17, 33, 42, 0.49);
+  }
+
+  .bg-primary-light {
+    background-color: rgb(0, 0, 0, 0.75);
+  }
+
+  .bg-primary-2 {
+    background-color: rgb(19, 19, 7);
+  }
+
+  .bg-primary-3 {
+    background-color: rgba(176, 161, 41, 0.75);
+  }
+
+  .bg-primary-4 {
+    background-color: rgba(176, 161, 41, 0.667);
+  }
+
+  .bg-primary-5 {
+    background-color: rgba(176, 161, 41, 0.583);
+  }
+
+  .bg-primary-6 {
+    background-color: rgba(176, 161, 41, 0.5);
+  }
+
+  .bg-primary-7 {
+    background-color: rgba(176, 161, 41, 0.417);
+  }
+
+  .bg-primary-8 {
+    background-color: rgba(176, 161, 41, 0.333);
+  }
+
+  .bg-primary-9 {
+    background-color: rgba(176, 161, 41, 0.25);
+  }
+
+  .bg-primary-10 {
+    background-color: rgba(176, 161, 41, 0.167);
+  }
+
+  .bg-primary-11 {
+    background-color: rgba(176, 161, 41, 0.083);
+  }
+
+  .bg-primary-12 {
+    background-color: rgba(176, 161, 41, 0);
+  }
+
+  .bg-inscriptorblue-dark {
+    background-color: #e6e2bc;
+  }
+
+  .bg-inscriptorblue {
+    background-color: #dcd7a3;
+  }
+
+  .bg-inscriptorblue-light {
+    background-color: #c0b751;
+  }
+
+  .text-inscriptorblue-dark {
+    color: #9d9487;
+  }
+
+  .text-inscriptorblue-light {
+    color: #302e17;
+  }
+
+  .highlight {
+    background-color: rgba(177, 162, 43, 0.75) !important;
+  }
+}

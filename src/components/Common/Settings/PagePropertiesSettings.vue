@@ -8,6 +8,11 @@
               <div class="q-mt-lg text-subtitle2">{{ predefinedPrompt.promptType }}</div>
               <PromptSelectMultiple :prompt-type="predefinedPrompt.promptType" :hint="predefinedPrompt.promptHint" />
             </div>
+
+            <div class="q-py-sm">
+              <div class="q-mt-lg text-subtitle2">Default Custom Prompt Instructions</div>
+              <q-input v-model="promptStore.defaultCustomPromptInstructions" filled dense label="Instructions" type="textarea" :rows="3" :autogrow="true" hint="The default prefixed instructions for quick custom prompts." />
+            </div>
           </div>
         </q-expansion-item>
       </div>
@@ -66,7 +71,7 @@
                   </q-item-label>
                 </q-item-section>
                 <q-item-section side>
-                  <q-btn icon="las la-trash" flat color="negative" @click="promptStore.removeFileTemplate(template)" />
+                  <q-btn icon="mdi-delete-outline" flat color="negative" @click="promptStore.removeFileTemplate(template)" />
                 </q-item-section>
               </q-item>
             </q-list>

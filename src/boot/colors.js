@@ -3,7 +3,7 @@ import { setCssVar } from 'quasar'
 
 export default boot(({ app }) => {
 
-  setCssVar('primary', '#717180'); // 629b8c
+  setCssVar('primary', '#7e7e8e'); // 629b8c
 
   setCssVar('brand', '#4e5dd4'); // 629b8c
   setCssVar('brandDark', '#3f49a9'); // 629b8c

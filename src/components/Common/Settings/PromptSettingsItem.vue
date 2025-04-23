@@ -16,7 +16,7 @@
         </div>
         <div class="col flex items-center q-mr-xl q-gutter-y-xs">
           <q-badge class="q-ml-sm" color="">
-            <q-icon name="las la-robot" class="q-mr-xs" />
+            <q-icon name="mdi-robot-outline" class="q-mr-xs" />
             {{ model?.name }}
             <q-tooltip>
               Default AI model
@@ -29,45 +29,31 @@
             </q-tooltip>
           </q-badge>-->
           <q-badge class="q-ml-sm" color="secondary" v-if="promptCategory?.length > 0">
-            <q-icon name="las la-tag"  class="q-mr-xs"/>
+            <q-icon name="mdi-tag-outline"  class="q-mr-xs"/>
             {{ promptCategory }}
             <q-tooltip>
               Prompt Category
             </q-tooltip>
           </q-badge>
           <q-badge class="q-ml-sm" color="secondary" v-if="promptFolder?.length > 0">
-            <q-icon name="las la-folder" class="q-mr-xs" />
+            <q-icon name="mdi-folder-outline" class="q-mr-xs" />
             {{ promptFolder }}
             <q-tooltip>
               Folder
             </q-tooltip>
           </q-badge>
-          <!--<q-badge v-if="prompt.info?.tags.includes('context')" class="q-ml-sm" color="warning" >
-            <q-icon name="las la-user" />
-            Context
-            <q-tooltip>
-              This prompt will ask for context
-            </q-tooltip>
-          </q-badge>
-          <q-badge v-if="prompt.hasParameters" class="q-ml-sm" color="warning" >
-            <q-icon name="las la-user" />
-            Parameters
-            <q-tooltip>
-              This prompt will ask for extra parameters
-            </q-tooltip>
-          </q-badge>-->
         </div>
 
         <template v-if="!startExpanded">
-          <div class="col-auto row q-ml-sm"><q-btn icon="las la-trash" color="red" flat @click="promptStore.removePrompt(prompt)" label="" class="float-right" dense/></div>
-          <div class="col-auto row q-ml-sm"><q-btn icon="las la-copy" color="primary" flat @click="promptStore.clonePrompt(prompt)" label="" class="float-right" dense/></div>
+          <div class="col-auto row q-ml-sm"><q-btn icon="mdi-delete-outline" color="red" flat @click="promptStore.removePrompt(prompt)" label="" class="float-right" dense/></div>
+          <div class="col-auto row q-ml-sm"><q-btn icon="mdi-content-copy" color="primary" flat @click="promptStore.clonePrompt(prompt)" label="" class="float-right" dense/></div>
 
           <div class="col-auto row q-ml-sm">
-            <q-btn icon="las la-arrow-up" color="primary" flat @click="promptStore.pushPromptOrder(prompt, -1)" label="" class="float-right" dense/>
-            <q-btn icon="las la-arrow-down" color="primary" flat @click="promptStore.pushPromptOrder(prompt, 1)" label="" class="float-right" dense/>
+            <q-btn icon="mdi-arrow-up-thin" color="primary" flat @click="promptStore.pushPromptOrder(prompt, -1)" label="" class="float-right" dense/>
+            <q-btn icon="mdi-arrow-down-thin" color="primary" flat @click="promptStore.pushPromptOrder(prompt, 1)" label="" class="float-right" dense/>
           </div>
 
-          <div class="col-auto row q-ml-sm"><q-btn icon="las la-cog" color="primary" flat @click="settingsExpanded = !settingsExpanded" label="" class="float-right" dense/></div>
+          <div class="col-auto row q-ml-sm"><q-btn icon="mdi-cog" color="primary" flat @click="settingsExpanded = !settingsExpanded" label="" class="float-right" dense/></div>
         </template>
 
 
@@ -86,7 +72,7 @@
               <div class="col-auto q-ml-sm" v-if="allowPromptCategorization">
                 <q-select outlined filled dense label="Category Tab" v-model="promptCategory" :options="promptStore.promptCategories" option-label="label" option-value="label" emit-value use-input clearable hide-dropdown-icon @new-value="(val, done) => promptStore.addListItem(promptStore.promptCategories, val, 'white', done)" options-dense >
                   <template v-slot:prepend>
-                    <q-icon name="las la-table" />
+                    <q-icon name="mdi-table-column" />
                   </template>
                   <template v-slot:option="scope">
                     <q-item v-bind="scope.itemProps">
@@ -106,12 +92,12 @@
               <div class="col-auto q-ml-sm" v-if="allowPromptCategorization">
                 <q-select outlined filled dense label="Folder" v-model="promptFolder" :options="promptStore.promptFolders" option-label="label" option-value="label" emit-value use-input clearable hide-dropdown-icon @new-value="(val, done) => promptStore.addListItem(promptStore.promptFolders, val, 'white', done)" options-dense >
                   <template v-slot:prepend>
-                    <q-icon name="las la-folder" />
+                    <q-icon name="mdi-folder-outline" />
                   </template>
                   <template v-slot:option="scope">
                     <q-item v-bind="scope.itemProps">
                       <q-item-section avatar>
-                        <q-icon :name="scope.opt.icon ?? 'las la-folder'" />
+                        <q-icon :name="scope.opt.icon ?? 'mdi-folder-outline'" />
                       </q-item-section>
                       <q-item-section>
                         <q-item-label>{{ scope.opt.label }}</q-item-label>
@@ -166,6 +152,9 @@
               <div class="col">
                 <q-select filled dense v-model="promptStyle" label="Prompt UI Style" :options="promptStyles" v-if="showPromptUiStyle" options-dense/>
               </div>
+              <div class="col-auto" v-if="hasResultsSeparator || promptStyle === 'brainstorm' || promptStyle === 'brainstorm-ui'">
+                <q-input dense filled label="Results separator" v-model="resultsSeparator" autogrow />
+              </div>
             </div>
 
             <div class="row q-gutter-x-md" v-if="showPromptToggles">
@@ -185,6 +174,9 @@
               <div class="col-auto">
                 <q-checkbox v-model="hasExtendedChatMessages" dense label="Include more prompt messages" />
               </div>
+              <div class="col-auto">
+                <q-checkbox v-model="hasResultsSeparator" dense label="Separator of results" />
+              </div>
 
             </div>
 
@@ -192,12 +184,12 @@
               <div class="col q-gutter-y-xs">
 
                 <div class="text-subtitle2 q-mt-sm ">Prompt Format</div>
-                <q-input dense filled square label="System Prompt Prefix" v-model="systemPromptPrefix" autogrow />
-                <q-input dense filled square label="System Prompt Suffix" v-model="systemPromptSuffix" autogrow />
-                <q-input dense filled square label="User Prompt Prefix" v-model="userPromptPrefix" autogrow />
-                <q-input dense filled square label="User Prompt Suffix" v-model="userPromptSuffix" autogrow />
-                <q-input dense filled square label="Assistant Prompt Prefix" v-model="assistantPromptPrefix" autogrow />
-                <q-input dense filled square label="Assistant Prompt Suffix" v-model="assistantPromptSuffix" autogrow />
+                <q-input dense filled label="System Prompt Prefix" v-model="systemPromptPrefix" autogrow />
+                <q-input dense filled label="System Prompt Suffix" v-model="systemPromptSuffix" autogrow />
+                <q-input dense filled label="User Prompt Prefix" v-model="userPromptPrefix" autogrow />
+                <q-input dense filled label="User Prompt Suffix" v-model="userPromptSuffix" autogrow />
+                <q-input dense filled label="Assistant Prompt Prefix" v-model="assistantPromptPrefix" autogrow />
+                <q-input dense filled label="Assistant Prompt Suffix" v-model="assistantPromptSuffix" autogrow />
               </div>
               <div class="col-auto items-center flex">
                 <HelpIcon :tooltip="$t('tooltips.parameters.promptFormat')"></HelpIcon>
@@ -283,14 +275,14 @@
                   <div class="col" v-if="model.args?.sourceLanguages">
                     <q-select :options="model.args.sourceLanguages" v-model="sourceLanguage" filled dense label="Source Language" clearable :hint="sourceLanguageHint">
                       <template v-slot:prepend>
-                        <q-icon name="las la-language" />
+                        <q-icon name="mdi-translate" />
                       </template>
                     </q-select>
                   </div>
                   <div class="col" v-if="model.args?.targetLanguages">
                     <q-select :options="model.args.targetLanguages" v-model="targetLanguage" filled dense label="Target Language" clearable :hint="targetLanguageHint">
                       <template v-slot:prepend>
-                        <q-icon name="las la-language" />
+                        <q-icon name="mdi-translate" />
                       </template>
                     </q-select>
                   </div>
@@ -315,26 +307,31 @@
                     <q-card-section  class="q-gutter-y-sm">
                       <div class="row q-gutter-x-sm">
                         <div class="col-3">
-                          <q-input dense filled square label="Parameter Name" :model-value="parameter.name" v-on:update:model-value="updateParameter(prompt, parameter, {name: $event})" />
+                          <q-input dense filled label="Parameter Name" :model-value="parameter.name" v-on:update:model-value="updateParameter(prompt, parameter, {name: $event})" />
                         </div>
                         <div class="col">
-                          <q-input dense filled square label="Description" :model-value="parameter.hint" v-on:update:model-value="updateParameter(prompt, parameter, {hint: $event})" />
+                          <q-input dense filled label="Description" :model-value="parameter.hint" v-on:update:model-value="updateParameter(prompt, parameter, {hint: $event})" />
                         </div>
                         <div class="col-auto row">
-                          <q-btn icon="las la-trash q-ml-sm q-mr-sm" color="red" flat dense @click="deleteParameter(prompt, parameter)" label="" class="float-right"/>
+                          <q-btn icon="mdi-delete-outline q-ml-sm q-mr-sm" color="red" flat dense @click="deleteParameter(prompt, parameter)" label="" class="float-right"/>
 
-                          <q-btn dense icon="las la-arrow-up" color="primary" flat @click="promptStore.pushParameterOrder(prompt, parameter, -1)" label="" class="float-right"/>
-                          <q-btn dense icon="las la-arrow-down" color="primary" flat @click="promptStore.pushParameterOrder(prompt, parameter, 1)" label="" class="float-right"/>
+                          <q-btn dense icon="mdi-arrow-up-thin" color="primary" flat @click="promptStore.pushParameterOrder(prompt, parameter, -1)" label="" class="float-right"/>
+                          <q-btn dense icon="mdi-arrow-down-thin" color="primary" flat @click="promptStore.pushParameterOrder(prompt, parameter, 1)" label="" class="float-right"/>
 
                         </div>
                       </div>
 
                       <div class="row q-gutter-x-sm">
                         <div class="col">
-                          <q-input dense filled square label="Default value" :model-value="parameter.default" v-on:update:model-value="updateParameter(prompt, parameter, {default: $event})" />
+                          <template v-if="parameter.type === 'Select (advanced)' || parameter.type === 'Select'" >
+                            <q-select dense filled label="Default value" :options="parameter.values" options-dense emit-value :model-value="parameter.default" v-on:update:model-value="updateParameter(prompt, parameter, {default: $event})" />
+                          </template>
+                          <template v-else>
+                            <q-input dense filled label="Default value" :model-value="parameter.default" v-on:update:model-value="updateParameter(prompt, parameter, {default: $event})" />
+                          </template>
                         </div>
                         <div class="col">
-                          <q-select dense filled square label="Type" :model-value="parameter.type" :options="parameterTypes" v-on:update:model-value="updateParameter(prompt, parameter, {type: $event})" />
+                          <q-select dense filled label="Type" :model-value="parameter.type" :options="parameterTypes" v-on:update:model-value="updateParameter(prompt, parameter, {type: $event})" options-dense />
                         </div>
                       </div>
 
@@ -342,27 +339,42 @@
                         <q-list dense class="q-mt-md">
                           <q-item v-for="(value, index) in parameter.values" :key="index">
                             <q-input dense outlined autogrow :model-value="value" v-on:update:model-value="updateParameterValue(prompt, parameter, index, $event)" class="full-width"/>
-                            <q-btn icon="las la-trash" flat dense @click="deletePromptParameterValue(prompt, parameter, index)" class="text-red float-right"/>
+                            <q-btn icon="mdi-delete-outline" flat dense @click="deletePromptParameterValue(prompt, parameter, index)" class="text-red float-right"/>
                           </q-item>
 
                         </q-list>
 
-                        <q-btn label="Add Option" icon="las la-plus" flat dense class="q-my-md" @click="addParameterValue(prompt, parameter)" />
+                        <q-btn label="Add Option" icon="mdi-plus" flat dense class="q-my-md" @click="addParameterValue(prompt, parameter)" />
+                      </template>
+
+                      <template v-if="parameter.type === 'Select (advanced)'">
+                        <q-list dense class="q-mt-md q-gutter-xs">
+                          <q-item v-for="(value, index) in parameter.values" :key="index">
+                            <div class="row q-mr-xs">
+                              <q-input dense outlined autogrow :model-value="value?.label" label="Name" v-on:update:model-value="updateParameterValue(prompt, parameter, index, {label: $event, value: value?.value})" class="col"/>
+                            </div>
+                            <div class="row full-width">
+                              <q-input dense outlined autogrow :model-value="value?.value" label="Value" v-on:update:model-value="updateParameterValue(prompt, parameter, index, {label: value?.label, value: $event})" class="col"/>
+                            </div>
+                            <q-btn icon="mdi-delete-outline" flat dense @click="deletePromptParameterValue(prompt, parameter, index)" class="text-red float-right"/>
+                          </q-item>
+                        </q-list>
+                        <q-btn label="Add Option" icon="mdi-plus" flat dense class="q-my-md" @click="addParameterValue(prompt, parameter)" />
                       </template>
 
                       <div class="row q-gutter-x-sm">
                         <div class="col">
-                          <q-input dense filled square label="Examples:" :model-value="parameter.examples" v-on:update:model-value="updateParameter(prompt, parameter, {examples: $event})" hint="Example values, separate them by comma (,), eg: 'apple, banana'"/>
+                          <q-input dense filled label="Examples:" :model-value="parameter.examples" v-on:update:model-value="updateParameter(prompt, parameter, {examples: $event})" hint="Example values, separate them by comma (,), eg: 'apple, banana'"/>
                         </div>
                       </div>
 
 
                       <div class="row q-gutter-x-sm">
                         <div class="col">
-                          <q-input dense filled square label="Prefix with" :model-value="parameter.prefixWith" v-on:update:model-value="updateParameter(prompt, parameter, {prefixWith: $event})" hint="This text is inserted before the parameter."/>
+                          <q-input dense filled label="Prefix with" :model-value="parameter.prefixWith" v-on:update:model-value="updateParameter(prompt, parameter, {prefixWith: $event})" hint="This text is inserted before the parameter."/>
                         </div>
                         <div class="col">
-                          <q-input dense filled square label="Suffix with" :model-value="parameter.suffixWith" v-on:update:model-value="updateParameter(prompt, parameter, {suffixWith: $event})" hint="This text is inserted after the parameter."/>
+                          <q-input dense filled label="Suffix with" :model-value="parameter.suffixWith" v-on:update:model-value="updateParameter(prompt, parameter, {suffixWith: $event})" hint="This text is inserted after the parameter."/>
                         </div>
                       </div>
 
@@ -378,7 +390,7 @@
 
               </template>
               <q-card-actions>
-                <q-btn label="Add parameter" outline icon="las la-plus" flat dense @click="addParameter(prompt)"/>
+                <q-btn label="Add parameter" outline icon="mdi-plus" flat dense @click="addParameter(prompt)"/>
               </q-card-actions>
             </q-card>
 
@@ -409,6 +421,14 @@
                     <div class="col-auto">
                       <q-checkbox v-model="overrideFrequencyPenalty" dense label="Override Frequency Penalty" />
                       <HelpIcon :tooltip="$t('tooltips.parameters.frequencyPenalty')"></HelpIcon>
+                    </div>
+                  </div>
+
+                  <div class="row q-gutter-x-md">
+                    <div class="col-auto">
+                      <div class="col-auto">
+                        <q-checkbox v-model="hiddenInPromptSelector" dense label="Hidden in prompt selector" />
+                      </div>
                     </div>
                   </div>
 
@@ -455,38 +475,38 @@
                     <q-card-section>
                       <div class="row">
                         <div class="col">
-                          <q-input dense filled square label="Action Name" :model-value="action.title" v-on:update:model-value="updateAction(prompt, action, {title: $event})" hint=""/>
+                          <q-input dense filled label="Action Name" :model-value="action.title" v-on:update:model-value="updateAction(prompt, action, {title: $event})" hint=""/>
                         </div>
                         <div class="col-auto row">
-                          <q-btn icon="las la-trash q-ml-sm q-mr-sm" color="red" flat dense @click="deleteAction(prompt, action)" label="" class=""/>
+                          <q-btn icon="mdi-delete-outline q-ml-sm q-mr-sm" color="red" flat dense @click="deleteAction(prompt, action)" label="" class=""/>
                         </div>
                       </div>
-                      <q-select dense filled square label="Type" :model-value="action.type" v-on:update:model-value="updateAction(prompt, action, {type: $event})" :options="actionTypes" emit-value>
+                      <q-select dense filled label="Type" :model-value="action.type" v-on:update:model-value="updateAction(prompt, action, {type: $event})" :options="actionTypes" emit-value>
                       </q-select>
                     </q-card-section>
 
                     <q-card-section v-if="action.type === 'Run Prompt'" >
-                      <q-select dense filled square label="Prompt" :model-value="getPrompt(action.typeParameter)?.title" v-on:update:model-value="updateAction(prompt, action, {typeParameter: $event})" :options="runPromptTypeParameters" emit-value>
+                      <q-select dense filled label="Prompt" :model-value="getPrompt(action.typeParameter)?.title" v-on:update:model-value="updateAction(prompt, action, {typeParameter: $event})" :options="runPromptTypeParameters" emit-value options-dense>
                       </q-select>
                     </q-card-section>
 
                     <q-card-section v-if="action.type === 'Reply'" >
-                      <q-input dense filled square label="Reply Message" :model-value="action.typeParameter" v-on:update:model-value="updateAction(prompt, action, {typeParameter: $event})" hint="Message to send to AI as the reply"/>
+                      <q-input dense filled label="Reply Message" :model-value="action.typeParameter" v-on:update:model-value="updateAction(prompt, action, {typeParameter: $event})" hint="Message to send to AI as the reply"/>
                     </q-card-section>
 
                     <q-card-section v-if="action.type === 'Add to Context'" >
-                      <q-select dense filled square label="Context" :model-value="action.typeParameter" v-on:update:model-value="updateAction(prompt, action, {typeParameter: $event})" :options="addToContextTypeParameter" emit-value>
+                      <q-select dense filled label="Context" :model-value="action.typeParameter" v-on:update:model-value="updateAction(prompt, action, {typeParameter: $event})" :options="addToContextTypeParameter" emit-value>
                       </q-select>
                     </q-card-section>
 
                     <q-card-section v-if="action.type === 'Save to Variable'" >
-                      <q-select dense filled square label="Variable" :model-value="action.typeParameter" v-on:update:model-value="updateAction(prompt, action, {typeParameter: $event})" :options="saveToVariableVariables" emit-value>
+                      <q-select dense filled label="Variable" :model-value="action.typeParameter" v-on:update:model-value="updateAction(prompt, action, {typeParameter: $event})" :options="saveToVariableVariables" emit-value>
                       </q-select>
                     </q-card-section>
                   </q-card>
                 </q-card-section>
                 <q-card-actions>
-                  <q-btn label="Add action" outline icon="las la-plus" flat dense @click="addAction(prompt)"/>
+                  <q-btn label="Add action" outline icon="mdi-plus" flat dense @click="addAction(prompt)"/>
                 </q-card-actions>
               </q-card>
             </q-expansion-item>
@@ -499,7 +519,7 @@
                 <q-card-section v-if="showPromptResultCount">
                   <div  class="row">
                     <div class="col">
-                      <q-input dense filled square label="Promp Result Count" v-model="overridePromptTimes" type="number" :shadow-text="overridePromptTimes?.length === 0 ? 'Using default from model' : ''" />
+                      <q-input dense filled label="Promp Result Count" v-model="overridePromptTimes" type="number" :shadow-text="overridePromptTimes?.length === 0 ? 'Using default from model' : ''" />
                     </div>
                     <div class="col-auto flex items-center">
                       <HelpIcon tooltip="How many times is the prompt executed. Use value > 1 to prompt multiple times so that you can choose the result you like the best."></HelpIcon>
@@ -526,7 +546,7 @@
                       <q-card-section>
                         <div class="row q-gutter-x-sm full-width">
                           <div class="col-auto flex items-center q-mr-md">
-                            <q-input v-model="run.name" label="name" filled dense square/>
+                            <q-input v-model="run.name" label="name" filled dense/>
                           </div>
 
                           <div class="col-auto column items-center">
@@ -546,13 +566,13 @@
                           </div>
 
                           <div class="col-auto flex items-center">
-                            <q-btn icon="las la-trash" flat color="red" @click="promptStore.removePromptRun(prompt, run)" />
+                            <q-btn icon="mdi-delete-outline" flat color="red" @click="promptStore.removePromptRun(prompt, run)" />
                           </div>
                         </div>
 
                         <div class="row q-gutter-x-sm full-width q-mt-sm">
                           <div class="col-auto ">
-                            <q-select v-if="run.changeModel" v-model="run.changeModelValue" filled dense label="Model" :options="models" emit-value />
+                            <q-select v-if="run.changeModel" v-model="run.changeModelValue" filled dense label="Model" :options="models" emit-value options-dense />
                           </div>
 
                           <div class="col-auto">
@@ -573,7 +593,26 @@
                       </q-card-section>
                     </q-card>
                   </div>
-                  <q-btn color="primary" icon="las la-plus" label="Add run" @click="promptStore.addPromptRun(prompt)" class="q-mx-md q-mt-md q-mb-md"/>
+                  <q-btn color="primary" icon="mdi-plus" label="Add run" @click="promptStore.addPromptRun(prompt)" class="q-mx-md q-mt-md q-mb-md"/>
+                </q-card-section>
+              </q-card>
+            </q-expansion-item>
+
+            <q-expansion-item label="Brainstorm Settings" switch-toggle-side dense v-if="promptStyle === 'brainstorm-ui'">
+              <q-card bordered>
+                <q-card-section class="">
+                  <div class="full-width" bordered>
+                    <CodeEditor :model-value="getDynamicSettings('brainstorm_expandPromptMessage')" v-on:update:model-value="setDynamicSettings('brainstorm_expandPromptMessage', $event)" :parameters="parameters" label="Expand Prompt" />
+                  </div>
+                  <div class="full-width" bordered>
+                    <CodeEditor :model-value="getDynamicSettings('brainstorm_similarIdeasMessage')" v-on:update:model-value="setDynamicSettings('brainstorm_similarIdeasMessage', $event)" :parameters="parameters" label="Similar Ideas Prompt" />
+                  </div>
+                  <div class="full-width" bordered>
+                    <CodeEditor :model-value="getDynamicSettings('brainstorm_subIdeasMessage')" v-on:update:model-value="setDynamicSettings('brainstorm_subIdeasMessage', $event)" :parameters="parameters" label="Related Ideas Prompt" />
+                  </div>
+                  <div class="full-width" bordered>
+                    <CodeEditor :model-value="getDynamicSettings('brainstorm_replyMessage')" v-on:update:model-value="setDynamicSettings('brainstorm_replyMessage', $event)" :parameters="parameters" label="Reply to Idea Prompt" />
+                  </div>
                 </q-card-section>
               </q-card>
             </q-expansion-item>
@@ -602,6 +641,8 @@ import InputWithAi from "components/Common/InputWithAi.vue";
 import {
   allPromptContexts
 } from "src/common/resources/promptContexts";
+import PromptSelectMultiple from 'components/Common/PredefinedPromptSelect.vue';
+import MultiplePromptsSelect from 'components/Common/MultiplePromptsSelect.vue';
 
   const promptStore = usePromptStore();
   const fileStore = useFileStore();
@@ -619,7 +660,7 @@ import {
 
   const promptTypes = [
     {label: "General Prompt", value: "general", description: "Prompt can be used everywhere, with or without selecting any text.", icon: "mdi-creation"},
-    {label: "Insert Prompt", value: "insert", description: "Prompt can be triggered when you click in empty space, with no text selected.", icon: "las la-plus"},
+    {label: "Insert Prompt", value: "insert", description: "Prompt can be triggered when you click in empty space, with no text selected.", icon: "mdi-plus"},
     {label: "Selection Prompt", value: "selection", description: "Prompt can be triggered only when you select some text.", icon: "las la-text-width"},
     {label: "Chat Prompt", value: "chat", description: "Prompt is only available in Chat tab.", icon: "mdi-chat"},
     //{label: "Selection Analysis Prompt", value: "selectionAnalysis", description: "Prompt will be automatically triggered every time you select some text.", icon: "mdi-chart-timeline-variant-shimmer"},
@@ -630,6 +671,7 @@ import {
     {label: "Change (show colored differences)", value: "change"},
     {label: "Generate (generates new text)", value: "generate"},
     {label: "Brainstorm", value: "brainstorm"},
+    {label: "Brainstorm UI", value: "brainstorm-ui"},
     {label: "Mermaid", value: "mermaid"},
   ]
 
@@ -792,6 +834,13 @@ import {
     get: () => props.prompt.excludedContextTypes,
     set: (value) => {
       promptStore.updatePrompt(props.prompt, {excludedContextTypes: value});
+    }
+  });
+
+  const brainstormExpandPrompt = computed({
+    get: () => props.prompt.settings.expandPrompts,
+    set: (value) => {
+      promptStore.updatePrompt(props.prompt, {expandPrompts: value});
     }
   });
 
@@ -972,6 +1021,13 @@ import {
     }
   });
 
+const hasResultsSeparator = computed({
+  get: () => props.prompt.hasResultsSeparator ?? false,
+  set: (value) => {
+    promptStore.updatePrompt(props.prompt, {hasResultsSeparator: value});
+  }
+});
+
   const overridePromptFormat = computed({
     get: () => props.prompt.overridePromptFormat,
     set: (value) => {
@@ -983,6 +1039,13 @@ import {
     get: () => props.prompt.overrideContexts ?? false,
     set: (value) => {
       promptStore.updatePrompt(props.prompt, {overrideContexts: value});
+    }
+  });
+
+  const resultsSeparator = computed({
+    get: () => props.prompt.resultsSeparator ?? '<split/>',
+    set: (value) => {
+      promptStore.updatePrompt(props.prompt, {resultsSeparator: value});
     }
   });
 
@@ -1056,6 +1119,13 @@ import {
     get: () => props.prompt.hasParameters,
     set: (value) => {
       promptStore.updatePrompt(props.prompt, {hasParameters: value});
+    }
+  });
+
+  const hiddenInPromptSelector = computed({
+    get: () => props.prompt.settings.hiddenInPromptSelector ?? false,
+    set: (value) => {
+      promptStore.updatePrompt(props.prompt, {hiddenInPromptSelector: value});
     }
   });
 
@@ -1157,6 +1227,7 @@ import {
   const parameterTypes = [
     'Text',
     'Select',
+    'Select (advanced)'
   ]
 
   function updateParameter(prompt, parameter, args) {
@@ -1189,6 +1260,14 @@ import {
 
   function updateAction(prompt, action, args) {
     promptStore.updatePromptAction(prompt, action, args);
+  }
+
+  function setDynamicSettings(key, value) {
+    promptStore.updatePromptSettingsDynamic(props.prompt, key, value);
+  }
+
+  function getDynamicSettings(key) {
+    return props.prompt.settings[key] ?? '';
   }
 
   function deleteParameter(prompt, parameter) {

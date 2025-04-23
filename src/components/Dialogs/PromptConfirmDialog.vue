@@ -16,7 +16,7 @@
               {{ textMessage.type }} message:
             </div>
             <div class="col-auto">
-              <q-btn class="q-ml-sm" flat dense icon="las la-ellipsis-h" size="10px" >
+              <q-btn class="q-ml-sm" flat dense icon="mdi-dots-horizontal" size="10px" >
                 <q-menu anchor="center middle">
                   <q-list dense>
                     <q-item
@@ -123,10 +123,10 @@
           <div class="">
             <div class="row q-gutter-x-md q-mb-md">
               <div class="col">
-                <q-select filled dense label="AI model" square :options="models" v-model="model" option-label="name" option-value="id" />
+                <q-select filled dense label="AI model" :options="models" v-model="model" option-label="name" option-value="id" />
               </div>
               <div class="col">
-                <q-select filled dense label="Creativity" square :options="creativityOptions" v-model="creativity" options-dense >
+                <q-select filled dense label="Creativity" :options="creativityOptions" v-model="creativity" options-dense >
                   <template v-slot:prepend>
                     <q-icon :name="creativity.icon" v-if="creativity.icon" />
                   </template>
@@ -188,7 +188,7 @@
 
       <q-card-section class="q-px-md q-pt-none q-pb-none" v-if="promptVariablesIncluded.length > 0">
         <div class="row q-px-md text-grey-7 text-weight-regular">
-          <div class=" flex items-center"><q-icon name="las la-check" class="q-mr-xs" />Prompt Includes:</div>
+          <div class=" flex items-center"><q-icon name="mdi-check" class="q-mr-xs" />Prompt Includes:</div>
           <template v-for="variable in promptVariablesIncluded" :key="variable">
             <q-chip color="transparent" text-color="grey-7">
               {{ variable }}
@@ -198,6 +198,85 @@
       </q-card-section>
 
       <q-separator class="q-mt-sm" />
+
+      <template v-if="prompt.info?.tags?.includes('input')">
+        <q-card-section class="q-px-md q-pt-sm">
+
+          <div class="bordered rounded-borders q-mt-sm" flat>
+            <div class="cursor-pointer context-selector q-px-md q-py-md">
+              <div class="row">
+                <div class="col text-subtitle2 flex items-center"><q-icon name="mdi-import" class="q-mr-xs" />Input</div>
+                <div class="col-auto"><q-icon name="keyboard_arrow_down" size="sm" /></div>
+              </div>
+
+              <template v-if="promptStore.promptUserInputs?.length > 0 ?? false">
+                <template v-for="input in promptStore.promptUserInputs" :key="input.id">
+                  <q-chip :color="input.color + '-3'" removable @remove="removeInput(input)">
+                    {{ input.label }}
+                    &nbsp;<q-badge :color="inputWarning(input).color" v-if="inputWarning(input)">
+                      <q-icon name="error" />&nbsp;
+                      {{ inputWarning(input).warning }}
+                    </q-badge>
+                    <q-tooltip color="primary" >
+                      {{ input.description }}
+                    </q-tooltip>
+                  </q-chip>
+                </template>
+              </template>
+              <template v-else>
+                <div>
+                  No input provided to the prompt
+                </div>
+              </template>
+
+              <q-popup-proxy >
+                <q-card style="width: 668px">
+                  <q-card-section class="no-padding">
+                    <div class="row">
+                      <div class="col q-pa-md">
+                        <div class="row">
+                          <div class="col-auto">
+                            <q-chip :text-color="getInputChipFontColor(selectedTextPromptInput)" :color="getInputChipColor(selectedTextPromptInput)" :icon="getInputChipIcon(selectedTextPromptInput)" :clickable="isInputAllowedForThisPrompt(selectedTextPromptInput)" @click="toggleInput(selectedTextPromptInput)" >
+                              {{ selectedTextPromptInput.label }} &nbsp;
+                              <q-tooltip color="primary">
+                                <div>include selected text</div>
+                                <div>
+                                  <q-badge :color="inputWarning(selectedTextPromptInput).color" v-if="inputWarning(selectedTextPromptInput)">
+                                    {{ inputWarning(selectedTextPromptInput).warning }}
+                                  </q-badge>
+                                </div>
+                              </q-tooltip>
+                            </q-chip>
+                          </div>
+                          <div class="col-auto">
+                            <q-chip :text-color="getInputChipFontColor(currentFilePromptInput)" :color="getInputChipColor(currentFilePromptInput)" :icon="getInputChipIcon(currentFilePromptInput)" :clickable="isInputAllowedForThisPrompt(currentFilePromptInput)" @click="toggleInput(currentFilePromptInput)" >
+                              {{ currentFilePromptInput.label }} &nbsp;
+                              <q-tooltip color="primary">
+                                <div>include all text from {{ currentFile?.title }}</div>
+                                <div>
+                                  <q-badge :color="inputWarning(currentFilePromptContext).color" v-if="inputWarning(currentFilePromptContext)">
+                                    {{ inputWarning(currentFilePromptContext).warning }}
+                                  </q-badge>
+                                </div>
+                              </q-tooltip>
+                            </q-chip>
+
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </q-card-section>
+                </q-card>
+
+              </q-popup-proxy>
+
+            </div>
+          </div>
+        </q-card-section>
+      </template>
+
+      <q-separator class="q-mt-sm" />
+
 
       <template v-if="prompt.info?.tags?.includes('context')">
         <q-card-section class="q-px-md q-pt-sm">
@@ -232,7 +311,7 @@
           <div class="bordered rounded-borders q-mt-sm" flat>
             <div class="cursor-pointer context-selector q-px-md q-py-md">
               <div class="row">
-                <div class="col text-subtitle2 flex items-center"><q-icon name="las la-book" class="q-mr-xs" />Context</div>
+                <div class="col text-subtitle2 flex items-center"><q-icon name="mdi-book-outline" class="q-mr-xs" />Context</div>
                 <div class="col-auto"><q-icon name="keyboard_arrow_down" size="sm" /></div>
               </div>
 
@@ -264,7 +343,7 @@
                   <q-card-section class="no-padding">
                     <div class="row">
                       <div class="col-3 q-pa-md bg-grey-1">
-                        <q-btn dense flat color="primary" icon="las la-save" label="Save Context" size="13px" @click="saveCurrentContext()" />
+                        <q-btn dense flat color="primary" icon="mdi-content-save-outline" label="Save Context" size="13px" @click="saveCurrentContext()" />
 
                         <template v-if="promptStore.savedPromptContexts.length > 0">
                           <div class="text-subtitle2 q-mt-md">Saved Contexts:</div>
@@ -277,7 +356,7 @@
                                   </q-tooltip>
                                 </q-btn>
                               </q-item-section>
-                              <q-item-section side><q-btn dense flat icon="las la-trash"  color="red" @click="deleteSavedContext(savedContext)"></q-btn></q-item-section>
+                              <q-item-section side><q-btn dense flat icon="mdi-delete-outline"  color="red" @click="deleteSavedContext(savedContext)"></q-btn></q-item-section>
                             </q-item>
                           </q-list>
                         </template>
@@ -370,19 +449,19 @@
                                 <q-menu>
                                   <q-list style="min-width: 100px" dense>
                                     <q-item clickable v-close-popup @click="toggleContext(previousCharactersPromptContext, 3000)">
-                                      <q-item-section side><q-icon name="las la-plus" /></q-item-section>
+                                      <q-item-section side><q-icon name="mdi-plus" /></q-item-section>
                                       <q-item-section>Previous 3000 Characters</q-item-section>
                                     </q-item>
                                     <q-item clickable v-close-popup @click="toggleContext(previousCharactersPromptContext, 2000)">
-                                      <q-item-section side><q-icon name="las la-plus" /></q-item-section>
+                                      <q-item-section side><q-icon name="mdi-plus" /></q-item-section>
                                       <q-item-section>Previous 2000 Characters</q-item-section>
                                     </q-item>
                                     <q-item clickable v-close-popup @click="toggleContext(previousCharactersPromptContext, 1000)">
-                                      <q-item-section side><q-icon name="las la-plus" /></q-item-section>
+                                      <q-item-section side><q-icon name="mdi-plus" /></q-item-section>
                                       <q-item-section>Previous 1000 Characters</q-item-section>
                                     </q-item>
                                     <q-item clickable v-close-popup @click="toggleContext(previousCharactersPromptContext, 500)">
-                                      <q-item-section side><q-icon name="las la-plus" /></q-item-section>
+                                      <q-item-section side><q-icon name="mdi-plus" /></q-item-section>
                                       <q-item-section>Previous 500 Characters</q-item-section>
                                     </q-item>
                                   </q-list>
@@ -444,7 +523,7 @@
                         <div class="text-subtitle2 q-mt-md">Individual Files:</div>
                         <div class="row q-gutter-x-sm">
                           <div class="col-12">
-                            <q-select label="Add single file" input-debounce="0" @filter="filterFnFile" use-input options-dense dense filled square dropdown-icon="add" v-model="promptContextFile" :options="promptContextFiles" @update:model-value="(val) => addFileContext(val)" >
+                            <q-select label="Add single file" input-debounce="0" @filter="filterFnFile" use-input options-dense dense filled dropdown-icon="add" v-model="promptContextFile" :options="promptContextFiles" @update:model-value="(val) => addFileContext(val)" >
                             </q-select>
                           </div>
                         </div>
@@ -488,6 +567,9 @@
         <q-card-section class="q-pt-none q-gutter-y-md q-mt-sm" >
           <div v-for="parameter in promptStore.promptParametersValue" :key="parameter.name">
             <template v-if="parameter.type === 'Select'">
+              <q-select dense filled v-model="parameter.value" :options="parameter.values" :label="parameter.name"></q-select>
+            </template>
+            <template v-if="parameter.type === 'Select (advanced)'">
               <q-select dense filled v-model="parameter.value" :options="parameter.values" :label="parameter.name"></q-select>
             </template>
             <template v-if="parameter.type === 'Text'">
@@ -537,14 +619,14 @@
             <div class="col">
               <q-select v-model="promptStore.promptSourceLanguage" :options="sourceLanguages" label="Source Language" filled dense clearable :hint="sourceLanguageHint" @focus="enterConfirms.value = false" @blur="enterConfirms.value = true">
                 <template v-slot:prepend>
-                  <q-icon name="las la-language" />
+                  <q-icon name="mdi-translate" />
                 </template>
               </q-select>
             </div>
             <div class="col">
               <q-select v-model="promptStore.promptTargetLanguage" :options="targetLanguages" label="Target Language" filled dense  @focus="enterConfirms.value = false" @blur="enterConfirms.value = true">
                 <template v-slot:prepend>
-                  <q-icon name="las la-language" />
+                  <q-icon name="mdi-translate" />
                 </template>
               </q-select>
             </div>
@@ -557,7 +639,7 @@
       <q-card-actions class="text-primary">
 
         <div class="col-auto">
-          <q-select filled dense label="AI model" square :options="models" v-model="model" option-label="name" option-value="id" options-dense />
+          <q-select filled dense label="AI model" :options="models" v-model="model" option-label="name" option-value="id" options-dense />
         </div>
         <div class="col">
         </div>
@@ -574,7 +656,7 @@
 
 <script setup>
   import {usePromptStore} from "stores/prompt-store";
-  import {executeConfirmPrompt} from "src/common/helpers/promptHelper";
+  import {executeConfirmPrompt2} from "src/common/helpers/promptHelper";
   import {computed, ref} from "vue";
   import {convertHtmlToText, removeHtmlTags, tokenise, truncate} from "src/common/utils/textUtils";
   import {useFileStore} from "stores/file-store";
@@ -582,8 +664,8 @@
   import {
     currentAndChildrenFilePromptContext,
     currentAndChildrenFileSummaryPromptContext,
-    currentFilePromptContext, currentFileSummaryPromptContext, previousCharactersPromptContext,
-    selectedTextPromptContext
+    currentFilePromptContext, currentFilePromptInput, currentFileSummaryPromptContext, previousCharactersPromptContext,
+    selectedTextPromptContext, selectedTextPromptInput
   } from "src/common/resources/promptContexts";
   import {useLayoutStore} from "stores/layout-store";
   import {Dialog} from "quasar";
@@ -607,19 +689,20 @@
     .concat(fileStore.variables.map(v => ({label: 'Variable ' + v.title, color: 'green', description: 'Content from variable ' + v.title})))
   );
 
-  const prompt = computed(() => promptStore.currentPromptConfirmation);
+  const request = computed(() => promptStore.currentPromptConfirmationRequest);
+  const prompt = computed(() => promptStore.currentPromptConfirmationRequest.prompt);
   const model = computed({
     get () {
-      return promptStore.getModel(promptStore.getCurrentPromptModelId(prompt.value));
+      return promptStore.getModel(request.value.forceModelId ?? prompt.value.modelId);
     },
     set (value) {
-      promptStore.setCurrentOverridePromptParameter(prompt.value, value.id, undefined, undefined, undefined);
+      request.value.forceModelId = value.id;
     }
   });
 
   const creativity = computed({
     get () {
-      const temperature = promptStore.getCurrentOverrideTemperature(prompt.value);
+      const temperature = request.value.forceTemperature;
 
       if(temperature !== undefined && temperature !== null) {
         return creativityOptions.find(c => c.value === temperature);
@@ -628,7 +711,7 @@
       }
     },
     set (value) {
-      promptStore.setCurrentOverridePromptParameter(prompt.value, undefined, value.value, undefined, undefined);
+      request.value.forceTemperature = value.id;
     }
   });
 
@@ -674,7 +757,7 @@
     let match;
     while ((match = regex.exec(text)) !== null) {
       // except $context
-      if(match[0] === '$context') {
+      if(match[0] === '$context' || match[0] === '$input') {
         continue;
       }
 
@@ -695,13 +778,19 @@
   });
 
   function separateTextByComma(text) {
-    return text.split(',').map(t => t.trim());
+    return text.split(',')?.map(t => t.trim()) ?? [];
   }
 
   const canConfirmPrompt = computed(() => {
     for (const parameter of promptStore.promptParametersValue) {
-      if (parameter.required && (!parameter.value || convertHtmlToText(parameter.value).trim() === '')) {
-        return false;
+      if (parameter.required) {
+        if(parameter.value?.value !== undefined) {
+          if(convertHtmlToText(parameter.value.value).trim() === '') {
+            return false;
+          }
+        } else if(!parameter.value || convertHtmlToText(parameter.value).trim() === '') {
+          return false;
+        }
       }
     }
 
@@ -714,11 +803,15 @@
     }
 
     promptStore.promptParametersShown = false;
+    const request = promptStore.currentPromptConfirmationRequest;
 
     if(forceInput) {
-      await executeConfirmPrompt(false, promptPreview.value);
+      request.previewOnly = false;
+      request.forceInput = promptPreview.value;
+
+      await executeConfirmPrompt2(request);
     } else {
-      await executeConfirmPrompt();
+      await executeConfirmPrompt2(request);
     }
   }
 
@@ -727,7 +820,10 @@
       return;
     }
 
-    const input = await executeConfirmPrompt(true);
+    const request = promptStore.currentPromptConfirmationRequest;
+    request.previewOnly = true;
+
+    const input = await executeConfirmPrompt2(request);
 
     promptPreview.value = input;
     promptPreviewShown.value = true;
@@ -872,6 +968,14 @@
     addFileContextDialogData.value = null;
   }
 
+  function toggleInput(input, parametersValue = undefined) {
+    if (containsInput(input)) {
+      removeInput(input);
+    } else {
+      addInput(input, parametersValue);
+    }
+  }
+
   function toggleContext(context, parametersValue = undefined) {
     if (containsContext(context)) {
       removeContext(context);
@@ -884,8 +988,30 @@
     promptContextFilesText.value = '';
   }
 
+  function containsInput(input) {
+    return promptStore.promptUserInputs.some(c => c.id === input.id);
+  }
+
   function containsContext(context) {
     return promptStore.promptContext.some(c => c.id === context.id);
+  }
+
+  function isInputAllowedForThisPrompt(input) {
+    if(input === selectedTextPromptInput) {
+      const selection = getEditorSelection();
+
+      if(!selection || selection.empty === true) {
+        return false;
+      }
+    }
+
+    if(input === currentFilePromptInput) {
+      if (!currentFile.value || !currentFile.value.content || removeHtmlTags(currentFile.value.content).trim() === '') {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   function isContextAllowedForThisPrompt(context) {
@@ -895,7 +1021,7 @@
       }
     }
 
-    if(context === selectedTextPromptContext) {
+    if(context === selectedTextPromptContext ) {
       const selection = getEditorSelection();
 
       if(!selection || selection.empty === true) {
@@ -942,6 +1068,14 @@
     return true;
   }
 
+  function getInputChipColor(input) {
+    if(!isInputAllowedForThisPrompt(input)) {
+      //return 'white';
+    }
+
+    return containsInput(input) ? (input.color + '-4') : (input.color + '-1');
+  }
+
   function getContextChipColor(context) {
     if(!isContextAllowedForThisPrompt(context)) {
       //return 'white';
@@ -950,12 +1084,28 @@
     return containsContext(context) ? (context.color + '-4') : (context.color + '-1');
   }
 
+  function getInputChipIcon(input) {
+    if(!isInputAllowedForThisPrompt(input)) {
+      return undefined;
+    }
+
+    return containsInput(input) ? 'mdi-check' : 'mdi-plus';
+  }
+
   function getContextChipIcon(context) {
     if(!isContextAllowedForThisPrompt(context)) {
       return undefined;
     }
 
-    return containsContext(context) ? 'las la-check' : 'las la-plus';
+    return containsContext(context) ? 'mdi-check' : 'mdi-plus';
+  }
+
+  function getInputChipFontColor(context) {
+    if(!isInputAllowedForThisPrompt(context)) {
+      return 'grey-4';
+    }
+
+    return 'black'
   }
 
   function getContextChipFontColor(context) {
@@ -964,6 +1114,22 @@
     }
 
     return 'black'
+  }
+
+  function addInput(input, parametersValue = undefined) {
+    if(input === selectedTextPromptInput) {
+      removeInput(currentFilePromptInput);
+    }
+
+    if(input === currentFilePromptInput) {
+      removeInput(selectedTextPromptInput);
+    }
+
+    if(parametersValue) {
+      input.parameters = parametersValue;
+    }
+
+    promptStore.promptUserInputs.push(input);
   }
 
   function addContext(context, parametersValue = undefined) {
@@ -989,9 +1155,15 @@
   }
 
   function removeContext(context) {
-    // remove by id and contextType
-
     promptStore.promptContext = promptStore.promptContext.filter(c => c.id !== context.id);
+  }
+
+  function removeInput(input) {
+    promptStore.promptUserInputs = promptStore.promptUserInputs.filter(c => c.id !== input.id);
+  }
+
+  function inputWarning(input) {
+    return null;
   }
 
   function contextWarning(context) {

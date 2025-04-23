@@ -5,14 +5,13 @@
         <IconPicker v-model="file.icon" size="xs"/>
       </div>
       <div class="col flex items-center">
-        <q-input ref="titleRef" :shadow-text="file.title.length > 0 ? '' : ''" class="q-ml-sm full-width" dense autofocus square borderless :input-class="writeClasses" v-model="fileTitle" @keydown="onKeydown" ></q-input>
+        <q-input ref="titleRef" :shadow-text="file.title.length > 0 ? '' : ''" class="q-ml-sm full-width" dense autofocus borderless :input-class="writeClasses" v-model="fileTitle" @keydown="onKeydown" ></q-input>
       </div>
       <div class="col-auto flex items-center q-mr-sm" v-if="file.children && file.children.length > 0">
-        <q-btn-toggle :options="views" v-model="file.view" unelevated no-caps class="bordered" toggle-color="primary" padding="xs md" size="11px" />
-
+        <q-btn-toggle :options="views" v-model="file.view" unelevated no-caps class="bordered" toggle-color="primary" padding="xs md" size="12px" text-color="grey-7"  />
       </div>
       <div class="col-auto flex items-center ">
-        <q-btn flat icon="las la-ellipsis-h" >
+        <q-btn flat icon="mdi-dots-horizontal" >
           <q-popup-proxy >
 
             <q-card>
@@ -25,7 +24,7 @@
               </q-card-section>
               <q-separator />
               <q-card-section>
-                <q-btn icon="las la-external-link-alt" @click="makeTemplate" label="Create template from this file" color="secondary" />
+                <q-btn icon="mdi-open-in-new" @click="makeTemplate" label="Create template from this file" color="secondary" />
               </q-card-section>
             </q-card>
 
@@ -36,16 +35,16 @@
     <template v-if="file.view === 'list'" >
       <div class="q-mt-sm q-mx-md">
         <div class="q-mb-md">
-          <q-card class="row justify-center q-gutter-x-xs" bordered flat>
+          <q-card class="row justify-center q-gutter-x-xs inscriptor-shadow-1" bordered>
             <div class="col-auto">
-              <q-btn size="11px" no-caps dense flat square label="Synopsis" :class="{ 'text-light': !viewSummary, 'text-primary': viewSummary }" @click="viewSummary = !viewSummary" />
+              <q-btn size="11px" no-caps dense flat label="Synopsis" :class="{ 'text-light': !viewSummary, 'text-primary': viewSummary }" @click="viewSummary = !viewSummary" />
             </div>
             <div class="col-auto">
-              <q-btn size="11px" no-caps dense flat square label="Note" :class="{ 'text-light': !viewNote, 'text-primary': viewNote }" @click="viewNote = !viewNote" />
+              <q-btn size="11px" no-caps dense flat label="Note" :class="{ 'text-light': !viewNote, 'text-primary': viewNote }" @click="viewNote = !viewNote" />
             </div>
             <div class="col" />
             <div class="col-auto">
-              <q-btn size="11px" dense flat square icon="las la-font" @click="automaticTextCorrection = !automaticTextCorrection" class="text-light" :class="{ 'text-primary': automaticTextCorrection }">
+              <q-btn size="11px" dense flat icon="mdi-alpha-g-box" @click="automaticTextCorrection = !automaticTextCorrection" class="text-light" :class="{ 'text-primary': automaticTextCorrection }">
                 <q-tooltip>
                   Toggle Automatic Text Corrections
                 </q-tooltip>
@@ -59,25 +58,25 @@
     <template v-else-if="file.view === 'board'" >
       <div class="q-mt-sm q-mx-md">
         <div class="q-mb-md">
-          <q-card class="row justify-center q-gutter-x-xs" bordered flat>
+          <q-card class="row justify-center q-gutter-x-xs inscriptor-shadow-1" bordered>
             <div class="col-auto">
-              <q-btn size="11px" no-caps dense flat square label="1 Column" :class="{ 'text-light': gridLayout !== 'col-12', 'text-primary': gridLayout === 'col-12' }" @click="gridLayout = 'col-12'" />
+              <q-btn size="11px" no-caps dense flat label="1 Column" :class="{ 'text-light': gridLayout !== 'col-12', 'text-primary': gridLayout === 'col-12' }" @click="gridLayout = 'col-12'" />
             </div>
             <div class="col-auto">
-              <q-btn size="11px" no-caps dense flat square label="2 Columns" :class="{ 'text-light': gridLayout !== 'col-6 q-px-xs q-pb-md', 'text-primary': gridLayout === 'col-6 q-px-xs q-pb-md' }" @click="gridLayout = 'col-6 q-px-xs q-pb-md'" />
+              <q-btn size="11px" no-caps dense flat label="2 Columns" :class="{ 'text-light': gridLayout !== 'col-6 q-px-xs q-pb-md', 'text-primary': gridLayout === 'col-6 q-px-xs q-pb-md' }" @click="gridLayout = 'col-6 q-px-xs q-pb-md'" />
             </div>
             <div class="col-auto">
-              <q-btn size="11px" no-caps dense flat square label="3 Columns" :class="{ 'text-light': gridLayout !== 'col-4 q-px-xs q-pb-md', 'text-primary': gridLayout === 'col-4 q-px-xs q-pb-md' }" @click="gridLayout = 'col-4 q-px-xs q-pb-md'" />
+              <q-btn size="11px" no-caps dense flat label="3 Columns" :class="{ 'text-light': gridLayout !== 'col-4 q-px-xs q-pb-md', 'text-primary': gridLayout === 'col-4 q-px-xs q-pb-md' }" @click="gridLayout = 'col-4 q-px-xs q-pb-md'" />
             </div>
             <div class="col-auto q-ml-lg">
-              <q-btn size="11px" no-caps dense flat square label="Expand I" :class="{ 'text-light': !view2ndLevel, 'text-primary': view2ndLevel }" @click="view2ndLevel = !view2ndLevel" />
+              <q-btn size="11px" no-caps dense flat label="Expand I" :class="{ 'text-light': !view2ndLevel, 'text-primary': view2ndLevel }" @click="view2ndLevel = !view2ndLevel" />
             </div>
             <div class="col-auto">
-              <q-btn size="11px" no-caps dense flat square label="Expand II" :class="{ 'text-light': !view3rdLevel, 'text-primary': view3rdLevel }" @click="view3rdLevel = !view3rdLevel" />
+              <q-btn size="11px" no-caps dense flat label="Expand II" :class="{ 'text-light': !view3rdLevel, 'text-primary': view3rdLevel }" @click="view3rdLevel = !view3rdLevel" />
             </div>
             <div class="col" />
             <div class="col-auto">
-              <q-btn size="11px" dense flat square icon="las la-font" @click="automaticTextCorrection = !automaticTextCorrection" class="text-light" :class="{ 'text-primary': automaticTextCorrection }">
+              <q-btn size="11px" dense flat icon="mdi-alpha-g-box" @click="automaticTextCorrection = !automaticTextCorrection" class="text-light" :class="{ 'text-primary': automaticTextCorrection }">
                 <q-tooltip>
                   Toggle Automatic Text Corrections
                 </q-tooltip>
@@ -176,9 +175,9 @@
   }
 
   const views = [
-    {value: 'text', icon: 'las la-file-alt'},
-    {value: 'list', icon: 'las la-th-list'},
-    {value: 'board', icon: 'las la-th-large'},
+    {value: 'text', icon: 'mdi-file-document-outline'},
+    {value: 'list', icon: 'mdi-view-list-outline'},
+    {value: 'board', icon: 'mdi-developer-board'},
   ];
 
   function makeTemplate() {

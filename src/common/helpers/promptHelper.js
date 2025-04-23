@@ -1,7 +1,12 @@
 import {convertHtmlToText, replaceParameterEditorText, trimWhitespace} from "src/common/utils/textUtils";
 import {usePromptStore} from "stores/prompt-store";
 import {useFileStore} from "stores/file-store";
-import {allPromptContexts, currentFilePromptContext, selectedTextPromptContext} from "src/common/resources/promptContexts";
+import {
+  allPromptContexts,
+  currentFilePromptContext, currentFilePromptInput,
+  selectedTextPromptContext,
+  selectedTextPromptInput
+} from "src/common/resources/promptContexts";
 import {useLayoutStore} from "stores/layout-store";
 import {getEditor, isEmptySelection} from "src/common/utils/editorUtils";
 
@@ -48,22 +53,27 @@ export function trimLineBreaks(text) {
   return text.replace(/\n{3,}/g, '\n\n');
 }
 
-export async function executePromptClick(prompt, text, clear = true, appendMessages = null, forceBypassMoreParameters = false, appendContext = null, silent = false, forceShowContextSelection = false, promptSource = null, onOutput = null) {
+export async function executePromptClick2(request) {
   const promptStore = usePromptStore();
   const layoutStore = useLayoutStore();
 
-  if(prompt.tabId) {
-    promptStore.setCurrentTabId(prompt.tabId);
+  if(request.prompt.tabId) {
+    promptStore.setCurrentTabId(request.prompt.tabId);
   }
 
   // if ctrl is holding down
   const ctrlDown = layoutStore.ctrlDown;
 
-  promptStore.promptInput = text;
+  promptStore.promptUserInputs = [];
+  //promptStore.promptInput = request.text;
 
-  const model = promptStore.getModel(promptStore.getCurrentPromptModelId(prompt));
+  const model = promptStore.getModelFromRequest(request);
 
-  const showMoreParametersWindow = !ctrlDown && ((forceShowContextSelection === true) || (!forceBypassMoreParameters && prompt.promptType !== 'selectionAnalysis' && (prompt.promptType !== 'chat' || (model.args?.targetLanguages && !prompt.targetLanguage))));
+  const showMoreParametersWindow = !ctrlDown
+    && (
+      request.forceShowContextSelection === true
+      || (!request.forceBypassMoreParameters && request.prompt.promptType !== 'selectionAnalysis' && (request.prompt.promptType !== 'chat' || (model.args?.targetLanguages && !request.prompt.targetLanguage)))
+    );
 
   if(showMoreParametersWindow) {
 
@@ -78,15 +88,27 @@ export async function executePromptClick(prompt, text, clear = true, appendMessa
       }
     }
 
+    const editor = getEditor();
+    if(editor) {
+      if(isEmptySelection()) {
+        if(currentFile.content && trimWhitespace(convertHtmlToText(currentFile.content)).length > 0) {
+          promptStore.promptUserInputs = [ currentFilePromptInput ];
+        } else {
+          promptStore.promptUserInputs = [];
+        }
+      } else {
+        promptStore.promptUserInputs = [ selectedTextPromptInput ];
+      }
+    }
+
     if(fileContext) {
       promptStore.promptContext = [...fileContext];
     } else {
-      const editor = getEditor();
 
-      if(prompt.overrideContexts === true) {
+      if(request.prompt.overrideContexts === true) {
         promptStore.promptContext = [];
 
-        for (const contextTypeId of prompt.defaultContextTypes ?? []) {
+        for (const contextTypeId of request.prompt.defaultContextTypes ?? []) {
           const foundPromptContextType = allPromptContexts.find(c => c.id === contextTypeId);
 
           if(foundPromptContextType) {
@@ -110,20 +132,20 @@ export async function executePromptClick(prompt, text, clear = true, appendMessa
       }
     }
 
-    if(prompt.overrideContexts === true) {
-      if(prompt.excludedContextTypes) {
-        promptStore.promptContext = promptStore.promptContext.filter(c => !prompt.excludedContextTypes.includes(c.id));
+    if(request.prompt.overrideContexts === true) {
+      if(request.prompt.excludedContextTypes) {
+        promptStore.promptContext = promptStore.promptContext.filter(c => !request.prompt.excludedContextTypes.includes(c.id));
       }
     }
 
     promptStore.promptParametersShown = true;
-    promptStore.currentPromptConfirmation = prompt;
-    promptStore.currentPromptConfirmationSelectedText = text;
+    promptStore.currentPromptConfirmationRequest = request;
 
-    promptStore.previousPromptParameterValue = [...promptStore.promptParametersValue];
+    const previousParameters = [...promptStore.promptParametersValue];
     promptStore.promptParametersValue = [];
-    for (const param of prompt.parameters) {
-      const prevPrompt = promptStore.previousPromptParameterValue.find(p => p.prompt.id === prompt.id && p.name === param.name);
+
+    for (const param of request.prompt.parameters) {
+      const prevPrompt = previousParameters.find(p => p.prompt.id === request.prompt.id && p.name === param.name);
 
       promptStore.promptParametersValue.push({
         name: param.name,
@@ -135,107 +157,196 @@ export async function executePromptClick(prompt, text, clear = true, appendMessa
         suffixWith: param.suffixWith,
         examples: param.examples,
         values: [...param.values],
-        prompt: prompt,
+        prompt: request.prompt,
       });
     }
   } else {
-    if(prompt.promptType === "general" || prompt.promptType === "insert" || prompt.promptType === "selection" || prompt.promptType === "selectionAnalysis") {
-      return await executePrompt(text, prompt, clear, appendMessages, false, null, appendContext, silent, promptSource, onOutput);
-    }  else if (prompt.promptType === "chat") {
-      return await executeChatPrompt(text, prompt, clear, appendMessages, false, null, appendContext);
+    request.previewOnly = false;
+    request.forceInput = null;
+
+    if(request.prompt.promptType === "general" || request.prompt.promptType === "insert" || request.prompt.promptType === "selection" || request.prompt.promptType === "selectionAnalysis") {
+      return await executePrompt2(request);
+    }  else if (request.prompt.promptType === "chat") {
+      return await executeChatPrompt2(request);
     }
   }
 }
 
-export async function executeConfirmPrompt(previewOnly = false, forceInput = null, appendContext = null) {
+export async function executeConfirmPrompt2(request) {
   const promptStore = usePromptStore();
 
-  if(prompt.tabId) {
-    promptStore.setCurrentTabId(prompt.tabId);
+  if(request.prompt.tabId) {
+    promptStore.setCurrentTabId(request.prompt.tabId);
   }
 
   let clear = true;
-
-  if(forceInput && forceInput.isRegenerating) {
+  if((request.forceInput && request.forceInput.isRegenerating) || request.prompt.promptType === "chat") {
     clear = false;
   }
 
-  if(promptStore.currentPromptConfirmation.promptType === "general"
-    || promptStore.currentPromptConfirmation.promptType === "insert"
-    || promptStore.currentPromptConfirmation.promptType === "selection"
-    || promptStore.currentPromptConfirmation.promptType === "selectionAnalysis") {
-    return await executePrompt(promptStore.promptInput, promptStore.currentPromptConfirmation, clear, null, previewOnly, forceInput, appendContext);
-  } else if (promptStore.currentPromptConfirmation.promptType === "chat") {
-    return await executeChatPrompt(promptStore.promptInput, promptStore.currentPromptConfirmation, false, null, previewOnly, forceInput, appendContext);
+  request.clear = clear;
+
+  if(request.prompt.promptType === "general"
+    || request.prompt.promptType === "insert"
+    || request.prompt.promptType === "selection"
+    || request.prompt.promptType === "selectionAnalysis") {
+    return await executePrompt2(request);
+  } else if (request.prompt.promptType === "chat") {
+    return await executeChatPrompt2(request);
   }
 
   return null;
 }
 
-async function executePrompt(text, prompt, clear = true, appendMessages = null, previewOnly = false, forceInput = null, appendContext = null, silent = false, promptSource = null, onOutput = null) {
+async function executePrompt2(request) {
   const promptStore = usePromptStore();
 
-  const model = promptStore.getModel(promptStore.getCurrentPromptModelId(prompt));
+  const model = promptStore.getModelFromRequest(request);
 
-  const promptTimes = prompt.overridePromptTimes?.length > 0 ? parseInt(prompt.overridePromptTimes) : model.promptTimes;
+  const promptTimes = request.prompt.overridePromptTimes?.length > 0 ? parseInt(request.prompt.overridePromptTimes) : model.promptTimes;
 
-  if(prompt.info?.tags?.includes("context") && promptStore.promptContext) {
+  if(request.prompt.info?.tags?.includes("context") && promptStore.promptContext) {
     const fileStore = useFileStore();
 
     const currentFile = fileStore.selectedFile;
 
     if(currentFile) {
-      fileStore.setTemporaryFileMetaProperty(currentFile, 'context-' + prompt.id, promptStore.promptContext);
+      fileStore.setTemporaryFileMetaProperty(currentFile, 'context-' + request.prompt.id, promptStore.promptContext);
     }
   }
 
   const context = [...promptStore.promptContext];
+  const userInputs = [...promptStore.promptUserInputs];
 
-  if(appendContext) {
-    for (const appendContextElement of appendContext) {
+  if(request.appendContext) {
+    for (const appendContextElement of request.appendContext) {
       if(!context.find(c => c.id === appendContextElement.id)) {
         context.push(appendContextElement);
       }
     }
   }
 
-  return await promptStore.promptMultiple(prompt, text, promptStore.promptParametersValue, context, prompt.promptType, promptTimes, clear, appendMessages, null, previewOnly, forceInput, silent, promptSource, onOutput);
+  if (request.contextTypes && request.contextTypes.length > 0) {
+    for (const existingContext of request.contextTypes) {
+      if (!context.find(c => c.id === existingContext.id)) {
+        context.push(existingContext);
+      }
+    }
+  }
+
+  if (request.userInputs && request.userInputs.length > 0) {
+    for (const existingUserInput of request.userInputs) {
+      if (!userInputs.find(u => u.id === existingUserInput.id)) {
+        userInputs.push(existingUserInput);
+      }
+    }
+  }
+
+  request.contextTypes = context;
+  request.userInputs = userInputs;
+  request.forceTemperature = null;
+  request.promptTimes = promptTimes;
+
+  if(!request.parametersValue) {
+    request.parametersValue = promptStore.promptParametersValue;
+  } else {
+    for (const param of promptStore.promptParametersValue) {
+      const foundParam = request.parametersValue.find(p => p.name === param.name);
+      if(!foundParam) {
+        request.parametersValue.push(param);
+      }
+    }
+  }
+
+  return await promptStore.promptMultiple2(request);
 }
 
-async function executeChatPrompt(text, prompt, clear = true, appendMessages = null, previewOnly = false, forceInput = null, appendContext = null) {
+async function executeChatPrompt2(request) {
   const promptStore = usePromptStore();
 
-  const model = promptStore.getModel(promptStore.getCurrentPromptModelId(prompt));
+  const model = promptStore.getModelFromRequest(request);
 
-  const promptTimes = prompt.overridePromptTimes?.length > 0 ? parseInt(prompt.overridePromptTimes) : model.promptTimes;
+  const promptTimes = request.prompt.overridePromptTimes?.length > 0 ? parseInt(request.prompt.overridePromptTimes) : model.promptTimes;
 
   const context = [...promptStore.promptContext];
+  const userInputs = [...promptStore.promptUserInputs];
 
-  if(appendContext) {
-    for (const appendContextElement of appendContext) {
+  if(request.appendContext) {
+    for (const appendContextElement of request.appendContext) {
       if(!context.find(c => c.id === appendContextElement.id)) {
         context.push(appendContextElement);
       }
     }
   }
 
-  return await promptStore.promptMultiple(prompt, text, promptStore.promptParametersValue, context, prompt.promptType, promptTimes, clear, appendMessages, null, previewOnly, forceInput, appendContext);
+  request.contextTypes = context;
+  request.userInputs = userInputs;
+  request.forceTemperature = null;
+  request.promptTimes = promptTimes;
+
+  if(!request.parametersValue) {
+    request.parametersValue = promptStore.promptParametersValue;
+  } else {
+    for (const param of promptStore.promptParametersValue) {
+      const foundParam = request.parametersValue.find(p => p.name === param.name);
+      if(!foundParam) {
+        request.parametersValue.push(param);
+      }
+    }
+  }
+
+  return await promptStore.promptMultiple2(request);
 }
 
-export async function replyToPrompt(promptResult, message) {
+export function cloneRequest(request) {
+  return {
+    //TODO implement
+    prompt: request.prompt,
+    text: request.text, // automatic input
+    userInputs: request.userInputs ? [...request.userInputs] : null, // user specified inputs
+    forceInput: request.forceInput, // TODO what is this?
+
+    systemPrompt: request.systemPrompt,
+    userPrompt: request.userPrompt,
+
+    clear: request.clear,
+    forceBypassMoreParameters: request.forceBypassMoreParameters,
+    forceShowContextSelection: request.forceShowContextSelection,
+    silent: request.silent,
+    onOutput: request.onOutput,
+
+    promptSource: request.promptSource,
+    forceTemperature: request.forceTemperature,
+    promptTimes: request.promptTimes,
+    previewOnly: request.previewOnly,
+
+    forceModelId: request.forceModelId,
+
+    executedTextMessages: request.executedTextMessages ? [...request.executedTextMessages] : null,
+    appendMessages: request.appendMessages ? [...request.appendMessages] : null,
+    contextTypes: request.contextTypes ? [...request.contextTypes] : null,
+    parametersValue: request.parametersValue ? [...request.parametersValue] : null,
+  }
+}
+
+export async function replyToPrompt2(promptResult, message) {
   if(message.trim() === '') return;
 
   const promptStore = usePromptStore();
+  const request = cloneRequest(promptResult.request); // the original prompt request
 
   const appendMessages = [];
-
   if(promptResult.appendMessages) {
     appendMessages.push(...promptResult.appendMessages);
   }
   appendMessages.push({type: 'assistant', text: convertHtmlToText(replaceParameterEditorText(promptResult.originalText))});
   appendMessages.push({type: 'user', text: message});
 
-  promptStore.setCurrentOverridePromptParameters(promptResult.promptArgs.overridePromptParameters);
+  request.appendMessages = appendMessages;
+  request.prompt = promptResult.prompt;
+  request.text = promptResult.input;
+  request.clear = false;
+  request.forceBypassMoreParameters = true;
 
-  await executePromptClick(promptResult.prompt, promptResult.input, false, appendMessages, true);
+  await executePromptClick2(request);
 }

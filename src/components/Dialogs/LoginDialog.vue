@@ -3,7 +3,7 @@
     <template v-if="user && user.emailVerified === false && !user.isAnonymous">
       <q-card-section>
         <span class="text-h6">Email verification required</span>
-        <q-btn flat dense @click="refreshWindow" class="float-right q-ml-md" icon="las la-sync" />
+        <q-btn flat dense @click="refreshWindow" class="float-right q-ml-md" icon="mdi-sync" />
       </q-card-section>
       <q-card-section class="row justify-center">
         <div class="text-subtitle2 q-mt-md"><q-chip>Please verify your email {{ user.email }} to continue</q-chip></div>
@@ -237,7 +237,7 @@
 
         Notify.create({
           message: 'Logged in as guest',
-          icon: 'las la-user',
+          icon: 'mdi-account-outline',
           color: 'positive',
           position: 'top',
           timeout: 4000,
@@ -268,7 +268,7 @@
 
       Notify.create({
         message: message,
-        icon: 'las la-user',
+        icon: 'mdi-account-outline',
         color: 'negative',
         position: 'top',
         timeout: 4000,
@@ -311,7 +311,7 @@
 
         Notify.create({
           message: 'Logged in as ' + user.email,
-          icon: 'las la-user',
+          icon: 'mdi-account-outline',
           color: 'positive',
           position: 'top',
           timeout: 4000,
@@ -342,7 +342,7 @@
 
       Notify.create({
         message: message,
-        icon: 'las la-user',
+        icon: 'mdi-account-outline',
         color: 'negative',
         position: 'top',
         timeout: 4000,
@@ -406,7 +406,7 @@
 
         Notify.create({
           message: 'Logged in as ' + user.email,
-          icon: 'las la-user',
+          icon: 'mdi-account-outline',
           color: 'positive',
           position: 'top',
           timeout: 4000,
@@ -429,7 +429,7 @@
 
         Notify.create({
           message: message,
-          icon: 'las la-user',
+          icon: 'mdi-account-outline',
           color: 'negative',
           position: 'top',
           timeout: 4000,
@@ -473,7 +473,7 @@
         Notify.create({
           message: 'Email sent.',
           position: 'top',
-          icon: 'las la-envelope',
+          icon: 'mdi-email-outline',
           timeout: 4000,
         });
 
@@ -518,7 +518,7 @@
             message: 'Verification request sent to your email.',
             caption: 'Please check your email inbox.',
             position: 'top',
-            icon: 'las la-envelope',
+            icon: 'mdi-email-outline',
             timeout: 10000,
           });
         }
@@ -608,7 +608,7 @@
 
           Notify.create({
             message: 'Logged in as ' + user.email,
-            icon: 'las la-user',
+            icon: 'mdi-account-outline',
             color: 'positive',
             position: 'top',
             timeout: 4000,
@@ -629,7 +629,7 @@
 
           Notify.create({
             message: message,
-            icon: 'las la-user',
+            icon: 'mdi-account-outline',
             color: 'negative',
             position: 'top',
             timeout: 4000,

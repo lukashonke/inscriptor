@@ -160,6 +160,7 @@ export function htmlToMarkdown(html) {
 }
 
 export function truncate(text, length) {
+  if(!text) return null;
   return text.length > length ? text.substring(0, length) + '...' : text;
 }
 

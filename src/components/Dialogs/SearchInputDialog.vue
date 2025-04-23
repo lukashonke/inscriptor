@@ -3,7 +3,7 @@
     <q-card style="width: 800px; max-width: 70vw;">
       <q-input v-model="searchQuery" label="Search..." filled style="min-width: 300px;" dense ref="searchRef" autofocus :debounce="500" clearable>
         <template v-slot:prepend>
-          <q-icon name="las la-search" size="xs" />
+          <q-icon name="mdi-magnify" size="xs" />
         </template>
       </q-input>
 
@@ -15,7 +15,7 @@
         <q-list dense>
           <q-item v-for="result in fileNameResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)">
             <q-item-section side>
-              <q-icon :name="result.file.icon ?? 'las la-file-alt'" :color="result.file.state?.color" class="no-padding no-margin" size="17px" />
+              <q-icon :name="result.file.icon ?? 'mdi-file-document-outline'" :color="result.file.state?.color" class="no-padding no-margin" size="17px" />
             </q-item-section>
             <q-item-section>
               <q-item-label><div v-html="result.annotation" /></q-item-label>
@@ -25,7 +25,7 @@
         <q-list dense>
           <q-item v-for="result in fileContentResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)">
             <q-item-section side>
-              <q-icon :name="result.file.icon ?? 'las la-file-alt'" :color="result.file.state?.color" class="no-padding no-margin" size="17px" />
+              <q-icon :name="result.file.icon ?? 'mdi-file-document-outline'" :color="result.file.state?.color" class="no-padding no-margin" size="17px" />
             </q-item-section>
             <q-item-section>
               <q-item-label>{{ result.file.title }}</q-item-label>

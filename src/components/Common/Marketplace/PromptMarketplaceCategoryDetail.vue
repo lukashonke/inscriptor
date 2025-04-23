@@ -56,7 +56,7 @@ C<template>
         </q-select>
       </div>
       <div class="col-auto flex items-center">
-        <q-btn flat dense round icon="las la-times" @click="layoutStore.promptMarketplaceOpen = !layoutStore.promptMarketplaceOpen" />
+        <q-btn flat dense round icon="mdi-close" @click="layoutStore.promptMarketplaceOpen = !layoutStore.promptMarketplaceOpen" />
       </div>
     </div>
 
@@ -91,7 +91,7 @@ C<template>
         </q-select>
       </div>
       <div class="col-auto flex items-center">
-        <q-btn flat dense round icon="las la-times" @click="layoutStore.promptMarketplaceOpen = !layoutStore.promptMarketplaceOpen" />
+        <q-btn flat dense round icon="mdi-close" @click="layoutStore.promptMarketplaceOpen = !layoutStore.promptMarketplaceOpen" />
       </div>
     </div>
 
@@ -106,7 +106,7 @@ C<template>
           </div>
         </div>
         <div class="col-auto flex items-center">
-          <q-btn flat dense round icon="las la-times" @click="layoutStore.promptMarketplaceOpen = !layoutStore.promptMarketplaceOpen" />
+          <q-btn flat dense round icon="mdi-close" @click="layoutStore.promptMarketplaceOpen = !layoutStore.promptMarketplaceOpen" />
         </div>
       </div>
     </template>
@@ -120,7 +120,7 @@ C<template>
             <q-expansion-item
               expand-separator
               header-class="text-caption"
-              icon="las la-info-circle"
+              icon="mdi-information-outline"
               label="Info about Local AI models"
             >
               <q-card style="" v-if="category === 'Models' && modelCategory === 'Ollama'" class="row bg-primary-1">
@@ -166,7 +166,7 @@ C<template>
 
                     <a href="https://huggingface.co/spaces/lmsys/chatbot-arena-leaderboard" target="_blank">
                       Chatbot Arena Leaderboard
-                      <q-icon name="las la-external-link-alt" />
+                      <q-icon name="mdi-open-in-new" />
                     </a>
                   </div>
 
@@ -188,10 +188,10 @@ C<template>
                     </div>
 
                     <div v-if="ollamaInstalled === false">
-                      <q-chip icon="las la-exclamation" color="red-2">Ollama is not installed or is not running</q-chip>
+                      <q-chip icon="mdi-exclamation" color="red-2">Ollama is not installed or is not running</q-chip>
                       <div class="row q-mt-md q-gutter-x-md">
                         <div class="col">
-                          <q-btn icon="las la-external-link-alt" unelevated @click.prevent="openBrowserPage('https://ollama.com/')" label="Download Ollama" />
+                          <q-btn icon="mdi-open-in-new" unelevated @click.prevent="openBrowserPage('https://ollama.com/')" label="Download Ollama" />
                         </div>
                         <div class="col-auto">
                           <q-btn unelevated @click.prevent="getOllamaStatus()">Refresh</q-btn>
@@ -214,7 +214,7 @@ C<template>
             <q-expansion-item
               expand-separator
               header-class="text-caption"
-              icon="las la-info-circle"
+              icon="mdi-information-outline"
               label="Info about Cloud AI models"
             >
               <q-card class="row bg-primary-1">
@@ -254,7 +254,7 @@ C<template>
 
                     <a href="https://huggingface.co/spaces/lmsys/chatbot-arena-leaderboard" target="_blank">
                       Chatbot Arena Leaderboard
-                      <q-icon name="las la-external-link-alt" />
+                      <q-icon name="mdi-open-in-new" />
                     </a>
                   </div>
                 </q-card-section>
@@ -270,11 +270,11 @@ C<template>
       <template v-if="category === 'Models' && modelCategory === 'Ollama'">
         <div class="row q-mb-lg q-gutter-x-md">
           <div class="">
-            <q-btn icon="las la-plus" color="primary" @click="addOllamaModelDialog = true" label="Add Custom Ollama Model" />
+            <q-btn icon="mdi-plus" color="primary" @click="addOllamaModelDialog = true" label="Add Custom Ollama Model" />
           </div>
 
           <div class="">
-            <q-btn icon="las la-plus" color="primary" @click="checkLmStudio(); addLmStudioModelDialog = true" label="Add Custom LM Studio Model" />
+            <q-btn icon="mdi-plus" color="primary" @click="checkLmStudio(); addLmStudioModelDialog = true" label="Add Custom LM Studio Model" />
           </div>
         </div>
       </template>
@@ -340,12 +340,12 @@ C<template>
 
       <q-card-section>
         <div>
-          These cloud models are provided via <a href="https://openrouter.ai/" target="_blank">https://openrouter.ai/<q-icon name="las la-external-link-alt" /></a>.
+          These cloud models are provided via <a href="https://openrouter.ai/" target="_blank">https://openrouter.ai/<q-icon name="mdi-open-in-new" /></a>.
         </div>
       </q-card-section>
 
       <q-card-section class="">
-        <q-input autofocus v-model="searchOpenRouterModelName" filled dense square label="Search Model" hint="Examples: llama3"/>
+        <q-input autofocus v-model="searchOpenRouterModelName" filled dense label="Search Model" hint="Examples: llama3"/>
 
         <q-list v-if="openRouterSearchedModels">
           <q-item dense v-for="openRouterModel in openRouterSearchedModels" :key="openRouterModel.id" class="q-mt-md">
@@ -386,13 +386,13 @@ C<template>
         <div>
           <a href="https://ollama.com/library" target="_blank">
           Ollama Model Library
-          <q-icon name="las la-external-link-alt" />
+          <q-icon name="mdi-open-in-new" />
           </a>
         </div>
       </q-card-section>
 
       <q-card-section class="">
-        <q-input v-model="newOllamaModelName" filled dense square label="Ollama Model Name" hint="Examples: phi3:mini llama3.1 gemma2:2b"/>
+        <q-input v-model="newOllamaModelName" filled dense label="Ollama Model Name" hint="Examples: phi3:mini llama3.1 gemma2:2b"/>
 
       </q-card-section>
 
@@ -415,7 +415,7 @@ C<template>
       <q-card-section>
         <div>Download desired model in LM Studio, load it, then continue here.</div>
         <div>Make sure LM Studio Local Server is started and match the port below.</div>
-        <div><a href="https://lmstudio.ai/" target="_blank">More info <q-icon name="las la-external-link-alt" /></a></div>
+        <div><a href="https://lmstudio.ai/" target="_blank">More info <q-icon name="mdi-open-in-new" /></a></div>
       </q-card-section>
 
       <q-card-section>
@@ -437,7 +437,7 @@ C<template>
 
         <div class="row">
           <div class="col">
-            <q-input v-model="lmStudioPort" type="number" filled dense square label="LM Studio Server Port" hint="Default: 1234"/>
+            <q-input v-model="lmStudioPort" type="number" filled dense label="LM Studio Server Port" hint="Default: 1234"/>
           </div>
           <div class="col-auto items-center">
             <q-btn @click="checkLmStudio()" label="Connect" flat color="primary"  />
@@ -446,8 +446,8 @@ C<template>
       </q-card-section>
 
       <q-card-section class="q-gutter-y-lg">
-        <q-select :options="lmStudioModels" filled v-model="newLmStudioModelName" dense square label="LM Studio Model Name" hint="Examples: bartowski/Phi-3.5-mini-instruct-GGUF" emit-value option-label="id" option-value="id" @update:model-value="lmStudioModelSelected()"/>
-        <q-input v-model="newLmStudioModelVisibleName" filled dense square label="Model Visible Name" hint="Examples: Name the model"/>
+        <q-select :options="lmStudioModels" filled v-model="newLmStudioModelName" dense label="LM Studio Model Name" hint="Examples: bartowski/Phi-3.5-mini-instruct-GGUF" emit-value option-label="id" option-value="id" @update:model-value="lmStudioModelSelected()"/>
+        <q-input v-model="newLmStudioModelVisibleName" filled dense label="Model Visible Name" hint="Examples: Name the model"/>
       </q-card-section>
 
       <q-separator />
@@ -575,37 +575,37 @@ function confirmAddLmStudioModel() {
   ];
 
   const allModelTags = [
-    { label: 'ChatGPT', value: 'ChatGPT', icon: 'las la-flag' },
-    { label: 'Claude', value: 'Claude', icon: 'las la-flag' },
-    { label: 'Open Source', value: 'Open Source', icon: 'las la-flag' },
+    { label: 'ChatGPT', value: 'ChatGPT', icon: 'mdi-flag-outline' },
+    { label: 'Claude', value: 'Claude', icon: 'mdi-flag-outline' },
+    { label: 'Open Source', value: 'Open Source', icon: 'mdi-flag-outline' },
 
-    { label: 'Complex', value: 'Complex', icon: 'las la-cogs' },
-    { label: 'Medium Complexity', value: 'Medium Complexity', icon: 'las la-cog' },
-    { label: 'Small Complexity', value: 'Small Complexity', icon: 'las la-cog' },
+    { label: 'Complex', value: 'Complex', icon: 'mdi-cogs' },
+    { label: 'Medium Complexity', value: 'Medium Complexity', icon: 'mdi-cog' },
+    { label: 'Small Complexity', value: 'Small Complexity', icon: 'mdi-cog' },
 
-    { label: 'Multilingual', value: 'Multilingual', icon: 'las la-globe' },
+    { label: 'Multilingual', value: 'Multilingual', icon: 'mdi-earth' },
 
-    { label: 'Speed: Instant', value: 'Speed: Instant', icon: 'las la-rocket' },
-    { label: 'Speed: Fast', value: 'Speed: Fast', icon: 'las la-rocket' },
-    { label: 'Speed: Moderate', value: 'Speed: Moderate', icon: 'las la-rocket' },
-    { label: 'Speed: Slow', value: 'Speed: Slow', icon: 'las la-rocket' },
+    { label: 'Speed: Instant', value: 'Speed: Instant', icon: 'mdi-speedometer' },
+    { label: 'Speed: Fast', value: 'Speed: Fast', icon: 'mdi-speedometer' },
+    { label: 'Speed: Moderate', value: 'Speed: Moderate', icon: 'mdi-speedometer' },
+    { label: 'Speed: Slow', value: 'Speed: Slow', icon: 'mdi-speedometer' },
 
-    { label: 'Context: ~8k', value: 'Context: ~8k', icon: 'las la-book' },
-    { label: 'Context: ~16k', value: 'Context: ~16k', icon: 'las la-book' },
-    { label: 'Context: ~32k', value: 'Context: ~32k', icon: 'las la-book' },
-    { label: 'Context: 100k +', value: 'Context: 100k +', icon: 'las la-book' },
+    { label: 'Context: ~8k', value: 'Context: ~8k', icon: 'mdi-book-open-blank-variant' },
+    { label: 'Context: ~16k', value: 'Context: ~16k', icon: 'mdi-book-open-blank-variant' },
+    { label: 'Context: ~32k', value: 'Context: ~32k', icon: 'mdi-book-open-blank-variant' },
+    { label: 'Context: 100k +', value: 'Context: 100k +', icon: 'mdi-book-open-blank-variant' },
   ];
 
   const allPromptTags = [
-    { label: 'Story Writing', value: 'Story Writing', icon: 'las la-book' },
-    { label: 'Writing', value: 'Writing', icon: 'las la-book' },
-    { label: 'Grammar', value: 'Notes & Summaries', icon: 'las la-book' },
-    { label: 'Translation', value: 'Translation', icon: 'las la-book' },
+    { label: 'Story Writing', value: 'Story Writing', icon: 'mdi-book-open-blank-varian' },
+    { label: 'Writing', value: 'Writing', icon: 'mdi-book-open-blank-varian' },
+    { label: 'Grammar', value: 'Notes & Summaries', icon: 'mdi-book-open-blank-varian' },
+    { label: 'Translation', value: 'Translation', icon: 'mdi-book-open-blank-varian' },
 
-    { label: 'Brainstorming & Suggestions', value: 'Brainstorming & Suggestions', icon: 'las la-book' },
-    { label: 'Notes & Summaries', value: 'Notes & Summaries', icon: 'las la-book' },
-    { label: 'Text Transformation', value: 'Text Transformation', icon: 'las la-book' },
-    { label: 'Random Generation', value: 'Notes & Summaries', icon: 'las la-book' },
+    { label: 'Brainstorming & Suggestions', value: 'Brainstorming & Suggestions', icon: 'mdi-book-open-blank-varian' },
+    { label: 'Notes & Summaries', value: 'Notes & Summaries', icon: 'mdi-book-open-blank-varian' },
+    { label: 'Text Transformation', value: 'Text Transformation', icon: 'mdi-book-open-blank-varian' },
+    { label: 'Random Generation', value: 'Notes & Summaries', icon: 'mdi-book-open-blank-varian' },
   ];
 
   const modelCategory = ref('Cloud');

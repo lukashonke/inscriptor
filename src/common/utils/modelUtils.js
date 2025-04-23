@@ -73,7 +73,7 @@ export async function importModel(model, callback, skipDialog = false, forceMode
         Notify.create({
           message: 'Imported ' + model.meta.name,
           group: 'import-model',
-          icon: 'las la-check',
+          icon: 'mdi-check',
           color: 'positive',
           width: 300,
           position: 'top',
@@ -105,7 +105,7 @@ export async function importModel(model, callback, skipDialog = false, forceMode
           } else {
             Notify.create({
               message: 'No model selected',
-              icon: 'las la-exclamation-triangle',
+              icon: 'mdi-exclamation',
               color: 'negative',
               position: 'top',
               timeout: 4000,
@@ -135,7 +135,7 @@ export async function importModel(model, callback, skipDialog = false, forceMode
             Notify.create({
               message: 'Could not import model ' + llmModel.modelName,
               caption: 'Check if the model exists and is available to you',
-              icon: 'las la-microchip',
+              icon: 'mdi-chip',
               color: 'negative',
               position: 'top',
               timeout: 3000,
@@ -146,7 +146,7 @@ export async function importModel(model, callback, skipDialog = false, forceMode
 
           const notif = Notify.create({
             message: 'Downloading model ' + llmModel.name,
-            icon: 'las la-microchip',
+            icon: 'mdi-chip',
             group: false,
             spinner: true,
             color: 'positive',
@@ -217,7 +217,7 @@ export async function importModel(model, callback, skipDialog = false, forceMode
 
       if(!skipNotification) {
         Notify.create({
-          icon: 'las la-check',
+          icon: 'mdi-check',
           spinner: false,
           color: 'positive',
           message: 'Imported ' + model.meta.name,

@@ -21,7 +21,7 @@
           </div>
 
           <div class="col-auto flex items-center q-mr-sm">
-            <q-btn color="primary" @click="newConversation" size="md" icon="las la-pen-square" class="" label="New chat">
+            <q-btn color="primary" @click="newConversation" size="md" icon="mdi-pencil-box-outline" class="" label="New chat">
               <q-tooltip>
                 Start a new conversation with AI model
               </q-tooltip>
@@ -29,12 +29,12 @@
           </div>
 
           <div class="col-auto flex items-center">
-            <q-btn flat color="negative" icon="las la-trash" size="md">
+            <q-btn flat color="negative" icon="mdi-delete-outline" size="md">
               <q-menu>
                 <q-list dense>
                   <q-item clickable @click="removeConversation" v-close-popup>
                     <q-item-section side>
-                      <q-icon name="las la-times" />
+                      <q-icon name="mdi-close" />
                     </q-item-section>
                     <q-item-section>
                       Remove current conversation
@@ -43,7 +43,7 @@
                   <q-separator />
                   <q-item clickable @click="removeAllConversations">
                     <q-item-section side>
-                      <q-icon name="las la-trash" color="negative" />
+                      <q-icon name="mdi-delete-outline" color="negative" />
                     </q-item-section>
                     <q-item-section>
                       Remove all conversations
@@ -63,25 +63,19 @@
         </div>
       </div>
 
-      <div class="col-auto">
-        <div class="text-center">
-
-        </div>
-      </div>
-
       <div class="col">
-        <div class="q-gutter-y-sm q-ml-xs" style="margin-bottom: 100px;">
-
-          <template v-for="(promptResult, index) in results" :key="index">
-            <PromptResult :promptResult="promptResult" :show-as-chat="true" :allow-regenerate="index === results.length - 1"/>
-          </template>
-
+        <div class="q-gutter-y-sm q-ml-xs chat-history-container" style="margin-bottom: 100px;">
+          <div class="chat-messages-container-unhinged">
+            <template v-for="(promptResult, index) in results" :key="index">
+              <PromptResult :promptResult="promptResult" :show-as-chat="true" :allow-regenerate="index === results.length - 1"/>
+            </template>
+          </div>
         </div>
       </div>
 
       <div class="col">
         <div class="full-width" style="position: absolute; bottom: 0; right: 0; z-index: 1000" >
-          <div class="q-mr-sm bg-white">
+          <div class="q-mr-lg bg-white">
             <div class="" >
 
               <div class="text-caption q-pa-md q-pb-sm q-pt-sm text-grey-7 left-border" v-if="results.length === 0">
@@ -99,18 +93,18 @@
 
               </div>
 
-              <div class="row">
-                <div class="col">
-                  <q-input square v-model="promptText" :label="'Write message to AI...'" filled class="full-width" rows="4" type="textarea" lines dense ref="searchRef" @keydown="onInputKey">
+              <div class="row left-border">
+                <div class="col q-ml-sm rounded-borders q-px-sm">
+                  <q-input v-model="promptText" :label="'Write message to AI...'" borderless class="full-width" rows="4" type="textarea" lines dense ref="searchRef" @keydown="onInputKey">
                   </q-input>
                 </div>
                 <div class="col-auto q-ml-sm">
                   <div class="column">
                     <div class="col">
-                      <q-btn icon="las la-paper-plane" color="accent" @click="sendChat()" :disable="promptForChatId === null" />
+                      <q-btn icon="mdi-send-outline" color="accent" @click="sendChat()" :disable="promptForChatId === null" />
                     </div>
                     <div class="col q-mt-md">
-                      <q-btn flat icon="las la-cog" @click="settingsOpen = !settingsOpen" />
+                      <q-btn flat icon="mdi-cog" @click="settingsOpen = !settingsOpen" />
                     </div>
                   </div>
                 </div>
@@ -150,9 +144,10 @@
 import {usePromptStore} from "stores/prompt-store";
 import {computed, ref} from "vue";
 import {Dialog} from "quasar";
-import {executePromptClick} from "src/common/helpers/promptHelper";
+import {executePromptClick2} from "src/common/helpers/promptHelper";
 import PromptResult from "components/RightMenu/PromptResult.vue";
 import {useLayoutStore} from "stores/layout-store";
+import {chatTabId} from 'src/common/resources/tabs';
 
 const promptStore = usePromptStore();
 const layoutStore = useLayoutStore();
@@ -162,18 +157,18 @@ const promptText = ref('');
 const settingsOpen = ref(false);
 
 const results = computed(() => {
-  const index = promptStore.getTabData(promptStore.currentTab)?.promptResultsIndex ?? 0;
-  return promptStore.getTabData(promptStore.currentTab)?.promptResultsHistory[index] ?? [];
+  const index = promptStore.getTabData(chatTabId)?.promptResultsIndex ?? 0;
+  return promptStore.getTabData(chatTabId)?.promptResultsHistory[index] ?? [];
 });
 
 const maxResultsPage = computed(() => {
-  return promptStore.getTabData(promptStore.currentTab)?.promptResultsHistory.length ?? 0;
+  return promptStore.getTabData(chatTabId)?.promptResultsHistory.length ?? 0;
 });
 
 const page = computed({
-  get: () => (promptStore.getTabData(promptStore.currentTab)?.promptResultsIndex ?? 0) + 1,
+  get: () => (promptStore.getTabData(chatTabId)?.promptResultsIndex ?? 0) + 1,
   set: (value) => {
-    promptStore.setCurrentTabResultsIndex(value - 1);
+    promptStore.setCurrentTabResultsIndex(chatTabId, value - 1);
   }
 });
 
@@ -223,7 +218,16 @@ async function sendChat() {
 
   messages.push({type: 'user', text: textCopy});
 
-  await executePromptClick(prompt, messages, false, null, false, null, false, chatWithContext.value);
+  const request = {
+    prompt: prompt,
+    text: messages,
+    clear: false,
+    forceBypassMoreParameters: false,
+    silent: false,
+    forceShowContextSelection: chatWithContext.value
+  };
+
+  await executePromptClick2(request);
 }
 
 const models = computed(() => promptStore.models.map(tab => ({label: tab.name, value: tab.id})));
@@ -285,13 +289,13 @@ function updateSystemPromptText() {
 }
 
 function newConversation() {
-  promptStore.newPromptResultsHistory();
+  promptStore.newPromptResultsHistory(chatTabId);
 
   updateSystemPromptText();
 }
 
 function removeConversation() {
-  promptStore.removePromptResultsHistoryItem(promptStore.getTabData(promptStore.currentTab)?.promptResultsIndex ?? null);
+  promptStore.removePromptResultsHistoryItem(chatTabId, promptStore.getTabData(chatTabId)?.promptResultsIndex ?? null);
 }
 
 function removeAllConversations() {
@@ -303,7 +307,7 @@ function removeAllConversations() {
       cancel: true,
       persistent: true
     }).onOk(() => {
-    promptStore.clearPromptHistory();
+    promptStore.clearPromptHistory(chatTabId);
   }).onCancel(() => {
   }).onDismiss(() => {
     }

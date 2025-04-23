@@ -22,7 +22,7 @@
 
               <q-item active-class="text-accent text-weight-medium" clickable :active="selectedCategory === 'Models'" v-ripple @click="selectedCategory = 'Models'">
                 <q-item-section avatar>
-                  <q-icon name="las la-microchip" />
+                  <q-icon name="mdi-chip" />
                 </q-item-section>
                 <q-item-section>
                   AI Models
@@ -32,7 +32,7 @@
             </q-list>
 
             <q-separator class="q-mt-xl shadow-4"/>
-            <div class="text-center text-subtitle2 q-mt-md q-mb-sm"><q-icon name="las la-users" class="q-mr-sm" />Community Content</div>
+            <div class="text-center text-subtitle2 q-mt-md q-mb-sm"><q-icon name="mdi-account-group-outline" class="q-mr-sm" />Community Content</div>
 
             <div class="text-center text-caption"> Coming soon </div>
           </div>

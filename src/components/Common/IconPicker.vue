@@ -39,7 +39,7 @@
     },
     defaultIcon: {
       type: String,
-      default: 'las la-circle',
+      default: 'mdi-circle-outline',
     },
     size: {
       type: String,

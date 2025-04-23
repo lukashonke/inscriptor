@@ -1,5 +1,5 @@
 <template>
-  <div class="row" style="width: 600px;">
+  <div class="row" style="width: 550px;">
     <div class="col-auto right-border bg-grey-1" id="promptSelectorCategories">
       <div class="row">
         <div class="col full-width">
@@ -26,7 +26,7 @@
             size="12px"
             no-caps
             :label="category.label.length === 0 ? 'Default' : category.label"
-            :icon="category.icon ?? 'las la-circle'"
+            :icon="category.icon ?? 'mdi-circle-outline'"
             :class="[
               'bg-' + (category.color ?? 'blue') + (currentPromptCategory === category.label ? '-1' : '-0'),
                'text-' + (category.color ?? 'blue') + '-9'
@@ -38,20 +38,20 @@
               <q-list dense>
                 <q-item clickable v-ripple class="" @click="promptStore.pushCategoryOrder(category, -1)">
                   <q-item-section side>
-                    <q-icon name="las la-arrow-up" size="xs" />
+                    <q-icon name="mdi-arrow-up-thin" size="xs" />
                   </q-item-section>
                   <q-item-section>Move Up</q-item-section>
                 </q-item>
                 <q-item clickable v-ripple class="" @click="promptStore.pushCategoryOrder(category, 1)">
                   <q-item-section side>
-                    <q-icon name="las la-arrow-down" size="xs" />
+                    <q-icon name="mdi-arrow-down-thin" size="xs" />
                   </q-item-section>
                   <q-item-section>Move Down</q-item-section>
                 </q-item>
                 <q-separator />
                 <q-item clickable v-ripple class="text-negative" @click="deleteAllPrompts(category)">
                   <q-item-section side>
-                    <q-icon name="las la-times" size="xs" />
+                    <q-icon name="mdi-close" size="xs" />
                   </q-item-section>
                   <q-item-section>Delete prompts in this category</q-item-section>
                 </q-item>
@@ -79,7 +79,7 @@
             no-caps
             size="12px"
             label="Open Inscriptor Hub"
-            icon="las la-store"
+            icon="mdi-storefront-outline"
             :class="[
               'bg-primary-0',
                'text-black'
@@ -104,18 +104,40 @@
 
 
         <q-card-section v-if="currentPromptCategory === '-custom-'" class="q-gutter-y-sm" style="width: 480px;" id="promptSelectorCustomPrompt">
-          <InputWithAi v-model="customPromptText" :autofocus="true" :filled="true" label="System Prompt Instructions" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Prompt Refiner')" :prompt-input="customPromptText" class="write-monospace" :automatic-text-correction="false"/>
 
-          <div class="row q-mt-lg">
-            <div class="col-12">
-              <q-select v-model="customPromptModel" :options="models" filled dense options-dense square label="AI Model" class="" />
+          <!--<q-card class="q-pa-sm bordered" flat>
+            <q-card-section class="no-padding">
+
+              <template v-if="props.promptTypes === 'insert'">
+                <q-chip text-color="black" :color="currentFilePromptInput.color + '-3'" icon="mdi-check" >
+                  {{currentFilePromptInput.label}} included
+                  <q-tooltip color="primary">
+                    <div>all text from file</div>
+                  </q-tooltip>
+                </q-chip>
+              </template>
+              <template v-else>
+                <q-chip text-color="black" :color="selectedTextPromptInput.color + '-3'" icon="mdi-check" >
+                  {{selectedTextPromptInput.label}}
+                  <q-tooltip color="primary">
+                    <div>selected text it included</div>
+                  </q-tooltip>
+                </q-chip>
+              </template>
+            </q-card-section>
+          </q-card>-->
+
+          <InputWithAi v-model="customPromptText" :autofocus="true" :filled="true" label="Instructions for AI" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Prompt Refiner')" :prompt-input="customPromptText" class="write-monospace" :automatic-text-correction="false"/>
+          <div class="row">
+            <div class="col-auto">
+              <q-select v-model="customPromptModel" :options="models" filled dense options-dense label="AI Model" class="" />
             </div>
             <div class="col-12 q-mt-lg">
-              <q-btn-dropdown icon="mdi-creation-outline" split label="Prompt" unelevated :disable="!canCustomPrompt" color="accent" @click="customPromptClick" class="full-width">
+              <q-btn-dropdown icon="mdi-creation-outline" split label="Prompt" :disable="!canCustomPrompt" color="accent" @click="customPromptClick" class="full-width">
                 <q-list>
                   <q-item dense clickable v-close-popup @click="turnIntoPrompt">
                     <q-item-section avatar>
-                      <q-icon name="mdi-creation-outline" color="amber" />
+                      <q-icon name="mdi-file" />
                     </q-item-section>
                     <q-item-section>
                       <q-item-label>Save as Prompt</q-item-label>
@@ -148,7 +170,6 @@
 <script setup>
 import {computed, onMounted, ref} from "vue";
 import {usePromptStore} from "stores/prompt-store";
-import {groupBy} from "src/common/utils/arrayUtils";
 import {useFileStore} from "stores/file-store";
 import PromptSelectorItem from "components/Common/PromptSelector/PromptSelectorItem.vue";
 import {isTextLlm} from "src/common/utils/modelUtils";
@@ -160,6 +181,7 @@ const promptStore = usePromptStore();
 const layoutStore = useLayoutStore();
 const fileStore = useFileStore();
 
+const customPromptPrefix = computed(() => promptStore.defaultCustomPromptInstructions);
 const customPromptText = ref('');
 
 const customPromptModelValue = computed({
@@ -197,12 +219,12 @@ const canCustomPrompt = computed(() => customPromptText.value.length > 0 && prom
 
 function createAdhocPrompt(userPrompt) {
   let userPromptText = userPrompt;
-  let systemPromptText = customPromptText.value + "\n\n$context\n";
+  let systemPromptText = customPromptPrefix.value + "\n\n" + customPromptText.value + "\n\n$context\n";
 
-  if(!fileStore.selectedFile || fileStore.selectedFile.content.trim() == '') {
+  /*if(!fileStore.selectedFile || fileStore.selectedFile.content.trim() == '') {
     userPromptText = systemPromptText;
-    systemPromptText = 'You are a helpful assistant. Perform the following task to the best of your ability.';
-  }
+    systemPromptText = customPromptPrefix.value;
+  }*/
 
   const customPrompt = promptStore.getCustomAdhocPrompt(props.promptTypes, systemPromptText, userPromptText);
 
@@ -213,11 +235,9 @@ function createAdhocPrompt(userPrompt) {
 }
 
 async function customPromptClick() {
-  const userPrompt = props.promptTypes === 'insert' ? "$text" : "$selection"
+  const customPrompt = createAdhocPrompt('$input');
 
-  const customPrompt = createAdhocPrompt(userPrompt);
-
-  promptClick(customPrompt);
+  promptClick({prompt: customPrompt});
 }
 
 async function turnIntoPrompt() {
@@ -234,8 +254,8 @@ const props = defineProps({
 
 const emit = defineEmits(['promptClick'])
 
-function promptClick(prompt) {
-  emit('promptClick', prompt);
+function promptClick(promptClickData) {
+  emit('promptClick', promptClickData);
 }
 
 const currentPromptCategory = ref('');
@@ -269,7 +289,7 @@ const categories = computed(() => {
     if (!existingCategory) {
       retValue.push({
         label: pd,
-        icon: 'las la-circle'
+        icon: 'mdi-circle-outline'
       });
     }
   }
@@ -278,16 +298,16 @@ const categories = computed(() => {
 });
 
 const categoryPrompts = computed(() => {
-  const prompts = getPrompts().filter(p => promptStore.canPrompt(p)).filter(p => p.category === currentPromptCategory.value || (currentPromptCategory.value === '' && !p.category))
+  const prompts = getPrompts().filter(p => promptStore.canPrompt(p)).filter(p => !p.settings.hiddenInPromptSelector && p.category === currentPromptCategory.value || (currentPromptCategory.value === '' && !p.category))
   return prompts;
 });
 
-const promptsGroupedByModel = computed(() => {
+/*const promptsGroupedByModel = computed(() => {
   const prompts = getPrompts().filter(p => promptStore.canPrompt(p)).filter(p => p.category === currentPromptCategory.value || (currentPromptCategory.value === '' && !p.category))
   const grouping = groupBy(prompts, 'modelId');
 
   return groupByToArray(grouping);
-});
+});*/
 
 function getPrompts() {
   if((props.promptTypes === 'selection')) {
@@ -345,7 +365,7 @@ function groupPromptsByFolder(prompts) {
       } else {
         usedFolder = {
           label: prompt.folder,
-          icon: folder?.icon ?? 'las la-folder',
+          icon: folder?.icon ?? 'mdi-folder-outline',
           color: folder?.color ?? 'black',
           prompts: [prompt]
         };

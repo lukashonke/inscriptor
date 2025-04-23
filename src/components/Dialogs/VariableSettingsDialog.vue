@@ -26,7 +26,7 @@
                   <q-input filled dense v-model="variable.value" label="Value" autogrow />
                 </div>
                 <div class="col-auto" v-if="!(variable.undeletable === true)">
-                  <q-btn flat label="" color="red" icon="las la-trash" @click="fileStore.removeVariable(index)" />
+                  <q-btn flat label="" color="red" icon="mdi-delete-outline" @click="fileStore.removeVariable(index)" />
                 </div>
               </div>
 
@@ -52,7 +52,7 @@
           </q-expansion-item>
         </q-card>
 
-        <q-btn color="primary" label="Add variable" @click="fileStore.addVariable" icon="las la-plus" class="q-mt-md" />
+        <q-btn color="primary" label="Add variable" @click="fileStore.addVariable" icon="mdi-plus" class="q-mt-md" />
 
       </q-card-section>
     </q-card>

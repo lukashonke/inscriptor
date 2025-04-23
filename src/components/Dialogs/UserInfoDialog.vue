@@ -7,7 +7,7 @@
             User Plan
           </div>
           <div class="col-auto">
-            <q-btn flat dense icon="las la-times" @click="layoutStore.userInfoDialogOpen = false" />
+            <q-btn flat dense icon="mdi-close" @click="layoutStore.userInfoDialogOpen = false" />
           </div>
         </div>
       </q-card-section>
@@ -25,7 +25,7 @@
             <div class="row">
               <span class="text-subtitle2 q-mr-sm">Subscription:</span>
 
-              <q-icon name="las la-crown" class="q-mr-xs q-pt-xs" color="amber" v-if="userData.subscriptionLevel > 0" />
+              <q-icon name="mdi-crown-outline" class="q-mr-xs q-pt-xs" color="amber" v-if="userData.subscriptionLevel > 0" />
               <span class="text-subtitle2">{{ getLevelName(userData.subscriptionLevel) }}</span>
 
               <span class="text-subtitle2 q-ml-xs" v-if="hasFreePremium">(Early Adopter)</span>
@@ -74,7 +74,7 @@
 
               <div class="col-12 text-h6 q-mb-lg text-weight-bold row text-center">
                 <div class="col-auto" style="width: 0px">
-                  <q-btn flat color="primary" icon="las la-arrow-left" style="width: 120px" label="back" @click="showBuyCredits = false"></q-btn>
+                  <q-btn flat color="primary" icon="mdi-arrow-left-thin" style="width: 120px" label="back" @click="showBuyCredits = false"></q-btn>
                 </div>
                 <div class="col">
                   Get more AI credits
@@ -188,7 +188,7 @@
                   <q-list class="q-py-sm bg-blue-grey-1">
                     <q-item clickable>
                       <q-item-section avatar>
-                        <q-icon color="black" name="las la-folder" />
+                        <q-icon color="black" name="mdi-folder-outline" />
                       </q-item-section>
 
                       <q-item-section>
@@ -198,7 +198,7 @@
                     </q-item>
                     <q-item clickable>
                       <q-item-section avatar>
-                        <q-icon color="black" name="las la-folder" />
+                        <q-icon color="black" name="mdi-folder-outline" />
                       </q-item-section>
 
                       <q-item-section>
@@ -209,7 +209,7 @@
 
                     <q-item clickable>
                       <q-item-section avatar>
-                        <q-icon color="black" name="las la-microchip" />
+                        <q-icon color="black" name="mdi-chip" />
                       </q-item-section>
 
                       <q-item-section>
@@ -220,7 +220,7 @@
 
                     <q-item clickable>
                       <q-item-section avatar>
-                        <q-icon color="black" name="las la-cloud" />
+                        <q-icon color="black" name="mdi-cloud-outline" />
                       </q-item-section>
 
                       <q-item-section>
@@ -231,7 +231,7 @@
 
                     <q-item clickable>
                       <q-item-section avatar>
-                        <q-icon color="black" name="las la-folder" />
+                        <q-icon color="black" name="mdi-folder-outline" />
                       </q-item-section>
 
                       <q-item-section>
@@ -251,7 +251,7 @@
                 <q-card class="shadow-16 bg-inscriptorblue" :class="{'primary-highlight': userData.subscriptionLevel === 1}" style="max-width: 330px;  min-height: 510px;">
                   <q-card-section class="bg-inscriptorblue text-white">
                     <div class="flex items-center">
-                      <q-icon name="las la-crown" class="q-mr-xs q-pt-xs" color="amber" size="sm" />
+                      <q-icon name="mdi-crown-outline" class="q-mr-xs q-pt-xs" color="amber" size="sm" />
                       <span class="text-h6 q-ml-xs text-aleo">Inscriptor Premium</span>
                       <q-badge color="amber" text-color="accent" class="q-ml-md" v-if="userData.subscriptionLevel === 1">Current</q-badge>
                     </div>
@@ -279,7 +279,7 @@
                   <q-list class="q-py-sm bg-inscriptorblue-dark text-inscriptorblue-light">
                     <q-item clickable>
                       <q-item-section avatar>
-                        <q-icon name="las la-check" />
+                        <q-icon name="mdi-check" />
                       </q-item-section>
 
                       <q-item-section>
@@ -290,7 +290,7 @@
 
                     <q-item clickable>
                       <q-item-section avatar>
-                        <q-icon name="las la-cloud" />
+                        <q-icon name="mdi-cloud-outline" />
                       </q-item-section>
 
                       <q-item-section>
@@ -301,7 +301,7 @@
 
                     <q-item clickable>
                       <q-item-section avatar>
-                        <q-icon name="las la-microchip" />
+                        <q-icon name="mdi-chip" />
                       </q-item-section>
 
                       <q-item-section>
@@ -312,7 +312,7 @@
 
                     <q-item clickable>
                       <q-item-section avatar>
-                        <q-icon name="las la-folder" />
+                        <q-icon name="mdi-folder-outline" />
                       </q-item-section>
 
                       <q-item-section>
@@ -337,10 +337,10 @@
                     <q-btn color="accent" class="full-width" @click="buyPremium(yearly ? 'SubscriptionPremiumYearly' : 'SubscriptionPremium')">Subscribe</q-btn>
                   </q-card-actions>
                   <q-card-actions v-else-if="!hasFreePremium"  class="bg-inscriptorblue text-white">
-                    <q-btn flat unelevated class="full-width" icon="las la-check" label="Subscribed"></q-btn>
+                    <q-btn flat unelevated class="full-width" icon="mdi-check" label="Subscribed"></q-btn>
                   </q-card-actions>
                   <q-card-actions v-else  class="bg-inscriptorblue text-white">
-                    <q-btn flat no-caps unelevated class="full-width" icon="las la-check" label="Free for Early Adopters"></q-btn>
+                    <q-btn flat no-caps unelevated class="full-width" icon="mdi-check" label="Free for Early Adopters"></q-btn>
                   </q-card-actions>
                 </q-card>
               </div>

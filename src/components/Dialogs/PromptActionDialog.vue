@@ -48,7 +48,7 @@
             </q-item>
           </q-list>
 
-          <q-btn class="gt-xs q-mt-md" size="12px" flat dense icon="las la-plus" label="Create new file" @click="createNewFile()" >
+          <q-btn class="gt-xs q-mt-md" size="12px" flat dense icon="mdi-plus" label="Create new file" @click="createNewFile()" >
             <q-tooltip>Create a new file with your prompt result as content</q-tooltip>
           </q-btn>
         </template>
