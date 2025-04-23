@@ -62,7 +62,7 @@
         </div>
       </q-card-section>
 
-      <q-card-actions class="justify-between q-px-md q-pt-sm q-pb-sm">
+      <q-card-actions class="justify-between q-px-md q-pt-sm q-pb-sm no-wrap">
         <q-btn @click="$emit('toggle-reply', idea)" icon="mdi-reply-outline" label="Reply" size="12px" :disable="idea.generating" color="grey-7" flat dense no-caps class="hoverable-btn"/>
 
         <q-btn-dropdown split @click="$emit('expand-idea', idea)" icon="mdi-creation-outline" label="Expand" size="12px" :disable="idea.generating" color="grey-7" flat dense no-caps class="hoverable-btn">

@@ -1314,8 +1314,4 @@
     font-size: 1.3rem;
   }
 
-  .gradient-variation-1 {
-    background: linear-gradient(135deg, #ffffff 80%, #ededf8 100%);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-  }
 </style>

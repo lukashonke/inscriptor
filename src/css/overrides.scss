@@ -36,3 +36,11 @@
 
 .q-list {
 }
+
+.q-field--filled .q-field__control::before {
+  border-bottom: 0px solid transparent !important;
+}
+
+.q-field--filled .q-field__control {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+}

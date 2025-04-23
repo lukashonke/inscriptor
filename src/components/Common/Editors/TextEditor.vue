@@ -20,7 +20,13 @@
         <q-btn v-if="predefinedWordFinderPrompts && predefinedWordFinderPrompts.length > 0" size="12px" dense flat icon="mdi-auto-fix" padding="4px 6px" class="bg-white bordered" color="accent" @click="runWordFinder()" :loading="wordFinderLoading">
           <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="ai-panel-solid">
             <q-card style="width: 400px; min-height: 50px;" flat class="no-scroll ai-panel-solid">
+              <div class=" text-center bg-accent q-py-xs q-px-md q-mb-sm row">
+                <div class="col justify-start flex">
+                  <span class=text-white>{{ truncate(getSelectedText(), 40) }}</span>
+                </div>
+              </div>
               <div class="row" style="min-width: 100px; min-height: 50px; max-height: 400px; overflow: auto;">
+
                 <template v-for="(word, i) in wordFinderOutput" :key="i">
                   <div class="col-auto">
                     <q-item clickable v-close-popup @click="replaceSelectedWord(word)" dense>
@@ -240,6 +246,8 @@ import {CharacterCount} from "@tiptap/extension-character-count";
 import {OrderedList} from "@tiptap/extension-ordered-list";
 import {BulletList} from "@tiptap/extension-bullet-list";
 import {ListItem} from "@tiptap/extension-list-item";
+import {selectedTextPromptInput} from 'src/common/resources/promptContexts';
+import {truncate} from 'src/common/utils/textUtils';
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
@@ -523,6 +531,7 @@ async function runWordFinder(replace = true) {
         clear: false,
         forceBypassMoreParameters: true,
         silent: true,
+        userInputs: [selectedTextPromptInput],
         onOutput: onOutput
       }
 

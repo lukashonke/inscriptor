@@ -226,11 +226,26 @@ async function executePrompt2(request) {
     }
   }
 
+  if (request.contextTypes && request.contextTypes.length > 0) {
+    for (const existingContext of request.contextTypes) {
+      if (!context.find(c => c.id === existingContext.id)) {
+        context.push(existingContext);
+      }
+    }
+  }
+
+  if (request.userInputs && request.userInputs.length > 0) {
+    for (const existingUserInput of request.userInputs) {
+      if (!userInputs.find(u => u.id === existingUserInput.id)) {
+        userInputs.push(existingUserInput);
+      }
+    }
+  }
+
   request.contextTypes = context;
   request.userInputs = userInputs;
   request.forceTemperature = null;
   request.promptTimes = promptTimes;
-  debugger;
 
   if(!request.parametersValue) {
     request.parametersValue = promptStore.promptParametersValue;

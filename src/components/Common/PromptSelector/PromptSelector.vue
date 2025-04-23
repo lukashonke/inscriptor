@@ -1,5 +1,5 @@
 <template>
-  <div class="row" style="width: 600px;">
+  <div class="row" style="width: 550px;">
     <div class="col-auto right-border bg-grey-1" id="promptSelectorCategories">
       <div class="row">
         <div class="col full-width">

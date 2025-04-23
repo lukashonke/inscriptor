@@ -17,7 +17,7 @@
       </q-badge>
     </template>
 
-    <template v-if="file.settings?.contextType">
+    <template v-if="file.settings?.contextType && !hideContextType">
       <q-badge :color="file.settings.contextType.color + '-2'" :text-color="file.settings.contextType.color + '-8'" rounded class="q-ml-xs" style="font-size: 0.7rem;">
         {{ truncate(file.settings?.contextType.label, truncateContextChars) }}
         <q-tooltip :delay="500">
@@ -41,6 +41,10 @@
     file: {
       type: Object,
       required: false,
+    },
+    hideContextType: {
+      type: Boolean,
+      default: false,
     },
   });
 

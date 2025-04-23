@@ -45,7 +45,7 @@
           <q-btn-toggle :options="[{value: 'grid', label: 'Grid', icon: 'mdi-view-grid'},{value: 'list', label: 'List', icon: 'mdi-view-sequential'}]" :model-value="viewMode" @update:model-value="setViewMode" unelevated no-caps class="bordered" toggle-color="primary" padding="xs md" />
         </div>
         <div class="col-auto flex items-center" v-if="viewMode === 'grid'">
-          <span class="q-mr-xs">Columns:</span>
+          <span class="q-mx-xs">Columns:</span>
           <q-btn-toggle :options="[{value: 3, label: 3},{value: 4, label: 4},{value: 5, label: 5}]" :model-value="columnCount" @update:model-value="setColumnCount" unelevated no-caps class="bordered" toggle-color="primary" padding="xs sm" id="aiSwitch" />
         </div>
       </div>
@@ -1056,8 +1056,6 @@ defineExpose({
 
   .list-view-column {
     padding: 0 24px;
-    max-height: 85vh;
-    overflow: auto;
   }
 
   .list-view-column .column-header {

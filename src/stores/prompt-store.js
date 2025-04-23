@@ -21,7 +21,7 @@ import {
   getAllMarkdown,
   getEditor,
   getEditorSelection,
-  getSelectedMarkdown
+  getSelectedMarkdown, getSelectedText
 } from "src/common/utils/editorUtils";
 import {Ollama} from 'ollama/browser'
 import {removeOllamaModel} from "src/common/apiServices/ollamaApiService";
@@ -343,6 +343,7 @@ export const usePromptStore = defineStore('prompts', {
 
       let inputIsText;
       let selectedText;
+      let editorSelection;
       let textBefore;
       let textAfter;
       let text;
@@ -424,6 +425,8 @@ export const usePromptStore = defineStore('prompts', {
 
       if(editor) {
         const {from, to, empty, $anchor, $head} = getEditorSelection();
+
+        editorSelection = getSelectedText();
 
         nodeBefore = $anchor.nodeBefore?.text ?? '';
         nodeAfter = $anchor.nodeAfter?.text ?? '';
@@ -618,11 +621,13 @@ export const usePromptStore = defineStore('prompts', {
               }
             }
           } else if(inputType.id === 'Selected Text') {
-            if(selectedText && selectedText.length > 0) {
+            let selectedTextReplace = editorSelection ?? selectedText;
+
+            if(selectedTextReplace && selectedTextReplace.length > 0) {
               if(request.userInputs.length > 1) {
                 userInputValue += 'Selected Text inside ' + (fileStore.getFileNameWithPath(fileStore.selectedFile)) + ': ';
               }
-              userInputValue += convertHtmlToText(selectedText);
+              userInputValue += convertHtmlToText(selectedTextReplace);
 
               if(request.userInputs.length > 1) {
                 userInputValue += '\n-----\n';
@@ -2927,6 +2932,7 @@ export const usePromptStore = defineStore('prompts', {
         "overridePromptTimes": "1",
         "parameters": [],
         "settings": {},
+        "promptStyle": promptType === 'selection' ? 'change' : 'generate',
         "info": {
           "tags": [ "context", "input" ]
         },

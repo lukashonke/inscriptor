@@ -9,6 +9,16 @@
     background-color: rgba(77, 92, 210, 0.05);
   }
 
+  .gradient-variation-1 {
+    background: linear-gradient(135deg, #ffffff 80%, #ededf8 100%);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .gradient-variation-2 {
+    background: linear-gradient(135deg, #ffffff 60%, #f6f6f6 100%);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+
   .bg-file-list-hover {
     background-color: #efefef;
     box-shadow: 0 0px 1px rgb(237, 237, 237);

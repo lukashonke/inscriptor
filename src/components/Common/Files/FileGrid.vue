@@ -2,10 +2,10 @@
   <div class="row">
     <div v-for="child in file.children ?? []" :key="child.id" class="q-mb-lg" :class="mainCols">
 
-      <div :class="mainCols === 'col-12' ? '' : 'bordered'">
-        <div class="text-h6 row cursor-pointer" @click="fileStore.selectFile(child, false)" style="max-width: 1082px">
+      <div :class="mainCols === 'col-12' ? '' : ''">
+        <div class="text-h6 row cursor-pointer full-width" @click="fileStore.selectFile(child, false)" style="">
           <div class="col">
-            <FileDetailItem :file="child" />
+            <FileDetailItem :file="child" :hide-context-type="true" />
           </div>
           <div class="col-auto">
             <span class="q-mr-md text-grey-6 text-caption">
@@ -22,18 +22,18 @@
         </div>
 
         <div class="row q-mt-xs">
-          <div class="col-auto full-width" style="max-width: 1082px">
+          <div class="col-auto full-width">
             <InputWithAi v-model="child.synopsis" label="Synopsis" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" :prompt-input="child.content" :class="writeClasses" @update:model-value="() => fileStore.setDirty(child)" :automatic-text-correction="automaticTextCorrection"/>
           </div>
         </div>
 
-        <div class="row q-gutter-x-md q-gutter-y-lg q-mt-xs q-pb-xs" v-if="viwSecondLevel">
+        <div class="row q-gutter-x-md q-gutter-y-md q-mt-xs q-pb-xs" v-if="viwSecondLevel">
           <template v-for="nestedChild in child.children ?? []" :key="nestedChild.id">
-            <q-card class="col-auto bg-grey-2 shadow-1" style="width: 350px">
+            <q-card class="col-grow gradient-variation-2 inscriptor-shadow-1" style="min-width: 380px; max-width: 600px;">
               <q-card-section class="cursor-pointer q-pa-sm" @click="fileStore.selectFile(nestedChild, false)">
                 <q-item-label class="row items-center">
                   <div class="col text-subtitle1">
-                    <FileDetailItem :file="nestedChild" />
+                    <FileDetailItem :file="nestedChild" :hide-context-type="true" />
                   </div>
                   <div class="col-auto">
                   <span class="q-mr-md text-grey-6 text-caption">
@@ -49,19 +49,18 @@
                   </div>
                 </q-item-label>
               </q-card-section>
-              <q-separator />
               <q-card-section class="q-pa-sm">
 
-                <InputWithAi v-model="nestedChild.synopsis" borderless :filled="false" :label="nestedChild.synopsis ? undefined : ('Enter ' + nestedChild.title + ' synopsis')" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" class="q-px-sm" :prompt-input="nestedChild.content" :class="writeClasses" @update:model-value="() => fileStore.setDirty(nestedChild)" :spellcheck="automaticTextCorrection"/>
+                <InputWithAi v-model="nestedChild.synopsis" borderless :filled="false" :label="nestedChild.synopsis ? undefined : ('Enter ' + nestedChild.title + ' synopsis')" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" class="q-px-sm" :prompt-input="nestedChild.content" :class="writeClasses" @update:model-value="() => fileStore.setDirty(nestedChild)" :automatic-text-correction="automaticTextCorrection"/>
 
                 <template v-if="viewThirdLevel">
                   <template v-for="nestedNestedChild in nestedChild.children ?? []" :key="nestedNestedChild.id">
-                    <q-card flat>
-                      <q-card-section class="text-subtitle2 q-mt-md  bg-white shadow-1 q-pa-xs rounded-borders" >
+                    <q-card flat class="" style="background-color: rgba(63,73,169,0.05);">
+                      <q-card-section class="text-subtitle2 q-mt-md q-pa-sm" >
 
                         <div class="row items-center cursor-pointer">
                           <div class="col" @click="fileStore.selectFile(nestedNestedChild, false)">
-                            <FileDetailItem :file="nestedNestedChild" />
+                            <FileDetailItem :file="nestedNestedChild" :hide-context-type="true" />
                           </div>
                           <div class="col-auto">
                           <span class="q-mr-md text-grey-6 text-caption">
@@ -79,7 +78,7 @@
 
                         <div class="row full-width">
                           <div class="col">
-                            <InputWithAi v-model="nestedNestedChild.synopsis" borderless :filled="false" :label="nestedNestedChild.synopsis ? undefined : ('Enter ' + nestedNestedChild.title + ' synopsis')" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" class="q-px-sm" :prompt-input="nestedNestedChild.content" :class="writeClasses" @update:model-value="() => fileStore.setDirty(nestedNestedChild)" :spellcheck="automaticTextCorrection" />
+                            <InputWithAi v-model="nestedNestedChild.synopsis" borderless :filled="false" :label="nestedNestedChild.synopsis ? undefined : ('Enter ' + nestedNestedChild.title + ' synopsis')" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" class="q-px-sm" :prompt-input="nestedNestedChild.content" :class="writeClasses" @update:model-value="() => fileStore.setDirty(nestedNestedChild)" :automatic-text-correction="automaticTextCorrection" />
                           </div>
                         </div>
 
@@ -91,15 +90,15 @@
 
               </q-card-section>
               <q-card-actions v-if="viewThirdLevel">
-                <q-btn dense unelevated icon="add" color="primary" flat class="full-width text-grey-5 text-weight-regular" @click="fileStore.addFile('New', nestedChild, null)" :label="'Create in ' + nestedChild.title" no-caps />
+                <q-btn dense unelevated icon="add" color="primary" flat class="full-width text-grey-6 text-weight-regular" @click="fileStore.addFile('New', nestedChild, null)" :label="'Create in ' + nestedChild.title" no-caps />
               </q-card-actions>
             </q-card>
           </template>
         </div>
 
         <div class="row">
-          <div class="col-auto full-width" style="max-width: 1082px">
-            <q-btn dense unelevated icon="add" color="primary" flat class="full-width q-mt-sm text-grey-5 text-weight-regular" @click="fileStore.addFile('New', child, null)" :label="'Create in ' + child.title" no-caps />
+          <div class="col-auto full-width">
+            <q-btn dense unelevated icon="add" color="primary" flat class="full-width q-mt-sm text-grey-6 text-weight-regular" @click="fileStore.addFile('New', child, null)" :label="'Create in ' + child.title" no-caps />
           </div>
         </div>
       </div>

@@ -2,7 +2,7 @@
   <div>
     <div class="relative-position">
       <div class="" style="position: absolute; top: 5px; right: 5px; z-index: 10; ">
-        <q-btn @click.prevent.stop icon="mdi-creation-outline" flat outline dense color="accent" size="10px" :loading="prompting">
+        <q-btn @click.prevent.stop icon="mdi-creation-outline" flat outline dense color="primary" size="11px" :loading="prompting">
           <q-menu v-model="visible">
             <q-list dense>
               <q-item dense v-for="prompt in promptSelection" :key="prompt.id" clickable @click="runPrompt(prompt); visible = false;">
@@ -38,9 +38,6 @@
       :spellcheck="automaticTextCorrection"
       @update:modelValue="onInput"
     >
-      <template v-slot:append >
-
-      </template>
     </q-input>
 
 
