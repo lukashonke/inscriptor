@@ -21,7 +21,7 @@
           </div>
 
           <div class="col-auto flex items-center q-mr-sm">
-            <q-btn color="primary" @click="newConversation" size="md" icon="mdi-pencil-box-outline" class="" label="New chat">
+            <q-btn color="accent" @click="newConversation" size="md" icon="mdi-pencil-box-outline" class="" label="New chat">
               <q-tooltip>
                 Start a new conversation with AI model
               </q-tooltip>
@@ -55,7 +55,7 @@
           </div>
         </div>
         <div v-else class="flex justify-center q-mb-md q-mt-lg">
-          <q-btn color="primary" @click="newConversation" size="md" icon="mdi-chat-plus" class="" label="New chat with AI">
+          <q-btn color="accent" @click="newConversation" size="md" icon="mdi-chat-plus" class="" label="New chat with AI">
             <q-tooltip>
               Start a new conversation with AI model of your choice
             </q-tooltip>

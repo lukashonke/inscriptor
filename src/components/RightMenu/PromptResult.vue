@@ -93,13 +93,14 @@
             </q-btn>
           </div>
 
-          <div class="col ellipsis">
+          <div class="col ellipsis" v-if="showPromptInfo">
             <q-badge class="q-ml-md q-gutter-x-xs hoverable-btn-semi">
               <span>{{ promptResultTitle }}</span>
               <span v-if="promptResultModel?.length > 0"><q-icon name="mdi-chip"  />{{ promptResultModel }}</span>
               <span v-if="promptResultTemperature"><q-icon  name="mdi-thermometer-low" /> {{ promptResultTemperature }}</span>
             </q-badge>
           </div>
+          <div class="col" v-else />
 
           <div class="col-auto" v-if="collapsed">
             <q-btn color="grey-7" flat unelevated size="sm" :icon="collapsed ? 'mdi-plus-square' : 'mdi-minus-box-outline'" @click="collapsed = !collapsed" class="hoverable-btn-semi">
@@ -470,7 +471,7 @@
       </div>
 
       <q-slide-transition>
-        <div v-show="reactExpanded" class="row q-mx-md q-mb-md q-pb-sm">
+        <div v-show="reactExpanded" class="row q-mx-md q-pb-sm">
           <div class="col q-mr-sm">
             <q-input v-model="reactInput" borderless dense label="Message" autofocus autogrow ref="reactInputRef" @keyup="onReplyKeyup" />
           </div>
@@ -558,6 +559,10 @@
       type: Boolean,
       default: false,
     },
+    showPromptInfo: {
+      type: Boolean,
+      default: true,
+    },
   });
 
   const selection = useTextSelection();
@@ -623,9 +628,9 @@
       'write-medium': (fileStore.selectedFile?.settings?.fontSize ?? 'medium') === 'medium',
       'write-large': fileStore.selectedFile?.settings?.fontSize === 'large',
 
-      'text-editor': (fileStore.selectedFile?.settings?.editorType ?? 'regular') === 'regular',
-      'text-editor-condensed': fileStore.selectedFile?.settings?.editorType === 'condensed',
-      'text-editor-non-indented': fileStore.selectedFile?.settings?.editorType === 'non-indented',
+      'text-editor': props.type !== 'inline' && (fileStore.selectedFile?.settings?.editorType ?? 'regular') === 'regular',
+      'text-editor-condensed': props.type !== 'inline' && fileStore.selectedFile?.settings?.editorType === 'condensed',
+      'text-editor-non-indented': props.type === 'inline' || fileStore.selectedFile?.settings?.editorType === 'non-indented',
 
       'prompt-text-editor': true,
 

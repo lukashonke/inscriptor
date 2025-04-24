@@ -2,72 +2,145 @@
   <div v-if="editor" class="">
     <bubble-menu
       class="bubble-menu"
-      :tippy-options="{ duration: 100, placement: 'right', maxWidth: '600px', zIndex: 99999 }"
+      :tippy-options="{ duration: 500, placement: 'right', maxWidth: '600px', zIndex: 99999 }"
       :editor="editor"
     >
-      <div class="q-gutter-x-xs">
-        <q-btn size="12px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white bordered" color="accent" :class="{ 'text-primary': showPrompts }">
-          <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" >
-            <q-card v-show="showPrompts">
-              <PromptSelector prompt-types="selection" @promptClick="promptClick" />
-            </q-card>
-          </q-popup-proxy>
-          <q-tooltip  :delay="1000">
-            AI prompts
-          </q-tooltip>
-        </q-btn>
+      <div class="q-gutter-y-xs">
+        <div class="row">
+          <div class="q-gutter-x-xs">
+            <q-btn size="12px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white bordered" color="accent" :class="{ 'text-primary': showPrompts }">
+              <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" >
+                <q-card v-show="showPrompts">
+                  <PromptSelector prompt-types="selection" @promptClick="promptClick" />
+                </q-card>
+              </q-popup-proxy>
+              <q-tooltip  :delay="1000">
+                AI prompts
+              </q-tooltip>
+            </q-btn>
 
-        <q-btn v-if="predefinedWordFinderPrompts && predefinedWordFinderPrompts.length > 0" size="12px" dense flat icon="mdi-auto-fix" padding="4px 6px" class="bg-white bordered" color="accent" @click="runWordFinder()" :loading="wordFinderLoading">
-          <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="ai-panel-solid">
-            <q-card style="width: 400px; min-height: 50px;" flat class="no-scroll ai-panel-solid">
-              <div class=" text-center bg-accent q-py-xs q-px-md q-mb-sm row">
-                <div class="col justify-start flex">
-                  <span class=text-white>{{ truncate(getSelectedText(), 40) }}</span>
+            <q-btn v-if="predefinedWordFinderPrompts && predefinedWordFinderPrompts.length > 0" size="12px" dense flat icon="mdi-auto-fix" padding="4px 6px" class="bg-white bordered" color="accent" @click="runWordFinder()" :loading="wordFinderLoading">
+              <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="ai-panel-solid">
+                <q-card style="width: 400px; min-height: 50px;" flat class="no-scroll ai-panel-solid">
+                  <div class=" text-center bg-accent q-py-xs q-px-md q-mb-sm row">
+                    <div class="col justify-start flex">
+                      <span class=text-white>{{ truncate(getSelectedText(), 40) }}</span>
+                    </div>
+                  </div>
+                  <div class="row" style="min-width: 100px; min-height: 50px; max-height: 400px; overflow: auto;">
+
+                    <template v-for="(word, i) in wordFinderOutput" :key="i">
+                      <div class="col-auto">
+                        <q-item clickable v-close-popup @click="replaceOrInsertWord(word)" dense>
+                          <q-item-section>
+                            <q-item-label>{{ word }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </div>
+                    </template>
+                  </div>
+                  <div class="full-width flex justify-center" v-if="wordFinderOutput && wordFinderOutput.length > 0">
+                    <q-btn icon="mdi-plus" color="primary" no-caps @click="runWordFinder(false)" dense flat class="text-center full-width" :loading="wordFinderLoading"/>
+                  </div>
+                  <q-skeleton v-else animation="fade"/>
+
+
+                </q-card>
+              </q-popup-proxy>
+              <q-tooltip  :delay="1000">
+                Word Finder
+              </q-tooltip>
+            </q-btn>
+
+            <q-btn size="12px" dense flat label="Quick command..." no-caps padding="4px 6px" class="bg-white bordered" color="primary" :class="{ 'text-primary': showPrompts }" @click="quickSelectionPromptShown = true" v-if="!quickSelectionPromptShown && quickSelectionCommandPrompts && quickSelectionCommandPrompts.length > 0">
+            </q-btn>
+          </div>
+          <div class="bg-white">
+            <q-input v-if="quickSelectionPromptShown" class="q-ml-sm" v-model="quickSelectionPromptInput" dense outlined filled autofocus @blur="quickSelectionPromptShown = false"  @keydown="quickSelectionPromptKeydown"/>
+          </div>
+        </div>
+
+        <div class="row " v-if="quickCommandTemporaryResult.length > 0">
+          <PromptResult v-if="quickCommandTemporaryPromptResult" :promptResult="quickCommandTemporaryPromptResult" type="inline" :has-close="true" @close="closeQuickPromptResult" @replace-self="replacePromptResult"/>
+          <q-card v-else style="width: 400px; min-height: 50px;" class="hoverable-card idea-card gradient-variation-1 q-pa-xs no-p-margin">
+            <div class="prompt-actions sticky-top">
+              <div class="row no-wrap ellipsis">
+                <div class="col-auto">
+                  <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-chevron-double-up" @click="insertFromQuickCommand('selection')" :loading="quickCommandRunning" class="hoverable-btn-semi">
+                    <q-tooltip :delay="1000">
+                      Click to replace
+                    </q-tooltip>
+                  </q-btn>
+                </div>
+                <div class="col" />
+                <div class="col-auto">
+                  <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-close" @click="quickCommandTemporaryResult = ''" class="hoverable-btn-semi">
+                  </q-btn>
                 </div>
               </div>
-              <div class="row" style="min-width: 100px; min-height: 50px; max-height: 400px; overflow: auto;">
-
-                <template v-for="(word, i) in wordFinderOutput" :key="i">
-                  <div class="col-auto">
-                    <q-item clickable v-close-popup @click="replaceSelectedWord(word)" dense>
-                      <q-item-section>
-                        <q-item-label>{{ word }}</q-item-label>
-                      </q-item-section>
-                    </q-item>
-                  </div>
-                </template>
-              </div>
-              <div class="full-width flex justify-center" v-if="wordFinderOutput && wordFinderOutput.length > 0">
-                <q-btn icon="mdi-plus" color="primary" no-caps @click="runWordFinder(false)" dense flat class="text-center full-width" :loading="wordFinderLoading"/>
-              </div>
-              <q-skeleton v-else animation="fade"/>
-
-
-            </q-card>
-          </q-popup-proxy>
-          <q-tooltip  :delay="1000">
-            Word Finder
-          </q-tooltip>
-        </q-btn>
+            </div>
+            <q-card-section>
+              <div v-html="markdownToHtml(quickCommandTemporaryResult)" />
+            </q-card-section>
+          </q-card>
+        </div>
       </div>
+
     </bubble-menu>
 
     <floating-menu
       class="floating-menu"
-      :tippy-options="{ duration: 100, placement: 'bottom', maxWidth: '600px' }"
+      :tippy-options="{ duration: 500, placement: 'bottom', maxWidth: '600px' }"
       :editor="editor"
+      :should-show="shouldShowFloatingMenu"
     >
-      <div class="">
-        <q-btn size="12px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white bordered" color="accent" :class="{ 'text-primary': showPrompts }">
-          <q-popup-proxy transition-show="jump-down" transition-hide="fade" anchor="top right" self="top left" :offset="[10, 0]"  >
-            <q-card v-show="showPrompts">
-              <PromptSelector prompt-types="insert" @promptClick="promptClick" />
-            </q-card>
-          </q-popup-proxy>
-          <q-tooltip  :delay="1000">
-            AI prompts
-          </q-tooltip>
-        </q-btn>
+      <div class="q-gutter-y-xs">
+        <div class="row">
+          <div class="q-gutter-x-xs">
+            <q-btn size="12px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white bordered" color="accent" :class="{ 'text-primary': showPrompts }">
+              <q-popup-proxy transition-show="jump-down" transition-hide="fade" anchor="top right" self="top left" :offset="[10, 0]"  >
+                <q-card v-show="showPrompts">
+                  <PromptSelector prompt-types="insert" @promptClick="promptClick" />
+                </q-card>
+              </q-popup-proxy>
+              <q-tooltip  :delay="1000">
+                AI prompts
+              </q-tooltip>
+            </q-btn>
+
+            <q-btn size="12px" dense flat label="Quick command..." no-caps padding="4px 6px" class="bg-white bordered" color="primary" :class="{ 'text-primary': showPrompts }" @click="quickInlinePromptShown = true" v-if="!quickInlinePromptShown && quickInlineCommandPrompts && quickInlineCommandPrompts.length > 0">
+            </q-btn>
+
+          </div>
+          <div class="bg-white">
+            <q-input v-if="quickInlinePromptShown" class="q-ml-sm" v-model="quickInlinePromptInput" dense outlined autofocus @blur="quickInlinePromptShown = false"  @keydown="quickInlinePromptKeydown"/>
+          </div>
+        </div>
+        <div class="row " v-if="quickCommandTemporaryResult.length > 0">
+          <PromptResult v-if="quickCommandTemporaryPromptResult" :promptResult="quickCommandTemporaryPromptResult" type="inline" :has-close="true" @close="quickCommandTemporaryPromptResult = null; quickCommandTemporaryResult = ''" @replace-self="replacePromptResult" :show-prompt-info="false"/>
+          <q-card v-else style="width: 400px; min-height: 50px;" class="hoverable-card idea-card gradient-variation-1 q-pa-xs no-p-margin">
+            <div class="prompt-actions sticky-top">
+              <div class="row no-wrap ellipsis">
+                <div class="col-auto">
+                  <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-chevron-double-up" @click="insertFromQuickCommand('inline')" :loading="quickCommandRunning" class="hoverable-btn-semi">
+                    <q-tooltip :delay="1000">
+                      Click to insert
+                    </q-tooltip>
+                  </q-btn>
+                </div>
+                <div class="col" />
+                <div class="col-auto">
+                  <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-close" @click="quickCommandTemporaryResult = ''" class="hoverable-btn-semi">
+                  </q-btn>
+                </div>
+              </div>
+            </div>
+            <q-card-section>
+              <div v-html="markdownToHtml(quickCommandTemporaryResult)" />
+            </q-card-section>
+          </q-card>
+        </div>
+
       </div>
 
     </floating-menu>
@@ -206,7 +279,7 @@
 </template>
 
 <script setup>
-import {mergeAttributes, useEditor} from '@tiptap/vue-3'
+import {getText, getTextSerializersFromSchema, useEditor} from '@tiptap/vue-3'
 import {
   BubbleMenu,
   EditorContent,
@@ -222,7 +295,6 @@ import {usePromptStore} from "stores/prompt-store";
 import {useFileStore} from "stores/file-store";
 import {useEditorStore} from "stores/editor-store";
 import {HardBreak} from "@tiptap/extension-hard-break";
-import { Node } from '@tiptap/core';
 import {
   executePromptClick2
 } from "src/common/helpers/promptHelper";
@@ -240,14 +312,17 @@ import {Underline} from "@tiptap/extension-underline";
 import {Italic} from "@tiptap/extension-italic";
 import {CodeBlock} from "@tiptap/extension-code-block";
 import {useLayoutStore} from "stores/layout-store";
-import {useDebounceFn, useElementHover} from "@vueuse/core";
+import {useElementHover} from "@vueuse/core";
 import PromptSelector from "components/Common/PromptSelector/PromptSelector.vue";
 import {CharacterCount} from "@tiptap/extension-character-count";
 import {OrderedList} from "@tiptap/extension-ordered-list";
 import {BulletList} from "@tiptap/extension-bullet-list";
 import {ListItem} from "@tiptap/extension-list-item";
 import {selectedTextPromptInput} from 'src/common/resources/promptContexts';
-import {truncate} from 'src/common/utils/textUtils';
+import {markdownToHtml, truncate} from 'src/common/utils/textUtils';
+import PromptResult from 'components/RightMenu/PromptResult.vue';
+import {CustomParagraph} from 'src/common/tipTap/CustomParagraph';
+import {AutoCompletePlugin} from 'src/common/tipTap/AutoComplete';
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
@@ -267,6 +342,11 @@ const autoCorrect = ref('on'); // off
 const autoCapitalize = ref('default'); // off
 const spellcheck = ref('true');
 const wordFinderOpen = ref(false);
+const quickInlinePromptInput = ref('');
+const quickInlinePromptShown = ref(false);
+
+const quickSelectionPromptInput = ref('');
+const quickSelectionPromptShown = ref(false);
 
 function toggleAutomaticCorrections() {
   if(automaticCorrections.value === false) {
@@ -283,6 +363,34 @@ function toggleAutomaticCorrections() {
     spellcheck.value = 'false';
 
     automaticCorrections.value = false;
+  }
+}
+
+function quickInlinePromptKeydown(e) {
+  if (e === void 0) return
+
+  if (e.keyCode === 13 && quickInlinePromptShown.value && quickInlinePromptInput.value.length > 0) {
+    console.log(quickInlinePromptInput.value);
+
+    triggerQuickPrompt('inline', '' + quickInlinePromptInput.value);
+
+    quickInlinePromptShown.value = false;
+    quickInlinePromptInput.value = '';
+    e.preventDefault();
+  }
+}
+
+function quickSelectionPromptKeydown(e) {
+  if (e === void 0) return
+
+  if (e.keyCode === 13 && quickSelectionPromptShown.value && quickSelectionPromptInput.value.length > 0) {
+    console.log(quickSelectionPromptInput.value);
+
+    triggerQuickPrompt('selection', '' + quickSelectionPromptInput.value);
+
+    quickSelectionPromptShown.value = false;
+    quickSelectionPromptInput.value = '';
+    e.preventDefault();
   }
 }
 
@@ -358,6 +466,31 @@ function groupByToArray(grouping) {
   return retValue;
 }
 
+function shouldShowFloatingMenu(props) {
+  const {view, state } = props;
+  const { selection } = state
+  const { $anchor, empty } = selection
+  const isRootDepth = $anchor.depth === 1
+
+  const isEmptyTextBlock = $anchor.parent.isTextblock && !$anchor.parent.type.spec.code && !$anchor.parent.textContent && $anchor.parent.childCount === 0 && !getTextContent($anchor.parent)
+
+  if (
+    !view.hasFocus()
+    || !empty
+    //|| !isRootDepth
+    //|| !isEmptyTextBlock
+    || !this.editor.isEditable
+  ) {
+    return false
+  }
+
+  return true
+}
+
+function getTextContent(node) {
+  return getText(node, { textSerializers: getTextSerializersFromSchema(editor.value.schema) })
+}
+
 watch(() => props.modelValue, (value) => {
   // HTML
   const isSame = editor.value.getHTML() === value
@@ -375,31 +508,7 @@ watch(() => props.modelValue, (value) => {
   promptStore.setCharsCount(editor.value.storage.characterCount.characters());
 })
 
-const CustomParagraph = Node.create({
-  name: 'userMessageParagraph',
 
-  defaultOptions: {
-    HTMLAttributes: {
-      class: 'user-message',
-    },
-  },
-
-  group: 'block',
-
-  content: 'inline*',
-
-  parseHTML() {
-    return [
-      {
-        tag: 'p.user-message',
-      },
-    ];
-  },
-
-  renderHTML({ HTMLAttributes }) {
-    return ['p', mergeAttributes(this.options.HTMLAttributes, HTMLAttributes), 0];
-  },
-});
 
 const characterLimit = computed(() => {
   return layoutStore.getMaxFileSize();
@@ -435,6 +544,10 @@ const editor = useEditor({
       levels: [1, 2, 3],
     }),
     CustomParagraph,
+    AutoCompletePlugin.configure({
+      autocompleteValue: getAutocomplete,
+      includeChildren: true,
+    }),
     Blockquote.configure({
       HTMLAttributes: {
         class: 'user-message',
@@ -455,14 +568,14 @@ const editor = useEditor({
       return;
     }
 
-    layoutStore.setAnalysisWillBeTriggered(1000);
-    await debouncedFn();
+    //layoutStore.setAnalysisWillBeTriggered(1000);
+    //await debouncedFn();
   },
 });
 
-const debouncedFn = useDebounceFn(() => {
-  promptSelectionAnalysisPrompts();
-}, 1500)
+//const debouncedFn = useDebounceFn(() => {
+//  promptSelectionAnalysisPrompts();
+//}, 1500)
 
 onMounted(() =>{
   editorStore.setEditor(editor.value);
@@ -474,8 +587,8 @@ onDeactivated(() => {
   editorStore.setEditor(null);
 });
 
-const predefinedWordFinderPrompts = computed(() => {
-  const promptId = promptStore.getPredefinedPromptId('Word Finder');
+function getPredefinedPrompts(type) {
+  const promptId = promptStore.getPredefinedPromptId(type);
 
   if(!promptId || promptId.length === 0) {
     return [];
@@ -490,10 +603,151 @@ const predefinedWordFinderPrompts = computed(() => {
   }
 
   return retValue;
+}
+
+const predefinedWordFinderPrompts = computed(() => {
+  return getPredefinedPrompts('Word Finder');
 });
 
+const quickInlineCommandPrompts = computed(() => {
+  return getPredefinedPrompts('Quick Inline Prompt');
+})
+
+const quickSelectionCommandPrompts = computed(() => {
+  return getPredefinedPrompts('Quick Selection Prompt');
+})
+
+const autocompletePrompts = computed(() => {
+  return getPredefinedPrompts('Auto Complete');
+})
+
+const autocompleteRunning = ref(false);
+const autocompleteResult = ref(null);
+
+async function triggerAutocomplete() {
+  const prompts = autocompletePrompts.value;
+
+  if(autocompleteRunning.value) {
+    return;
+  }
+
+  autocompleteRunning.value = true;
+
+  try {
+    for (const prompt of prompts) {
+      const onOutput = (fullText, newText, isFinished, isError) => {
+        //if(isFinished)
+        editorStore.autoCompleteText = fullText;
+      };
+
+      const request = {
+        prompt: prompt,
+        text: '',
+        clear: false,
+        forceBypassMoreParameters: true,
+        silent: true,
+        //userInputs: [selectedTextPromptInput],
+        onOutput: onOutput
+      }
+
+      const result = await executePromptClick2(request);
+    }
+  } finally {
+    autocompleteRunning.value = false;
+  }
+}
+
+function getAutocomplete(node) {
+  triggerAutocomplete();
+  console.log('triggered');
+  return editorStore.autoCompleteText ?? '';
+}
+
+function insertFromQuickCommand(type) {
+  replaceOrInsertWord(quickCommandTemporaryResult.value)
+
+  quickCommandTemporaryResult.value = '';
+}
+
+const quickCommandRunning = ref(false);
+const quickCommandTemporaryResult = ref('ahsiod hasiod haosidh saoihd oiasbd ioasnodi asnoixd sa');
+const quickCommandTemporaryPromptResult = ref(null);
+
+function closeQuickPromptResult() {
+  quickCommandTemporaryPromptResult.value = null;
+  quickCommandTemporaryResult.value = '';
+}
+
+function replacePromptResult(result) {
+  quickCommandTemporaryPromptResult.value = result;
+}
+
+async function triggerQuickPrompt(type, command) {
+  if(quickCommandRunning.value) {
+    return;
+  }
+
+  if(type === 'inline') {
+    const prompts = quickInlineCommandPrompts.value;
+
+    quickCommandRunning.value = true;
+
+    try {
+      for (const prompt of prompts) {
+        const onOutput = (fullText, newText, isFinished, isError) => {
+          quickCommandTemporaryResult.value = fullText;
+        };
+
+        const request = {
+          prompt: prompt,
+          text: command,
+          clear: false,
+          forceBypassMoreParameters: true,
+          silent: true,
+          //userInputs: [selectedTextPromptInput],
+          onOutput: onOutput
+        }
+
+        const result = await executePromptClick2(request);
+
+        quickCommandTemporaryPromptResult.value = result;
+      }
+    } finally {
+      quickCommandRunning.value = false;
+    }
+  } else if(type === 'selection') {
+    const prompts = quickSelectionCommandPrompts.value;
+
+    quickCommandRunning.value = true;
+
+    try {
+      for (const prompt of prompts) {
+        const onOutput = (fullText, newText, isFinished, isError) => {
+          quickCommandTemporaryResult.value = fullText;
+        };
+
+        const request = {
+          prompt: prompt,
+          text: command,
+          clear: false,
+          forceBypassMoreParameters: true,
+          silent: true,
+          userInputs: [selectedTextPromptInput],
+          onOutput: onOutput
+        }
+
+        const result = await executePromptClick2(request);
+
+        quickCommandTemporaryPromptResult.value = result;
+      }
+    } finally {
+      quickCommandRunning.value = false;
+    }
+  }
+}
+
 async function runWordFinder(replace = true) {
-  const prompts = predefinedWordFinderPrompts.value;
+  const prompts = getPredefinedPrompts('Word Finder');
 
   try {
     wordFinderLoading.value = true;
@@ -568,7 +822,7 @@ async function runWordFinder(replace = true) {
   }
 }
 
-function replaceSelectedWord(text) {
+function replaceOrInsertWord(text) {
   const editor = getEditor();
   if(!editor) return;
 
@@ -576,12 +830,16 @@ function replaceSelectedWord(text) {
 
   const selectedText = getSelectedText();
 
-  // if text ends with ' '
-  if(selectedText.endsWith(' ') && !text.endsWith(' ')) {
-    text += ' ';
-  }
+  if(selectedText) {
+    // if text ends with ' '
+    if(selectedText.endsWith(' ') && !text.endsWith(' ')) {
+      text += ' ';
+    }
 
-  if(selectedText.startsWith(' ') && !text.startsWith(' ')) {
+    if(selectedText.startsWith(' ') && !text.startsWith(' ')) {
+      text = ' ' + text;
+    }
+  } else {
     text = ' ' + text;
   }
 
@@ -629,11 +887,11 @@ function replaceSelectedWord(text) {
 const wordFinderLoading = ref(false);
 const wordFinderOutput = ref([]);
 
-async function promptSelectionAnalysisPrompts() {
+/*async function promptSelectionAnalysisPrompts() {
 
   layoutStore.setAnalysisTriggered(false);
   await promptStore.promptSelectionAnalysisPrompts();
-}
+}*/
 
 async function promptClick(promptClickData, forceAllFileText) {
   const prompt = promptClickData.prompt;
@@ -686,90 +944,7 @@ function getSelectedTextAsChat() {
 </script>
 
 <style lang="scss">
-/* Basic editor styles */
-.text-editor {
-  .tiptap {
-    > * + * {
-      margin-top: 0.75em;
-    }
 
-    ul,
-    ol {
-      margin-top: 0px;
-      padding: 0 1rem;
-
-      p {
-        margin: 0 0 0 0;
-      }
-    }
-
-    p {
-      margin-bottom: 10px;
-      margin-top: 0px;
-    }
-
-    img {
-      max-width: 100%;
-      height: auto;
-      max-height: 40em;
-
-      &.ProseMirror-selectednode {
-        outline: 3px solid #68CEF8;
-      }
-    }
-
-    h1 {
-      font-size: 1.7em;
-      font-weight: bold;
-      line-height: 1.1;
-      margin-bottom: 10px;
-      margin-top: 30px;
-    }
-
-    h2 {
-      font-size: 1.4em;
-      font-weight: bold;
-      line-height: 1.1;
-      margin-bottom: 10px;
-      margin-top: 30px;
-    }
-
-    h3 {
-      font-size: 1.1em;
-      font-weight: bold;
-      line-height: 1.1;
-      margin-bottom: 10px;
-      margin-top: 30px;
-    }
-
-
-    outline: 0px solid #dddddd;
-
-    code {
-      background-color: rgba(#616161, 0.1);
-      color: #616161;
-    }
-
-    pre {
-      background: #ddd;
-      color: #353535;
-      padding: 0.75rem 1rem;
-      border-radius: 0.5rem;
-
-      code {
-        color: inherit;
-        padding: 0;
-        background: none;
-        font-size: 0.8rem;
-      }
-    }
-
-  }
-
-  .ProseMirror-focused {
-
-  }
-}
 
 .user-message {
   p {

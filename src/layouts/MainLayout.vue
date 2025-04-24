@@ -72,7 +72,7 @@
 </template>
 
 <script setup>
-import {onBeforeMount, onMounted, watch} from 'vue';
+import {computed, onBeforeMount, onMounted, watch} from 'vue';
 import LeftMenuComponent from 'components/LeftMenu/LeftMenuComponent.vue';
 import {useFileStore} from "stores/file-store";
 import AppToolbar from "components/Toolbar/AppToolbar.vue";
@@ -101,7 +101,7 @@ import ErrorDialog from "components/Dialogs/ErrorDialog.vue";
 import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { getVersion } from '@tauri-apps/api/app';
-import {useKeyModifier} from "@vueuse/core";
+import {onKeyStroke, useActiveElement, useKeyModifier, useMagicKeys, whenever} from "@vueuse/core";
 import AppTour from "components/Dialogs/AppTour.vue";
 import InAppTutorial from "components/Dialogs/InAppTutorial.vue";
 import AddPromptDialog from "components/Dialogs/AddPromptDialog.vue";
@@ -111,11 +111,14 @@ import MessageUsDialog from "components/Dialogs/MessageUsDialog.vue";
 import NewUserWelcomeDialog from "components/Dialogs/NewUserWelcomeDialog.vue";
 import EditProjectMetadataDialog from 'components/Dialogs/EditProjectMetadataDialog.vue';
 import PromptUiDialog from 'components/Dialogs/PromptUiDialog.vue';
+import {getSelectedText} from 'src/common/utils/editorUtils';
+import {useEditorStore} from 'stores/editor-store';
 
 const layoutStore = useLayoutStore();
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
 const localDataStore = useLocalDataStore();
+const editorStore = useEditorStore();
 
 // control
 const controlState = useKeyModifier('Control');
@@ -128,6 +131,44 @@ const metaState = useKeyModifier('Meta');
 watch(metaState, (value) => {
   layoutStore.ctrlDown = value;
 });
+
+const activeElement = useActiveElement()
+const focusedEditor = computed(() =>
+  activeElement.value?.classList?.contains('tiptap')
+)
+
+const keys = useMagicKeys({
+  passive: false,
+  onEventFired(e) {
+    if (e.key === 'Tab' && editorStore.autoCompleteText) {
+      debugger;
+      e.preventDefault()
+    }
+  },
+});
+const altI = keys['Alt+I']
+const tab = keys['Tab']
+
+watch(altI, (v) => {
+  debugger;
+  if (focusedEditor.value && !v) {
+    console.log('Alt+I pressed');
+    const selectedText = getSelectedText();
+    if(selectedText) {
+      promptStore.analysisEnabled = true;
+      layoutStore.currentRightMenuView = 'analysis';
+      layoutStore.setAnalysisTriggered(false);
+      promptStore.promptSelectionAnalysisPrompts(true);
+    }
+  }
+})
+
+watch(tab, (v) => {
+  debugger;
+  if (focusedEditor.value && !v) {
+    editorStore.confirmAutocompleteText();
+  }
+})
 
 const db = useFirestore();
 

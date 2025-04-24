@@ -50,6 +50,7 @@ export const usePromptStore = defineStore('prompts', {
     predefinedPromptInstances: [],
 
     analysisEnabled: false,
+    selectionAnalysisRunning: false,
     selectedAnalysisPrompts: [],
     selectionPromptResults: [],
 
@@ -218,7 +219,7 @@ export const usePromptStore = defineStore('prompts', {
     async promptAgain2(request) {
       return await this.promptMultiple2(request);
     },
-    async promptSelectionAnalysisPrompts() {
+    async promptSelectionAnalysisPrompts(force) {
       if(getEditorSelection()?.empty ?? true) {
         return;
       }
@@ -227,25 +228,33 @@ export const usePromptStore = defineStore('prompts', {
         .filter(p => p.enabled)
         .filter(p => this.selectedAnalysisPrompts.find(ap => ap.value === p.id));
 
-      if(!this.analysisEnabled || prompts.length === 0) {
+      if((!this.analysisEnabled && !force) || prompts.length === 0 || this.selectionAnalysisRunning) {
         return;
       }
 
-      this.clearSelectionAnalysisPrompts();
+      this.selectionAnalysisRunning = true;
 
-      for (const prompt of prompts) {
-        const text = getSelectedMarkdown();
+      try {
+        this.clearSelectionAnalysisPrompts();
 
-        const request = {
-          prompt: prompt,
-          text: text,
-          forceBypassMoreParameters: true,
-          forceShowContextSelection: false,
-          promptSource: 'selectionAnalysis'
+        for (const prompt of prompts) {
+          const text = getSelectedMarkdown();
+
+          const request = {
+            prompt: prompt,
+            text: text,
+            forceBypassMoreParameters: true,
+            forceShowContextSelection: false,
+            promptSource: 'selectionAnalysis'
+          }
+
+          await executePromptClick2(request);
         }
-
-        await executePromptClick2(request);
+      } finally {
+        this.selectionAnalysisRunning = false;
       }
+
+
     },
     clearSelectionAnalysisPrompts() {
       this.selectionPromptResults = [];
@@ -2517,6 +2526,9 @@ export const usePromptStore = defineStore('prompts', {
             '\t{"title": "Option 1 Title", "followUp": "The instruction for the AI"}\n' +
             ']' },
         { promptType: 'Word Finder', promptHint: 'Can be used when selecting text to find similar words.' },
+        { promptType: 'Auto Complete', promptHint: 'Used to suggest auto completions of your sentences.' },
+        { promptType: 'Quick Inline Prompt', promptHint: 'Available when you have nothing selected.' },
+        { promptType: 'Quick Selection Prompt', promptHint: 'Available when you select some text.' },
       ];
 
       this.labels = [

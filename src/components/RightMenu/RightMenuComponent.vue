@@ -111,7 +111,7 @@
 
       <div class="fit ai-panel scroll">
         <div class="text-center q-mt-md q-mb-md">
-          <q-btn-toggle :options="views" v-model="currentView" unelevated no-caps class="bordered inscriptor-highlight-btn" toggle-color="primary" padding="xs md" id="aiSwitch" />
+          <q-btn-toggle :options="views" v-model="layoutStore.currentRightMenuView" unelevated no-caps class="bordered inscriptor-highlight-btn" toggle-color="primary" padding="xs md" id="aiSwitch" />
         </div>
         <q-card flat v-if="promptStore.analysisEnabled" class="bg-transparent">
 
@@ -123,8 +123,15 @@
           </q-card-section>
 
           <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length > 0">
-            <q-select clearable options-dense v-model="promptStore.selectedAnalysisPrompts" label="Active Analysis prompts" outlined dense filled :options="availableAnalysisPrompts" multiple use-chips/>
-            <q-linear-progress indeterminate v-if="layoutStore.analysisTriggered" />
+            <div class="row">
+              <div class="col-auto flex items-center q-pr-md">
+                <q-btn @click="promptStore.promptSelectionAnalysisPrompts" icon="mdi-chart-timeline-variant-shimmer" color="accent" label="Analyze" no-caps :loading="promptStore.selectionAnalysisRunning"/>
+              </div>
+              <div class="col">
+                <q-select clearable options-dense v-model="promptStore.selectedAnalysisPrompts" label="Active Analysis prompts" outlined dense filled :options="availableAnalysisPrompts" multiple use-chips/>
+                <q-linear-progress indeterminate v-if="layoutStore.analysisTriggered" />
+              </div>
+            </div>
           </q-card-section>
 
           <q-card-section v-if="promptStore.analysisEnabled && selectionPromptResults?.length > 0">
@@ -150,7 +157,7 @@
 
           <q-card-section v-else-if="promptStore.selectedAnalysisPrompts.length > 0 && selectionPromptResults?.length === 0" class="text-center">
             <div class="">Analysis is active using {{ promptStore.selectedAnalysisPrompts.length }} prompt(s)</div>
-            <div>Select some text to begin analyzing it.</div>
+            <div>Click 'Analyze' or press ALT+I to start.</div>
           </q-card-section>
 
           <q-card-section v-else-if="promptStore.selectedAnalysisPrompts.length === 0" class="text-center">
@@ -158,8 +165,8 @@
           </q-card-section>
 
         </q-card>
-        <PromptsTab v-if="currentView === 'prompts'"/>
-        <ChatTab v-if="currentView === 'chat'"/>
+        <PromptsTab v-if="layoutStore.currentRightMenuView === 'prompts'"/>
+        <ChatTab v-if="layoutStore.currentRightMenuView === 'chat'"/>
       </div>
 
 
@@ -208,12 +215,10 @@
     {label: 'Analysis', value: 'analysis', icon: 'mdi-chart-timeline-variant-shimmer'},
   ];
 
-  const currentView = ref('prompts');
-
-  watch(currentView, (newValue) => {
+  watch(() => layoutStore.currentRightMenuView, (newValue) => {
     if(newValue === 'prompts') {
-      currentTab.value = promptTabId;
       promptStore.analysisEnabled = false;
+      currentTab.value = promptTabId;
     } else if(newValue === 'analysis') {
       promptStore.analysisEnabled = true;
     } else if(newValue === 'chat') {

@@ -107,6 +107,8 @@ export const useLayoutStore = defineStore('layout', {
     chatSystemPromptText: null,
 
     editProjectMetadataOpen: false,
+
+    currentRightMenuView: 'prompts',
   }),
   getters: {
     getIsDragAndDropping: (state) => state.isDragAndDropping,
