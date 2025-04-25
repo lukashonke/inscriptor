@@ -2547,7 +2547,7 @@ export const usePromptStore = defineStore('prompts', {
             ']' },
         { promptType: 'Word Finder', promptHint: 'Can be used when selecting text to find similar words.' },
         { promptType: 'Auto Complete', promptHint: 'Used to suggest auto completions of your sentences.' },
-        { promptType: 'Quick Inline Prompt', promptHint: 'Available when you have nothing selected.' },
+        { promptType: 'Quick Insert Prompt', promptHint: 'Available when you have nothing selected.' },
         { promptType: 'Quick Selection Prompt', promptHint: 'Available when you select some text.' },
       ];
 

@@ -624,7 +624,7 @@ const predefinedWordFinderPrompts = computed(() => {
 });
 
 const quickInlineCommandPrompts = computed(() => {
-  return getPredefinedPrompts('Quick Inline Prompt');
+  return getPredefinedPrompts('Quick Insert Prompt');
 })
 
 const quickSelectionCommandPrompts = computed(() => {
