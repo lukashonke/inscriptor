@@ -143,7 +143,6 @@ export const useFileStore = defineStore('files', {
     },
     setDirty(file) {
       if(file) {
-        console.log('setDirty', file.title);
         file.dirty = true;
 
         this.setBrowserWindowLeaveDialogIfNotSet();
@@ -699,8 +698,6 @@ export const useFileStore = defineStore('files', {
         // handled in MainLayout in a better way
         return;
       }
-
-      console.log('setBrowserWindowLeaveDialog', set);
 
       if(set) {
         window.onbeforeunload = async function() {

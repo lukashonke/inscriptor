@@ -6,7 +6,10 @@ export const useEditorStore = defineStore('editor', {
     editor: null,
     titleRef: null,
 
+    pendingAutocompleteTextInput: null,
+
     autoCompleteText: null,
+    autoCompleteTextInput: null,
   }),
   getters: {
     getEditor: (state) => state.editor,
@@ -14,6 +17,21 @@ export const useEditorStore = defineStore('editor', {
   actions: {
     setEditor(editor) {
       this.editor = editor;
+    },
+    setPendingAutocompleteTextInput(input) {
+      this.pendingAutocompleteTextInput = input;
+    },
+    setAutoCompleteText(text, input = null) {
+      this.autoCompleteTextInput = input;
+
+      if(text === this.autoCompleteText) {
+        return;
+      }
+
+      this.autoCompleteText = text;
+      if (this.editor) {
+        this.editor.view.updateState(this.editor.state); // TODO motherfucker not working
+      }
     },
     confirmAutocompleteText() {
       if(!this.autoCompleteText || !this.editor) return;

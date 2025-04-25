@@ -12,9 +12,9 @@ export function getAllText() {
 
 export function getAllHtml() {
   const editor = getEditor();
-  const text = editorHtmlBetween(editor.state, { from: 0, to: editor.state.doc.content.size });
+  const html = editorHtmlBetween(editor.state, { from: 0, to: editor.state.doc.content.size });
 
-  return text;
+  return html;
 }
 
 export function getAllMarkdown() {
@@ -84,7 +84,7 @@ export function getSelectedMarkdown() {
   return htmlToMarkdown(html);
 }
 
-export function editorHtmlBetween(state, range) {
+export function editorNodeBetween(state, range) {
   const { from, to } = range;
 
   // Create a DOM serializer
@@ -99,13 +99,35 @@ export function editorHtmlBetween(state, range) {
   // Convert to HTML string
   const temp = document.createElement('div');
   temp.appendChild(domFragment);
+  return temp;
+}
+
+export function editorHtmlBetween(state, range) {
+  const temp = editorNodeBetween(state, range);
   return temp.innerHTML;
+}
+
+export function editorHtmlTextBetween(state, range) {
+  const temp = editorNodeBetween(state, range);
+  return temp.innerText;
 }
 
 export function editorMarkdownBetween(state, range) {
   const html = editorHtmlBetween(state, range);
+  const text = editorHtmlTextBetween(state, range);
 
-  return htmlToMarkdown(html);
+  let retValue = htmlToMarkdown(html);
+
+  // If text ends with empty space, append empty space to html too
+  if (text && text.endsWith(' ')) {
+    retValue += ' ';
+  }
+
+  if (text && text.startsWith(' ')) {
+    retValue = ' ' + retValue;
+  }
+
+  return retValue;
 }
 
 export function editorTextBetween(
@@ -158,8 +180,6 @@ export function editorTextBetween(
       separated = true
     }
   })
-
-  console.log(text);
 
   return text
 }

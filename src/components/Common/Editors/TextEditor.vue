@@ -2,13 +2,13 @@
   <div v-if="editor" class="">
     <bubble-menu
       class="bubble-menu"
-      :tippy-options="{ duration: 500, placement: 'right', maxWidth: '600px', zIndex: 99999 }"
+      :tippy-options="{ duration: 100, placement: 'bottom', maxWidth: '600px', zIndex: 99999 }"
       :editor="editor"
     >
-      <div class="q-gutter-y-xs">
+      <div class="q-gutter-y-xs" v-if="aiBubbleMenu">
         <div class="row">
           <div class="q-gutter-x-xs">
-            <q-btn size="12px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white bordered" color="accent" :class="{ 'text-primary': showPrompts }">
+            <q-btn size="11px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white bordered" inscriptor-shadow-1 color="accent" :class="{ 'text-primary': showPrompts }">
               <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" >
                 <q-card v-show="showPrompts">
                   <PromptSelector prompt-types="selection" @promptClick="promptClick" />
@@ -19,7 +19,7 @@
               </q-tooltip>
             </q-btn>
 
-            <q-btn v-if="predefinedWordFinderPrompts && predefinedWordFinderPrompts.length > 0" size="12px" dense flat icon="mdi-auto-fix" padding="4px 6px" class="bg-white bordered" color="accent" @click="runWordFinder()" :loading="wordFinderLoading">
+            <q-btn v-if="predefinedWordFinderPrompts && predefinedWordFinderPrompts.length > 0" size="11px" dense flat icon="mdi-auto-fix" padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="accent" @click="runWordFinder()" :loading="wordFinderLoading">
               <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="ai-panel-solid">
                 <q-card style="width: 400px; min-height: 50px;" flat class="no-scroll ai-panel-solid">
                   <div class=" text-center bg-accent q-py-xs q-px-md q-mb-sm row">
@@ -52,21 +52,21 @@
               </q-tooltip>
             </q-btn>
 
-            <q-btn size="12px" dense flat label="Quick command..." no-caps padding="4px 6px" class="bg-white bordered" color="primary" :class="{ 'text-primary': showPrompts }" @click="quickSelectionPromptShown = true" v-if="!quickSelectionPromptShown && quickSelectionCommandPrompts && quickSelectionCommandPrompts.length > 0">
+            <q-btn size="11px" dense flat label="Quick command..." no-caps padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="primary" :class="{ 'text-primary': showPrompts }" @click="quickSelectionPromptShown = true" v-if="!quickSelectionPromptShown && quickSelectionCommandPrompts && quickSelectionCommandPrompts.length > 0" :loading="quickCommandRunning">
             </q-btn>
           </div>
           <div class="bg-white">
-            <q-input v-if="quickSelectionPromptShown" class="q-ml-sm" v-model="quickSelectionPromptInput" dense outlined filled autofocus @blur="quickSelectionPromptShown = false"  @keydown="quickSelectionPromptKeydown"/>
+            <q-input v-if="quickSelectionPromptShown" class="q-ml-sm inscriptor-shadow-1" autogrow v-model="quickSelectionPromptInput" dense outlined autofocus @blur="quickSelectionPromptShown = false"  @keydown="quickSelectionPromptKeydown" clearable clear-icon="mdi-close"/>
           </div>
         </div>
 
-        <div class="row " v-if="quickCommandTemporaryResult.length > 0">
-          <PromptResult v-if="quickCommandTemporaryPromptResult" :promptResult="quickCommandTemporaryPromptResult" type="inline" :has-close="true" @close="closeQuickPromptResult" @replace-self="replacePromptResult"/>
+        <div class="row" v-if="quickCommandTemporaryResult.length > 0">
+          <PromptResult v-if="quickCommandTemporaryPromptResult" :promptResult="quickCommandTemporaryPromptResult" type="inline" :has-close="true" @close="closeQuickPromptResult" :insert-func="insertQuickPromptResult" @on-insert="closeQuickPromptResult" @replace-self="replacePromptResult"  :show-prompt-info="false"/>
           <q-card v-else style="width: 400px; min-height: 50px;" class="hoverable-card idea-card gradient-variation-1 q-pa-xs no-p-margin">
             <div class="prompt-actions sticky-top">
               <div class="row no-wrap ellipsis">
                 <div class="col-auto">
-                  <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-chevron-double-up" @click="insertFromQuickCommand('selection')" :loading="quickCommandRunning" class="hoverable-btn-semi">
+                  <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-chevron-double-left" @click="insertFromQuickCommand('selection')" :loading="quickCommandRunning" class="hoverable-btn-semi">
                     <q-tooltip :delay="1000">
                       Click to replace
                     </q-tooltip>
@@ -90,14 +90,14 @@
 
     <floating-menu
       class="floating-menu"
-      :tippy-options="{ duration: 500, placement: 'bottom', maxWidth: '600px' }"
+      :tippy-options="{ duration: 100, placement: 'bottom', maxWidth: '600px' }"
       :editor="editor"
       :should-show="shouldShowFloatingMenu"
     >
-      <div class="q-gutter-y-xs">
+      <div class="q-gutter-y-xs" v-if="aiBubbleMenu">
         <div class="row">
           <div class="q-gutter-x-xs">
-            <q-btn size="12px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white bordered" color="accent" :class="{ 'text-primary': showPrompts }">
+            <q-btn size="11px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="accent" :class="{ 'text-primary': showPrompts }">
               <q-popup-proxy transition-show="jump-down" transition-hide="fade" anchor="top right" self="top left" :offset="[10, 0]"  >
                 <q-card v-show="showPrompts">
                   <PromptSelector prompt-types="insert" @promptClick="promptClick" />
@@ -108,16 +108,15 @@
               </q-tooltip>
             </q-btn>
 
-            <q-btn size="12px" dense flat label="Quick command..." no-caps padding="4px 6px" class="bg-white bordered" color="primary" :class="{ 'text-primary': showPrompts }" @click="quickInlinePromptShown = true" v-if="!quickInlinePromptShown && quickInlineCommandPrompts && quickInlineCommandPrompts.length > 0">
+            <q-btn size="11px" dense flat label="Quick command..." no-caps padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="primary" :class="{ 'text-primary': showPrompts }" @click="quickInlinePromptShown = true" v-if="!quickInlinePromptShown && quickInlineCommandPrompts && quickInlineCommandPrompts.length > 0" :loading="quickCommandRunning">
             </q-btn>
-
           </div>
           <div class="bg-white">
-            <q-input v-if="quickInlinePromptShown" class="q-ml-sm" v-model="quickInlinePromptInput" dense outlined autofocus @blur="quickInlinePromptShown = false"  @keydown="quickInlinePromptKeydown"/>
+            <q-input v-if="quickInlinePromptShown" autogrow class="q-ml-sm inscriptor-shadow-1" v-model="quickInlinePromptInput" dense outlined autofocus @blur="quickInlinePromptShown = false"  @keydown="quickInlinePromptKeydown"/>
           </div>
         </div>
         <div class="row " v-if="quickCommandTemporaryResult.length > 0">
-          <PromptResult v-if="quickCommandTemporaryPromptResult" :promptResult="quickCommandTemporaryPromptResult" type="inline" :has-close="true" @close="quickCommandTemporaryPromptResult = null; quickCommandTemporaryResult = ''" @replace-self="replacePromptResult" :show-prompt-info="false"/>
+          <PromptResult v-if="quickCommandTemporaryPromptResult" :promptResult="quickCommandTemporaryPromptResult" type="inline" :has-close="true" @close="closeQuickPromptResult" :insert-func="insertQuickPromptResult" @replace-self="replacePromptResult" :show-prompt-info="false"/>
           <q-card v-else style="width: 400px; min-height: 50px;" class="hoverable-card idea-card gradient-variation-1 q-pa-xs no-p-margin">
             <div class="prompt-actions sticky-top">
               <div class="row no-wrap ellipsis">
@@ -223,6 +222,14 @@
       </div>
 
       <div class="col-auto">
+        <q-btn size="11px" dense flat icon="mdi-alpha-a-box" @click="toggleAiBubbleMenu" class="" :class="{ 'text-primary': aiBubbleMenu, 'text-grey-5': !aiBubbleMenu }">
+          <q-tooltip>
+            Toggle AI bubble menu
+          </q-tooltip>
+        </q-btn>
+      </div>
+
+      <div class="col-auto">
         <q-btn size="11px" dense flat icon="mdi-alpha-g-box" @click="toggleAutomaticCorrections" class="" :class="{ 'text-primary': automaticCorrections, 'text-grey-5': !automaticCorrections }">
           <q-tooltip>
             Toggle Automatic Text Corrections
@@ -301,7 +308,7 @@ import {
 import {Blockquote} from "@tiptap/extension-blockquote";
 import {
   convertTextsToChat,
-  editorTextsBetween, getAllMarkdown, getEditor, getEditorSelection,
+  editorTextsBetween, getAllMarkdown, getAllText, getEditor, getEditorSelection,
   getSelectedText, getSelectedTextExpanded
 } from "src/common/utils/editorUtils";
 import {groupBy} from "src/common/utils/arrayUtils";
@@ -312,7 +319,7 @@ import {Underline} from "@tiptap/extension-underline";
 import {Italic} from "@tiptap/extension-italic";
 import {CodeBlock} from "@tiptap/extension-code-block";
 import {useLayoutStore} from "stores/layout-store";
-import {useElementHover} from "@vueuse/core";
+import {useDebounceFn, useElementHover} from "@vueuse/core";
 import PromptSelector from "components/Common/PromptSelector/PromptSelector.vue";
 import {CharacterCount} from "@tiptap/extension-character-count";
 import {OrderedList} from "@tiptap/extension-ordered-list";
@@ -347,6 +354,11 @@ const quickInlinePromptShown = ref(false);
 
 const quickSelectionPromptInput = ref('');
 const quickSelectionPromptShown = ref(false);
+const aiBubbleMenu = ref(true);
+
+function toggleAiBubbleMenu() {
+  aiBubbleMenu.value = !aiBubbleMenu.value;
+}
 
 function toggleAutomaticCorrections() {
   if(automaticCorrections.value === false) {
@@ -384,8 +396,6 @@ function quickSelectionPromptKeydown(e) {
   if (e === void 0) return
 
   if (e.keyCode === 13 && quickSelectionPromptShown.value && quickSelectionPromptInput.value.length > 0) {
-    console.log(quickSelectionPromptInput.value);
-
     triggerQuickPrompt('selection', '' + quickSelectionPromptInput.value);
 
     quickSelectionPromptShown.value = false;
@@ -545,7 +555,7 @@ const editor = useEditor({
     }),
     CustomParagraph,
     AutoCompletePlugin.configure({
-      autocompleteValue: getAutocomplete,
+      autocompleteValue: getAutocompleteResult,
       includeChildren: true,
     }),
     Blockquote.configure({
@@ -560,8 +570,12 @@ const editor = useEditor({
     emits('update:modelValue', editor.value.getHTML())
     promptStore.updateTokens();
     promptStore.setCharsCount(editor.value.storage.characterCount.characters());
+    editorStore.setAutoCompleteText('');
   },
   onSelectionUpdate: async () => {
+
+    editorStore.setAutoCompleteText('');
+    scheduleAutocomplete();
 
     // only if anything is selected
     if(editor.value.state.selection.empty) {
@@ -622,23 +636,109 @@ const autocompletePrompts = computed(() => {
 })
 
 const autocompleteRunning = ref(false);
-const autocompleteResult = ref(null);
 
-async function triggerAutocomplete() {
+const autocompleteDebounceFn = useDebounceFn(async () => {
+  await runAutocomplete();
+}, 400)
+
+async function scheduleAutocomplete() {
+  await autocompleteDebounceFn();
+}
+
+function createAutocompleteInput() {
+  const currentPosition = editor.value.state.selection.head;
+  const autoCompleteInput = {
+    position: currentPosition,
+    text: getAllText(),
+  }
+
+  return autoCompleteInput;
+}
+
+function areAutocompleteInputsSame(input1, input2) {
+  if(!input1 || !input2) return false; // one of them is not set
+
+  return input1.position == input2.position && input1.text == input2.text;
+}
+
+function shouldRunAutocomplete() {
+  if(!editor.value) return false;
+
+  const selectedText = getSelectedText();
+  if(selectedText && selectedText.length > 0) {
+    //console.log('Autocomplete not triggered: selected text');
+    return false;
+  }
+
+  const autocompleteInput = createAutocompleteInput();
+
+  // if the autocomplete is running, we need to check if the input is the same
+  if(autocompleteRunning.value) {
+    if(editorStore.pendingAutocompleteTextInput) {
+      if(areAutocompleteInputsSame(editorStore.pendingAutocompleteTextInput, autocompleteInput)) {
+        //console.log('Autocomplete not triggered: already running on same input');
+        return false;
+      }
+    }
+  }
+
+
+
+  // existing autocomplete input
+  if(editorStore.autoCompleteTextInput) {
+    if(areAutocompleteInputsSame(editorStore.autoCompleteTextInput, autocompleteInput)) {
+      //console.log('Autocomplete not triggered: same input ALREADY CREATED');
+      return false;
+    }
+  }
+
+  const isInMiddleOfWord = () => {
+    if (!editor.value) return false;
+
+    const { state } = editor.value;
+    const { selection } = state;
+    const { $cursor } = selection;
+
+    // We need a cursor selection
+    if (!$cursor) return false;
+
+    const textBefore = $cursor.nodeBefore?.text || '';
+    const textAfter = $cursor.nodeAfter?.text || '';
+
+    // If there's text before and after, and neither is a space, we're in the middle of a word
+    const hasTextBefore = textBefore.length > 0 && !/\s$/.test(textBefore);
+    const hasTextAfter = textAfter.length > 0 && !/^\s/.test(textAfter);
+
+    return hasTextBefore && hasTextAfter;
+  };
+
+  if (isInMiddleOfWord()) {
+    //console.log('Autocomplete not triggered: cursor in middle of word');
+    return false;
+  }
+
+  //console.log('Autocomplete allowed');
+
+  return true;
+}
+
+async function runAutocomplete() {
   const prompts = autocompletePrompts.value;
 
-  if(autocompleteRunning.value) {
+  //console.log('-----------');
+  //console.log('Tried autocomplete');
+
+  if(!shouldRunAutocomplete()) {
     return;
   }
 
+  const autocompleteInput = createAutocompleteInput();
+
+  editorStore.setPendingAutocompleteTextInput(autocompleteInput);
   autocompleteRunning.value = true;
 
   try {
     for (const prompt of prompts) {
-      const onOutput = (fullText, newText, isFinished, isError) => {
-        //if(isFinished)
-        editorStore.autoCompleteText = fullText;
-      };
 
       const request = {
         prompt: prompt,
@@ -646,21 +746,37 @@ async function triggerAutocomplete() {
         clear: false,
         forceBypassMoreParameters: true,
         silent: true,
-        //userInputs: [selectedTextPromptInput],
-        onOutput: onOutput
+        noTrim: true,
       }
 
+      //console.log('Autocomplete started', autocompleteInput);
+
       const result = await executePromptClick2(request);
+      if(!result) return;
+
+      // sleep 1s
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      // input has changed
+      if(!areAutocompleteInputsSame(createAutocompleteInput(), autocompleteInput)) {
+        //console.log('Autocomplete dropped, inputs have changed');
+        return;
+      }
+
+      //console.log('Autocomplete finished: ' + result.originalText, autocompleteInput);
+
+      editorStore.setAutoCompleteText(result.originalText, autocompleteInput);
     }
   } finally {
+    editorStore.setPendingAutocompleteTextInput(null);
     autocompleteRunning.value = false;
   }
 }
 
-function getAutocomplete(node) {
-  triggerAutocomplete();
-  console.log('triggered');
-  return editorStore.autoCompleteText ?? '';
+function getAutocompleteResult(node) {
+  if(!editorStore.autoCompleteText) return '';
+  if(editorStore.autoCompleteText.trim() === 'X') return '';
+  return editorStore.autoCompleteText;
 }
 
 function insertFromQuickCommand(type) {
@@ -670,7 +786,7 @@ function insertFromQuickCommand(type) {
 }
 
 const quickCommandRunning = ref(false);
-const quickCommandTemporaryResult = ref('ahsiod hasiod haosidh saoihd oiasbd ioasnodi asnoixd sa');
+const quickCommandTemporaryResult = ref('');
 const quickCommandTemporaryPromptResult = ref(null);
 
 function closeQuickPromptResult() {
@@ -680,6 +796,10 @@ function closeQuickPromptResult() {
 
 function replacePromptResult(result) {
   quickCommandTemporaryPromptResult.value = result;
+}
+
+function insertQuickPromptResult(result) {
+  replaceOrInsertWord(result.originalText);
 }
 
 async function triggerQuickPrompt(type, command) {
@@ -773,10 +893,10 @@ async function runWordFinder(replace = true) {
         message = message.replaceAll('$previousSuggestions', '');
       }
 
-      console.log(message);
+      //console.log(message);
 
       const onOutput = (fullText, newText, isFinished, isError) => {
-        console.log(fullText);
+        //console.log(fullText);
       };
 
       const request = {

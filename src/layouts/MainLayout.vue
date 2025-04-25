@@ -141,7 +141,6 @@ const keys = useMagicKeys({
   passive: false,
   onEventFired(e) {
     if (e.key === 'Tab' && editorStore.autoCompleteText) {
-      debugger;
       e.preventDefault()
     }
   },
@@ -150,7 +149,6 @@ const altI = keys['Alt+I']
 const tab = keys['Tab']
 
 watch(altI, (v) => {
-  debugger;
   if (focusedEditor.value && !v) {
     console.log('Alt+I pressed');
     const selectedText = getSelectedText();
@@ -164,7 +162,6 @@ watch(altI, (v) => {
 })
 
 watch(tab, (v) => {
-  debugger;
   if (focusedEditor.value && !v) {
     editorStore.confirmAutocompleteText();
   }

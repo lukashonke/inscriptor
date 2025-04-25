@@ -198,26 +198,36 @@ export const usePromptStore = defineStore('prompts', {
 
             lastResult = result;
 
-            console.log(result.diff);
+            //console.log(result.diff);
           }
         }
       } catch (e) {
-        console.log(e);
-        Notify.create({
-          icon: 'error',
-          color: 'negative',
-          position: 'bottom-right',
-          message: 'An error occurred while prompting',
-          actions: [
-            { icon: 'close', color: 'white', round: true, handler: () => { /* ... */ } }
-          ]
-        })
+        if(this.shouldNotifyError(e)) {
+          console.log(e);
+          Notify.create({
+            icon: 'error',
+            color: 'negative',
+            position: 'bottom-right',
+            message: 'An error occurred while prompting',
+            actions: [
+              { icon: 'close', color: 'white', round: true, handler: () => { /* ... */ } }
+            ]
+          })
+        } else {
+          console.log(e?.name);
+        }
       }
-
       return lastResult;
     },
     async promptAgain2(request) {
       return await this.promptMultiple2(request);
+    },
+    shouldNotifyError(e) {
+      if(e.name === 'AbortError') {
+        return false;
+      }
+
+      return true;
     },
     async promptSelectionAnalysisPrompts(force) {
       if(getEditorSelection()?.empty ?? true) {
@@ -401,7 +411,6 @@ export const usePromptStore = defineStore('prompts', {
           textMessage.text = replaceMentionEditorText(textMessage.text);
         }
       }
-      console.log(textMessages);
 
       systemPrompt = systemPrompt.replace('$selection', selectedText ?? '');
       userPrompt = userPrompt.replace('$selection', selectedText ?? '');
@@ -493,8 +502,8 @@ export const usePromptStore = defineStore('prompts', {
         replaceDynamic(/\$textAround\((\d+)\)\((\d+)\)/g);
       }
 
-      console.log('textBefore:', textBefore);
-      console.log('textAfter:', textAfter);
+      //console.log('textBefore:', textBefore);
+      ///console.log('textAfter:', textAfter);
 
       function replace(what, withWhat) {
         if(systemPrefix.includes(what)) {
@@ -546,7 +555,13 @@ export const usePromptStore = defineStore('prompts', {
       replace('$text2000Before', () => getTextBeforeKeepingWordsIntact(convertHtmlToText(textBefore), 2000));
       replace('$text1000Before', () => getTextBeforeKeepingWordsIntact(convertHtmlToText(textBefore), 1000));
       replace('$text500Before', () => getTextBeforeKeepingWordsIntact(convertHtmlToText(textBefore), 500));
+
       replace('$textAfter', () => convertHtmlToText(textAfter) ?? '');
+      replace('$text2000After', () => getTextBeforeKeepingWordsIntact(convertHtmlToText(textAfter), 2000));
+      replace('$text1000After', () => getTextBeforeKeepingWordsIntact(convertHtmlToText(textAfter), 1000));
+      replace('$text500After', () => getTextBeforeKeepingWordsIntact(convertHtmlToText(textAfter), 500));
+
+
       replace('$text', () => convertHtmlToText(text) ?? '');
       replace('$nodeBefore', () => convertHtmlToText(nodeBefore) ?? '');
       replace('$nodeAfter', () => convertHtmlToText(nodeAfter) ?? '');
@@ -1271,13 +1286,15 @@ export const usePromptStore = defineStore('prompts', {
                   pr.originalText = pr.originalText.trimEnd().substring(0, pr.originalText.length - 2);
                 }
 
-                // trim start
-                pr.text = pr.text.trimStart();
-                pr.originalText = pr.originalText.trimStart();
+                if(!request.noTrim) {
+                  // trim start
+                  pr.text = pr.text.trimStart();
+                  pr.originalText = pr.originalText.trimStart();
 
-                // trim end
-                pr.text = pr.text.trimEnd();
-                pr.originalText = pr.originalText.trimEnd();
+                  // trim end
+                  pr.text = pr.text.trimEnd();
+                  pr.originalText = pr.originalText.trimEnd();
+                }
 
                 // replace new lines with <br>
                 //pr.text = pr.text.replace(/\n/g, '<br>');
@@ -1721,13 +1738,16 @@ export const usePromptStore = defineStore('prompts', {
     },
     finishPromptResult(pr) {
       if(!pr) return;
-      // trim start
-      pr.text = pr.text.trimStart();
-      pr.originalText = pr.originalText.trimStart();
 
-      // trim end
-      pr.text = pr.text.trimEnd();
-      pr.originalText = pr.originalText.trimEnd();
+      if(!pr.request.noTrim) {
+        // trim start
+        pr.text = pr.text.trimStart();
+        pr.originalText = pr.originalText.trimStart();
+
+        // trim end
+        pr.text = pr.text.trimEnd();
+        pr.originalText = pr.originalText.trimEnd();
+      }
 
       // replace new lines with <br>
       //pr.text = pr.text.replace(/\n/g, '<br>');

@@ -33,8 +33,6 @@ export function promptStream(idToken, request, wordCallback, finishCallback, err
           // Read the next chunk
           read();
         }).catch(err => {
-          console.error('Stream reading error:', err);
-
           if(errorCallback) {
             errorCallback(err);
           }
@@ -44,8 +42,6 @@ export function promptStream(idToken, request, wordCallback, finishCallback, err
       read();
     })
     .catch(err => {
-      console.error('Fetch error:', err);
-
       if(errorCallback) {
         errorCallback(err);
       }

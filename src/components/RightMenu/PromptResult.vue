@@ -551,6 +551,9 @@
     insertTarget: {
       type: Object,
     },
+    insertFunc: {
+      type: Function,
+    },
     type: {
       type: String,
       default: 'default',
@@ -567,7 +570,7 @@
 
   const selection = useTextSelection();
 
-  const emits = defineEmits(['close', 'replaceSelf']);
+  const emits = defineEmits(['close', 'replaceSelf', 'onInsert']);
 
   function onClose() {
     emits('close')
@@ -1019,6 +1022,7 @@
     try {
       copying.value = true;
       await insertInternal();
+      emits('onInsert');
     } finally {
       copying.value = false;
     }
@@ -1035,6 +1039,12 @@
       }
 
       props.insertTarget(text);
+      emits('close')
+      return;
+    }
+
+    if(props.insertFunc) {
+      props.insertFunc(props.promptResult);
       emits('close')
       return;
     }

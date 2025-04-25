@@ -315,6 +315,8 @@ export function cloneRequest(request) {
     silent: request.silent,
     onOutput: request.onOutput,
 
+    noTrim: request.noTrim,
+
     promptSource: request.promptSource,
     forceTemperature: request.forceTemperature,
     promptTimes: request.promptTimes,
