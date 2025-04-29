@@ -227,8 +227,6 @@ async function sendChat() {
     forceShowContextSelection: chatWithContext.value
   };
 
-  debugger;
-
   await executePromptClick2(request);
 }
 

@@ -1,20 +1,55 @@
 <template>
 
-  <div class="row q-gutter-x-md q-mt-md q-mb-sm">
-    <div class="col flex justify-end">
-      <q-expansion-item
-      label="Parameters" class="full-width" switch-toggle-side>
-        <div class="row q-gutter-md">
-          <div class="col-12 col-grow" v-for="variable in uiData?.variables ?? []" :key="variable.title">
-            <q-input dense filled  v-model="variable.value" :label="variable.title" :placeholder="variable.defaultValue" :hint="variable.hint" />
-          </div>
+  <q-dialog v-model="parametersDialogOpen">
+    <q-card style="min-width: 600px; max-width: 80vw;">
+      <q-card-section class="column no-wrap q-gutter-y-md">
+
+        <div class="col text-subtitle2">
+          Brainstorming Parameters:
         </div>
-      </q-expansion-item>
+
+        <div class="col flex items-center" v-for="variable in (uiData?.variables ?? []).filter(i => i.isFromPromptParameter)" :key="variable.title" style="min-width: 300px;">
+          <q-input autogrow dense filled  v-model="variable.value" :label="variable.title" :placeholder="variable.defaultValue" :hint="variable.hint ?? ''" class="full-width" />
+        </div>
+
+        <div class="q-mt-xl col flex items-center" v-for="variable in (uiData?.variables ?? []).filter(i => !i.isFromPromptParameter)" :key="variable.title" style="min-width: 300px;">
+          <q-input autogrow dense filled  v-model="variable.value" :label="variable.title" :placeholder="variable.defaultValue" :hint="variable.hint ?? ''" class="full-width" />
+        </div>
+
+      </q-card-section>
+    </q-card>
+  </q-dialog>
+
+  <div class="row q-gutter-x-md q-mt-md q-mb-sm">
+    <div class="col flex justify-start">
+      <q-btn @click="parametersDialogOpen = true" icon="mdi-cog-outline" color="primary" label="Parameters" no-caps flat :disable="isGenerating">
+      </q-btn>
+      <q-btn @click="expandLikedIdeas()" icon="mdi-creation-outline" no-caps flat color="primary" label="Expand Liked" :disable="isGenerating" v-if="uiData?.likedIdeas.length > 0" />
+      <q-btn-dropdown color="negative" flat icon="mdi-delete" label="Remove" :disable="isGenerating" no-caps v-if="uiData?.dislikedIdeas.length > 0 || uiData?.ideas.length > 0">
+        <q-list dense>
+          <q-item clickable v-close-popup @click="removeDislikedIdeas()" v-if="uiData?.dislikedIdeas.length > 0">
+            <q-item-section>
+              <q-item-label>Remove Disliked</q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-item clickable v-close-popup @click="removeAll()" v-if="uiData?.ideas.length > 0">
+            <q-item-section>
+              <q-item-label>Remove All Ideas</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-list>
+      </q-btn-dropdown>
     </div>
     <div class="col q-gutter-x-sm flex items-center">
       <div class="row full-width">
-        <div class="col flex justify-center" >
+        <div class="col flex justify-center q-gutter-x-sm" >
           <q-btn @click="generate(false)" icon="mdi-creation-outline" color="accent" label="Generate more" :loading="isGenerating">
+            <template v-slot:loading>
+              <q-spinner-dots />
+            </template>
+          </q-btn>
+
+          <q-btn @click="restart()" icon="mdi-restart" color="negative" label="Restart" no-caps :disable="isGenerating">
             <template v-slot:loading>
               <q-spinner-dots />
             </template>
@@ -22,26 +57,9 @@
         </div>
       </div>
     </div>
-    <div class="col flex items-center">
-      <div class="row full-width">
-        <div class="col">
-          <q-btn @click="expandLikedIdeas()" icon="mdi-creation-outline" no-caps flat color="primary" label="Expand Liked" :disable="isGenerating" v-if="uiData?.likedIdeas.length > 0" />
-          <q-btn-dropdown color="negative" flat icon="mdi-delete" label="Remove" :disable="isGenerating" no-caps>
-            <q-list dense>
-              <q-item clickable v-close-popup @click="removeDislikedIdeas()" v-if="uiData?.dislikedIdeas.length > 0">
-                <q-item-section>
-                  <q-item-label>Remove Disliked</q-item-label>
-                </q-item-section>
-              </q-item>
-              <q-item clickable v-close-popup @click="removeAll()" v-if="uiData?.ideas.length > 0">
-                <q-item-section>
-                  <q-item-label>Remove All Ideas</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-btn-dropdown>
-        </div>
-        <div class="col-auto flex items-center q-ml-md">
+    <div class="col flex items-center justify-end">
+      <div class="row full-width justify-end q-gutter-x-md">
+        <div class="col-auto flex items-center">
           <q-btn-toggle :options="[{value: 'grid', label: 'Grid', icon: 'mdi-view-grid'},{value: 'list', label: 'List', icon: 'mdi-view-sequential'}]" :model-value="viewMode" @update:model-value="setViewMode" unelevated no-caps class="bordered" toggle-color="primary" padding="xs md" />
         </div>
         <div class="col-auto flex items-center" v-if="viewMode === 'grid'">
@@ -208,6 +226,8 @@ import {ref, defineExpose, computed} from 'vue';
 import {cloneRequest, executePromptClick2} from 'src/common/helpers/promptHelper';
 import {convertHtmlToText, markdownToHtml} from 'src/common/utils/textUtils';
 import BrainstormPromptUiCard from 'src/components/Common/PromptUis/BrainstormPromptUiCard.vue';
+import PromptContextSelector from 'components/Common/PromptSelector/PromptContextSelector.vue';
+import {useLayoutStore} from 'stores/layout-store';
 
 const props = defineProps({
   promptResult: {
@@ -215,6 +235,10 @@ const props = defineProps({
     required: true,
   }
 });
+
+const layoutStore = useLayoutStore();
+
+const parametersDialogOpen = ref(false);
 
 const isGenerating = ref(false);
 // Number of columns for masonry layout
@@ -235,6 +259,7 @@ const viewMode = ref('grid');
 if (props.promptResult?.uiData?.viewMode) {
   viewMode.value = props.promptResult.uiData.viewMode;
 }
+
 
 const request = computed(() => props.promptResult.request);
 const prompt = computed(() => props.promptResult.prompt);
@@ -275,6 +300,19 @@ const likedAndPinnedIdeas = computed(() => {
 // Get pinned ideas for a specific column (masonry-style)
 function getPinnedColumnIdeas(columnIndex) {
   return pinnedIdeas.value.filter((_, index) => index % columns.value === columnIndex);
+}
+
+async function restart() {
+  const newRequest = {
+    prompt: request.value.prompt,
+    text: request.value.text,
+    userInput: request.value.userInput,
+
+}
+
+  await executePromptClick2(newRequest);
+
+  layoutStore.promptUiDialogOpen = false;
 }
 
 async function generate(replace = true) {

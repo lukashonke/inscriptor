@@ -522,7 +522,6 @@ function quickSelectionPromptKeydown(e) {
   if (e === void 0) return
 
   if (e.keyCode === 13 && quickSelectionPromptShown.value && quickSelectionPromptInput.value.length > 0) {
-    debugger;
     triggerQuickPrompt('selection', '' + quickSelectionPromptInput.value);
 
     quickSelectionPromptShown.value = false;
@@ -1043,6 +1042,7 @@ async function runWordFinder(replace = true) {
       const request = {
         prompt: prompt,
         text: message,
+        userPrompt: message,
         clear: false,
         forceBypassMoreParameters: true,
         silent: true,
