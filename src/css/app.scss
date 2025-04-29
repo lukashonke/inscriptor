@@ -271,6 +271,21 @@ textarea::-webkit-scrollbar-button {
   border-radius: 22px;
 }
 
+.popup-gradient-1 {
+  background: linear-gradient(135deg, #ffffff 80%, #ededf8 100%);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.gradient-variation-1 {
+  background: linear-gradient(135deg, #ffffff 80%, #ededf8 100%);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.context-selector:hover {
+  background-color: rgb(240, 240, 240);
+  transition: background-color 0.5s;
+}
+
 .idea-card {
   background-color: #f8f8f8;
   border-color: rgb(228, 228, 228);

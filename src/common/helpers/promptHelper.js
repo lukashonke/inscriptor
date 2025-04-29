@@ -75,16 +75,29 @@ export async function executePromptClick2(request) {
       || (!request.forceBypassMoreParameters && request.prompt.promptType !== 'selectionAnalysis' && (request.prompt.promptType !== 'chat' || (model.args?.targetLanguages && !request.prompt.targetLanguage)))
     );
 
-  if(showMoreParametersWindow) {
+  if(!showMoreParametersWindow && request.prompt.info?.tags?.includes("context")) {
+    const previousPromptContext = promptStore.getSavedPromptRunData(request.prompt, 'lastContext');
+
+    if(previousPromptContext) {
+      promptStore.promptContext = [...previousPromptContext];
+    }
+  } if(showMoreParametersWindow) {
 
     const fileStore = useFileStore();
-    const currentFile = fileStore.selectedFile;
-    let fileContext = null;
-    if(currentFile) {
-      const contexts = fileStore.getTemporaryFileMetaProperty(currentFile, 'context-' + prompt.id);
 
-      if(contexts) {
-        fileContext = [...contexts];
+    let fileContext = null;
+    const currentFile = fileStore.selectedFile;
+    const previousPromptContext = promptStore.getSavedPromptRunData(request.prompt, 'lastContext');
+
+    if(previousPromptContext) {
+      fileContext = [...previousPromptContext];
+    } else {
+      if (currentFile) {
+        const contexts = fileStore.getTemporaryFileMetaProperty(currentFile, 'context-' + prompt.id);
+
+        if (contexts) {
+          fileContext = [...contexts];
+        }
       }
     }
 
@@ -213,6 +226,8 @@ async function executePrompt2(request) {
     if(currentFile) {
       fileStore.setTemporaryFileMetaProperty(currentFile, 'context-' + request.prompt.id, promptStore.promptContext);
     }
+
+    promptStore.setSavedPromptRunData(request.prompt, 'lastContext', promptStore.promptContext);
   }
 
   const context = [...promptStore.promptContext];
@@ -267,6 +282,18 @@ async function executeChatPrompt2(request) {
   const model = promptStore.getModelFromRequest(request);
 
   const promptTimes = request.prompt.overridePromptTimes?.length > 0 ? parseInt(request.prompt.overridePromptTimes) : model.promptTimes;
+
+  if(request.prompt.info?.tags?.includes("context") && promptStore.promptContext) {
+    const fileStore = useFileStore();
+
+    const currentFile = fileStore.selectedFile;
+
+    if(currentFile) {
+      fileStore.setTemporaryFileMetaProperty(currentFile, 'context-' + request.prompt.id, promptStore.promptContext);
+    }
+
+    promptStore.setSavedPromptRunData(request.prompt, 'lastContext', promptStore.promptContext);
+  }
 
   const context = [...promptStore.promptContext];
   const userInputs = [...promptStore.promptUserInputs];

@@ -45,7 +45,7 @@
   <transition appear enter-active-class="animated fadeIn slow" leave-active-class="animated fadeOut">
 
     <q-card :class="isReactionToAnotherPrompt ? 'q-ml-md' : ''" class="hoverable-card idea-card gradient-variation-1 q-pa-xs no-p-margin">
-      <div class="prompt-actions sticky-top">
+      <div class="prompt-actions" :class="type === 'inline' ? '' : 'sticky-top'">
         <div class="row no-wrap ellipsis">
           <div class="col-auto">
             <q-btn color="grey-7" flat unelevated size="sm" :icon="type === 'inline' ? 'mdi-plus' : 'mdi-chevron-double-left'" @click="insert" :loading="copying" class="hoverable-btn-semi">
@@ -106,7 +106,6 @@
             <q-btn color="grey-7" flat unelevated size="sm" :icon="collapsed ? 'mdi-plus-square' : 'mdi-minus-box-outline'" @click="collapsed = !collapsed" class="hoverable-btn-semi">
             </q-btn>
           </div>
-
           <div class="col-auto" v-if="hasClose">
             <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-close" @click="onClose" class="hoverable-btn-semi">
             </q-btn>

@@ -473,9 +473,14 @@
 
 .text-editor-height {
   .tiptap {
-    height: 85vh !important;
+    min-height: 85vh !important;
   }
 }
+
+.text-editor-bottom {
+  height: 5rem;
+}
+
 
 .prompt-text-editor {
 

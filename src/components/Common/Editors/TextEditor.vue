@@ -19,9 +19,9 @@
               </q-tooltip>
             </q-btn>
 
-            <q-btn v-if="predefinedWordFinderPrompts && predefinedWordFinderPrompts.length > 0" size="11px" dense flat icon="mdi-auto-fix" padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="accent" @click="runWordFinder()" :loading="wordFinderLoading">
-              <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="ai-panel-solid">
-                <q-card style="width: 400px; min-height: 50px;" flat class="no-scroll ai-panel-solid">
+            <q-btn v-if="predefinedWordFinderPrompts && predefinedWordFinderPrompts.length > 0" size="11px" dense flat icon="mdi-text-search" padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="accent" @click="runWordFinder()" :loading="wordFinderLoading">
+              <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="popup-gradient-1">
+                <q-card style="width: 400px; min-height: 50px;" class="no-scroll popup-gradient-1 idea-card">
                   <div class=" text-center bg-accent q-py-xs q-px-md q-mb-sm row">
                     <div class="col justify-start flex">
                       <span class=text-white>{{ truncate(getSelectedText(), 40) }}</span>
@@ -43,8 +43,6 @@
                     <q-btn icon="mdi-plus" color="primary" no-caps @click="runWordFinder(false)" dense flat class="text-center full-width" :loading="wordFinderLoading"/>
                   </div>
                   <q-skeleton v-else animation="fade"/>
-
-
                 </q-card>
               </q-popup-proxy>
               <q-tooltip  :delay="1000">
@@ -52,11 +50,53 @@
               </q-tooltip>
             </q-btn>
 
+            <q-btn v-if="promptStore.selectedAnalysisPrompts && promptStore.selectedAnalysisPrompts.length > 0" size="11px" dense flat icon="mdi-chart-timeline-variant-shimmer" padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="accent" @click="runSelectionAnalysis" :loading="promptStore.selectionAnalysisRunning">
+              <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="bg-transparent no-border shadow-0">
+                <div style="min-width: 400px; min-height: 50px;" class="scroll-y">
+                  <div class="" style="min-width: 100px; min-height: 50px; max-height: 400px; overflow: auto;" v-if="promptStore.selectionPromptResults && promptStore.selectionPromptResults.length > 0">
+                    <div class="q-mb-sm" v-for="(promptResult, index) in promptStore.selectionPromptResults" :key="index">
+                      <PromptResult :promptResult="promptResult" type="inline"/>
+                    </div>
+                  </div>
+                  <q-skeleton v-else animation="fade"/>
+
+
+                </div>
+              </q-popup-proxy>
+              <q-tooltip  :delay="1000">
+                Run Analysis using {{ promptStore.selectedAnalysisPrompts.length }} prompts
+              </q-tooltip>
+            </q-btn>
+
             <q-btn size="11px" dense flat label="Quick command..." no-caps padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="primary" :class="{ 'text-primary': showPrompts }" @click="quickSelectionPromptShown = true" v-if="!quickSelectionPromptShown && quickSelectionCommandPrompts && quickSelectionCommandPrompts.length > 0" :loading="quickCommandRunning">
             </q-btn>
           </div>
           <div class="bg-white">
-            <q-input v-if="quickSelectionPromptShown" class="q-ml-sm inscriptor-shadow-1" autogrow v-model="quickSelectionPromptInput" dense outlined autofocus @blur="quickSelectionPromptShown = false"  @keydown="quickSelectionPromptKeydown" clearable clear-icon="mdi-close"/>
+            <template v-if="quickSelectionPromptShown">
+              <q-card class="q-ml-xs hoverable-card idea-card gradient-variation-1 q-pa-xs no-p-margin" style="min-width: 300px; max-width: 500px;">
+                <div class="row">
+                  <div class="col">
+                    <q-input autogrow class="q-ml-sm text-caption" v-model="quickSelectionPromptInput" :shadow-text="quickSelectionPromptInput?.length === 0 ? 'enter command or question...' : ''" dense flat borderless autofocus @keydown="quickSelectionPromptKeydown"/>
+                  </div>
+                  <div class="col-auto flex items-center">
+                    <q-btn size="11px" dense flat no-caps padding="4px 6px" icon="mdi-close" color="primary" @click="quickSelectionPromptShown = false">
+                    </q-btn>
+                    <q-btn size="11px" dense flat no-caps padding="4px 6px" icon="mdi-dots-vertical" color="primary">
+                      <q-popup-proxy transition-show="jump-down" transition-hide="fade" anchor="bottom left" self="top left" :offset="[0, 10]" @before-show="onOpenSelectionPromptSettings" @hide="onCloseSelectionPromptSettings">
+                        <q-card class="" flat style="min-width: 400px; max-width: 500px;">
+                          <q-card-section class="q-pb-none text-subtitle2">
+                            Quick Selection Prompt Settings
+                          </q-card-section>
+                          <q-card-section>
+                            <PromptContextSelector />
+                          </q-card-section>
+                        </q-card>
+                      </q-popup-proxy>
+                    </q-btn>
+                  </div>
+                </div>
+              </q-card>
+            </template>
           </div>
         </div>
 
@@ -112,7 +152,31 @@
             </q-btn>
           </div>
           <div class="bg-white">
-            <q-input v-if="quickInlinePromptShown" autogrow class="q-ml-sm inscriptor-shadow-1" v-model="quickInlinePromptInput" dense outlined autofocus @blur="quickInlinePromptShown = false"  @keydown="quickInlinePromptKeydown"/>
+            <template v-if="quickInlinePromptShown">
+              <q-card class="q-ml-xs hoverable-card idea-card gradient-variation-1 q-pa-xs no-p-margin" style="min-width: 300px; max-width: 500px;">
+                <div class="row">
+                  <div class="col">
+                    <q-input autogrow class="q-ml-sm text-caption" v-model="quickInlinePromptInput" :shadow-text="quickInlinePromptInput?.length === 0 ? 'enter command or question...' : ''" dense flat borderless autofocus @keydown="quickInlinePromptKeydown"/>
+                  </div>
+                  <div class="col-auto flex items-center">
+                    <q-btn size="11px" dense flat no-caps padding="4px 6px" icon="mdi-close" color="primary" @click="quickInlinePromptShown = false">
+                    </q-btn>
+                    <q-btn size="11px" dense flat no-caps padding="4px 6px" icon="mdi-dots-vertical" color="primary">
+                      <q-popup-proxy transition-show="jump-down" transition-hide="fade" anchor="bottom left" self="top left" :offset="[0, 10]" @before-show="onOpenInlinePromptSettings" @hide="onCloseInlinePromptSettings">
+                        <q-card class="" flat style="min-width: 400px; max-width: 500px;">
+                          <q-card-section class="q-pb-none text-subtitle2">
+                            Quick Insert Prompt Settings
+                          </q-card-section>
+                          <q-card-section>
+                            <PromptContextSelector />
+                          </q-card-section>
+                        </q-card>
+                      </q-popup-proxy>
+                    </q-btn>
+                  </div>
+                </div>
+              </q-card>
+            </template>
           </div>
         </div>
         <div class="row " v-if="quickCommandTemporaryResult.length > 0">
@@ -248,7 +312,7 @@
   </div>
 
   <div class="flex justify-center">
-    <div class="col-auto full-width" :class="windowWidthClases">
+    <div class="full-width" :class="windowWidthClases">
       <transition
         appear
         enter-active-class="animated fadeIn slow"
@@ -262,6 +326,7 @@
 
       <editor-content :class="writeClasses" class="no-outline" :editor="editor" :spellcheck="spellcheck" />
       <!--<q-btn @click="fileStore.spellCheck()">Spell check</q-btn>-->
+      <div class="text-editor-bottom" @click="onClickBelowEditor" />
     </div>
   </div>
 
@@ -330,6 +395,7 @@ import {markdownToHtml, truncate} from 'src/common/utils/textUtils';
 import PromptResult from 'components/RightMenu/PromptResult.vue';
 import {CustomParagraph} from 'src/common/tipTap/CustomParagraph';
 import {AutoCompletePlugin} from 'src/common/tipTap/AutoComplete';
+import PromptContextSelector from 'components/Common/PromptSelector/PromptContextSelector.vue';
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
@@ -354,10 +420,15 @@ const quickInlinePromptShown = ref(false);
 
 const quickSelectionPromptInput = ref('');
 const quickSelectionPromptShown = ref(false);
+
 const aiBubbleMenu = ref(true);
 
 function toggleAiBubbleMenu() {
   aiBubbleMenu.value = !aiBubbleMenu.value;
+}
+
+function onBubbleMenuShow() {
+  quickSelectionPromptShown.value = false;
 }
 
 function toggleAutomaticCorrections() {
@@ -375,6 +446,61 @@ function toggleAutomaticCorrections() {
     spellcheck.value = 'false';
 
     automaticCorrections.value = false;
+  }
+}
+
+function onOpenInlinePromptSettings() {
+  const prompts = quickInlineCommandPrompts.value;
+
+  for (const prompt of prompts) {
+    const previousPromptContext = promptStore.getSavedPromptRunData(prompt, 'lastContext');
+
+    if(previousPromptContext) {
+      promptStore.promptContext = [...previousPromptContext];
+    } else {
+      promptStore.promptContext = [];
+    }
+
+    // only one
+    break;
+  }
+}
+
+function onCloseInlinePromptSettings() {
+  const prompts = quickInlineCommandPrompts.value;
+
+  for (const prompt of prompts) {
+    promptStore.setSavedPromptRunData(prompt, 'lastContext', promptStore.promptContext ?? []);
+
+    // only one
+    break;
+  }
+}
+
+function onOpenSelectionPromptSettings() {
+  const prompts = quickSelectionCommandPrompts.value;
+
+  for (const prompt of prompts) {
+    const previousPromptContext = promptStore.getSavedPromptRunData(prompt, 'lastContext');
+    if(previousPromptContext) {
+      promptStore.promptContext = [...previousPromptContext];
+    } else {
+      promptStore.promptContext = [];
+    }
+
+    // only one
+    break;
+  }
+}
+
+function onCloseSelectionPromptSettings() {
+  const prompts = quickSelectionCommandPrompts.value;
+
+  for (const prompt of prompts) {
+    promptStore.setSavedPromptRunData(prompt, 'lastContext', promptStore.promptContext ?? []);
+
+    // only one
+    break;
   }
 }
 
@@ -396,6 +522,7 @@ function quickSelectionPromptKeydown(e) {
   if (e === void 0) return
 
   if (e.keyCode === 13 && quickSelectionPromptShown.value && quickSelectionPromptInput.value.length > 0) {
+    debugger;
     triggerQuickPrompt('selection', '' + quickSelectionPromptInput.value);
 
     quickSelectionPromptShown.value = false;
@@ -576,6 +703,9 @@ const editor = useEditor({
 
     editorStore.setAutoCompleteText('');
     scheduleAutocomplete();
+
+    quickSelectionPromptShown.value = false;
+    quickInlinePromptShown.value = false;
 
     // only if anything is selected
     if(editor.value.state.selection.empty) {
@@ -766,6 +896,9 @@ async function runAutocomplete() {
       //console.log('Autocomplete finished: ' + result.originalText, autocompleteInput);
 
       editorStore.setAutoCompleteText(result.originalText, autocompleteInput);
+
+      // take only 1 auto complete prompt for now
+      break;
     }
   } finally {
     editorStore.setPendingAutocompleteTextInput(null);
@@ -831,6 +964,8 @@ async function triggerQuickPrompt(type, command) {
         const result = await executePromptClick2(request);
 
         quickCommandTemporaryPromptResult.value = result;
+
+        break;
       }
     } finally {
       quickCommandRunning.value = false;
@@ -859,11 +994,17 @@ async function triggerQuickPrompt(type, command) {
         const result = await executePromptClick2(request);
 
         quickCommandTemporaryPromptResult.value = result;
+
+        break;
       }
     } finally {
       quickCommandRunning.value = false;
     }
   }
+}
+
+async function runSelectionAnalysis() {
+  await promptStore.promptSelectionAnalysisPrompts(true);
 }
 
 async function runWordFinder(replace = true) {
@@ -1059,6 +1200,19 @@ function getSelectedTextAsChat() {
   let messages = convertTextsToChat(texts);
 
   return messages;
+}
+
+function onClickBelowEditor(event) {
+  console.log('onClickBelowEditor', event);
+  // append new line if there is no blank line at the end
+  const text = editor.value.getText();
+  console.log(text);
+  if(!text.endsWith('\n')) {
+    editor.value.commands.insertContentAt(editor.value.state.doc.content.size - 1, '<p></p>', {
+      updateSelection: true,
+    })
+  }
+  editor.value.chain().focus().run();
 }
 
 </script>
