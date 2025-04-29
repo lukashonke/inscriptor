@@ -38,9 +38,13 @@
             <div class="inline-block" style="width: 5px">&nbsp;</div>
 
           </template>
-          <span class="file-menu-item" >
+          <span class="file-menu-item flex items-center" >
             {{ truncate(file.title, 25) }}
             <span v-if="file.dirty" class="text-grey-7">*</span>
+            <template v-if="file.children && file.children.length > 0 && !file.expanded">
+              <q-badge color="grey-5" rounded :label="file.children.length" class="q-ml-xs file-child-count-bubble">
+              </q-badge>
+            </template>
           </span>
 
 
