@@ -224,9 +224,10 @@
             </q-btn>
           </div>
 
+
           <template v-if="promptResult.prompt.promptStyle === 'brainstorm'">
             <template v-if="promptBrainstormValueTree != null && promptBrainstormValueTree.length> 0">
-              <q-card v-for="(idea, index) in promptBrainstormValueTree" :key="index" flat class="no-margin">
+              <q-card v-for="(idea, index) in promptBrainstormValueTree" :key="index" flat class="no-margin bg-transparent">
                 <q-card-section class="q-px-sm q-py-none">
                   <div class="prompt-brainstorm-idea">
                     <q-btn @click="promptBrainstormValueTree.splice(index, 1)" flat size="sm" class="float-right" icon="mdi-close" color="negative" dense />
@@ -683,19 +684,20 @@
       return null;
     }
 
-    if(!props.promptResult.valueTree) {
-      if(!props.promptResult.text) {
-        return null;
-      }
-
-      const pr = props.promptResult;
-      const separator = props.promptResult.prompt.resultsSeparator ?? '<split/>'
-      let tree = pr.text.split(separator).map(item => ({ text: item })).filter(item => item.text.trim() !== '');
-
-      pr.valueTree = tree;
-
-      return props.promptResult.valueTree;
+    if(!props.promptResult.text) {
+      return null;
     }
+
+    const pr = props.promptResult;
+    if(pr.valueTree && pr.valueTreeInput === pr.text) {
+      return pr.valueTree;
+    }
+
+    const separator = props.promptResult.prompt.resultsSeparator ?? '<split/>'
+    let tree = pr.text.split(separator).map(item => ({ text: item })).filter(item => item.text.trim() !== '');
+
+    pr.valueTreeInput = pr.text;
+    pr.valueTree = tree;
 
     return props.promptResult.valueTree;
   });

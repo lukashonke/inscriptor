@@ -21,28 +21,33 @@
 
             <q-btn v-if="predefinedWordFinderPrompts && predefinedWordFinderPrompts.length > 0" size="11px" dense flat icon="mdi-text-search" padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="accent" @click="runWordFinder()" :loading="wordFinderLoading">
               <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="popup-gradient-1">
-                <q-card style="width: 400px; min-height: 50px;" class="no-scroll popup-gradient-1 idea-card">
-                  <div class=" text-center bg-accent q-py-xs q-px-md q-mb-sm row">
-                    <div class="col justify-start flex">
-                      <span class=text-white>{{ truncate(getSelectedText(), 40) }}</span>
+                <q-card style="width: 400px; height: 300px;" class="popup-gradient-1 idea-card column">
+                  <div class="col-auto" style="height: 35px;">
+                    <div class="row text-center bg-accent q-py-xs q-px-md q-mb-sm full-width">
+                      <div class="col justify-start flex">
+                        <span class=text-white>{{ truncate(getSelectedText(), 40) }}</span>
+                      </div>
                     </div>
                   </div>
-                  <div class="row" style="min-width: 100px; min-height: 50px; max-height: 400px; overflow: auto;">
-
-                    <template v-for="(word, i) in wordFinderOutput" :key="i">
-                      <div class="col-auto">
-                        <q-item clickable v-close-popup @click="replaceOrInsertWord(word)" dense>
-                          <q-item-section>
-                            <q-item-label>{{ word }}</q-item-label>
-                          </q-item-section>
-                        </q-item>
-                      </div>
-                    </template>
+                  <div class="col scroll-y">
+                    <div class="row">
+                      <template v-for="(word, i) in wordFinderOutput" :key="i">
+                        <div class="col-auto">
+                          <q-item clickable v-close-popup @click="replaceOrInsertWord(word)" dense>
+                            <q-item-section>
+                              <q-item-label>{{ word }}</q-item-label>
+                            </q-item-section>
+                          </q-item>
+                        </div>
+                      </template>
+                    </div>
                   </div>
-                  <div class="full-width flex justify-center" v-if="wordFinderOutput && wordFinderOutput.length > 0">
-                    <q-btn icon="mdi-plus" color="primary" no-caps @click="runWordFinder(false)" dense flat class="text-center full-width" :loading="wordFinderLoading"/>
+                  <div class="col-auto" height="40px;">
+                    <div class="full-width flex justify-center" v-if="wordFinderOutput && wordFinderOutput.length > 0">
+                      <q-btn icon="mdi-plus" color="primary" no-caps @click="runWordFinder(false)" dense flat class="text-center full-width" :loading="wordFinderLoading"/>
+                    </div>
+                    <q-skeleton v-else animation="fade"/>
                   </div>
-                  <q-skeleton v-else animation="fade"/>
                 </q-card>
               </q-popup-proxy>
               <q-tooltip  :delay="1000">
@@ -51,17 +56,13 @@
             </q-btn>
 
             <q-btn v-if="promptStore.selectedAnalysisPrompts && promptStore.selectedAnalysisPrompts.length > 0" size="11px" dense flat icon="mdi-chart-timeline-variant-shimmer" padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="accent" @click="runSelectionAnalysis" :loading="promptStore.selectionAnalysisRunning">
-              <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="bg-transparent no-border shadow-0">
-                <div style="min-width: 400px; min-height: 50px;" class="scroll-y">
-                  <div class="" style="min-width: 100px; min-height: 50px; max-height: 400px; overflow: auto;" v-if="promptStore.selectionPromptResults && promptStore.selectionPromptResults.length > 0">
-                    <div class="q-mb-sm" v-for="(promptResult, index) in promptStore.selectionPromptResults" :key="index">
-                      <PromptResult :promptResult="promptResult" type="inline"/>
-                    </div>
+              <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="gradient-variation-2 no-border" @on-before-show="console.log($event)" @show="console.log($event)">
+                <q-card style="min-width: 400px; max-width: 650px; height: 500px" class="scroll-y q-pa-md" v-if="promptStore.selectionPromptResults && promptStore.selectionPromptResults.length > 0">
+                  <div class="q-mb-sm" v-for="(promptResult, index) in promptStore.selectionPromptResults" :key="index">
+                    <PromptResult :promptResult="promptResult" type="inline"/>
                   </div>
-                  <q-skeleton v-else animation="fade"/>
-
-
-                </div>
+                </q-card>
+                <q-skeleton v-else animation="fade"/>
               </q-popup-proxy>
               <q-tooltip  :delay="1000">
                 Run Analysis using {{ promptStore.selectedAnalysisPrompts.length }} prompts
