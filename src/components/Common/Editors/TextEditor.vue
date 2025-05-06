@@ -397,6 +397,7 @@ import PromptResult from 'components/RightMenu/PromptResult.vue';
 import {CustomParagraph} from 'src/common/tipTap/CustomParagraph';
 import {AutoCompletePlugin} from 'src/common/tipTap/AutoComplete';
 import PromptContextSelector from 'components/Common/PromptSelector/PromptContextSelector.vue';
+import {HorizontalRule} from '@tiptap/extension-horizontal-rule';
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
@@ -666,6 +667,7 @@ const editor = useEditor({
     Underline,
     Italic,
     Bold,
+    HorizontalRule,
     CodeBlock,
     CharacterCount.configure({
       limit: characterLimit.value,
