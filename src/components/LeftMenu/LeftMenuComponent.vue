@@ -25,7 +25,7 @@
 
     <q-separator />
 
-    <div class="col-auto q-mt-sm" id="files">
+    <div class="col-auto q-mt-sm scroll-y" id="files" style="max-height: calc(100vh - 225px);">
       <FileList />
     </div>
     <div class="col-auto flex justify-center q-mt-md ">

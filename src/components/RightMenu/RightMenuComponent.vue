@@ -127,8 +127,15 @@
               <div class="col-auto flex items-center q-pr-md">
                 <q-btn @click="promptStore.promptSelectionAnalysisPrompts" icon="mdi-chart-timeline-variant-shimmer" color="accent" label="Analyze" no-caps :loading="promptStore.selectionAnalysisRunning"/>
               </div>
-              <div class="col">
-                <q-select clearable options-dense v-model="promptStore.selectedAnalysisPrompts" label="Active Analysis prompts" outlined dense filled :options="availableAnalysisPrompts" multiple use-chips/>
+              <div class="col justify-end flex">
+                <q-btn :label="promptStore.selectedAnalysisPrompts.length + ' prompts active'" flat color="accent"  icon-right="mdi-chevron-down">
+                  <q-popup-proxy>
+                    <q-card style="width: 500px">
+                      <q-select clearable options-dense v-model="promptStore.selectedAnalysisPrompts" label="Active Analysis prompts" outlined dense filled :options="availableAnalysisPrompts" multiple use-chips/>
+                    </q-card>
+                  </q-popup-proxy>
+                </q-btn>
+
                 <q-linear-progress indeterminate v-if="layoutStore.analysisTriggered" />
               </div>
             </div>
