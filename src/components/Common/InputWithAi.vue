@@ -35,6 +35,7 @@
       :filled="filled"
       :dense="dense"
       :autofocus="autofocus"
+      :autogrow="autogrow"
       :spellcheck="automaticTextCorrection"
       @update:modelValue="onInput"
     >
@@ -96,6 +97,10 @@ const props = defineProps({
     default: true,
   },
   autofocus: {
+    type: Boolean,
+    default: false,
+  },
+  autogrow: {
     type: Boolean,
     default: false,
   },
