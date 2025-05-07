@@ -23,7 +23,7 @@
 
         <div class="row q-mt-xs">
           <div class="col-auto full-width">
-            <InputWithAi v-model="child.synopsis" label="Synopsis" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" :prompt-input="child.content" :class="writeClasses" @update:model-value="() => fileStore.setDirty(child)" :automatic-text-correction="automaticTextCorrection"/>
+            <InputWithAi v-model="child.synopsis" label="Synopsis" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" :prompt-input="child.content" :class="writeClasses" @update:model-value="() => fileStore.setDirty(child)" :automatic-text-correction="automaticTextCorrection" autogrow/>
           </div>
         </div>
 
@@ -51,7 +51,7 @@
               </q-card-section>
               <q-card-section class="q-pa-sm">
 
-                <InputWithAi v-model="nestedChild.synopsis" borderless :filled="false" :label="nestedChild.synopsis ? undefined : ('Enter ' + nestedChild.title + ' synopsis')" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" class="q-px-sm" :prompt-input="nestedChild.content" :class="writeClasses" @update:model-value="() => fileStore.setDirty(nestedChild)" :automatic-text-correction="automaticTextCorrection"/>
+                <InputWithAi v-model="nestedChild.synopsis" borderless :filled="false" :label="nestedChild.synopsis ? undefined : ('Enter ' + nestedChild.title + ' synopsis')" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" class="q-px-sm" :prompt-input="nestedChild.content" :class="writeClasses" @update:model-value="() => fileStore.setDirty(nestedChild)" :automatic-text-correction="automaticTextCorrection"  autogrow/>
 
                 <template v-if="viewThirdLevel">
                   <template v-for="nestedNestedChild in nestedChild.children ?? []" :key="nestedNestedChild.id">
@@ -78,7 +78,7 @@
 
                         <div class="row full-width">
                           <div class="col">
-                            <InputWithAi v-model="nestedNestedChild.synopsis" borderless :filled="false" :label="nestedNestedChild.synopsis ? undefined : ('Enter ' + nestedNestedChild.title + ' synopsis')" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" class="q-px-sm" :prompt-input="nestedNestedChild.content" :class="writeClasses" @update:model-value="() => fileStore.setDirty(nestedNestedChild)" :automatic-text-correction="automaticTextCorrection" />
+                            <InputWithAi v-model="nestedNestedChild.synopsis" borderless :filled="false" :label="nestedNestedChild.synopsis ? undefined : ('Enter ' + nestedNestedChild.title + ' synopsis')" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" class="q-px-sm" :prompt-input="nestedNestedChild.content" :class="writeClasses" @update:model-value="() => fileStore.setDirty(nestedNestedChild)" :automatic-text-correction="automaticTextCorrection"  autogrow/>
                           </div>
                         </div>
 
