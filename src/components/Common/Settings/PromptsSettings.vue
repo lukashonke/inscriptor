@@ -73,17 +73,66 @@
             <q-btn color="accent" label="Inscriptor Hub" icon="mdi-storefront-outline" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
           </div>
 
-          <div v-for="prompt in prompts" :key="prompt.id">
+          <div class="q-mb-md">
+            <div class="row q-col-gutter-sm">
+              <div class="col-7">
+                <q-input
+                  v-model="searchFilter"
+                  dense
+                  filled
+                  :placeholder="'Search in ' + prompts.length + ' prompts...'"
+                  clearable
+                  autofocus
+                  class="q-mb-sm"
+                >
+                  <template v-slot:prepend>
+                    <q-icon name="search" />
+                  </template>
+                </q-input>
+              </div>
+              <div class="col">
+                <q-select
+                  v-model="selectedModel"
+                  :options="modelOptions"
+                  dense
+                  filled
+                  clearable
+                  options-dense
+                  emit-value
+                  map-options
+                  label="AI model"
+                />
+              </div>
+              <div class="col">
+                <q-select
+                  v-model="selectedCategory"
+                  :options="categoryOptions"
+                  dense
+                  filled
+                  clearable
+                  options-dense
+                  emit-value
+                  map-options
+                  label="Category"
+                />
+              </div>
+
+            </div>
+          </div>
+
+          <div v-for="prompt in paginatedPrompts" :key="prompt.id">
             <PromptSettingsItem :prompt="prompt" />
           </div>
 
-          <!--<q-tab-panels v-model="promptModel" animated>
-            <q-tab-panel v-for="model in models" :key="model.id" :name="model.id">
-              <div v-for="prompt in prompts.filter(p => p.modelId === promptModel)" :key="prompt.id">
-                <PromptSettingsItem :prompt="prompt" />
-              </div>
-            </q-tab-panel>
-          </q-tab-panels>-->
+          <div class="row justify-center q-mt-md">
+            <q-pagination
+              v-model="currentPage"
+              :max="totalPages"
+              :max-pages="6"
+              boundary-numbers
+              direction-links
+            />
+          </div>
 
          </q-tab-panel>
 
@@ -116,6 +165,63 @@
   const prompts = computed(() => promptStore.prompts);
   const tabs = computed(() => promptStore.tabs);
   const models = computed(() => promptStore.models);
+
+  // Pagination
+  const currentPage = ref(1);
+  const itemsPerPage = 12;
+  const searchFilter = ref('');
+  const selectedModel = ref(null);
+  const selectedCategory = ref(null);
+
+  const modelOptions = computed(() => models.value.map(m => ({
+    label: m.name,
+    value: m.id
+  })));
+
+  const categoryOptions = computed(() => {
+    const categories = promptStore.getCategories();
+    return categories.map(category => ({
+      label: category,
+      value: category
+    }));
+  });
+
+  const filteredPrompts = computed(() => {
+    let filtered = prompts.value;
+
+    // Apply model filter
+    if (selectedModel.value) {
+      filtered = filtered.filter(prompt => prompt.modelId === selectedModel.value);
+    }
+
+    // Apply category filter
+    if (selectedCategory.value) {
+      filtered = filtered.filter(prompt => prompt.category === selectedCategory.value);
+    }
+
+    // Apply search filter
+    if (searchFilter.value) {
+      const searchLower = searchFilter.value.toLowerCase();
+      filtered = filtered.filter(prompt =>
+        prompt.title.toLowerCase().includes(searchLower)
+      );
+    }
+
+    return filtered;
+  });
+
+  const totalPages = computed(() => Math.ceil(filteredPrompts.value.length / itemsPerPage));
+
+  const paginatedPrompts = computed(() => {
+    const start = (currentPage.value - 1) * itemsPerPage;
+    const end = start + itemsPerPage;
+    return filteredPrompts.value.slice(start, end);
+  });
+
+  // Reset to first page when filters change
+  watch([searchFilter, selectedModel, selectedCategory], () => {
+    currentPage.value = 1;
+  });
 
   const promptType = ref('general');
   const systemPrompt = ref('Perform the task to the best of your ability');

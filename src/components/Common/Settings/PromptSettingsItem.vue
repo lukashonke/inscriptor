@@ -10,38 +10,59 @@
             <span class="text-caption text-grey-7 ">{{ description }}</span>
           </div>
         </div>
+        <div class="col q-mr-xl">
+          <div class="row items-center q-gutter-y-xs q-gutter-x-sm justify-end" v-if="!settingsExpanded">
+            <div class="col-auto" style="width: 220px;">
+              <q-select v-model="modelId" filled dense :options="models" options-dense >
+                <template v-slot:prepend>
+                  <q-icon name="mdi-robot-outline" size="16px" />
+                </template>
+              </q-select>
 
-        <div class="col">
-
-        </div>
-        <div class="col flex items-center q-mr-xl q-gutter-y-xs">
-          <q-badge class="q-ml-sm" color="">
-            <q-icon name="mdi-robot-outline" class="q-mr-xs" />
-            {{ model?.name }}
-            <q-tooltip>
-              Default AI model
-            </q-tooltip>
-          </q-badge>
-          <!--<q-badge class="q-ml-sm" color="" v-if="promptType?.label.length > 0">
-            {{ promptType.label }} prompt
-            <q-tooltip>
-              Prompt Trigger Type
-            </q-tooltip>
-          </q-badge>-->
-          <q-badge class="q-ml-sm" color="secondary" v-if="promptCategory?.length > 0">
-            <q-icon name="mdi-tag-outline"  class="q-mr-xs"/>
-            {{ promptCategory }}
-            <q-tooltip>
-              Prompt Category
-            </q-tooltip>
-          </q-badge>
-          <q-badge class="q-ml-sm" color="secondary" v-if="promptFolder?.length > 0">
-            <q-icon name="mdi-folder-outline" class="q-mr-xs" />
-            {{ promptFolder }}
-            <q-tooltip>
-              Folder
-            </q-tooltip>
-          </q-badge>
+            </div>
+            <div class="col-auto" style="width: 220px;">
+              <q-select v-if="allowPromptCategorization" outlined filled dense label="Category Tab" v-model="promptCategory" :options="promptStore.promptCategories" option-label="label" option-value="label" emit-value use-input clearable hide-dropdown-icon @new-value="(val, done) => promptStore.addListItem(promptStore.promptCategories, val, 'white', done)" options-dense >
+                <template v-slot:prepend>
+                  <q-icon name="mdi-table-column" />
+                </template>
+                <template v-slot:option="scope">
+                  <q-item v-bind="scope.itemProps">
+                    <q-item-section avatar>
+                      <q-icon :name="scope.opt.icon" :color="scope.opt.color" />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label>{{ scope.opt.label }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </template>
+                <q-tooltip>
+                  Category represents tab where the prompt is located.
+                </q-tooltip>
+              </q-select>
+            </div>
+            <div class="col-auto">
+              <div class="col-auto q-ml-sm" style="width: 220px;">
+                <q-select v-if="allowPromptCategorization" outlined filled dense label="Folder" v-model="promptFolder" :options="promptStore.promptFolders" option-label="label" option-value="label" emit-value use-input clearable hide-dropdown-icon @new-value="(val, done) => promptStore.addListItem(promptStore.promptFolders, val, 'white', done)" options-dense >
+                  <template v-slot:prepend>
+                    <q-icon name="mdi-folder-outline" />
+                  </template>
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section avatar>
+                        <q-icon :name="scope.opt.icon ?? 'mdi-folder-outline'" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>{{ scope.opt.label }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                  <q-tooltip>
+                    Folder can group similar prompts in one tab.
+                  </q-tooltip>
+                </q-select>
+              </div>
+            </div>
+          </div>
         </div>
 
         <template v-if="!startExpanded">
@@ -55,8 +76,6 @@
 
           <div class="col-auto row q-ml-sm"><q-btn icon="mdi-cog" color="primary" flat @click="settingsExpanded = !settingsExpanded" label="" class="float-right" dense/></div>
         </template>
-
-
       </div>
 
       <q-slide-transition v-if="settingsExpanded">

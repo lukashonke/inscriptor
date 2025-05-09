@@ -123,7 +123,7 @@
           <div class="">
             <div class="row q-gutter-x-md q-mb-md">
               <div class="col">
-                <q-select filled dense label="AI model" :options="models" v-model="model" option-label="name" option-value="id" />
+                <q-select filled dense label="AI model" :options="models" v-model="model" option-label="name" option-value="id" options-dense />
               </div>
               <div class="col">
                 <q-select filled dense label="Creativity" :options="creativityOptions" v-model="creativity" options-dense >

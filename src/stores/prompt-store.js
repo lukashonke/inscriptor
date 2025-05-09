@@ -1213,7 +1213,7 @@ export const usePromptStore = defineStore('prompts', {
                 },
 
                 antiPrompts: model.defaultStopStrings,
-                temperature: input.temperature,
+                temperature: model.hasTemperature === false ? undefined : input.temperature,
                 maxTokens: input.maxTokens,
                 topP: input.topP,
                 minP: input.minP,
@@ -1384,7 +1384,7 @@ export const usePromptStore = defineStore('prompts', {
                 frequency_penalty: input.frequencyPenalty,
                 presence_penalty: input.presencePenalty,
 
-                temperature: input.temperature,
+                temperature: model.hasTemperature === false ? undefined : input.temperature,
                 top_p: input.topP,
 
                 max_tokens: input.maxTokens,
@@ -1455,11 +1455,11 @@ export const usePromptStore = defineStore('prompts', {
                 frequency_penalty: input.frequencyPenalty,
                 presence_penalty: input.presencePenalty,
 
-                temperature: input.temperature,
+                temperature: model.hasTemperature === false ? undefined : input.temperature,
                 top_p: input.topP,
 
-                max_tokens: input.maxTokens,
-                stop: model.defaultStopStrings.length > 0 ? undefined : model.defaultStopStrings,
+                max_completion_tokens: input.maxTokens,
+                //stop: model.defaultStopStrings.length > 0 ? undefined : model.defaultStopStrings,
                 response_format: input.jsonMode === true ? { type: "json_object" } : undefined,
               },
                 {
