@@ -46,18 +46,20 @@
         <q-card bordered class="">
           <q-card-section class="q-gutter-y-sm">
             <div class="row q-gutter-x-sm">
-              <div class="col"><q-input dense borderless filled placeholder="Name" v-model="name" label="Visible Name" :readonly="!canEditModelMeta"/></div>
+              <div class="col"><q-input dense borderless :filled="canEditModelMeta" placeholder="Name" v-model="name" label="Visible Name" :readonly="!canEditModelMeta"/></div>
 
-              <div class="col"><q-input dense borderless filled label="LLM Model Name" v-model="modelName" readonly  /></div>
+              <div class="col"><q-input dense borderless label="LLM Model Name" v-model="modelName" readonly  /></div>
 
-              <div class="col"><q-input dense borderless filled label="Inference Engine" :model-value="model.args?.inferenceEngine" readonly /></div>
+              <div class="col">
+                <q-input dense borderless label="Inference Engine" :model-value="model.args?.inferenceEngine" readonly />
+              </div>
 
               <div class="col-auto"><q-select v-if="model.type === 'local'" dense borderless filled label="Quants" v-model="modelQuants" :options="availableModelQuants"/></div>
             </div>
 
             <div class="row">
               <div class="col">
-                <q-input dense borderless filled label="Description" v-model="description" :readonly="!canEditModelMeta" autogrow />
+                <q-input dense borderless label="Description" v-model="description" :readonly="!canEditModelMeta" :filled="canEditModelMeta" autogrow />
               </div>
             </div>
 
