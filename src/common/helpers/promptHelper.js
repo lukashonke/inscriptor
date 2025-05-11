@@ -342,6 +342,8 @@ export function cloneRequest(request) {
     silent: request.silent,
     onOutput: request.onOutput,
 
+    allowParallel: request.allowParallel,
+
     noTrim: request.noTrim,
 
     promptSource: request.promptSource,

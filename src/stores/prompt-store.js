@@ -249,24 +249,27 @@ export const usePromptStore = defineStore('prompts', {
       try {
         this.clearSelectionAnalysisPrompts();
 
-        for (const prompt of prompts) {
-          const text = getSelectedMarkdown();
-
+        const text = getSelectedMarkdown();
+        
+        // Create an array of promises to execute all prompts in parallel
+        const promptPromises = prompts.map(prompt => {
           const request = {
             prompt: prompt,
             text: text,
+            allowParallel: true,
             forceBypassMoreParameters: true,
             forceShowContextSelection: false,
             promptSource: 'selectionAnalysis'
-          }
-
-          await executePromptClick2(request);
-        }
+          };
+          
+          return executePromptClick2(request);
+        });
+        
+        // Wait for all prompts to complete in parallel
+        await Promise.all(promptPromises);
       } finally {
         this.selectionAnalysisRunning = false;
       }
-
-
     },
     clearSelectionAnalysisPrompts() {
       this.selectionPromptResults = [];
@@ -965,6 +968,10 @@ export const usePromptStore = defineStore('prompts', {
     },
     shouldCancelRunningPrompt(request) {
       if(request.silent) {
+        return false;
+      }
+
+      if(request.allowParallel === true) {
         return false;
       }
 
