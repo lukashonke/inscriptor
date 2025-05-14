@@ -55,7 +55,7 @@
               </q-tooltip>
             </q-btn>
 
-            <q-btn v-if="promptStore.selectedAnalysisPrompts && promptStore.selectedAnalysisPrompts.length > 0" size="11px" dense flat icon="mdi-chart-timeline-variant-shimmer" padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="accent" @click="runSelectionAnalysis" :loading="promptStore.selectionAnalysisRunning">
+            <q-btn v-if="promptStore.analysisPromptsSettings.prompts && promptStore.analysisPromptsSettings.prompts.length > 0" size="11px" dense flat icon="mdi-chart-timeline-variant-shimmer" padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="accent" @click="runSelectionAnalysis" :loading="promptStore.selectionAnalysisRunning">
               <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="gradient-variation-2 no-border" @on-before-show="console.log($event)" @show="console.log($event)">
                 <q-card style="min-width: 400px; max-width: 650px; height: 500px" class="scroll-y q-pa-md" v-if="promptStore.selectionPromptResults && promptStore.selectionPromptResults.length > 0">
                   <div class="q-mb-sm" v-for="(promptResult, index) in promptStore.selectionPromptResults" :key="index">
@@ -65,7 +65,7 @@
                 <q-skeleton v-else animation="fade"/>
               </q-popup-proxy>
               <q-tooltip  :delay="1000">
-                Run Analysis using {{ promptStore.selectedAnalysisPrompts.length }} prompts
+                Run Analysis using {{ promptStore.analysisPromptsSettings.prompts.length }} prompts
               </q-tooltip>
             </q-btn>
 
@@ -1006,7 +1006,7 @@ async function triggerQuickPrompt(type, command) {
 }
 
 async function runSelectionAnalysis() {
-  await promptStore.promptSelectionAnalysisPrompts(true);
+  await promptStore.promptSelectionAnalysisPrompts(true, true);
 }
 
 async function runWordFinder(replace = true) {

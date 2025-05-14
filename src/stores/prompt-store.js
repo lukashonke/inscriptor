@@ -51,7 +51,9 @@ export const usePromptStore = defineStore('prompts', {
 
     analysisEnabled: false,
     selectionAnalysisRunning: false,
-    selectedAnalysisPrompts: [],
+    analysisPromptsSettings: {
+      prompts: []
+    },
     selectionPromptResults: [],
 
     lastPrompts: [],
@@ -231,14 +233,18 @@ export const usePromptStore = defineStore('prompts', {
 
       return true;
     },
-    async promptSelectionAnalysisPrompts(force) {
+    async promptSelectionAnalysisPrompts(force, onlyPromptsToRunOnSelect = false) {
       if(getEditorSelection()?.empty ?? true) {
         return;
       }
 
-      const prompts = ([...this.selectionAnalysisPrompts, ...this.selectionPrompts] ?? [])
-        .filter(p => p.enabled)
-        .filter(p => this.selectedAnalysisPrompts.find(ap => ap.value === p.id));
+      const prompts = (this.analysisPromptsSettings.prompts ?? [])
+        .filter(ap => ap.enabled)
+        .filter(ap => !onlyPromptsToRunOnSelect || ap.runOnSelection === true)
+        .map(ap => {
+          return [...this.selectionAnalysisPrompts, ...this.selectionPrompts].find(p => p.id === ap.promptId && p.enabled);
+        })
+        .filter(p => p !== undefined);
 
       if((!this.analysisEnabled && !force) || prompts.length === 0 || this.selectionAnalysisRunning) {
         return;
@@ -250,7 +256,7 @@ export const usePromptStore = defineStore('prompts', {
         this.clearSelectionAnalysisPrompts();
 
         const text = getSelectedMarkdown();
-        
+
         // Create an array of promises to execute all prompts in parallel
         const promptPromises = prompts.map(prompt => {
           const request = {
@@ -261,10 +267,10 @@ export const usePromptStore = defineStore('prompts', {
             forceShowContextSelection: false,
             promptSource: 'selectionAnalysis'
           };
-          
+
           return executePromptClick2(request);
         });
-        
+
         // Wait for all prompts to complete in parallel
         await Promise.all(promptPromises);
       } finally {
@@ -2101,9 +2107,9 @@ export const usePromptStore = defineStore('prompts', {
       }
 
       if(args.modelId !== undefined) {
-        if(prompt.id.startsWith(prompt.modelId)) {
-          prompt.id = prompt.id.replace(prompt.modelId, args.modelId.value);
-        }
+        //if(prompt.id.startsWith(prompt.modelId)) {
+        //  prompt.id = prompt.id.replace(prompt.modelId, args.modelId.value);
+        //}
         prompt.modelId = args.modelId.value;
       }
       if(args.overrideTopP !== undefined) {
@@ -2533,7 +2539,7 @@ export const usePromptStore = defineStore('prompts', {
         fileTemplates: this.fileTemplates,
         currentSpellCheckLanguage: this.currentSpellCheckLanguage,
         //analysisEnabled: this.analysisEnabled,
-        selectedAnalysisPrompts: this.selectedAnalysisPrompts,
+        analysisPromptsSettings: this.analysisPromptsSettings,
         labels: this.labels,
         statuses: this.statuses,
         contextTypes: this.contextTypes,
@@ -2579,7 +2585,9 @@ export const usePromptStore = defineStore('prompts', {
       };
 
       //this.analysisEnabled = false;
-      this.selectedAnalysisPrompts = [];
+      this.analysisPromptsSettings = {
+        prompts: []
+      };
 
       this.predefinedPrompts = [
         { promptType: 'Summarize Page', promptHint: 'Can be used to quickly generate file synopsies / summaries.' },
@@ -2796,7 +2804,7 @@ export const usePromptStore = defineStore('prompts', {
         this.analysisEnabled = aiSettings.analysisEnabled;
       }*/
 
-      if(aiSettings.selectedAnalysisPrompts) {
+      /*if(aiSettings.selectedAnalysisPrompts) {
         this.selectedAnalysisPrompts = [];
         for(const analysisPrompt of aiSettings.selectedAnalysisPrompts) {
           const prompt = this.prompts.find(p => p.id === analysisPrompt.value);
@@ -2804,6 +2812,21 @@ export const usePromptStore = defineStore('prompts', {
           if (prompt && !this.selectedAnalysisPrompts.find(p => p.id === prompt.id)) {
             this.onUpdatePrompt(prompt);
             this.selectedAnalysisPrompts.push(analysisPrompt);
+          }
+        }
+      }*/
+
+      if(aiSettings.analysisPromptsSettings) {
+        this.analysisPromptsSettings = aiSettings.analysisPromptsSettings;
+        if(!this.analysisPromptsSettings.prompts) {
+          this.analysisPromptsSettings.prompts = [];
+        }
+
+        for(const analysisPrompt of this.analysisPromptsSettings.prompts) {
+          const prompt = this.prompts.find(p => p.id === analysisPrompt.promptId);
+
+          if (!prompt) {
+            this.removeAnalysisPrompt(analysisPrompt);
           }
         }
       }
@@ -3088,5 +3111,34 @@ export const usePromptStore = defineStore('prompts', {
 
       this.savedPromptRunData[prompt.id][key] = value;
     },
+    addAnalysisPrompt(prompt) {
+      this.analysisPromptsSettings.prompts.push({
+        promptId: prompt.value,
+        enabled: true,
+        runOnSelection: true,
+      });
+    },
+    removeAnalysisPrompt(prompt) {
+      const index = this.analysisPromptsSettings.prompts.findIndex(p => p === prompt);
+      if (index !== -1) {
+        this.analysisPromptsSettings.prompts.splice(index, 1);
+      }
+    },
+    updateAnalysisPrompt(prompt, args) {
+      const index = this.analysisPromptsSettings.prompts.findIndex(p => p === prompt);
+      if (index !== -1) {
+        // Update the prompt with the new arguments
+        for (const key in args) {
+          this.analysisPromptsSettings.prompts[index][key] = args[key];
+        }
+      }
+    },
+    moveAnalysisPrompt(prompt, addToIndex) {
+      const index = this.analysisPromptsSettings.prompts.findIndex(p => p === prompt);
+      if (index !== -1) {
+        this.analysisPromptsSettings.prompts.splice(index, 1);
+        this.analysisPromptsSettings.prompts.splice(index + addToIndex, 0, prompt);
+      }
+    }
   }
 });

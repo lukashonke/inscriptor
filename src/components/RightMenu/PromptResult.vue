@@ -308,16 +308,10 @@
             <q-input v-if="!hasImages && editEnabled" filled dense v-model="promptResultText" type="textarea"
               autogrow />
             <template v-else-if="promptResultText">
-              <contenteditable tag="div" :class="writeClasses" class="no-outline" v-model="promptResultText"
-                v-if="!hasImages && !htmlView" ref="promptResultRef" contenteditable="false" spellcheck="false"
-                :no-html="false">
-              </contenteditable>
-
-              <div>
-                <editor-content :editor="editor" spellcheck="false" class="no-outline" :class="writeClasses"
-                  v-if="htmlView" />
+              <div v-if="!hasImages && !htmlView" :class="writeClasses" class="no-outline" v-html="promptResultText" ref="promptResultRef" />
+              <div class="q-mx-sm">
+                <editor-content v-if="htmlView" :editor="editor" spellcheck="false" class="no-outline" :class="writeClasses" />
               </div>
-
             </template>
           </template>
         </div>

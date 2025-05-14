@@ -102,10 +102,9 @@ export async function importFromMarketplace(packId, category, skipDialog) {
             for(const promptId of itemDetail.data.settingsOverrides.analysisPrompts) {
               const prompt = promptStore.getPromptById(promptId);
               if(prompt) {
-                promptStore.selectedAnalysisPrompts.push({
-                  label: prompt.title,
+                promptStore.addAnalysisPrompt({
                   value: prompt.id
-                });
+                })
               }
             }
           }

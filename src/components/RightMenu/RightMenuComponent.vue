@@ -128,10 +128,46 @@
                 <q-btn @click="promptStore.promptSelectionAnalysisPrompts" icon="mdi-chart-timeline-variant-shimmer" color="accent" label="Analyze" no-caps :loading="promptStore.selectionAnalysisRunning"/>
               </div>
               <div class="col justify-end flex">
-                <q-btn :label="promptStore.selectedAnalysisPrompts.length + ' prompts active'" flat color="accent"  icon-right="mdi-chevron-down">
+                <q-btn :label="promptStore.analysisPromptsSettings.prompts.length + ' prompts active'" flat color="accent"  icon-right="mdi-chevron-down">
                   <q-popup-proxy>
-                    <q-card style="width: 500px">
-                      <q-select clearable options-dense v-model="promptStore.selectedAnalysisPrompts" label="Active Analysis prompts" outlined dense filled :options="availableAnalysisPrompts" multiple use-chips/>
+                    <q-card style="width: 600px">
+
+                      <q-list v-if="promptStore.analysisPromptsSettings.prompts" dense class="full-width q-mb-sm">
+                        <q-item v-for="(prompt, i) in promptStore.analysisPromptsSettings.prompts" :key="i" dense class="full-width">
+                          <q-item-section side>
+                            <div class="text-grey-8 q-gutter-xs flex items-center">
+                              <q-toggle dense :model-value="prompt.enabled" @update:model-value="(val) => promptStore.updateAnalysisPrompt(prompt, {enabled: val})" color="accent" />
+                            </div>
+                          </q-item-section>
+                          <q-item-section top class="col gt-sm" :class="prompt.enabled ? '' : 'text-grey'">
+                            <q-item-label class="q-mt-sm">
+                              {{ getPromptNameById(prompt.promptId) }}
+                            </q-item-label>
+                            <q-item-label caption>
+                              {{ getPromptModelName(prompt.promptId).name }}
+                            </q-item-label>
+                          </q-item-section>
+                          <q-item-section side class="flex items-center">
+                            <div class="text-grey-8 q-gutter-xs flex items-center">
+                              <q-checkbox label="Run on Select" flat dense round :model-value="prompt.runOnSelection" @update:model-value="(val) => promptStore.updateAnalysisPrompt(prompt, {runOnSelection: val})"  >
+                                <q-tooltip :delay="500">
+                                  Triggers automatically when you select a text
+                                </q-tooltip>
+                              </q-checkbox>
+                              <q-btn flat dense icon="mdi-arrow-up" @click="promptStore.moveAnalysisPrompt(prompt, - 1)"  />
+                              <q-btn flat dense icon="mdi-arrow-down" @click="promptStore.moveAnalysisPrompt(prompt, 1)" />
+                              <q-btn flat dense icon="mdi-delete" @click="promptStore.removeAnalysisPrompt(prompt)" color="negative" />
+                            </div>
+                          </q-item-section>
+                        </q-item>
+                      </q-list>
+
+                      <div v-if="addPromptVisible">
+                        <q-select clearable options-dense v-model="addPrompt" label="Add prompt" outlined dense filled :options="availableAnalysisPrompts" @update:model-value="(val) => addAnalysisPrompt(val)"/>
+                      </div>
+                      <div v-else>
+                        <q-btn square flat class="full-width" icon="mdi-plus" @click="addPromptVisible = true" />
+                      </div>
                     </q-card>
                   </q-popup-proxy>
                 </q-btn>
@@ -162,12 +198,12 @@
             <q-btn outline @click="promptStore.promptSelectionAnalysisPrompts" icon="mdi-sync" class="q-mt-md" color="green" size="sm"/>
           </q-card-section>
 
-          <q-card-section v-else-if="promptStore.selectedAnalysisPrompts.length > 0 && selectionPromptResults?.length === 0" class="text-center">
-            <div class="">Analysis is active using {{ promptStore.selectedAnalysisPrompts.length }} prompt(s)</div>
-            <div>Click 'Analyze' or press ALT+I to start.</div>
+          <q-card-section v-else-if="promptStore.analysisPromptsSettings.prompts.length > 0 && selectionPromptResults?.length === 0" class="text-center">
+            <div class="">Analysis is active using {{ promptStore.analysisPromptsSettings.prompts.length }} prompt(s)</div>
+            <div>Click 'Analyze' or press CTRL+space to start.</div>
           </q-card-section>
 
-          <q-card-section v-else-if="promptStore.selectedAnalysisPrompts.length === 0" class="text-center">
+          <q-card-section v-else-if="promptStore.analysisPromptsSettings.prompts.length === 0" class="text-center">
             <div>You have not selected any analysis prompts, so no analysis will be performed.</div>
           </q-card-section>
 
@@ -206,6 +242,9 @@
 
   const uploadingImage = ref(false);
   const fileImg = ref(null);
+
+  const addPromptVisible = ref(false);
+  const addPrompt = ref(null);
 
   const imageHovered = useElementHover(fileImg);
 
@@ -256,6 +295,20 @@
       };
     }).sort((a, b) => a.label.localeCompare(b.label))
   );
+
+  function addAnalysisPrompt(prompt) {
+    addPrompt.value = null;
+
+    promptStore.addAnalysisPrompt(prompt);
+  }
+
+  function updateAnalysisPrompt(prompt, args) {
+    if(!prompt || !args) return;
+
+    if(args.enabled !== undefined) {
+
+    }
+  }
 
   const fileSynopsis = computed({
     get: () => file.value?.synopsis ?? '',
@@ -375,6 +428,19 @@
       };
       input.click();
     }
+  }
+
+  function getPromptNameById(promptId) {
+    return promptStore.getPromptById(promptId)?.title;
+  }
+
+  function getPromptModelName(promptId) {
+    const prompt = promptStore.getPromptById(promptId);
+    if(prompt) {
+      return promptStore.getModel(prompt.modelId);
+    }
+
+    return "";
   }
 
 </script>

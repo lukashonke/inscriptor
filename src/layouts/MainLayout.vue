@@ -145,18 +145,18 @@ const keys = useMagicKeys({
     }
   },
 });
-const altI = keys['Alt+I']
+const ctrlSpace = keys['Control+Space']
 const tab = keys['Tab']
 
-watch(altI, (v) => {
+watch(ctrlSpace, (v) => {
   if (focusedEditor.value && !v) {
-    console.log('Alt+I pressed');
+    console.log('ctrlSpace pressed');
     const selectedText = getSelectedText();
     if(selectedText) {
       promptStore.analysisEnabled = true;
       layoutStore.currentRightMenuView = 'analysis';
       layoutStore.setAnalysisTriggered(false);
-      promptStore.promptSelectionAnalysisPrompts(true);
+      promptStore.promptSelectionAnalysisPrompts(true, true);
     }
   }
 })
