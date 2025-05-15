@@ -1057,8 +1057,6 @@
   async function insertInternal() {
     let text;
 
-    debugger;
-
     if(props.insertTarget) {
       if(htmlView.value === true) {
         text = markdownToHtml(props.promptResult.originalText);
