@@ -1,24 +1,31 @@
 <template>
 
-  <bubble-menu :editor="editor" :tippy-options="{ duration: 100 }" v-if="editor">
+  <bubble-menu :editor="editor" :tippy-options="{ duration: 100 }" v-if="editor" >
     <q-card class="bubble-menu">
       <q-card-section class="q-pa-xs q-gutter-xs">
         <div class="row q-gutter-x-xs">
           <div class="col-auto">
-            <q-btn @click="promptResultInlinePrompt(promptResult.prompt, 'Expand')" label="Expand" no-caps size="12px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white" color="primary">
+            <q-btn @click="promptResultInlinePrompt(promptResult.prompt, 'Expand')" label="Expand" no-caps size="12px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white" color="primary" :loading="replyLoading">
             </q-btn>
           </div>
           <div class="col-auto">
-            <q-btn @click="promptResultInlinePrompt(promptResult.prompt, 'Explain')" label="Explain" no-caps size="12px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white" color="primary">
+            <q-btn @click="promptResultInlinePrompt(promptResult.prompt, 'Explain')" label="Explain" no-caps size="12px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white" color="primary" :loading="replyLoading">
             </q-btn>
           </div>
+          <!--<div class="col">
+
+          </div>
+          <div class="col-auto">
+            <q-btn no-caps size="12px" dense flat icon="mdi-close" padding="4px 6px" class="bg-white" color="primary">
+            </q-btn>
+          </div>-->
         </div>
         <div class="row">
           <div class="col">
             <q-input autofocus dense filled v-model="inlineReactText" label="Instruction" />
           </div>
           <div class="col-auto flex items-center">
-            <q-btn @click="promptResultInlinePrompt(promptResult.prompt, inlineReactText)" no-caps size="12px" dense flat icon="mdi-send" padding="4px 6px" class="bg-white" color="primary">
+            <q-btn @click="promptResultInlinePrompt(promptResult.prompt, inlineReactText)" no-caps size="12px" dense flat icon="mdi-send" padding="4px 6px" class="bg-white" color="primary" :loading="replyLoading">
             </q-btn>
           </div>
         </div>
@@ -136,7 +143,7 @@
                         <q-icon name="mdi-view-agenda-outline" size="xs" />
                       </q-item-section>
                       <q-item-section>
-                        Raw view
+                        Toggle view
                       </q-item-section>
                     </q-item>
                     <q-item clickable @click="editEnabled = !editEnabled">
@@ -330,16 +337,18 @@
         </q-btn>
       </div>
 
-      <div v-if="!isPrompting && allowRegenerate && collapsed === false && promptResult.prompt.promptType !== 'chat' && promptResult.prompt.promptStyle !== 'brainstorm-ui'" class="row prompt-actions">
-        <q-btn class="text-weight-bold hoverable-btn-semi" label="Reply" no-caps flat color="grey-7" unelevated size="sm" icon="mdi-reply-outline" @click.prevent="toggleReply()">
-          <q-tooltip>Reply on this prompt to AI</q-tooltip>
-        </q-btn>
+      <div v-if="!isPrompting && allowRegenerate && collapsed === false && promptResult.prompt.promptType !== 'chat' && promptResult.prompt.promptStyle !== 'brainstorm-ui'" class="row prompt-actions overflow-hidden-y">
+        <div class="col-auto">
+          <q-btn class="text-weight-bold hoverable-btn-semi" label="Reply" no-caps flat color="grey-7" unelevated size="sm" icon="mdi-reply-outline" @click.prevent="toggleReply()">
+            <q-tooltip>Reply on this prompt to AI</q-tooltip>
+          </q-btn>
+        </div>
 
         <div class="col q-ml-md">
           <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm"
             @click.prevent="generateFollowUpQuestions()" icon="mdi-creation-outline"
             v-if="promptStore.getPredefinedPromptId('Prompt Follow-Up Generator')"
-            :loading="promptStore.isPrompting && promptStore.isSilentPrompting">
+            :loading="promptStore.isSilentPrompting">
             <q-tooltip>
               Generate Follow-up questions
             </q-tooltip>
@@ -380,87 +389,88 @@
 
         <q-space />
 
-        <q-btn class="text-weight-bold float-right hoverable-btn-semi" label="Prompt Again" flat color="grey-7" unelevated size="sm" no-caps
-          icon="mdi-sync" @click.prevent="regeneratePrompt($event, false)">
-          <q-tooltip>Generate this prompt again</q-tooltip>
-        </q-btn>
+        <div class="col-auto">
+          <q-btn v-if="!promptResult.prompt.enablePromptRuns" class="text-weight-bold float-right hoverable-btn-semi" flat color="grey-7"
+            unelevated size="sm" icon="arrow_drop_down">
+            <q-menu>
+              <q-list dense>
 
-        <q-btn v-if="!promptResult.prompt.enablePromptRuns" class="text-weight-bold float-right hoverable-btn-semi" flat color="grey-7"
-          unelevated size="sm" icon="arrow_drop_down">
-          <q-menu>
-            <q-list dense>
+                <q-item clickable v-ripple>
+                  <q-item-section>Prompt with creativity...</q-item-section>
+                  <q-item-section side>
+                    <q-icon name="keyboard_arrow_right" />
+                  </q-item-section>
 
-              <q-item clickable v-ripple>
-                <q-item-section>Prompt with creativity...</q-item-section>
-                <q-item-section side>
-                  <q-icon name="keyboard_arrow_right" />
-                </q-item-section>
+                  <q-menu anchor="top end" self="top start">
+                    <q-list dense>
+                      <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 1)">
+                        <q-item-section side>
+                          <q-icon name="mdi-palette" size="xs" />
+                        </q-item-section>
+                        <q-item-section>
+                          <q-item-label>Very Creative (temperature 1)</q-item-label>
+                        </q-item-section>
+                      </q-item>
 
-                <q-menu anchor="top end" self="top start">
-                  <q-list dense>
-                    <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 1)">
-                      <q-item-section side>
-                        <q-icon name="mdi-palette" size="xs" />
-                      </q-item-section>
-                      <q-item-section>
-                        <q-item-label>Very Creative (temperature 1)</q-item-label>
-                      </q-item-section>
-                    </q-item>
+                      <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 0.8)">
+                        <q-item-section side>
+                          <q-icon name="mdi-palette-outline" size="xs" />
+                        </q-item-section>
+                        <q-item-section>
+                          <q-item-label>Creative (temperature 0.8)</q-item-label>
+                        </q-item-section>
+                      </q-item>
 
-                    <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 0.8)">
-                      <q-item-section side>
-                        <q-icon name="mdi-palette-outline" size="xs" />
-                      </q-item-section>
-                      <q-item-section>
-                        <q-item-label>Creative (temperature 0.8)</q-item-label>
-                      </q-item-section>
-                    </q-item>
+                      <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 0.5)">
+                        <q-item-section side>
+                          <q-icon name="mdi-keyboard-outline" size="xs" />
+                        </q-item-section>
+                        <q-item-section>
+                          <q-item-label>Deterministic (temperature 0.5)</q-item-label>
+                        </q-item-section>
+                      </q-item>
 
-                    <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 0.5)">
-                      <q-item-section side>
-                        <q-icon name="mdi-keyboard-outline" size="xs" />
-                      </q-item-section>
-                      <q-item-section>
-                        <q-item-label>Deterministic (temperature 0.5)</q-item-label>
-                      </q-item-section>
-                    </q-item>
+                      <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 0)">
+                        <q-item-section side>
+                          <q-icon name="mdi-keyboard" size="xs" />
+                        </q-item-section>
+                        <q-item-section>
+                          <q-item-label>Very Deterministic (temperature 0)</q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </q-list>
+                  </q-menu>
+                </q-item>
 
-                    <q-item clickable v-close-popup @click="regeneratePrompt($event, false, 0)">
-                      <q-item-section side>
-                        <q-icon name="mdi-keyboard" size="xs" />
-                      </q-item-section>
-                      <q-item-section>
-                        <q-item-label>Very Deterministic (temperature 0)</q-item-label>
-                      </q-item-section>
-                    </q-item>
-                  </q-list>
-                </q-menu>
-              </q-item>
+                <q-item clickable v-ripple>
+                  <q-item-section>Prompt using model...</q-item-section>
+                  <q-item-section side>
+                    <q-icon name="keyboard_arrow_right" />
+                  </q-item-section>
 
-              <q-item clickable v-ripple>
-                <q-item-section>Prompt using model...</q-item-section>
-                <q-item-section side>
-                  <q-icon name="keyboard_arrow_right" />
-                </q-item-section>
-
-                <q-menu anchor="top end" self="top start">
-                  <q-list>
+                  <q-menu anchor="top end" self="top start">
+                    <q-list>
 
 
-                    <q-item v-for="model in promptStore.models" :key="model"
-                      @click="regeneratePrompt($event, false, undefined, model)" dense clickable>
-                      <q-item-section side>
-                        <q-icon name="mdi-chip" size="xs" />
-                      </q-item-section>
-                      <q-item-section>{{ model.name }}</q-item-section>
-                    </q-item>
+                      <q-item v-for="model in promptStore.models" :key="model"
+                        @click="regeneratePrompt($event, false, undefined, model)" dense clickable>
+                        <q-item-section side>
+                          <q-icon name="mdi-chip" size="xs" />
+                        </q-item-section>
+                        <q-item-section>{{ model.name }}</q-item-section>
+                      </q-item>
 
-                  </q-list>
-                </q-menu>
-              </q-item>
-            </q-list>
-          </q-menu>
-        </q-btn>
+                    </q-list>
+                  </q-menu>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+          <q-btn class="text-weight-bold hoverable-btn-semi" label="Prompt Again" flat color="grey-7" unelevated size="sm" no-caps
+                 icon="mdi-sync" @click.prevent="regeneratePrompt($event, false)">
+            <q-tooltip>Generate this prompt again</q-tooltip>
+          </q-btn>
+        </div>
 
       </div>
 
@@ -483,6 +493,10 @@
     </q-card>
 
   </transition>
+
+  <div class="row q-mr-md q-mt-md" v-if="inlinePromptResult">
+    <PromptResult :promptResult="inlinePromptResult" type="inline" has-close @close="inlinePromptResult = null" :show-prompt-info="false" @replace-self="replacePromptResult"/>
+  </div>
 </template>
 
 <script setup>
@@ -954,6 +968,12 @@
 
   }
 
+  const inlinePromptResult = ref(null);
+
+  function replacePromptResult(result) {
+    inlinePromptResult.value = result;
+  }
+
   async function promptResultInlinePrompt(prompt, instruction) {
     const appendMessages = [];
 
@@ -970,9 +990,9 @@
       prompt: prompt,
       text: props.promptResult.input,
       clear: false,
+      inline: true,
       appendMessages: appendMessages,
       forceBypassMoreParameters: true,
-      silent: true
     };
 
     if(props.type === 'inline') {
@@ -983,7 +1003,18 @@
       const result = await executePromptClick2(request);
       replyLoading.value = false;
 
+      inlinePromptResult.value = result;
+
       emits('replaceSelf', result);
+    } else if(props.showAsChat === true) {
+      replyLoading.value = true;
+      request.silent = true;
+
+      const result = await executePromptClick2(request);
+
+      inlinePromptResult.value = result;
+
+      replyLoading.value = false;
     } else {
       collapsed.value = true;
 
@@ -1026,6 +1057,8 @@
   async function insertInternal() {
     let text;
 
+    debugger;
+
     if(props.insertTarget) {
       if(htmlView.value === true) {
         text = markdownToHtml(props.promptResult.originalText);
@@ -1058,7 +1091,7 @@
 
     // Get the start and end positions of the parent node
     const startPos = resolvedFrom.start(resolvedFrom.depth);
-    const endPos = startPos + parentNodeFrom.content.size;
+    const endPos = resolvedTo.start(resolvedTo.depth) + parentNodeTo.content.size;
 
     // Check if the selection spans the whole node
     const isWholeNodeSelected = from === startPos && to === endPos;

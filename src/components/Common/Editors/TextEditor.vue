@@ -332,6 +332,8 @@
   </div>
 
 
+
+
   <q-page-sticky position="bottom-left" :offset="[18, 18]" v-if="promptStore.hasStickyPrompts(fileStore.selectedFile)">
     <q-fab
       v-model="aiFab"

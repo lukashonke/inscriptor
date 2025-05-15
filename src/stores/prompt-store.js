@@ -1018,9 +1018,7 @@ export const usePromptStore = defineStore('prompts', {
       if(this.hasCustomPromptUi(request) && !request.executeCustomPromptUi) {
         return new Promise(async (resolve, reject) => {
           await this.handleCustomPromptUi(request, input);
-          if(this.shouldCancelRunningPrompt(request)) {
-            this.isPrompting = false;
-          }
+          this.onPromptingEnd(request, pr);
           pr.waitingForResponse = false;
           resolve(pr);
         });
@@ -1082,9 +1080,7 @@ export const usePromptStore = defineStore('prompts', {
 
             pr.error = 'Model is not downloaded or enabled.';
             reject(new Error('Model is not downloaded or enabled.'));
-            if(this.shouldCancelRunningPrompt(request)) {
-              this.isPrompting = false;
-            }
+            this.onPromptingEnd(request, pr);
             return;
           }
 
@@ -1102,9 +1098,7 @@ export const usePromptStore = defineStore('prompts', {
 
             pr.error = 'Inscriptor Cloud AI prompting not available to guests. You can still provide API tokens.';
             resolve(pr);
-            if(this.shouldCancelRunningPrompt(request)) {
-              this.isPrompting = false;
-            }
+            this.onPromptingEnd(request, pr);
             pr.waitingForResponse = false;
             return;
           }
@@ -1143,9 +1137,7 @@ export const usePromptStore = defineStore('prompts', {
                 pr.error = 'Input text is too long for the model.';
 
                 reject(new Error('Input text is too long for the model.'));
-                if(this.shouldCancelRunningPrompt(request)) {
-                  this.isPrompting = false;
-                }
+                this.onPromptingEnd(request, pr);
                 return;
               }
 
@@ -1337,9 +1329,7 @@ export const usePromptStore = defineStore('prompts', {
 
                 resolve(pr);
 
-                if(this.shouldCancelRunningPrompt(request)) {
-                  this.isPrompting = false;
-                }
+                this.onPromptingEnd(request, pr);
               },
               (err) => {
                 if (request.onOutput) {
@@ -1353,9 +1343,7 @@ export const usePromptStore = defineStore('prompts', {
 
                 reject(err);
 
-                if(this.shouldCancelRunningPrompt(request)) {
-                  this.isPrompting = false;
-                }
+                this.onPromptingEnd(request, pr);
               },
               this.promptAbortController,
               controllerName, actionName);
@@ -1418,9 +1406,8 @@ export const usePromptStore = defineStore('prompts', {
 
               resolve(pr);
 
-              if(this.shouldCancelRunningPrompt(request)) {
-                this.isPrompting = false;
-              }            }
+              this.onPromptingEnd(request, pr);
+            }
             catch (err) {
               pr.waitingForResponse = false;
               if (loggedPrompt) loggedPrompt.error = err;
@@ -1428,9 +1415,8 @@ export const usePromptStore = defineStore('prompts', {
 
               reject(err);
 
-              if(this.shouldCancelRunningPrompt(request)) {
-                this.isPrompting = false;
-              }            }
+              this.onPromptingEnd(request, pr);
+            }
           }
           else if (promptingEngineToUse === 'client-openai') { // JS client for openai
 
@@ -1488,19 +1474,16 @@ export const usePromptStore = defineStore('prompts', {
 
               resolve(pr);
 
-              if(this.shouldCancelRunningPrompt(request)) {
-                this.isPrompting = false;
-              }            }
-            catch (err) {
+              this.onPromptingEnd(request, pr);
+            } catch (err) {
               pr.waitingForResponse = false;
               if (loggedPrompt) loggedPrompt.error = err;
               pr.error = err;
 
               reject(err);
 
-              if(this.shouldCancelRunningPrompt(request)) {
-                this.isPrompting = false;
-              }            }
+              this.onPromptingEnd(request, pr);
+            }
           }
           else if (promptingEngineToUse === 'client-anthropic') { // JS client for openai
 
@@ -1561,10 +1544,8 @@ export const usePromptStore = defineStore('prompts', {
 
               resolve(pr);
 
-              if(this.shouldCancelRunningPrompt(request)) {
-                this.isPrompting = false;
-              }            }
-            catch (err) {
+              this.onPromptingEnd(request, pr);
+            } catch (err) {
               pr.waitingForResponse = false;
               if (loggedPrompt) loggedPrompt.error = err;
               pr.error = err;
@@ -1573,7 +1554,8 @@ export const usePromptStore = defineStore('prompts', {
 
               if(this.shouldCancelRunningPrompt(request)) {
                 this.isPrompting = false;
-              }            }
+              }
+            }
           }
           else if (promptingEngineToUse === 'client-ollama') { // JS client for ollama
 
@@ -1671,9 +1653,8 @@ export const usePromptStore = defineStore('prompts', {
 
               resolve(pr);
 
-              if(this.shouldCancelRunningPrompt(request)) {
-                this.isPrompting = false;
-              }            }
+              this.onPromptingEnd(request, pr);
+            }
             catch (err) {
               pr.waitingForResponse = false;
 
@@ -1682,9 +1663,8 @@ export const usePromptStore = defineStore('prompts', {
 
               reject(err);
 
-              if(this.shouldCancelRunningPrompt(request)) {
-                this.isPrompting = false;
-              }            }
+              this.onPromptingEnd(request, pr);
+            }
           }
           else if (promptingEngineToUse === 'client-dall-e') {
 
@@ -1724,20 +1704,16 @@ export const usePromptStore = defineStore('prompts', {
               resolve(pr);
 
               pr.waitingForResponse = false;
-              if(this.shouldCancelRunningPrompt(request)) {
-                this.isPrompting = false;
-              }            }
-            catch (err) {
+              this.onPromptingEnd(request, pr);
+            } catch (err) {
               pr.waitingForResponse = false;
 
               if (loggedPrompt) loggedPrompt.error = err;
               pr.error = err;
               reject(err);
 
-              if(this.shouldCancelRunningPrompt(request)) {
-                this.isPrompting = false;
-              }            }
-
+              this.onPromptingEnd(request, pr);
+            }
           }
           else if (promptingEngineToUse === 'automatic1111-sd') {
 
@@ -1766,9 +1742,8 @@ export const usePromptStore = defineStore('prompts', {
               }
 
               pr.waitingForResponse = false;
-              if(this.shouldCancelRunningPrompt(request)) {
-                this.isPrompting = false;
-              }            } catch (err) {
+              this.onPromptingEnd(request, pr);
+            } catch (err) {
               pr.waitingForResponse = false;
 
               if (loggedPrompt) loggedPrompt.error = err;
@@ -1776,9 +1751,7 @@ export const usePromptStore = defineStore('prompts', {
 
               reject(err);
 
-              if(this.shouldCancelRunningPrompt(request)) {
-                this.isPrompting = false;
-              }
+              this.onPromptingEnd(request, pr);
             }
           }
         });
@@ -1805,6 +1778,16 @@ export const usePromptStore = defineStore('prompts', {
       if(this.isPrompting) {
         this.promptAbortController.abort();
         this.isPrompting = false;
+        this.onPromptingEnd(null, null);
+      }
+    },
+    onPromptingEnd(request, pr) {
+      if(request) {
+        if(this.shouldCancelRunningPrompt(request)) {
+          this.isPrompting = false;
+        } else {
+          this.isSilentPrompting = false;
+        }
       }
     },
     pushLastPrompt(prompt) {

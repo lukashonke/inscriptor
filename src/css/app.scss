@@ -347,6 +347,8 @@ textarea::-webkit-scrollbar-button {
   background-color: #eaeeff;
   align-self: flex-end;
   margin-left: auto;
+  max-height: 200px;
+  overflow-y: scroll;
 }
 
 .chat-ai-message {

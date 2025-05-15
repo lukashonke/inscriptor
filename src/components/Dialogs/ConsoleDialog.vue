@@ -10,7 +10,7 @@
 
         <div class="col ">
           <q-list dense class="full-width">
-            <q-item v-for="(prompt, index) in items" :key="index" dense clickable :class="prompt.error ? 'bg-red-2' : 'bg-yellow-2'" @click="copy(prompt)">
+            <q-item v-for="(prompt, index) in items" :key="index" dense clickable :class="prompt.error ? 'bg-red-2' : 'bg-yellow-2'" class="q-mb-sm">
               <q-item-section>
                 <span class="text-bold">{{ prompt.model }} <span class="text-grey text-caption">{{ formatTime(prompt) }}</span>
                   <span class="text-grey text-caption">{{formatStats(prompt)}}</span>
@@ -20,12 +20,8 @@
                   <q-icon name="mdi-exclamation-thick" />
                   An error occured: ({{ prompt.error }})
                 </span>
-                <p class="write-serif scroll" v-html="formatPromptInput(prompt)">
-                </p>
+                <q-input :model-value="formatPromptInputTxt(prompt)" autogrow class="write-serif scroll" borderless dense />
               </q-item-section>
-              <q-tooltip :delay="200">
-                Click to copy
-              </q-tooltip>
             </q-item>
           </q-list>
         </div>
@@ -67,6 +63,14 @@
       return JSON.stringify(JSON.parse(prompt.input), null, 2).replace(/\n/g, '<br>');
     }
     return prompt.input.replace(/\n/g, '<br>');
+  }
+
+  function formatPromptInputTxt(prompt) {
+    const isJson = prompt.input && prompt.input.length > 0 && (prompt.input.startsWith('{') && prompt.input.endsWith('}') || prompt.input.startsWith('[') && prompt.input.endsWith(']'));
+    if (isJson) {
+      return JSON.stringify(JSON.parse(prompt.input), null, 2);
+    }
+    return prompt.input;
   }
 
   function formatStats(prompt) {

@@ -216,6 +216,8 @@ async function sendChat() {
     }
   }
 
+  const showMoreContextWindow = results.value.length === 0 && chatWithContext.value;
+
   messages.push({type: 'user', text: textCopy});
 
   const request = {
@@ -224,7 +226,7 @@ async function sendChat() {
     clear: false,
     forceBypassMoreParameters: false,
     silent: false,
-    forceShowContextSelection: chatWithContext.value
+    forceShowContextSelection: showMoreContextWindow
   };
 
   await executePromptClick2(request);

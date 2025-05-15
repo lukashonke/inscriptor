@@ -76,10 +76,10 @@
           <q-btn v-else flat no-caps :loading="uploadingImage" @click="uploadImage" icon="mdi-image-outline" color="grey-7" label="Add Image" class="full-width" />
         </q-card-section>
         <q-card-section class="q-py-sm">
-          <InputWithAi v-model="fileSynopsis" label="Synopsis" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" :prompt-input="file.content" :class="writeClasses" />
+          <InputWithAi v-model="fileSynopsis" label="Synopsis" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" :prompt-input="file.content" :class="writeClasses" autogrow />
         </q-card-section>
         <q-card-section class="q-py-sm">
-          <q-input label="Note" v-model="fileNote" type="textarea" filled :class="layoutStore.darkMode ? 'bg-brown-10' : 'bg-yellow-2'" dense/>
+          <q-input label="Note" v-model="fileNote" type="textarea" filled :class="layoutStore.darkMode ? 'bg-brown-10' : 'bg-yellow-2'" dense autogrow/>
         </q-card-section>
         <q-card-section class="q-pt-sm">
           <div class="">

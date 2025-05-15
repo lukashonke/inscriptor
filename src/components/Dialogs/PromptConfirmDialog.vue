@@ -197,9 +197,9 @@
         </div>
       </q-card-section>
 
-      <q-separator class="q-mt-sm" />
 
       <template v-if="prompt.info?.tags?.includes('input')">
+        <q-separator class="q-mt-sm" />
         <q-card-section class="q-px-md q-pt-sm">
 
           <div class="bordered rounded-borders q-mt-sm" flat>
@@ -275,7 +275,6 @@
         </q-card-section>
       </template>
 
-      <q-separator class="q-mt-sm" />
 
 
       <template v-if="prompt.info?.tags?.includes('context')">
@@ -368,7 +367,7 @@
           <q-btn flat label="Preview & Cost" color="secondary" @click="previewPrompt" class="float-left" :disable="!canConfirmPrompt"/>
         </div>
         <div class="col-auto">
-          <q-btn color="accent" icon="mdi-creation-outline" label="Run Prompt" v-close-popup @click="confirmPrompt(false)" class="float-right" :disable="!canConfirmPrompt"/>
+          <q-btn color="accent" icon="mdi-creation-outline" label="Run Prompt" v-close-popup @click="confirmPrompt(false)" class="float-right" :disable="!canConfirmPrompt" autofocus/>
         </div>
       </q-card-actions>
     </q-card>
@@ -470,7 +469,7 @@
     let match;
     while ((match = regex.exec(text)) !== null) {
       // except $context
-      if(match[0] === '$context' || match[0] === '$input') {
+      if(match[0] === '$context' || match[0] === '$input' || match[0] === '$chat') {
         continue;
       }
 
