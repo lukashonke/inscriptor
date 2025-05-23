@@ -39,6 +39,7 @@ export const usePromptStore = defineStore('prompts', {
     currentPromptForChatId: null,
     currentChatInsertUserQueries: true,
 
+    etag: null,
     tabs: [],
 
     tabData: {
@@ -2506,8 +2507,9 @@ export const usePromptStore = defineStore('prompts', {
     setCharsCount(count) {
       this.currentCharsCount = count;
     },
-    getUserProjectSettings() {
+    getUserProjectSettings(excludeDynamic = false) {
       const aiSettings = {
+        etag: excludeDynamic === true ? undefined : this.etag,
         tabs: this.tabs,
 
         prompts: this.prompts,
@@ -2541,6 +2543,8 @@ export const usePromptStore = defineStore('prompts', {
       this.currentModelForChatId = null;
       this.currentPromptForChatId = null;
       this.currentChatInsertUserQueries = true;
+
+      this.etag = null;
 
       this.promptCategories = [];
       this.promptFolders = [];
@@ -2627,6 +2631,8 @@ export const usePromptStore = defineStore('prompts', {
           }
         }
       }
+
+      this.etag = aiSettings.etag;
 
       if(aiSettings.currentModelForChatId) {
         this.currentModelForChatId = aiSettings.currentModelForChatId;

@@ -34,6 +34,61 @@ export async function getProjects(user, abortController) {
   }
 }
 
+export async function getCloudProjectFile(user, projectId, fileId, abortController) {
+  try {
+    const response = await fetch(url + 'Project/Projects/' + projectId + '/Files/' + fileId, {
+      method: 'GET',
+      headers: {
+        'Accept': 'text/plain',
+        'Content-Type': 'application/json',
+        'Authorization': await user.value.getIdToken()
+      },
+      signal: abortController?.signal
+    });
+
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    // return response as string
+    const retValue = JSON.parse(await response.text());
+
+    return retValue;
+  } catch (error) {
+    Notify.create({
+      message: 'Project file download failed. Please try again.',
+      color: 'negative',
+      position: 'top'
+    });
+    throw error;
+  }
+}
+
+export async function pingProject(user, projectId, abortController) {
+  try {
+    const response = await fetch(url + 'Project/Projects/' + projectId + '/Ping', {
+      method: 'GET',
+      headers: {
+        'Accept': 'text/plain',
+        'Content-Type': 'application/json',
+        'Authorization': await user.value.getIdToken()
+      },
+      signal: abortController?.signal
+    });
+
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+  } catch (error) {
+    Notify.create({
+      message: 'Project ping failed.',
+      color: 'negative',
+      position: 'top'
+    });
+    throw error;
+  }
+}
+
 export async function uploadProject(user, projectData, abortController) {
   try {
     const response = await fetch(url + 'Project/Projects', {
@@ -80,8 +135,19 @@ export async function uploadProjectUserProjectSettings(user, projectId, data, ab
 
     // throw error if response is not ok
     if(!response.ok) {
+      if(response.status === 412) {
+        Notify.create({
+          message: 'Save failed due to a conflict. Please reload the browser.',
+          caption: 'Have you opened the project in another tab or device?',
+          color: 'negative',
+          position: 'top'
+        });
+      }
+
       throw new Error('Upload failed');
     }
+
+    return JSON.parse(await response.text());
   } catch (error) {
     Notify.create({
       message: 'Project upload failed. Please try again.',
@@ -109,8 +175,19 @@ export async function uploadProjectData(user, projectId, data, abortController) 
 
     // throw error if response is not ok
     if(!response.ok) {
+      if(response.status === 412) {
+        Notify.create({
+          message: 'Save failed due to a conflict. Please reload the browser.',
+          caption: 'Have you opened the project in another tab or device?',
+          color: 'negative',
+          position: 'top'
+        });
+      }
+
       throw new Error('Upload failed');
     }
+
+    return JSON.parse(await response.text());
   } catch (error) {
     Notify.create({
       message: 'Project upload failed. Please try again.',
@@ -138,8 +215,19 @@ export async function uploadProjectFiles(user, projectId, files, abortController
 
     // throw error if response is not ok
     if(!response.ok) {
+      if(response.status === 412) {
+        Notify.create({
+          message: 'Save failed due to a conflict. Please reload the browser.',
+          caption: 'Have you opened the project in another tab or device?',
+          color: 'negative',
+          position: 'top'
+        });
+      }
+
       throw new Error('Upload failed');
     }
+
+    return JSON.parse(await response.text());
   } catch (error) {
     Notify.create({
       message: 'Project upload failed. Please try again.',

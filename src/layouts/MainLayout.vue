@@ -229,6 +229,8 @@ onMounted(async () => {
     // repeat quick save
     setInterval(quickSave, 3000);
 
+    setInterval(pingCloudProject, 60000);
+
     setInterval(reloadUserData, 60000);
 
     setInterval(reloadUserDataWithOpenUserInfo, 6000);
@@ -378,6 +380,20 @@ async function quickSave(force = false) {
         } else {
           await fileStore.syncProjectToCloud(force);
         }
+      }
+    }
+  } catch (e) {
+    console.error(e);
+    throw e;
+  }
+}
+
+async function pingCloudProject() {
+  try {
+    // ping cloud project opened to keep it cached
+    if(fileStore.projectId) {
+      if(fileStore.projectSettings?.syncToCloud === true) {
+        await fileStore.pingProject();
       }
     }
   } catch (e) {

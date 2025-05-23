@@ -14,7 +14,7 @@ import {usePromptStore} from "stores/prompt-store";
 import {md5} from "src/common/utils/hashUtils";
 import {
   deleteProject,
-  downloadProject,
+  downloadProject, getCloudProjectFile, pingProject,
   uploadProject, uploadProjectData, uploadProjectFiles,
   uploadProjectUserProjectSettings
 } from "src/common/apiServices/userProjectService";
@@ -35,6 +35,7 @@ export const useFileStore = defineStore('files', {
     projectSettings: {
       syncToCloud: false,
     },
+    etag: null,
     files: [],
     selectedFile: null,
     loadedUserSettings: false,
@@ -304,6 +305,30 @@ export const useFileStore = defineStore('files', {
           }
         }, 100);
       }
+
+      if(file && !file.dirty) {
+        this.loadFileFromCloud(file.id);
+      }
+    },
+    async loadFileFromCloud(fileId) {
+      const user = useCurrentUser();
+      if(!user || !this.projectId || !this.projectSettings?.syncToCloud) return;
+
+      const localFile = this.getFile(fileId);
+      if(localFile && !localFile.dirty) {
+        const file = await getCloudProjectFile(user, this.projectId, fileId);
+
+        if(localFile && !localFile.dirty && localFile.parentId === file.parentId && localFile.order === file.order) {
+          localFile.title = file.title;
+          localFile.content = file.content;
+          localFile.synopsis = file.synopsis;
+          localFile.note = file.note;
+          localFile.etag = file.etag;
+          localFile.icon = file.icon;
+          localFile.imageUrl = file.imageUrl;
+          localFile.state = file.state;
+        }
+      }
     },
     updateFileSettings(file, args) {
       if(!file.settings) {
@@ -503,6 +528,7 @@ export const useFileStore = defineStore('files', {
       const files = data.files ? unflattenFiles(data.files) : undefined;
       const variables = data.variables;
 
+      this.etag = project.data.etag;
       this.projectId = project.projectId;
       this.projectName = project.projectName;
       this.projectType = data.projectType;
@@ -578,6 +604,7 @@ export const useFileStore = defineStore('files', {
     },
     getProjectData(excludeFiles = false) {
       return {
+        etag: excludeFiles === true ? undefined : this.etag,
         projectId: this.projectId,
         projectName: this.projectName,
         projectSettings: this.projectSettings,
@@ -604,7 +631,7 @@ export const useFileStore = defineStore('files', {
     },
     computeUserProjectSettingsHash() {
       const promptStore = usePromptStore();
-      const userSettings = promptStore.getUserProjectSettings();
+      const userSettings = promptStore.getUserProjectSettings(true);
 
       const hash = md5(JSON.stringify(userSettings));
       return hash;
@@ -614,6 +641,12 @@ export const useFileStore = defineStore('files', {
 
       const hash = md5(JSON.stringify(projectData));
       return hash;
+    },
+    async pingProject() {
+      const user = useCurrentUser();
+      if(!user || !this.projectId) return;
+
+      await pingProject(user, this.projectId);
     },
     async syncProjectToCloud(force) {
       if(!this.canSave()) {
@@ -764,7 +797,10 @@ export const useFileStore = defineStore('files', {
       try {
         const userSettings = promptStore.getUserProjectSettings();
 
-        await uploadProjectUserProjectSettings(user, this.projectId, userSettings);
+        const response = await uploadProjectUserProjectSettings(user, this.projectId, userSettings);
+
+        promptStore.etag = response.etag;
+
         layoutStore.setProjectSyncIndicator(false, 0);
       } finally{
         layoutStore.setProjectSyncIndicator(false, 1000);
@@ -781,7 +817,10 @@ export const useFileStore = defineStore('files', {
       try {
         const projectData = this.getProjectData(true);
 
-        await uploadProjectData(user, this.projectId, projectData);
+        const response = await uploadProjectData(user, this.projectId, projectData);
+
+        this.etag = response.etag;
+
         layoutStore.setProjectSyncIndicator(false, 0);
       } finally{
         layoutStore.setProjectSyncIndicator(false, 1000);
@@ -821,10 +860,21 @@ export const useFileStore = defineStore('files', {
       layoutStore.setProjectSyncIndicator(true, 1000);
 
       try {
-        await uploadProjectFiles(user, this.projectId, fileRequests);
+        const response = await uploadProjectFiles(user, this.projectId, fileRequests);
+        this.applyFileEtags(response);
         layoutStore.setProjectSyncIndicator(false, 0);
+
+        return response;
       } finally{
         layoutStore.setProjectSyncIndicator(false, 1000);
+      }
+    },
+    applyFileEtags(fileIdsWithEtags) {
+      for (const fileWithEtag of fileIdsWithEtags) {
+        const file = this.getFile(fileWithEtag.id);
+        if(file) {
+          file.etag = fileWithEtag.etag;
+        }
       }
     },
     async saveProjectToCloud() {
