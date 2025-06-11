@@ -481,7 +481,7 @@
 
             </q-expansion-item>
 
-            <q-expansion-item :label="`AI Agents (${prompt.agents?.length})`" dense v-if="allowAgents" icon="mdi-robot">
+            <q-expansion-item :label="`AI Agents (${prompt.agents?.length ?? 0})`" dense v-if="allowAgents" icon="mdi-robot">
               <q-card>
                 <q-card-section class="q-pb-none">
                   <div class="text-caption text-grey">Tip: Define AI agents to further improve the output of this prompt before presenting it to you.</div>
@@ -550,7 +550,7 @@
                           <HelpIcon :tooltip="$t('tooltips.parameters.ignoreResultText')"></HelpIcon>
                         </div>
                         <div class="col-auto flex items-center">
-                          <q-input v-if="agent.allowMultipleRuns" dense filled label="Max iterations" type="number" :model-value="agent.maxRuns ?? 5" v-on:update:model-value="updateAgent(prompt, agent, {maxRuns: $event})" class="q-ml-sm" />
+                          <q-input dense filled label="Max iterations" type="number" :model-value="agent.maxRuns ?? 5" v-on:update:model-value="updateAgent(prompt, agent, {maxRuns: $event})" class="q-ml-sm" />
                         </div>
                       </div>
                     </q-card-section>
@@ -563,7 +563,7 @@
               </q-card>
             </q-expansion-item>
 
-            <q-expansion-item :label="`Action Buttons (${prompt.actions?.length})`" dense v-if="allowActions" icon="mdi-button-cursor">
+            <q-expansion-item :label="`Action Buttons (${prompt.actions?.length ?? 0})`" dense v-if="allowActions" icon="mdi-button-cursor">
               <q-card>
                 <q-card-section class="q-pb-none">
                   <div class="text-caption text-grey">Tip: Define quick actions that can be run after your AI prompt is executed.</div>

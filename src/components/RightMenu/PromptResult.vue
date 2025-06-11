@@ -345,7 +345,10 @@
           <span v-else>
             Analysing by {{ promptResult.analysingByAgent.title }}...
           </span>
-          <q-btn flat dense unelevated size="sm" no-caps icon="mdi-close" @click="promptStore.abortAiAnalysis(promptResult)" label="Abort" />
+
+          <div class="row q-mt-sm">
+            <q-btn color="negative" dense unelevated size="sm" no-caps icon="mdi-close" @click="promptStore.abortAgentAnalysis(promptResult)" label="Abort" />
+          </div>
         </div>
 
       </q-card-section>

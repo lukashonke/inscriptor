@@ -30,6 +30,7 @@ import {useCurrentUser} from "vuefire";
 import {getCloudModelApiKey} from "src/common/utils/modelUtils";
 import Anthropic from "@anthropic-ai/sdk";
 import {chatTabId, getPromptTabId, promptTabId} from 'src/common/resources/tabs';
+import {useAiAgentStore} from 'stores/aiagent-store';
 
 export const usePromptStore = defineStore('prompts', {
   state: () => ({
@@ -142,6 +143,8 @@ export const usePromptStore = defineStore('prompts', {
 
       this.updateTokens();
 
+      const aiAgentStore = useAiAgentStore();
+
       let lastResult = null;
 
       try {
@@ -177,7 +180,7 @@ export const usePromptStore = defineStore('prompts', {
 
             this.calculateDiffs(request, result);
 
-            await this.runAgentsOnPromptResult(request, result);
+            await aiAgentStore.runAgentsOnPromptResult(request, result);
 
             runResults.push({
               runName: run.name,
@@ -192,7 +195,8 @@ export const usePromptStore = defineStore('prompts', {
             const result = await this.promptInternal2(request);
 
             this.calculateDiffs(request, result);
-            await this.runAgentsOnPromptResult(request, result);
+
+            await aiAgentStore.runAgentsOnPromptResult(request, result);
 
             lastResult = result;
 
@@ -217,158 +221,9 @@ export const usePromptStore = defineStore('prompts', {
       }
       return lastResult;
     },
-    shouldIgnoreAgentResult(resultText, agent) {
-      const cleanResultText = (resultText ?? '').trim().toLowerCase().replace(/^["']|["']$/g, '');
-      const cleanIgnoreText = (agent.ignoreResultText ?? 'OK').trim().toLowerCase();
-      return cleanResultText === cleanIgnoreText;
-    },
-    async runAgentsOnPromptResult(request, result) {
-      if (request.prompt.agents?.length > 0) {
-        for(let agent of request.prompt.agents) {
-          result.analysingByAgent = agent;
-          result.analysingByAgentMessage = `${agent.title} is analysing...`;
-
-          try {
-            if (agent.type === 'Refiner') {
-              await this.runRefinerAgent(request, result, agent);
-            } else if (agent.type === 'Critic') {
-              await this.runCriticAgent(request, result, agent);
-            }
-          } finally {
-            result.analysingByAgent = undefined;
-            result.analysingByAgentMessage = undefined;
-          }
-        }
-      }
-    },
-    async runCriticAgent(request, result, agent) {
-      const agentMessages = [];
-      let iterations = 0;
-      const maxIterations = agent.maxRuns ?? 5;
-
-      // Keep applying follow-up instructions until stop word is reached or max iterations
-      while (iterations < maxIterations) {
-        iterations++;
-
-        if(result.analysisByAgentAborted) {
-          return;
-        }
-
-        // CREATE INSTRUCTIONS:
-        result.analysingByAgentMessage = `${agent.title}: Evaluating...`;
-
-        let newRequest = cloneRequest(request);
-        newRequest.silent = true;
-        newRequest.agentMessages = [...agentMessages];
-        
-        newRequest.agentMessages.push({ type: 'assistant', text: result.originalText });
-        newRequest.agentMessages.push({ type: 'user', text: agent.prompt });
-
-        let criticResult = await this.promptInternal2(newRequest);
-
-        if(result.analysisByAgentAborted) {
-          return;
-        }
-
-        // If the critic says to ignore (result is OK), stop execution
-        if (this.shouldIgnoreAgentResult(criticResult.originalText, agent)) {
-          result.analysingByAgentMessage = `${agent.title}: Content approved, no changes needed.`;
-          return; // No further action needed
-        }
-
-        const followUpInstruction = criticResult.originalText;
-
-
-        // GENERATE NEW TEXT:
-        result.analysingByAgentMessage = `${agent.title}: Iter ${iterations}/${maxIterations} - Refining...`;
-        // Create new request with original result and current follow-up instruction
-        newRequest = cloneRequest(request);
-        newRequest.silent = true;
-
-        agentMessages.push({ type: 'assistant', text: result.originalText });
-        agentMessages.push({ type: 'user', text: followUpInstruction });
-
-        newRequest.agentMessages = agentMessages;
-
-        const refinementResult = await this.promptInternal2(newRequest);
-
-        if (result.analysisByAgentAborted) {
-          return;
-        }
-
-        this.addPreviousAgentResult(result, agent);
-
-        // Update the result with the refined content
-        result.text = refinementResult.text;
-        result.originalText = refinementResult.originalText;
-
-        this.calculateDiffs(request, result);
-      }
-    },
-    async runRefinerAgent(request, result, agent) {
-      const agentMessages = [];
-      const maxRuns = agent.allowMultipleRuns ? (agent.maxRuns ?? 1) : 1;
-
-      for (let run = 0; run < maxRuns; run++) {
-        if(result.analysisByAgentAborted) {
-          return;
-        }
-
-        result.analysingByAgentMessage = `${agent.title}: Run ${run + 1}/${maxRuns} - Refining content...`;
-        
-        const newRequest = cloneRequest(request);
-        newRequest.silent = true;
-
-        agentMessages.push({ type: 'assistant', text: result.originalText });
-        agentMessages.push({ type: 'user', text: agent.prompt });
-
-        newRequest.agentMessages = agentMessages;
-
-        const newResult = await this.promptInternal2(newRequest);
-
-        if (result.analysisByAgentAborted) {
-          return;
-        }
-
-        if (this.shouldIgnoreAgentResult(newResult.originalText, agent)) {
-          result.analysingByAgentMessage = `${agent.title}: Content refined successfully (${run + 1} runs).`;
-          // already good, break
-          break;
-        } else {
-          this.addPreviousAgentResult(result, agent);
-
-          // change the result
-          result.text = newResult.text;
-          result.originalText = newResult.originalText;
-
-          this.calculateDiffs(request, result);
-        }
-      }
-    },
-    abortAiAnalysis(result) {
+    abortAgentAnalysis(result) {
       result.analysisByAgentAborted = true;
       result.analysingByAgentMessage = 'Aborting...';
-    },
-    addPreviousAgentResult(result, agent) {
-      if (!result.prevResults) {
-        result.prevResults = [];
-      }
-
-      result.prevResults.push({
-        title: 'Result before ' + agent.title,
-        request: result.request,
-        prompt: result.prompt,
-        text: result.text,
-        originalText: result.originalText,
-        diff: result.diff ? [...result.diff] : undefined,
-        meta: result.meta,
-        type: result.type,
-        waitingForResponse: result.waitingForResponse,
-        contextTypes: result.contextTypes,
-        parametersValue: result.parametersValue,
-        userInputs: result.userInputs,
-        collapsed: false,
-      });
     },
     calculateDiffs(request, result) {
       if (request.prompt.promptType === "general" || request.prompt.promptType === "selection" || request.prompt.promptType === "selectionAnalysis") {
