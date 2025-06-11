@@ -51,7 +51,7 @@
 
   <transition appear enter-active-class="animated fadeIn slow" leave-active-class="animated fadeOut">
 
-    <q-card :class="isReactionToAnotherPrompt ? 'q-ml-md' : ''" class="hoverable-card idea-card gradient-variation-1 q-pa-xs no-p-margin">
+    <q-card :class="[isReactionToAnotherPrompt ? 'q-ml-md' : '', isPreviousPromptResult ? 'gradient-variation-3' : 'gradient-variation-1']" class="hoverable-card idea-card  q-pa-xs no-p-margin">
       <div class="prompt-actions" :class="type === 'inline' ? '' : 'sticky-top'">
         <div class="row no-wrap ellipsis">
           <div class="col-auto">
@@ -105,6 +105,13 @@
               <span>{{ promptResultTitle }}</span>
               <span v-if="promptResultModel?.length > 0"><q-icon name="mdi-chip"  />{{ promptResultModel }}</span>
               <span v-if="promptResultTemperature"><q-icon  name="mdi-thermometer-low" /> {{ promptResultTemperature }}</span>
+            </q-badge>
+          </div>
+
+          <div class="col" v-if="isPreviousPromptResult">
+            <q-badge class="q-ml-md q-gutter-x-xs hoverable-btn-semi">
+              <q-icon name="mdi-history" />
+              <span>{{ promptResult.title }}</span>
             </q-badge>
           </div>
           <div class="col" v-else />
@@ -329,6 +336,12 @@
             Error while prompting: {{ promptResult.error }}
           </span>
         </div>
+
+        <div v-if="promptResult.analysingByAgent" class="q-mt-sm">
+          <q-spinner-grid />
+          Analysing by {{ promptResult.analysingByAgent.title }}...
+        </div>
+
       </q-card-section>
 
       <div v-if="type === 'inline'" class="row prompt-actions">
@@ -355,20 +368,20 @@
           </q-btn>
           <template v-if="promptResult.followUpQuestions">
             <template v-for="question in promptResult.followUpQuestions" :key="question.title">
-              <q-btn class="col-auto text-weight-bold hoverable-btn-semi" :label="question.title" flat color="accent" unelevated size="sm"
+              <q-btn class="col-auto text-weight-bold hoverable-btn-semi" :label="question.title" flat color="accent" unelevated size="sm" no-caps
                 @click.prevent="doPromptAction({type: 'Reply', typeParameter: question.followUp})">
                 <q-tooltip>
                   Reply: '{{ question.followUp }}'
                 </q-tooltip>
               </q-btn>
             </template>
-            <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm"
+            <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm" no-caps
               @click.prevent="removeFollowUpQuestions()" icon="mdi-close">
             </q-btn>
           </template>
           <template v-else>
             <template v-for="(promptAction, index) in promptResult.prompt.actions ?? []" :key="index">
-              <q-btn class="col-auto text-weight-bold hoverable-btn-semi" :label="promptAction.title" flat color="grey-7" unelevated
+              <q-btn class="col-auto text-weight-bold hoverable-btn-semi" :label="promptAction.title" flat color="grey-7" unelevated no-caps
                 size="sm" @click.prevent="doPromptAction(promptAction)" :icon="getPromptActionIcon(promptAction)">
                 <q-tooltip v-if="promptAction.type === 'Add to Context'">
                   Add this text to a file with context '{{promptAction.typeParameter}}'
@@ -494,6 +507,20 @@
 
   </transition>
 
+  <div v-if="promptResult.prevResults && promptResult.prevResults.length > 0" class="text-center">
+    <q-btn class="text-weight-bold hoverable-btn-semi" :label="previousResultsExpanded ? 'Hide results before agents' : 'Show results before agents (' + promptResult.prevResults.length + ')'" flat color="grey-7" unelevated size="sm" no-caps @click="previousResultsExpanded = !previousResultsExpanded" />
+  </div>
+
+  <template v-if="previousResultsExpanded && promptResult.prevResults && promptResult.prevResults.length > 0">
+    <template v-for="(previousResult, index) in promptResult.prevResults" :key="index">
+      <transition appear enter-active-class="animated fadeIn slow" leave-active-class="animated fadeOut">
+        <div class="q-mx-md">
+          <PromptResult :prompt-result="previousResult" :showPromptInfo="false" :isPreviousPromptResult="true" />
+        </div>
+      </transition>
+    </template>
+  </template>
+
   <div class="row q-mr-md q-mt-md" v-if="inlinePromptResult">
     <PromptResult :promptResult="inlinePromptResult" type="inline" has-close @close="inlinePromptResult = null" :show-prompt-info="false" @replace-self="replacePromptResult"/>
   </div>
@@ -502,7 +529,6 @@
 <script setup>
   import {useTextSelection} from '@vueuse/core'
   import {computed, ref, watch} from "vue";
-
   import { writeText } from '@tauri-apps/plugin-clipboard-manager';
   import {usePromptStore} from "stores/prompt-store";
   import {cloneRequest, executePromptClick2} from "src/common/helpers/promptHelper";
@@ -545,6 +571,7 @@
   const $q = useQuasar();
 
   const reactInputRef = ref();
+  const previousResultsExpanded = ref(false);
 
   const props = defineProps({
     promptResult: Object,
@@ -573,6 +600,10 @@
     showPromptInfo: {
       type: Boolean,
       default: true,
+    },
+    isPreviousPromptResult: {
+      type: Boolean,
+      default: false,
     },
   });
 

@@ -175,12 +175,9 @@ export const usePromptStore = defineStore('prompts', {
 
             const result = await this.promptInternal2(request);
 
-            if(request.prompt.promptType === "general" || request.prompt.promptType === "selection" || request.prompt.promptType === "selectionAnalysis") {
-              const trimmedResultText = result.text.trimStart().replace(/\n/g, '<br>');
-              if(trimmedResultText.length > 0) {
-                result.diff = diffStrings(request.text, trimmedResultText);
-              }
-            }
+            this.calculateDiffs(request, result);
+
+            await this.runAgentsOnPromptResult(request, result);
 
             runResults.push({
               runName: run.name,
@@ -194,12 +191,8 @@ export const usePromptStore = defineStore('prompts', {
 
             const result = await this.promptInternal2(request);
 
-            if(request.prompt.promptType === "general" || request.prompt.promptType === "selection" || request.prompt.promptType === "selectionAnalysis") {
-              const trimmedResultText = result.text.trimStart().replace(/\n/g, '<br>');
-              if(trimmedResultText.length > 0) {
-                result.diff = diffStrings(request.text, trimmedResultText);
-              }
-            }
+            this.calculateDiffs(request, result);
+            await this.runAgentsOnPromptResult(request, result);
 
             lastResult = result;
 
@@ -223,6 +216,72 @@ export const usePromptStore = defineStore('prompts', {
         }
       }
       return lastResult;
+    },
+    async runAgentsOnPromptResult(request, result) {
+      if (request.prompt.agents?.length > 0) {
+        for(let agent of request.prompt.agents) {
+          result.analysingByAgent = agent;
+
+          try {
+            if (agent.type === 'Refiner') {
+              const agentMessages = [];
+
+              for (let run = 0; run < (agent.allowMultipleRuns ? (agent.maxRuns ?? 1) : 1); run++) {
+                const newRequest = cloneRequest(request);
+                newRequest.silent = true;
+
+                agentMessages.push({ type: 'assistant', text: result.originalText });
+                agentMessages.push({ type: 'user', text: agent.prompt });
+
+                newRequest.agentMessages = agentMessages;
+
+                const newResult = await this.promptInternal2(newRequest);
+
+                if ((newResult.originalText ?? '').trim().toLowerCase() === (agent.ignoreResultText ?? 'OK').trim().toLowerCase()) {
+                  // already good, break
+                  break;
+                } else {
+                  if (!result.prevResults) {
+                    result.prevResults = [];
+                  }
+
+                  result.prevResults.push({
+                    title: 'Result before ' + agent.title,
+                    request: result.request,
+                    prompt: result.prompt,
+                    text: result.text,
+                    originalText: result.originalText,
+                    diff: result.diff ? [...result.diff] : undefined,
+                    meta: result.meta,
+                    type: result.type,
+                    waitingForResponse: result.waitingForResponse,
+                    contextTypes: result.contextTypes,
+                    parametersValue: result.parametersValue,
+                    userInputs: result.userInputs,
+                    collapsed: false,
+                  });
+
+                  // change the result
+                  result.text = newResult.text;
+                  result.originalText = newResult.originalText;
+
+                  this.calculateDiffs(request, result);
+                }
+              }
+            }
+          } finally {
+            result.analysingByAgent = undefined;
+          }
+        }
+      }
+    },
+    calculateDiffs(request, result) {
+      if (request.prompt.promptType === "general" || request.prompt.promptType === "selection" || request.prompt.promptType === "selectionAnalysis") {
+        const trimmedResultText = result.text.trimStart().replace(/\n/g, '<br>');
+        if (trimmedResultText.length > 0) {
+          result.diff = diffStrings(request.text, trimmedResultText);
+        }
+      }
     },
     async promptAgain2(request) {
       return await this.promptMultiple2(request);
@@ -451,6 +510,14 @@ export const usePromptStore = defineStore('prompts', {
         userPrompt2 = userPrompt2.replace('$chat', selectedText ?? '');
       }
 
+      if(request.agentMessages) {
+        for (const agentMessage of request.agentMessages) {
+          agentMessage.text = agentMessage.text.replace('$selection', selectedText ?? '');
+          agentMessage.text = agentMessage.text.replace('$textOrSelection', selectedText ?? '');
+          agentMessage.text = agentMessage.text.replace('$chat', selectedText ?? '');
+        }
+      }
+
       const editor = getEditor();
 
       if(editor) {
@@ -554,6 +621,14 @@ export const usePromptStore = defineStore('prompts', {
           }
         }
 
+        if(request.agentMessages) {
+          for (const agentMessage of request.agentMessages) {
+            if(agentMessage.text.includes(what)) {
+              agentMessage.text = agentMessage.text.replace(what, withWhat());
+            }
+          }
+        }
+
         if(assistantPrefix.includes(what)) {
           assistantPrefix = assistantPrefix.replace(what, withWhat());
         }
@@ -602,6 +677,11 @@ export const usePromptStore = defineStore('prompts', {
             if(userPrompt2) {
               userPrompt2 = userPrompt2.replace('$' + parameter.name, parameterValueText);
             }
+            if(request.agentMessages) {
+              for (const agentMessage of request.agentMessages) {
+                agentMessage.text = agentMessage.text.replace('$' + parameter.name, parameterValueText);
+              }
+            }
           }
         }
       }
@@ -626,6 +706,11 @@ export const usePromptStore = defineStore('prompts', {
         if(userPrompt2) {
           userPrompt2 = userPrompt2.replace('$' + variable.title, variable.value);
         }
+        if(request.agentMessages) {
+          for (const agentMessage of request.agentMessages) {
+            agentMessage.text = agentMessage.text.replace('$' + variable.title, variable.value);
+          }
+        }
       }
 
       systemPrompt = replaceMentionEditorText(systemPrompt);
@@ -637,9 +722,17 @@ export const usePromptStore = defineStore('prompts', {
         userPrompt2 = replaceMentionEditorText(userPrompt2);
       }
 
+      if(request.agentMessages) {
+        for (const agentMessage of request.agentMessages) {
+          agentMessage.text = replaceMentionEditorText(agentMessage.text);
+
+        }
+      }
+
       if(!promptResultInput || promptResultInput.length === 0) {
         promptResultInput = userPrompt;
       }
+
 
       let userInputValue = null;
 
@@ -943,6 +1036,10 @@ export const usePromptStore = defineStore('prompts', {
 
       if(forceMessages) {
         textMessages = forceMessages;
+      }
+
+      if(request.agentMessages) {
+        textMessages.push(...request.agentMessages);
       }
 
       for (const textMessage of textMessages ?? []) {
@@ -2204,6 +2301,70 @@ export const usePromptStore = defineStore('prompts', {
       }
 
       this.onUpdatePrompt(prompt);
+    },
+    addPromptAgent(prompt) {
+      if(!prompt) return;
+
+      if(!prompt.agents) {
+        prompt.agents = [];
+      }
+
+      prompt.agents.push({
+        title: 'New Agent',
+        type: 'Refiner',
+        prompt: '',
+        ignoreResultText: 'OK',
+      });
+
+      this.onUpdatePrompt(prompt);
+    },
+    updatePromptAgent(prompt, agent, args) {
+      if(!agent || !args) return;
+
+      if(args.title !== undefined) {
+        agent.title = args.title;
+      }
+
+      if(args.type !== undefined) {
+        agent.type = args.type;
+      }
+
+      if(args.prompt !== undefined) {
+        agent.prompt = args.prompt;
+      }
+
+      if(args.ignoreResultText !== undefined) {
+        agent.ignoreResultText = args.ignoreResultText;
+      }
+
+      if(args.allowMultipleRuns !== undefined) {
+        agent.allowMultipleRuns = args.allowMultipleRuns;
+      }
+
+      if(args.maxRuns !== undefined) {
+        agent.maxRuns = args.maxRuns;
+      }
+
+      this.onUpdatePrompt(prompt);
+    },
+    deletePromptAgent(prompt, agent) {
+      if(!prompt || !prompt.agents) return;
+      const index = prompt.agents.indexOf(agent);
+      prompt.agents.splice(index, 1);
+
+      this.onUpdatePrompt(prompt);
+    },
+    movePromptAgentUp(prompt, agent) {
+      if(!prompt || !prompt.agents) return;
+      const index = prompt.agents.indexOf(agent);
+      prompt.agents.splice(index, 1);
+      prompt.agents.splice(index - 1, 0, agent);
+    },
+    movePromptAgentDown(prompt, agent) {
+      if(!prompt || !prompt.agents) return;
+      const index = prompt.agents.indexOf(agent);
+      prompt.agents.splice(index, 1);
+      prompt.agents.splice(index + 1, 0, agent);
     },
     addPromptAction(prompt) {
      if(!prompt) return;
