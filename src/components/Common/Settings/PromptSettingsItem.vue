@@ -484,7 +484,8 @@
             <q-expansion-item :label="`AI Agents (${prompt.agents?.length})`" dense v-if="allowAgents" icon="mdi-robot">
               <q-card>
                 <q-card-section class="q-pb-none">
-                  <div class="text-caption text-grey">Tip: Define critics, readers or refiners to further improve the output of this prompt before presenting it to you.</div>
+                  <div class="text-caption text-grey">Tip: Define AI agents to further improve the output of this prompt before presenting it to you.</div>
+                  <div class="text-caption text-grey">Tip: Agents are executed from first to last.</div>
                 </q-card-section>
                 <q-card-section class="q-gutter-y-md" v-if="prompt.agents?.length > 0">
                   <q-card v-for="(agent, index) in prompt.agents" :key="index">
@@ -537,7 +538,21 @@
                     </q-card-section>
 
                     <q-card-section v-if="agent.type === 'Critic'" >
-                      
+                      <div class="row">
+                        <div class="col">
+                          <CodeEditor :model-value="agent.prompt" v-on:update:model-value="updateAgent(prompt, agent, {prompt: $event})" :parameters="parameters" label="Prompt" />
+                        </div>
+                      </div>
+
+                      <div class="row q-mt-sm q-col-gutter-x-lg">
+                        <div class="col-auto flex items-center">
+                          <q-input dense filled label="Stop text" :model-value="agent.ignoreResultText ?? 'OK'" v-on:update:model-value="updateAgent(prompt, agent, {ignoreResultText: $event})" />
+                          <HelpIcon :tooltip="$t('tooltips.parameters.ignoreResultText')"></HelpIcon>
+                        </div>
+                        <div class="col-auto flex items-center">
+                          <q-input v-if="agent.allowMultipleRuns" dense filled label="Max iterations" type="number" :model-value="agent.maxRuns ?? 5" v-on:update:model-value="updateAgent(prompt, agent, {maxRuns: $event})" class="q-ml-sm" />
+                        </div>
+                      </div>
                     </q-card-section>
 
                   </q-card>
@@ -769,8 +784,8 @@ import MultiplePromptsSelect from 'components/Common/MultiplePromptsSelect.vue';
   ];
 
   const agentTypes = [
-    { label: "Refiner", value: "Refiner", description: "Takes the output of this prompt and improves it according to your instructions. It may decide that no change is needed and keeps the current output as is." },
-    { label: "Critic", value: "Critic", description: "Takes the output of this prompt and asks itself if it meets desired criteria. Then according to reply, it chooses another action." },
+    { label: "Refiner", value: "Refiner", description: "Takes the output of this prompt and improves it according to your instructions. Can run multiple times, keeping previous messages in chat history, until it decides there is nothing more to improve." },
+    { label: "Critic", value: "Critic", description: "Takes the output of this prompt and iterates - by crafting additional instructions to improve the result." },
   ];
 
   const contextTypes = computed(() => {

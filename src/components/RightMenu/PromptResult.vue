@@ -337,9 +337,15 @@
           </span>
         </div>
 
-        <div v-if="promptResult.analysingByAgent" class="q-mt-sm">
-          <q-spinner-grid />
-          Analysing by {{ promptResult.analysingByAgent.title }}...
+        <div v-if="promptResult.analysingByAgent" class="q-mt-lg">
+          <q-spinner-grid class="q-mr-sm" />
+          <span v-if="promptResult.analysingByAgentMessage">
+            {{ promptResult.analysingByAgentMessage }}
+          </span>
+          <span v-else>
+            Analysing by {{ promptResult.analysingByAgent.title }}...
+          </span>
+          <q-btn flat dense unelevated size="sm" no-caps icon="mdi-close" @click="promptStore.abortAiAnalysis(promptResult)" label="Abort" />
         </div>
 
       </q-card-section>
