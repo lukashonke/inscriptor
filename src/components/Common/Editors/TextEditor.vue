@@ -4,6 +4,7 @@
       class="bubble-menu"
       :tippy-options="{ duration: 100, placement: 'bottom', maxWidth: '600px', zIndex: 99999 }"
       :editor="editor"
+      :should-show="shouldShowDefaultBubbleMenu"
     >
       <div class="q-gutter-y-xs" v-if="aiBubbleMenu">
         <div class="row">
@@ -287,19 +288,53 @@
       </div>
 
       <div class="col-auto" v-if="promptStore.projectAgents.length > 0">
-        <q-btn size="11px" dense flat icon="mdi-robot-outline" class="text-accent">
-          <q-menu>
+        <q-btn
+          v-if="!isAgentActive"
+          size="11px"
+          dense
+          flat
+          :icon="agentIcon"
+          :class="agentButtonClass"
+          :disable="isAgentActive"
+        >
+          <!-- Spinner overlay when processing -->
+          <q-spinner-oval
+            v-if="agentState === 'processing'"
+            size="16px"
+            color="orange"
+            class="absolute-center"
+          />
+
+          <q-menu v-if="!isAgentActive">
             <q-list dense>
               <q-item v-for="agent in promptStore.projectAgents" :key="agent.id" clickable v-close-popup @click="runProjectAgent(agent)">
                 <q-item-section>
-                  <q-item-label>{{ agent.title }}</q-item-label>
+                  <q-item-label class="flex items-center">
+                    <q-icon name="mdi-robot-outline" color="accent" size="xs" class="q-mr-sm" />
+                    {{ agent.title }}
+                  </q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>
           </q-menu>
-          <q-tooltip>
-            Run Project Agents
+
+          <q-tooltip :delay="1000">
+            {{ agentTooltip }}
           </q-tooltip>
+        </q-btn>
+
+        <!-- Stop button when agent is active -->
+        <q-btn
+          v-if="isAgentActive"
+          size="11px"
+          dense
+          flat
+          icon="mdi-stop"
+          class="text-negative q-ml-xs"
+          @click="stopAgentProcessing"
+          label="Stop AI Agent"
+          no-caps
+        >
         </q-btn>
       </div>
 
@@ -348,8 +383,43 @@
     </div>
   </div>
 
-
-
+  <!-- Agent Confirmation Widget -->
+  <bubble-menu
+    v-if="editor && confirmationWidgetVisible && confirmationWidgetData"
+    :editor="editor"
+    :tippy-options="{
+      placement: 'bottom-start',
+      offset: [0, 12],
+      duration: [200, 150],
+      zIndex: 10000,
+      interactive: true,
+      interactiveBorder: 10,
+      interactiveDebounce: 75,
+      hideOnClick: false,
+      trigger: 'manual',
+      boundary: 'viewport',
+      flip: true,
+      flipOnUpdate: true,
+      arrow: true,
+      theme: 'light-border',
+      maxWidth: 500,
+      appendTo: 'parent'
+    }"
+    :should-show="shouldShowConfirmationWidget"
+  >
+    <AgentConfirmationWidget
+      :agent-title="confirmationWidgetData.agentTitle"
+      :original-text="confirmationWidgetData.originalText"
+      :suggested-text="confirmationWidgetData.suggestedText"
+      :paragraph-range="confirmationWidgetData.paragraphRange"
+      :chat-loading="confirmationWidgetData.chatLoading"
+      :streaming-text="confirmationWidgetData.streamingText"
+      :is-streaming="confirmationWidgetData.isStreaming"
+      @accept="confirmationWidgetData.onAccept"
+      @reject="confirmationWidgetData.onReject"
+      @chat="confirmationWidgetData.onChat"
+    />
+  </bubble-menu>
 
   <q-page-sticky position="bottom-left" :offset="[18, 18]" v-if="promptStore.hasStickyPrompts(fileStore.selectedFile)">
     <q-fab
@@ -419,6 +489,7 @@ import {AgentDecorationPlugin} from 'src/common/tipTap/AgentDecorationPlugin';
 import PromptContextSelector from 'components/Common/PromptSelector/PromptContextSelector.vue';
 import {HorizontalRule} from '@tiptap/extension-horizontal-rule';
 import {useAiAgentStore} from "stores/aiagent-store";
+import AgentConfirmationWidget from 'src/components/Common/AgentConfirmationWidget.vue';
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
@@ -561,6 +632,61 @@ const currentSelectionPromptCategory = ref('');
 
 const fileInfo = ref(null);
 const fileInfoHover = useElementHover(fileInfo)
+
+// Agent confirmation widget state
+const confirmationWidgetVisible = ref(false);
+const confirmationWidgetData = ref(null);
+
+// shouldShow function for default BubbleMenu (hide only for paragraph with pending confirmation)
+const shouldShowDefaultBubbleMenu = ({ editor, view, state, from, to }) => {
+  // Default BubbleMenu logic: show when there's a non-empty text selection
+  const { selection } = state;
+  const { empty } = selection;
+
+  if (empty || !editor.isEditable) {
+    return false;
+  }
+
+  // Hide default bubble menu only if current selection overlaps with paragraph that has pending confirmation
+  if (confirmationWidgetVisible.value && confirmationWidgetData.value && confirmationWidgetData.value.paragraphRange) {
+    const targetRange = confirmationWidgetData.value.paragraphRange;
+
+    // Simplified overlap detection: ranges overlap if they're NOT completely separate
+    // Two ranges are separate if: from >= targetRange.to OR to <= targetRange.from
+    // So they overlap if: !(from >= targetRange.to || to <= targetRange.from)
+    const overlapsWithPendingParagraph = !(from >= targetRange.to || to <= targetRange.from);
+
+    console.log('BubbleMenu overlap check:', {
+      selection: { from, to },
+      targetRange,
+      overlaps: overlapsWithPendingParagraph,
+      confirmationVisible: confirmationWidgetVisible.value
+    });
+
+    if (overlapsWithPendingParagraph) {
+      console.log('Hiding default bubble menu due to overlap with pending confirmation');
+      return false; // Hide default bubble menu for the paragraph with pending confirmation
+    }
+  }
+
+  console.log('Showing default bubble menu for selection:', { from, to });
+  return true; // Show default bubble menu for all other selections
+};
+
+// shouldShow function for Agent Confirmation BubbleMenu
+const shouldShowConfirmationWidget = ({ editor, view, state, from, to }) => {
+  if (!confirmationWidgetVisible.value || !confirmationWidgetData.value) {
+    return false;
+  }
+
+  const targetRange = confirmationWidgetData.value.paragraphRange;
+  // Show when selection overlaps with our target paragraph
+  const overlaps = (from >= targetRange.from && from <= targetRange.to) ||
+                   (to >= targetRange.from && to <= targetRange.to) ||
+                   (from <= targetRange.from && to >= targetRange.to);
+
+  return overlaps;
+};
 
 computed(() => {
   const prompts = promptStore.selectionPrompts.filter(p => promptStore.canPrompt(p)).map(p => p.category ?? "");
@@ -755,6 +881,22 @@ onMounted(() =>{
   editorStore.setEditor(editor.value);
   promptStore.updateTokens();
   promptStore.setCharsCount(editor.value.storage.characterCount.characters());
+
+  // Add event listeners for agent confirmation widget
+  if (editor.value) {
+    editor.value.on('showAgentConfirmation', (data) => {
+      confirmationWidgetData.value = data;
+      confirmationWidgetVisible.value = true;
+    });
+
+    editor.value.on('hideAgentConfirmation', () => {
+      confirmationWidgetVisible.value = false;
+      // Keep confirmationWidgetData briefly for proper hiding animation
+      setTimeout(() => {
+        confirmationWidgetData.value = null;
+      }, 200); // Match the hide animation duration
+    });
+  }
 })
 
 onDeactivated(() => {
@@ -1246,8 +1388,53 @@ function onClickBelowEditor(event) {
   editor.value.chain().focus().run();
 }
 
+// Agent status computed properties
+const agentState = computed(() => aiAgentStore.agentState);
+const isAgentActive = computed(() => aiAgentStore.isAgentActive);
+
+const agentIcon = computed(() => {
+  switch (agentState.value) {
+    case 'processing':
+      return 'mdi-robot';
+    case 'waiting_for_user':
+      return 'mdi-robot-excited-outline';
+    default:
+      return 'mdi-robot-outline';
+  }
+});
+
+const agentButtonClass = computed(() => {
+  switch (agentState.value) {
+    case 'processing':
+      return 'text-orange';
+    case 'waiting_for_user':
+      return 'text-blue';
+    default:
+      return 'text-accent';
+  }
+});
+
+const agentTooltip = computed(() => {
+  switch (agentState.value) {
+    case 'processing':
+      return 'Agent is processing paragraphs...';
+    case 'waiting_for_user':
+      return 'Agent is waiting for your confirmation';
+    default:
+      return 'Run Project AI Agent';
+  }
+});
+
 async function runProjectAgent(agent) {
-  aiAgentStore.runProjectAgent(agent);
+  aiAgentStore.openProjectAgent(agent);
+}
+
+function stopAgentProcessing() {
+  try {
+    aiAgentStore.stopAgentProcessing();
+  } catch (error) {
+    console.error('Failed to stop agent processing:', error);
+  }
 }
 
 </script>
@@ -1285,5 +1472,19 @@ async function runProjectAgent(agent) {
 
 .floating-menu {
   display: flex;
+}
+
+.agent-confirmation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  padding: 20px;
 }
 </style>

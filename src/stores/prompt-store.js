@@ -149,6 +149,7 @@ export const usePromptStore = defineStore('prompts', {
       const aiAgentStore = useAiAgentStore();
 
       let lastResult = null;
+      
 
       try {
         if(request.prompt.enablePromptRuns === true && request.prompt.runs && request.prompt.runs.length > 0 && !request.silent) {
@@ -193,7 +194,7 @@ export const usePromptStore = defineStore('prompts', {
             console.log(result.diff);
           }
         } else {
-          for(let i = 0; i < request.promptTimes; i++) {
+          for(let i = 0; i < (request.promptTimes ?? 1); i++) {
 
             const result = await this.promptInternal2(request);
 

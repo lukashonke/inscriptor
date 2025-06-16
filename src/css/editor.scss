@@ -514,7 +514,7 @@
 // Agent decoration styles
 .agent-pending {
   position: relative;
-  
+
   &::before {
     content: '';
     position: absolute;
@@ -530,65 +530,36 @@
 
 .agent-processing {
   position: relative;
-  background-color: rgba(255, 167, 38, 0.08);
+  background-color: rgba(255, 167, 38, 0.05);
   border-left: 3px solid #ffa726;
   padding-left: 8px;
   margin-left: -8px;
-  
-  animation: agent-pulse 2s ease-in-out infinite;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -3px;
-    width: 3px;
-    height: 100%;
-    background: linear-gradient(45deg, #ffa726, #ff9800);
-    border-radius: 2px;
-    animation: agent-shimmer 1.5s ease-in-out infinite;
-  }
+
+  animation: agent-pulse 1.5s ease-in-out infinite;
 }
 
-.agent-completed {
+.agent-streaming {
   position: relative;
-  background-color: rgba(76, 175, 80, 0.05);
-  border-left: 3px solid #4caf50;
+  background-color: rgba(78, 93, 212, 0.05);
+  border-left: 3px solid #4e5dd4;
   padding-left: 8px;
   margin-left: -8px;
-  
-  transition: all 0.3s ease;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -3px;
-    width: 3px;
-    height: 100%;
-    background-color: #4caf50;
-    border-radius: 2px;
-  }
+
+  animation: agent-pulse-purple 1.5s ease-in-out infinite;
 }
 
-.agent-error {
+.agent-awaiting-confirmation {
   position: relative;
-  background-color: rgba(244, 67, 54, 0.05);
-  border-left: 3px solid #f44336;
+  background-color: rgba(78, 93, 212, 0.05);
+  border-left: 3px solid #4e5dd4;
   padding-left: 8px;
   margin-left: -8px;
-  
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -3px;
-    width: 3px;
-    height: 100%;
-    background-color: #f44336;
-    border-radius: 2px;
-  }
+
+  // Subtle glow effect for awaiting confirmation
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
 }
+
 
 // Dark mode support
 .dark-mode {
@@ -597,33 +568,27 @@
       background-color: #ffb74d;
     }
   }
-  
+
   .agent-processing {
     background-color: rgba(255, 183, 77, 0.12);
     border-left-color: #ffb74d;
-    
+
     &::before {
       background: linear-gradient(45deg, #ffb74d, #ffcc02);
     }
   }
-  
-  .agent-completed {
-    background-color: rgba(129, 199, 132, 0.08);
-    border-left-color: #81c784;
-    
-    &::before {
-      background-color: #81c784;
-    }
+
+  .agent-streaming {
+    background-color: rgba(186, 104, 200, 0.12);
+    border-left-color: #ba68c8;
   }
-  
-  .agent-error {
-    background-color: rgba(239, 154, 154, 0.08);
-    border-left-color: #ef9a9a;
-    
-    &::before {
-      background-color: #ef9a9a;
-    }
+
+  .agent-awaiting-confirmation {
+    background-color: rgba(100, 181, 246, 0.12);
+    border-left-color: #4e5dd4;
+    box-shadow: 0 0 8px rgba(100, 181, 246, 0.2);
   }
+
 }
 
 // Animations
@@ -633,6 +598,15 @@
   }
   50% {
     background-color: rgba(255, 167, 38, 0.15);
+  }
+}
+
+@keyframes agent-pulse-purple {
+  0%, 100% {
+    background-color: rgba(78, 93, 212, 0.05);
+  }
+  50% {
+    background-color: rgba(78, 93, 212, 0.12);
   }
 }
 

@@ -9,6 +9,7 @@ import {
 } from "src/common/resources/promptContexts";
 import {useLayoutStore} from "stores/layout-store";
 import {getEditor, isEmptySelection} from "src/common/utils/editorUtils";
+import {useAiAgentStore} from 'stores/aiagent-store';
 
 export function applyPromptFormatPrefixSuffix(systemPrefix, systemSuffix, systemMessage, userPrefix, userSuffix, userPrompt, assistantPrefix, assistantSuffix) {
   let output = '';
@@ -199,7 +200,10 @@ export async function executeConfirmPrompt2(request) {
 
   request.clear = clear;
 
-  if(request.prompt.promptType === "general"
+  if(request.agent) {
+    const aiAgentStore = useAiAgentStore();
+    await aiAgentStore.confirmProjectAgent(request)
+  } else if(request.prompt.promptType === "general"
     || request.prompt.promptType === "insert"
     || request.prompt.promptType === "selection"
     || request.prompt.promptType === "selectionAnalysis") {

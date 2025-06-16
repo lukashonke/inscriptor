@@ -128,6 +128,10 @@
                             <q-input dense filled label="Search prefix" :model-value="agent.searchPrefix ?? '//'" v-on:update:model-value="updateProjectAgent(agent, {searchPrefix: $event})" />
                             <HelpIcon :tooltip="$t('tooltips.parameters.searchPrefix')"></HelpIcon>
                           </div>
+                          <div class="col-auto flex items-center">
+                            <q-input dense filled label="Ignore Reply text" :model-value="agent.ignoreResultText ?? 'OK'" v-on:update:model-value="updateProjectAgent(agent, {ignoreResultText: $event})" />
+                            <HelpIcon :tooltip="$t('tooltips.parameters.ignoreResultText')"></HelpIcon>
+                          </div>
                         </div>
                       </div>
                     </q-card-section>
@@ -149,7 +153,6 @@
 <script setup>
 
 import {usePromptStore} from "stores/prompt-store";
-import {useLayoutStore} from "stores/layout-store";
 import HelpIcon from 'components/Common/HelpIcon.vue';
 import CodeEditor from 'components/Common/Editors/CodeEditor.vue';
 import {computed} from 'vue';

@@ -202,14 +202,19 @@
         <q-separator class="q-mt-sm" />
         <q-card-section class="q-px-md q-pt-sm">
 
-          <div class="bordered rounded-borders q-mt-sm" flat>
+          <div class="bordered rounded-borders q-mt-sm" flat :class="{'bg-grey-1': request.agent}">
             <div class="cursor-pointer context-selector q-px-md q-py-md">
               <div class="row">
                 <div class="col text-subtitle2 flex items-center"><q-icon name="mdi-import" class="q-mr-xs" />Input</div>
-                <div class="col-auto"><q-icon name="keyboard_arrow_down" size="sm" /></div>
+                <div class="col-auto" v-if="!request.agent"><q-icon name="keyboard_arrow_down" size="sm" /></div>
               </div>
 
-              <template v-if="promptStore.promptUserInputs?.length > 0 ?? false">
+              <template v-if="request.agent">
+                <div class="text-italic">
+                  All paragraphs starting with "{{ request.agent.searchPrefix }}" in the current file, processed one by one.
+                </div>
+              </template>
+              <template v-else-if="promptStore.promptUserInputs?.length > 0 ?? false">
                 <template v-for="input in promptStore.promptUserInputs" :key="input.id">
                   <q-chip :color="input.color + '-3'" removable @remove="removeInput(input)">
                     {{ input.label }}
@@ -363,11 +368,11 @@
         </div>
         <div class="col">
         </div>
-        <div class="col-auto q-mr-md">
+        <div class="col-auto q-mr-md" v-if="!request.agent">
           <q-btn flat label="Preview & Cost" color="secondary" @click="previewPrompt" class="float-left" :disable="!canConfirmPrompt"/>
         </div>
         <div class="col-auto">
-          <q-btn color="accent" icon="mdi-creation-outline" label="Run Prompt" v-close-popup @click="confirmPrompt(false)" class="float-right" :disable="!canConfirmPrompt" autofocus/>
+          <q-btn color="accent" :icon="request.agent ? 'mdi-robot-outline' : 'mdi-creation-outline'" :label="request.agent ? 'Run Agent' : 'Run Prompt'" v-close-popup @click="confirmPrompt(false)" class="float-right" :disable="!canConfirmPrompt" autofocus/>
         </div>
       </q-card-actions>
     </q-card>

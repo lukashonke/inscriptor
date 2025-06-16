@@ -18,26 +18,30 @@ export const useEditorStore = defineStore('editor', {
     setEditor(editor) {
       this.editor = editor;
     },
-    
     // Agent decoration management methods
     addAgentDecoration(from, to, status = 'pending') {
       if (!this.editor) return false;
       return this.editor.commands.addAgentDecoration(from, to, status);
     },
-    
     updateAgentDecoration(from, to, status) {
       if (!this.editor) return false;
       return this.editor.commands.updateAgentDecoration(from, to, status);
     },
-    
     removeAgentDecoration(from, to) {
       if (!this.editor) return false;
       return this.editor.commands.removeAgentDecoration(from, to);
     },
-    
     clearAllAgentDecorations() {
       if (!this.editor) return false;
       return this.editor.commands.clearAllAgentDecorations();
+    },
+    showConfirmationWidget(widgetData) {
+      if (!this.editor) return false;
+      return this.editor.commands.showConfirmationWidget(widgetData);
+    },
+    hideConfirmationWidget() {
+      if (!this.editor) return false;
+      return this.editor.commands.hideConfirmationWidget();
     },
     setPendingAutocompleteTextInput(input) {
       this.pendingAutocompleteTextInput = input;

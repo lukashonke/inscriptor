@@ -1,4 +1,4 @@
-import { Extension } from '@tiptap/vue-3';
+import { Extension, VueRenderer } from '@tiptap/vue-3';
 import { Plugin, PluginKey } from '@tiptap/pm/state'
 import { Decoration, DecorationSet } from '@tiptap/pm/view'
 
@@ -8,15 +8,16 @@ export const AgentDecorationPlugin = Extension.create({
   addOptions() {
     return {
       pendingClass: 'agent-pending',
-      processingClass: 'agent-processing', 
-      completedClass: 'agent-completed',
-      errorClass: 'agent-error',
+      processingClass: 'agent-processing',
+      streamingClass: 'agent-streaming',
+      awaitingConfirmationClass: 'agent-awaiting-confirmation',
     }
   },
 
   addStorage() {
     return {
       pluginKey: new PluginKey('agentDecoration'),
+      vueRenderers: new Map(), // Store VueRenderer instances for cleanup
     }
   },
 
@@ -53,9 +54,16 @@ export const AgentDecorationPlugin = Extension.create({
     ]
   },
 
+  onDestroy() {
+    // Cleanup all VueRenderer instances
+    this.storage.vueRenderers.forEach(renderer => renderer.destroy())
+    this.storage.vueRenderers.clear()
+  },
+
   addCommands() {
     const pluginKey = this.storage.pluginKey
     const options = this.options
+    const extension = this
     
     // Helper function to get CSS class based on status
     const getClassForStatus = (status) => {
@@ -64,10 +72,10 @@ export const AgentDecorationPlugin = Extension.create({
           return options.pendingClass
         case 'processing':
           return options.processingClass
-        case 'completed':
-          return options.completedClass
-        case 'error':
-          return options.errorClass
+        case 'streaming':
+          return options.streamingClass
+        case 'awaiting_confirmation':
+          return options.awaitingConfirmationClass
         default:
           return options.pendingClass
       }
@@ -125,6 +133,22 @@ export const AgentDecorationPlugin = Extension.create({
         return true
       },
 
+      showConfirmationWidget: (widgetData) => ({ tr, dispatch, state }) => {
+        // This will be handled by a separate component, just trigger an event
+        extension.editor.emit('showAgentConfirmation', widgetData)
+        return true
+      },
+
+      hideConfirmationWidget: () => ({ tr, dispatch, state }) => {
+        // This will be handled by a separate component
+        try {
+            extension.editor.emit('hideAgentConfirmation')
+        } catch (error) {
+          console.error('Failed to hide agent confirmation:', error);
+        }
+        return true
+      },
+
       removeAgentDecoration: (from, to) => ({ tr, dispatch, state }) => {
         if (!dispatch) return true
         
@@ -148,6 +172,9 @@ export const AgentDecorationPlugin = Extension.create({
       clearAllAgentDecorations: () => ({ tr, dispatch, state }) => {
         if (!dispatch) return true
         
+        // Also hide any confirmation widgets
+        extension.editor.emit('hideAgentConfirmation')
+        
         const newTr = state.tr.setMeta(pluginKey, { 
           type: 'set', 
           decorationSet: DecorationSet.empty 
@@ -156,23 +183,6 @@ export const AgentDecorationPlugin = Extension.create({
         dispatch(newTr)
         return true
       }
-    }
-  },
-
-
-  // Get CSS class based on status
-  getClassForStatus(status) {
-    switch (status) {
-      case 'pending':
-        return this.options.pendingClass
-      case 'processing':
-        return this.options.processingClass
-      case 'completed':
-        return this.options.completedClass
-      case 'error':
-        return this.options.errorClass
-      default:
-        return this.options.pendingClass
     }
   }
 })
