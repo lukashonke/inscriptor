@@ -140,16 +140,24 @@ export const useAiAgentStore = defineStore('ai-agent', {
       });
     },
     async runAgentsOnPromptResult(request, result) {
+      const promptStore = usePromptStore();
+
       if (request.prompt.agents?.length > 0) {
         for(let agent of request.prompt.agents) {
-          result.analysingByAgent = agent;
-          result.analysingByAgentMessage = `${agent.title} is analysing...`;
+
+          const agentDefinition = promptStore.promptAgents.find(a => a.id === agent.agentId);
+          if(!agentDefinition) {
+            continue;
+          }
+
+          result.analysingByAgent = agentDefinition;
+          result.analysingByAgentMessage = `${agentDefinition.title} is analysing...`;
 
           try {
-            if (agent.type === 'Refiner') {
-              await this.runRefinerAgent(request, result, agent);
-            } else if (agent.type === 'Critic') {
-              await this.runCriticAgent(request, result, agent);
+            if (agentDefinition.type === 'Refiner') {
+              await this.runRefinerAgent(request, result, agentDefinition);
+            } else if (agentDefinition.type === 'Critic') {
+              await this.runCriticAgent(request, result, agentDefinition);
             }
           } finally {
             result.analysingByAgent = undefined;

@@ -51,6 +51,8 @@ export const usePromptStore = defineStore('prompts', {
     predefinedPrompts: [],
     predefinedPromptInstances: [],
 
+    promptAgents: [],
+
     analysisEnabled: false,
     selectionAnalysisRunning: false,
     analysisPromptsSettings: {
@@ -2252,23 +2254,20 @@ export const usePromptStore = defineStore('prompts', {
 
       this.onUpdatePrompt(prompt);
     },
-    addPromptAgent(prompt) {
-      if(!prompt) return;
-
-      if(!prompt.agents) {
-        prompt.agents = [];
+    addPromptAgent() {
+      if(!this.promptAgents) {
+        this.promptAgents = [];
       }
 
-      prompt.agents.push({
+      this.promptAgents.push({
+        id: guid(),
         title: 'New Agent',
         type: 'Refiner',
         prompt: '',
         ignoreResultText: 'OK',
       });
-
-      this.onUpdatePrompt(prompt);
     },
-    updatePromptAgent(prompt, agent, args) {
+    updatePromptAgent(agent, args) {
       if(!agent || !args) return;
 
       if(args.title !== undefined) {
@@ -2294,23 +2293,61 @@ export const usePromptStore = defineStore('prompts', {
       if(args.maxRuns !== undefined) {
         agent.maxRuns = args.maxRuns;
       }
+    },
+    deletePromptAgent(agent) {
+      if(!this.promptAgents) return;
+      const index = this.promptAgents.indexOf(agent);
+      this.promptAgents.splice(index, 1);
+    },
+    movePromptAgentUp(agent) {
+      if(!this.promptAgents) return;
+      const index = this.promptAgents.indexOf(agent);
+      this.promptAgents.splice(index, 1);
+      this.promptAgents.splice(index - 1, 0, agent);
+    },
+    movePromptAgentDown(agent) {
+      if(!this.promptAgents) return;
+      const index = this.promptAgents.indexOf(agent);
+      this.promptAgents.splice(index, 1);
+      this.promptAgents.splice(index + 1, 0, agent);
+    },
+    addPromptPromptAgent(prompt) {
+      if(!prompt) return;
+
+      if(!prompt.agents) {
+        prompt.agents = [];
+      }
+
+      prompt.agents.push({
+        id: guid(),
+        agentId: null,
+      });
 
       this.onUpdatePrompt(prompt);
     },
-    deletePromptAgent(prompt, agent) {
+    updatePromptPromptAgent(prompt, agent, args) {
+      if(!agent || !args) return;
+
+      if(args.agentId !== undefined) {
+        agent.agentId = args.agentId;
+      }
+
+      this.onUpdatePrompt(prompt);
+    },
+    deletePromptPromptAgent(prompt, agent) {
       if(!prompt || !prompt.agents) return;
       const index = prompt.agents.indexOf(agent);
       prompt.agents.splice(index, 1);
 
       this.onUpdatePrompt(prompt);
     },
-    movePromptAgentUp(prompt, agent) {
+    movePromptPromptAgentUp(prompt, agent) {
       if(!prompt || !prompt.agents) return;
       const index = prompt.agents.indexOf(agent);
       prompt.agents.splice(index, 1);
       prompt.agents.splice(index - 1, 0, agent);
     },
-    movePromptAgentDown(prompt, agent) {
+    movePromptPromptAgentDown(prompt, agent) {
       if(!prompt || !prompt.agents) return;
       const index = prompt.agents.indexOf(agent);
       prompt.agents.splice(index, 1);
@@ -2641,6 +2678,7 @@ export const usePromptStore = defineStore('prompts', {
         contextTypes: this.contextTypes,
         promptCategories: this.promptCategories,
         promptFolders: this.promptFolders,
+        promptAgents: this.promptAgents,
         savedPromptContexts: this.savedPromptContexts,
         hubPromptPacks: this.hubPromptPacks,
         modelPromptPacks: this.modelPromptPacks,
@@ -2686,6 +2724,8 @@ export const usePromptStore = defineStore('prompts', {
       this.analysisPromptsSettings = {
         prompts: []
       };
+
+      this.promptAgents = [];
 
       this.predefinedPrompts = [
         { promptType: 'Summarize Page', promptHint: 'Can be used to quickly generate file synopsies / summaries.' },
@@ -2804,6 +2844,13 @@ export const usePromptStore = defineStore('prompts', {
               this.promptCategories.splice(index, 0, category);
             }
           }
+        }
+      }
+
+      if(aiSettings.promptAgents) {
+        this.promptAgents = [];
+        for(const agent of aiSettings.promptAgents) {
+          this.promptAgents.push(agent);
         }
       }
 

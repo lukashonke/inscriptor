@@ -492,69 +492,16 @@
                     <q-card-section>
                       <div class="row q-col-gutter-sm">
                         <div class="col flex items-center">
-                          <q-input dense filled label="Agent Name" :model-value="agent.title" v-on:update:model-value="updateAgent(prompt, agent, {title: $event})" class="full-width"/>
+                          <q-select class="full-width" filled dense label="Select Agent" :model-value="availableAgents.find(a => a.value === agent.agentId)?.label ?? 'Unknown Agent'" :options="availableAgents" emit-value options-dense v-on:update:model-value="updateAgent(prompt, agent, {agentId: $event})" />
                         </div>
-                        <div class="col">
-                          <q-select dense filled label="Type" :model-value="agent.type" v-on:update:model-value="updateAgent(prompt, agent, {type: $event})" :options="agentTypes" emit-value>
-                            <template v-slot:option="scope">
-                              <q-item v-bind="scope.itemProps" class="">
-                                <q-item-section>
-                                  <q-item-label>{{ scope.opt.label }}</q-item-label>
-                                  <q-item-label caption v-if="scope.opt.description?.length > 0 ?? false">{{ scope.opt.description }}</q-item-label>
-                                </q-item-section>
-                              </q-item>
-                            </template>
-                          </q-select>
-                        </div>
+
                         <div class="col-auto flex items-center">
                           <q-btn icon="mdi-arrow-up" flat dense @click="moveAgentUp(prompt, agent)" class="q-mr-xs" :disable="index === 0"/>
                           <q-btn icon="mdi-arrow-down" flat dense @click="moveAgentDown(prompt, agent)" class="q-mr-xs" :disable="index === prompt.agents.length - 1"/>
                           <q-btn icon="mdi-delete-outline q-ml-sm q-mr-sm" color="red" flat dense @click="deleteAgent(prompt, agent)" label="" class=""/>
                         </div>
                       </div>
-
                     </q-card-section>
-
-                    <q-card-section v-if="agent.type === 'Refiner'" >
-
-                      <div class="row">
-                        <div class="col">
-                          <CodeEditor :model-value="agent.prompt" v-on:update:model-value="updateAgent(prompt, agent, {prompt: $event})" :parameters="parameters" label="Prompt" />
-                        </div>
-                      </div>
-
-                      <div class="row q-mt-sm q-col-gutter-x-lg">
-                        <div class="col-auto flex items-center">
-                          <q-input dense filled label="Stop & Ignore text" :model-value="agent.ignoreResultText ?? 'OK'" v-on:update:model-value="updateAgent(prompt, agent, {ignoreResultText: $event})" />
-                          <HelpIcon :tooltip="$t('tooltips.parameters.ignoreResultText')"></HelpIcon>
-                        </div>
-                        <div class="col-auto flex items-center">
-                          <q-checkbox dense label="Allow multiple runs" :model-value="agent.allowMultipleRuns ?? false" v-on:update:model-value="updateAgent(prompt, agent, {allowMultipleRuns: $event})" />
-                          <q-input v-if="agent.allowMultipleRuns" dense filled label="Max runs" type="number" :model-value="agent.maxRuns ?? 1" v-on:update:model-value="updateAgent(prompt, agent, {maxRuns: $event})" class="q-ml-sm" />
-                          <HelpIcon :tooltip="$t('tooltips.parameters.agentMaxRuns')"></HelpIcon>
-                        </div>
-                      </div>
-
-                    </q-card-section>
-
-                    <q-card-section v-if="agent.type === 'Critic'" >
-                      <div class="row">
-                        <div class="col">
-                          <CodeEditor :model-value="agent.prompt" v-on:update:model-value="updateAgent(prompt, agent, {prompt: $event})" :parameters="parameters" label="Prompt" />
-                        </div>
-                      </div>
-
-                      <div class="row q-mt-sm q-col-gutter-x-lg">
-                        <div class="col-auto flex items-center">
-                          <q-input dense filled label="Stop text" :model-value="agent.ignoreResultText ?? 'OK'" v-on:update:model-value="updateAgent(prompt, agent, {ignoreResultText: $event})" />
-                          <HelpIcon :tooltip="$t('tooltips.parameters.ignoreResultText')"></HelpIcon>
-                        </div>
-                        <div class="col-auto flex items-center">
-                          <q-input dense filled label="Max iterations" type="number" :model-value="agent.maxRuns ?? 5" v-on:update:model-value="updateAgent(prompt, agent, {maxRuns: $event})" class="q-ml-sm" />
-                        </div>
-                      </div>
-                    </q-card-section>
-
                   </q-card>
                 </q-card-section>
                 <q-card-actions>
@@ -583,7 +530,6 @@
                           <q-btn icon="mdi-delete-outline q-ml-sm q-mr-sm" color="red" flat dense @click="deleteAction(prompt, action)" label="" class=""/>
                         </div>
                       </div>
-
                     </q-card-section>
 
                     <q-card-section v-if="action.type === 'Run Prompt'" >
@@ -783,10 +729,9 @@ import MultiplePromptsSelect from 'components/Common/MultiplePromptsSelect.vue';
     { label: "Save to Variable", value: "Save to Variable" },
   ];
 
-  const agentTypes = [
-    { label: "Refiner", value: "Refiner", description: "Takes the output of this prompt and improves it according to your instructions. Can run multiple times, keeping previous messages in chat history, until it decides there is nothing more to improve." },
-    { label: "Critic", value: "Critic", description: "Takes the output of this prompt and iterates - by crafting additional instructions to improve the result." },
-  ];
+  const availableAgents = computed(() => {
+    return promptStore.promptAgents.map(a => ({label: a.title + ' (' + a.type + ')', value: a.id}));
+  });
 
   const contextTypes = computed(() => {
     const values = allPromptContexts;
@@ -1379,23 +1324,23 @@ const hasResultsSeparator = computed({
   }
 
   function addAgent(prompt) {
-    promptStore.addPromptAgent(prompt);
+    promptStore.addPromptPromptAgent(prompt);
   }
 
   function deleteAgent(prompt, agent) {
-    promptStore.deletePromptAgent(prompt, agent);
+    promptStore.deletePromptPromptAgent(prompt, agent);
   }
 
   function moveAgentUp(prompt, agent) {
-    promptStore.movePromptAgentUp(prompt, agent);
+    promptStore.movePromptPromptAgentUp(prompt, agent);
   }
 
   function moveAgentDown(prompt, agent) {
-    promptStore.movePromptAgentDown(prompt, agent);
+    promptStore.movePromptPromptAgentDown(prompt, agent);
   }
 
   function updateAgent(prompt, agent, args) {
-    promptStore.updatePromptAgent(prompt, agent, args);
+    promptStore.updatePromptPromptAgent(prompt, agent, args);
   }
 
   function setDynamicSettings(key, value) {
