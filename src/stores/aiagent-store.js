@@ -3,9 +3,12 @@ import {
   cloneRequest,
 } from "src/common/helpers/promptHelper";
 import {usePromptStore} from 'stores/prompt-store';
+import {useEditorStore} from 'stores/editor-store';
+import {editorTextBetween} from 'src/common/utils/editorUtils';
 
 export const useAiAgentStore = defineStore('ai-agent', {
   state: () => ({
+    autonomousAgentProcessing: false,
   }),
   getters: {
   },
@@ -43,6 +46,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
         // If the critic says to ignore (result is OK), stop execution
         if (this.shouldIgnoreAgentResult(criticResult.originalText, agent)) {
+          console.log('runCriticAgent content approved, stopping');
           result.analysingByAgentMessage = `${agent.title}: Content approved, no changes needed.`;
           return; // No further action needed
         }
@@ -171,13 +175,17 @@ export const useAiAgentStore = defineStore('ai-agent', {
       const cleanIgnoreText = (agent.ignoreResultText ?? 'OK').trim().toLowerCase();
       return cleanResultText === cleanIgnoreText;
     },
-    async runAutonomousAgent(request) {
-
-      // Import editor utils to work with nodes
-      const { getEditor, editorTextBetween } = await import('src/common/utils/editorUtils');
-
+    async runProjectAgent(agent) {
+      const editorStore = useEditorStore();
+      
+      // Set processing state
+      this.autonomousAgentProcessing = true;
+      
+      // Clear any existing decorations
+      editorStore.clearAllAgentDecorations();
+      
       // Get the editor instance
-      const editor = getEditor();
+      const editor = editorStore.editor;
       if (!editor) {
         console.log('No editor instance found');
         this.autonomousAgentProcessing = false;
@@ -185,21 +193,21 @@ export const useAiAgentStore = defineStore('ai-agent', {
       }
 
       const doc = editor.state.doc;
-      const commentNodes = [];
+      const toProcess = [];
 
-      // Find all paragraphs starting with "//"
+      // Find all paragraphs starting with search prefix
       doc.nodesBetween(0, doc.content.size, (node, pos, parent, index) => {
         if (node.type.name === 'paragraph') {
           const from = pos;
           const to = pos + node.nodeSize;
           const text = editorTextBetween(doc, { from, to }, '\n', '\n');
 
-          // Check if paragraph starts with "//"
-          if (text.trim().startsWith('//') && text.trim().length > 2) {
-            const instruction = text.trim().substring(2).trim();
+          // Check if paragraph starts with search prefix
+          if (text.trim().startsWith(agent.searchPrefix) && text.trim().length > agent.searchPrefix.length) {
+            const instruction = text.trim().substring(agent.searchPrefix.length).trim();
 
             if (instruction.length > 0) {
-              commentNodes.push({
+              toProcess.push({
                 node: node,
                 pos: pos,
                 from: from,
@@ -213,6 +221,36 @@ export const useAiAgentStore = defineStore('ai-agent', {
         }
       });
 
+      console.log(`Found ${toProcess.length} paragraphs to process with agent: ${agent.title}`);
+      
+      for(const item of toProcess) {
+        await this.runAgentOnParagraph(agent, item);
+      }
+      
+      // Reset processing state
+      this.autonomousAgentProcessing = false;
+      
+      console.log(`Project agent ${agent.title} completed processing`);
     },
+    async runAgentOnParagraph(agent, item) {
+      const editorStore = useEditorStore();
+      
+      // Mark paragraph as pending
+      console.log(`Marking paragraph as pending: ${item.from}-${item.to}`, item.text);
+      editorStore.addAgentDecoration(item.from, item.to, 'pending');
+      
+      // TODO: Implement AI agent execution here
+      // For now, just log the item details
+      console.log('Agent:', agent.title);
+      console.log('Item:', item);
+      
+      // Simulate some processing time to see the pending state
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Mark as completed for now (will be replaced with actual AI processing)
+      editorStore.updateAgentDecoration(item.from, item.to, 'completed');
+      
+      console.log(`Paragraph processing completed: ${item.from}-${item.to}`);
+    }
   }
 });

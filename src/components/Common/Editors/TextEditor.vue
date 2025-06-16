@@ -286,7 +286,24 @@
         </q-btn>
       </div>
 
-      <div class="col-auto">
+      <div class="col-auto" v-if="promptStore.projectAgents.length > 0">
+        <q-btn size="11px" dense flat icon="mdi-robot-outline" class="text-accent">
+          <q-menu>
+            <q-list dense>
+              <q-item v-for="agent in promptStore.projectAgents" :key="agent.id" clickable v-close-popup @click="runProjectAgent(agent)">
+                <q-item-section>
+                  <q-item-label>{{ agent.title }}</q-item-label>
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
+          <q-tooltip>
+            Run Project Agents
+          </q-tooltip>
+        </q-btn>
+      </div>
+
+      <div class="col-auto q-ml-md">
         <q-btn size="11px" dense flat icon="mdi-alpha-a-box" @click="toggleAiBubbleMenu" class="" :class="{ 'text-primary': aiBubbleMenu, 'text-grey-5': !aiBubbleMenu }">
           <q-tooltip>
             Toggle AI bubble menu
@@ -398,13 +415,16 @@ import {markdownToHtml, truncate} from 'src/common/utils/textUtils';
 import PromptResult from 'components/RightMenu/PromptResult.vue';
 import {CustomParagraph} from 'src/common/tipTap/CustomParagraph';
 import {AutoCompletePlugin} from 'src/common/tipTap/AutoComplete';
+import {AgentDecorationPlugin} from 'src/common/tipTap/AgentDecorationPlugin';
 import PromptContextSelector from 'components/Common/PromptSelector/PromptContextSelector.vue';
 import {HorizontalRule} from '@tiptap/extension-horizontal-rule';
+import {useAiAgentStore} from "stores/aiagent-store";
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
 const editorStore = useEditorStore();
 const layoutStore = useLayoutStore();
+const aiAgentStore = useAiAgentStore();
 
 const props = defineProps({
   modelValue: {
@@ -688,6 +708,12 @@ const editor = useEditor({
     AutoCompletePlugin.configure({
       autocompleteValue: getAutocompleteResult,
       includeChildren: true,
+    }),
+    AgentDecorationPlugin.configure({
+      pendingClass: 'agent-pending',
+      processingClass: 'agent-processing',
+      completedClass: 'agent-completed',
+      errorClass: 'agent-error',
     }),
     Blockquote.configure({
       HTMLAttributes: {
@@ -1218,6 +1244,10 @@ function onClickBelowEditor(event) {
     })
   }
   editor.value.chain().focus().run();
+}
+
+async function runProjectAgent(agent) {
+  aiAgentStore.runProjectAgent(agent);
 }
 
 </script>

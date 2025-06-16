@@ -2,7 +2,7 @@
   <q-card flat>
     <q-card-section class="q-gutter-y-sm">
       <div class="bordered">
-        <q-expansion-item label="Prompt Agents" caption="Define agents that can be used to iteratively improve the output of prompts." v-model="layoutStore.settingsLabelsOpened">
+        <q-expansion-item label="Prompt Agents" caption="Define agents to iteratively improve the output of prompts.">
           <div class="q-pa-sm">
             <q-card flat>
               <q-card-section class="q-pb-none">
@@ -85,6 +85,61 @@
             </q-card>
           </div>
         </q-expansion-item>
+
+        <q-expansion-item label="Project Agents" caption="Define agents that run on the project.">
+          <div class="q-pa-md">
+            <q-card flat>
+              <q-card-section>
+                <div v-for="agent in promptStore.projectAgents" :key="agent.id" class="q-mb-md">
+                  <q-card>
+                    <q-card-section>
+                      <div class="row items-center">
+                        <div class="col">
+                          <q-input dense filled label="Title" :model-value="agent.title" v-on:update:model-value="updateProjectAgent(agent, {title: $event})" />
+                        </div>
+                        <div class="col-auto q-ml-sm">
+                          <q-btn-group flat>
+                            <q-btn flat dense icon="mdi-arrow-up" @click="moveProjectAgentUp(agent)" />
+                            <q-btn flat dense icon="mdi-arrow-down" @click="moveProjectAgentDown(agent)" />
+                            <q-btn flat dense icon="mdi-delete-outline" @click="deleteProjectAgent(agent)" color="red"/>
+                          </q-btn-group>
+                        </div>
+                      </div>
+
+                      <div class="row q-mt-sm">
+                        <div class="col">
+                          <q-select
+                            dense
+                            filled
+                            label="Prompt"
+                            :model-value="availablePrompts.find(p => p.value === agent.promptId)?.label ?? 'Unknown Prompt'"
+                            v-on:update:model-value="updateProjectAgent(agent, {promptId: $event})"
+                            :options="availablePrompts"
+                            emit-value
+                            options-dense
+                            map-options
+                          />
+                        </div>
+                      </div>
+
+                      <div class="row q-mt-sm q-col-gutter-x-lg">
+                        <div class="col-auto flex items-center">
+                          <div class="col-auto flex items-center">
+                            <q-input dense filled label="Search prefix" :model-value="agent.searchPrefix ?? '//'" v-on:update:model-value="updateProjectAgent(agent, {searchPrefix: $event})" />
+                            <HelpIcon :tooltip="$t('tooltips.parameters.searchPrefix')"></HelpIcon>
+                          </div>
+                        </div>
+                      </div>
+                    </q-card-section>
+                  </q-card>
+                </div>
+              </q-card-section>
+              <q-card-actions class="q-mt-md">
+                <q-btn label="Project Agent" outline icon="mdi-plus" flat dense @click="addProjectAgent()"/>
+              </q-card-actions>
+            </q-card>
+          </div>
+        </q-expansion-item>
       </div>
     </q-card-section>
   </q-card>
@@ -100,7 +155,6 @@ import CodeEditor from 'components/Common/Editors/CodeEditor.vue';
 import {computed} from 'vue';
 
 const promptStore = usePromptStore();
-const layoutStore = useLayoutStore();
 
 const agents = computed(() => promptStore.promptAgents);
 
@@ -108,6 +162,10 @@ const agentTypes = [
   { label: "Refiner", value: "Refiner", description: "Takes the output of this prompt and improves it according to your instructions. Can run multiple times, keeping previous messages in chat history, until it decides there is nothing more to improve." },
   { label: "Critic", value: "Critic", description: "Takes the output of this prompt and iterates - by crafting additional instructions to improve the result." },
 ];
+
+const availablePrompts = computed(() => {
+  return promptStore.prompts.map(p => ({label: p.title + ' (' + p.modelId + ')', value: p.id}));
+});
 
 function addPromptAgent() {
   promptStore.addPromptAgent();
@@ -128,6 +186,27 @@ function movePromptAgentDown(agent) {
 function updatePromptAgent(agent, args) {
   promptStore.updatePromptAgent(agent, args);
 }
+
+function addProjectAgent() {
+  promptStore.addProjectAgent();
+}
+
+function deleteProjectAgent(agent) {
+  promptStore.deleteProjectAgent(agent);
+}
+
+function moveProjectAgentUp(agent) {
+  promptStore.moveProjectAgentUp(agent);
+}
+
+function moveProjectAgentDown(agent) {
+  promptStore.moveProjectAgentDown(agent);
+}
+
+function updateProjectAgent(agent, args) {
+  promptStore.updateProjectAgent(agent, args);
+}
+
 
 </script>
 

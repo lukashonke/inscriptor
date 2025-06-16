@@ -52,6 +52,7 @@ export const usePromptStore = defineStore('prompts', {
     predefinedPromptInstances: [],
 
     promptAgents: [],
+    projectAgents: [],
 
     analysisEnabled: false,
     selectionAnalysisRunning: false,
@@ -2254,6 +2255,50 @@ export const usePromptStore = defineStore('prompts', {
 
       this.onUpdatePrompt(prompt);
     },
+    addProjectAgent() {
+      if(!this.projectAgents) {
+        this.projectAgents = [];
+      }
+
+      this.projectAgents.push({
+        id: guid(),
+        title: 'New Project Agent',
+        promptId: null,
+        ignoreResultText: 'OK',
+      });
+    },
+    updateProjectAgent(agent, args) {
+      if(!agent || !args) return;
+
+      if(args.title !== undefined) {
+        agent.title = args.title;
+      }
+
+      if(args.promptId !== undefined) {
+        agent.promptId = args.promptId;
+      }
+
+      if(args.searchPrefix !== undefined) {
+        agent.searchPrefix = args.searchPrefix;
+      }
+    },
+    deleteProjectAgent(agent) {
+      if(!this.projectAgents) return;
+      const index = this.projectAgents.indexOf(agent);
+      this.projectAgents.splice(index, 1);
+    },
+    moveProjectAgentUp(agent) {
+      if(!this.projectAgents) return;
+      const index = this.projectAgents.indexOf(agent);
+      this.projectAgents.splice(index, 1);
+      this.projectAgents.splice(index - 1, 0, agent);
+    },
+    moveProjectAgentDown(agent) {
+      if(!this.projectAgents) return;
+      const index = this.projectAgents.indexOf(agent);
+      this.projectAgents.splice(index, 1);
+      this.projectAgents.splice(index + 1, 0, agent);
+    },
     addPromptAgent() {
       if(!this.promptAgents) {
         this.promptAgents = [];
@@ -2679,6 +2724,7 @@ export const usePromptStore = defineStore('prompts', {
         promptCategories: this.promptCategories,
         promptFolders: this.promptFolders,
         promptAgents: this.promptAgents,
+        projectAgents: this.projectAgents,
         savedPromptContexts: this.savedPromptContexts,
         hubPromptPacks: this.hubPromptPacks,
         modelPromptPacks: this.modelPromptPacks,
@@ -2726,6 +2772,8 @@ export const usePromptStore = defineStore('prompts', {
       };
 
       this.promptAgents = [];
+
+      this.projectAgents = [];
 
       this.predefinedPrompts = [
         { promptType: 'Summarize Page', promptHint: 'Can be used to quickly generate file synopsies / summaries.' },
@@ -2851,6 +2899,13 @@ export const usePromptStore = defineStore('prompts', {
         this.promptAgents = [];
         for(const agent of aiSettings.promptAgents) {
           this.promptAgents.push(agent);
+        }
+      }
+
+      if(aiSettings.projectAgents) {
+        this.projectAgents = [];
+        for(const agent of aiSettings.projectAgents) {
+          this.projectAgents.push(agent);
         }
       }
 

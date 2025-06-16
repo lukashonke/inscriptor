@@ -37,6 +37,8 @@ export default {
       hasResultsSeparator: 'String that the AI outputs to separate the results in UI (for example to separate ideas in brainstorming prompts)',
       agentMaxRuns: 'The maximum number of times the agent can be run. If the agent is allowed to run multiple times, this will be the maximum number of times the agent will be run.',
       hasExtendedChatMessages: 'If checked, the AI will be fed more messages that you specify. It might be used to fool AI that it has generated some text (even if it has not) and to continue in similar style.',
+
+      searchPrefix: 'The prefix that the agent will search for in the text to run on. For example, if the prefix is "//", the agent will search for "//" in the text to run on.',
     },
   },
 }
