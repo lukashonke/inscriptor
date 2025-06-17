@@ -38,7 +38,7 @@ export default {
       agentMaxRuns: 'The maximum number of times the agent can be run. If the agent is allowed to run multiple times, this will be the maximum number of times the agent will be run.',
       hasExtendedChatMessages: 'If checked, the AI will be fed more messages that you specify. It might be used to fool AI that it has generated some text (even if it has not) and to continue in similar style.',
 
-      searchPrefix: 'The prefix that the agent will search for in the text to run on. For example, if the prefix is "//", the agent will search for "//" in the text to run on.',
+      searchPrefix: 'The prefix that the agent will search for in each paragraph of the text. Use this to mark paragraphs to be processed by the AI agent. Keep this field empty to run AI agent on all paragraphs.',
     },
   },
 }

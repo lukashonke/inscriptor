@@ -25,26 +25,26 @@ export const AgentDecorationPlugin = Extension.create({
     return [
       new Plugin({
         key: this.storage.pluginKey,
-        
+
         state: {
           init: (config, state) => {
             return DecorationSet.empty
           },
-          
+
           apply: (transaction, decorationSet, oldState, newState) => {
             // Map existing decorations through the transaction
             decorationSet = decorationSet.map(transaction.mapping, transaction.doc)
-            
+
             // Check for meta updates
             const meta = transaction.getMeta(this.storage.pluginKey)
             if (meta && meta.type === 'set') {
               return meta.decorationSet
             }
-            
+
             return decorationSet
           }
         },
-        
+
         props: {
           decorations: (state) => {
             return this.storage.pluginKey.getState(state)
@@ -64,7 +64,7 @@ export const AgentDecorationPlugin = Extension.create({
     const pluginKey = this.storage.pluginKey
     const options = this.options
     const extension = this
-    
+
     // Helper function to get CSS class based on status
     const getClassForStatus = (status) => {
       switch (status) {
@@ -80,106 +80,90 @@ export const AgentDecorationPlugin = Extension.create({
           return options.pendingClass
       }
     }
-    
+
     // Helper function to create decorations
     const createDecoration = (from, to, status) => {
       const className = getClassForStatus(status)
-      
+
       // Use node decoration for paragraph-level styling
       return Decoration.node(from, to, {
         class: className,
         'data-agent-status': status,
       })
     }
-    
+
     return {
       addAgentDecoration: (from, to, status = 'pending') => ({ tr, dispatch, state }) => {
         if (!dispatch) return true
-        
+
         const decoration = createDecoration(from, to, status)
         const currentDecorationSet = pluginKey.getState(state) || DecorationSet.empty
         const decorationSet = currentDecorationSet.add(state.doc, [decoration])
-        
-        const newTr = state.tr.setMeta(pluginKey, { 
-          type: 'set', 
-          decorationSet 
+
+        const newTr = state.tr.setMeta(pluginKey, {
+          type: 'set',
+          decorationSet
         })
-        
+
         dispatch(newTr)
         return true
       },
 
       updateAgentDecoration: (from, to, status) => ({ tr, dispatch, state }) => {
         if (!dispatch) return true
-        
+
         let decorationSet = pluginKey.getState(state) || DecorationSet.empty
-        
+
         // Find and remove existing decoration at this position
         const existingDecorations = decorationSet.find(from, to)
         if (existingDecorations.length > 0) {
           decorationSet = decorationSet.remove(existingDecorations)
         }
-        
+
         // Add new decoration
         const decoration = createDecoration(from, to, status)
         decorationSet = decorationSet.add(state.doc, [decoration])
-        
-        const newTr = state.tr.setMeta(pluginKey, { 
-          type: 'set', 
-          decorationSet 
+
+        const newTr = state.tr.setMeta(pluginKey, {
+          type: 'set',
+          decorationSet
         })
-        
+
         dispatch(newTr)
-        return true
-      },
-
-      showConfirmationWidget: (widgetData) => ({ tr, dispatch, state }) => {
-        // This will be handled by a separate component, just trigger an event
-        extension.editor.emit('showAgentConfirmation', widgetData)
-        return true
-      },
-
-      hideConfirmationWidget: () => ({ tr, dispatch, state }) => {
-        // This will be handled by a separate component
-        try {
-            extension.editor.emit('hideAgentConfirmation')
-        } catch (error) {
-          console.error('Failed to hide agent confirmation:', error);
-        }
         return true
       },
 
       removeAgentDecoration: (from, to) => ({ tr, dispatch, state }) => {
         if (!dispatch) return true
-        
+
         let decorationSet = pluginKey.getState(state) || DecorationSet.empty
-        
+
         // Find and remove decoration at this position
         const existingDecorations = decorationSet.find(from, to)
         if (existingDecorations.length > 0) {
           decorationSet = decorationSet.remove(existingDecorations)
         }
-        
-        const newTr = state.tr.setMeta(pluginKey, { 
-          type: 'set', 
-          decorationSet 
+
+        const newTr = state.tr.setMeta(pluginKey, {
+          type: 'set',
+          decorationSet
         })
-        
+
         dispatch(newTr)
         return true
       },
 
       clearAllAgentDecorations: () => ({ tr, dispatch, state }) => {
         if (!dispatch) return true
-        
+
         // Also hide any confirmation widgets
         extension.editor.emit('hideAgentConfirmation')
-        
-        const newTr = state.tr.setMeta(pluginKey, { 
-          type: 'set', 
-          decorationSet: DecorationSet.empty 
+
+        const newTr = state.tr.setMeta(pluginKey, {
+          type: 'set',
+          decorationSet: DecorationSet.empty
         })
-        
+
         dispatch(newTr)
         return true
       }

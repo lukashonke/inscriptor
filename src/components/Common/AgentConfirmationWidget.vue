@@ -6,8 +6,8 @@
         <div class="row items-center no-wrap">
           <div class="col">
             <div class="text-body2 text-weight-medium">
-              <q-icon name="mdi-robot-outline" class="q-mr-xs" />
-              {{ agentTitle }} suggestions:
+              <q-icon name="mdi-robot-outline" class="q-mr-xs q-ml-xs" />
+              {{ agentTitle || promptResult.agentTitle }} suggestions:
             </div>
           </div>
           <div class="col-auto">
@@ -20,14 +20,32 @@
               @click="onReject"
               class="text-white"
             >
-              <q-tooltip>Skip this paragraph</q-tooltip>
             </q-btn>
           </div>
         </div>
       </div>
 
+      <!-- Agent analysis status -->
+      <div v-if="promptResult.aiResult?.analysingByAgent" class="q-pa-sm bg-blue-grey-1">
+        <div class="row items-center">
+          <div class="col-auto">
+            <q-spinner-grid class="q-mr-sm" size="16px" />
+          </div>
+          <div class="col">
+            <div class="text-caption text-blue-grey-8">
+              <span v-if="promptResult.aiResult.analysingByAgentMessage">
+                {{ promptResult.aiResult.analysingByAgentMessage }}
+              </span>
+              <span v-else>
+                Analysing by {{ promptResult.aiResult.analysingByAgent.title }}...
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- Changes comparison -->
-      <q-card-section class="q-pa-sm">
+      <q-card-section class="q-pa-sm q-mb-none">
         <!-- Proposed changes with diff highlighting -->
         <div class="comparison-container">
           <div class="suggested-text q-mb-sm">
@@ -38,32 +56,31 @@
       </q-card-section>
 
       <!-- Chat input section -->
-      <q-card-section class="q-px-sm q-pt-none q-pb-sm q-mb-sm" v-if="!chatLoading && !isStreaming && suggestedText.trim()">
-        <div class="row q-gutter-sm">
+      <q-card-section class="q-px-sm q-py-none q-pb-sm q-mb-none" v-if="!promptResult.chatLoading && !promptResult.isStreaming && (promptResult.aiSuggestion || '').trim()">
+        <div class="row">
           <div class="col">
             <q-input
               v-model="chatInput"
               dense
-              filled
+              borderless
+              flat
+              class="q-ml-xs"
               autofocus
-              outlined
-              label="Reply to AI"
+              label="Reply to AI..."
               placeholder="e.g., Make it shorter, Add more detail, Change tone..."
               @keyup.enter="onChat"
-              :disable="chatLoading || isStreaming"
+              :disable="promptResult.chatLoading || promptResult.isStreaming"
             />
           </div>
           <div class="col-auto flex items-center">
-            <q-spinner-grid v-if="isStreaming"></q-spinner-grid>
+            <q-spinner-grid v-if="promptResult.isStreaming"></q-spinner-grid>
             <q-btn
-              v-else
-              icon="mdi-send-outline"
-              flat
+              v-else-if="chatInput && chatInput.length > 0"
+              icon="mdi-reply-outline"
               color="primary"
               @click="onChat"
-              :disable="!chatInput.trim() || chatLoading"
-              :loading="chatLoading"
-              dense
+              :disable="!chatInput.trim() || promptResult.chatLoading"
+              :loading="promptResult.chatLoading"
             >
               <q-tooltip>Send feedback to improve suggestion</q-tooltip>
             </q-btn>
@@ -75,7 +92,7 @@
 
       <!-- Action buttons -->
       <q-card-actions class="q-pa-sm">
-        <div class="row full-width q-gutter-sm">
+        <div class="row full-width">
           <div class="col-auto">
             <q-btn
               flat
@@ -84,8 +101,22 @@
               @click="onReject"
               class="full-width"
               no-caps
-              :disable="chatLoading || isStreaming"
+              :disable="promptResult.chatLoading || promptResult.isStreaming"
             />
+          </div>
+          <div class="col-auto" v-if="promptResult.conversationMessages && promptResult.conversationMessages.length > 0">
+            <q-btn
+              flat
+              color="orange"
+              icon="mdi-undo"
+              label="Undo to Original"
+              @click="onUndo"
+              class="full-width q-ml-sm"
+              no-caps
+              :disable="promptResult.chatLoading || promptResult.isStreaming"
+            >
+              <q-tooltip>Revert to original AI suggestion</q-tooltip>
+            </q-btn>
           </div>
           <div class="col"/>
           <div class="col-auto">
@@ -96,7 +127,7 @@
               @click="onAccept"
               class="full-width"
               no-caps
-              :disable="chatLoading || isStreaming"
+              :disable="promptResult.chatLoading || promptResult.isStreaming"
             />
           </div>
         </div>
@@ -111,37 +142,22 @@ import { diffStrings } from 'src/common/utils/textUtils'
 import { useFileStore } from 'stores/file-store'
 
 const props = defineProps({
-  agentTitle: {
-    type: String,
-    required: true
-  },
-  originalText: {
-    type: String,
-    required: true
-  },
-  suggestedText: {
-    type: String,
-    required: true
-  },
-  paragraphRange: {
+  promptResult: {
     type: Object,
-    required: true // { from, to }
+    required: true
   },
-  chatLoading: {
-    type: Boolean,
-    default: false
-  },
-  streamingText: {
+  // Legacy props for backward compatibility
+  agentTitle: {
     type: String,
     default: ''
   },
-  isStreaming: {
-    type: Boolean,
-    default: false
+  paragraphRange: {
+    type: Object,
+    default: () => ({ from: 0, to: 0 })
   }
 })
 
-const emits = defineEmits(['accept', 'reject', 'chat'])
+const emits = defineEmits(['accept', 'reject', 'chat', 'undo'])
 
 // Store instance
 const fileStore = useFileStore()
@@ -170,11 +186,11 @@ const writeClasses = computed(() => {
 // Calculate diff and render it with highlighting
 const diffHtml = computed(() => {
   // Use streaming text if available and streaming, otherwise use final suggested text
-  const textToCompare = props.isStreaming && props.streamingText
-    ? props.streamingText
-    : props.suggestedText;
+  const textToCompare = props.promptResult.isStreaming && props.promptResult.streamingText
+    ? props.promptResult.streamingText
+    : props.promptResult.aiSuggestion;
 
-  const diff = diffStrings(props.originalText, textToCompare);
+  const diff = diffStrings(props.promptResult.originalText ?? '', textToCompare ?? '');
 
   let html = '';
   for (const part of diff) {
@@ -188,7 +204,7 @@ const diffHtml = computed(() => {
   }
 
   // Add typing indicator when streaming
-  if (props.isStreaming) {
+  if (props.promptResult.isStreaming) {
     html += '<span class="streaming-cursor">|</span>';
   }
 
@@ -197,16 +213,16 @@ const diffHtml = computed(() => {
 
 function onAccept() {
   emits('accept', {
-    paragraphRange: props.paragraphRange,
-    originalText: props.originalText,
-    suggestedText: props.suggestedText
+    paragraphRange: props.paragraphRange || props.promptResult.paragraphRange,
+    originalText: props.promptResult.originalText,
+    aiSuggestion: props.promptResult.aiSuggestion
   })
 }
 
 function onReject() {
   emits('reject', {
-    paragraphRange: props.paragraphRange,
-    originalText: props.originalText
+    paragraphRange: props.paragraphRange || props.promptResult.paragraphRange,
+    originalText: props.promptResult.originalText
   })
 }
 
@@ -218,11 +234,18 @@ function onChat() {
   // Clear the input after sending
   chatInput.value = ''
 }
+
+function onUndo() {
+  // Clear chat input when undoing to reset state
+  chatInput.value = ''
+  emits('undo')
+}
 </script>
 
 <style lang="scss" scoped>
 .agent-confirmation-widget {
-  width: 500px;
+  min-width: 650px;
+  max-width: 50vw;
   margin: 0 auto;
 
   .comparison-container {

@@ -171,7 +171,9 @@
       <q-card-section class="row items-center q-px-md q-pt-md q-pb-sm">
         <div class="text-h6 bg-accent text-white text-aleo q-px-md q-py-xs rounded-borders full-width row items-center">
           <q-icon name="mdi-creation-outline" class="q-mr-sm" />
-          {{ prompt.title }} prompt
+          {{ prompt.title }}&nbsp;
+          <span v-if="!request.agent">prompt</span>
+          <span v-else>agent</span>
           <q-space />
           <q-btn icon="close" flat round dense v-close-popup />
         </div>
@@ -186,13 +188,20 @@
         </div>
       </q-card-section>
 
-      <q-card-section class="q-px-md q-pt-none q-pb-none" v-if="promptVariablesIncluded.length > 0">
+      <q-card-section class="q-px-md q-pb-none" v-if="promptVariablesIncluded.length > 0">
         <div class="row q-px-md text-grey-7 text-weight-regular">
           <div class=" flex items-center"><q-icon name="mdi-check" class="q-mr-xs" />Prompt Includes:</div>
-          <template v-for="variable in promptVariablesIncluded" :key="variable">
+          <template v-if="request.agent">
             <q-chip color="transparent" text-color="grey-7">
-              {{ variable }}
+              All paragraphs starting with "{{ request.agent.searchPrefix }}" in the current file, processed one by one.
             </q-chip>
+          </template>
+          <template v-else>
+            <template v-for="variable in promptVariablesIncluded" :key="variable">
+              <q-chip color="transparent" text-color="grey-7">
+                {{ variable }}
+              </q-chip>
+            </template>
           </template>
         </div>
       </q-card-section>

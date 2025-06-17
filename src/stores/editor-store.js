@@ -35,14 +35,6 @@ export const useEditorStore = defineStore('editor', {
       if (!this.editor) return false;
       return this.editor.commands.clearAllAgentDecorations();
     },
-    showConfirmationWidget(widgetData) {
-      if (!this.editor) return false;
-      return this.editor.commands.showConfirmationWidget(widgetData);
-    },
-    hideConfirmationWidget() {
-      if (!this.editor) return false;
-      return this.editor.commands.hideConfirmationWidget();
-    },
     setPendingAutocompleteTextInput(input) {
       this.pendingAutocompleteTextInput = input;
     },

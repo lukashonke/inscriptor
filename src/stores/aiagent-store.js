@@ -9,17 +9,20 @@ import {currentFilePromptContext} from 'src/common/resources/promptContexts';
 
 export const useAiAgentStore = defineStore('ai-agent', {
   state: () => ({
-    autonomousAgentProcessing: false,
-    autonomousAgentContext: [],
-    autonomousAgentRequest: null,
+    confirmationWidgetData: null,
     currentConfirmationPromise: null,
-    currentProcessingItem: null,
-    skippedParagraphs: new Set(), // Track skipped paragraph text content
-    globalStreamingAborted: false, // Global flag to abort all streaming
+
+    projectAgentCurrentProcessingItem: null,
+    projectAgentProcessing: false,
+    projectAgentContext: [],
+    projectAgentRequest: null,
+    projectAgentSkippedParagraphs: new Set(), // Track skipped paragraph text content
+
+    projectAgentAborted: false, // Global flag to abort all streaming
   }),
   getters: {
     agentState: (state) => {
-      if (!state.autonomousAgentProcessing) {
+      if (!state.projectAgentProcessing) {
         return 'idle';
       }
       if (state.currentConfirmationPromise) {
@@ -27,116 +30,204 @@ export const useAiAgentStore = defineStore('ai-agent', {
       }
       return 'processing';
     },
-    isAgentActive: (state) => state.autonomousAgentProcessing,
+    isAgentActive: (state) => state.projectAgentProcessing,
   },
   actions: {
-    async runCriticAgent(request, result, agent) {
+    createAgentRequest(baseRequest, agentMessages = [], options = {}) {
+      const newRequest = cloneRequest(baseRequest);
+      newRequest.silent = options.silent ?? true;
+      newRequest.agentMessages = [...agentMessages];
+
+      if (options.appendMessages) {
+        newRequest.appendMessages = [...options.appendMessages];
+      }
+
+      if (options.text !== undefined) {
+        newRequest.text = options.text;
+      }
+
+      if (options.contextTypes) {
+        newRequest.contextTypes = options.contextTypes;
+      }
+
+      if (options.onOutput) {
+        newRequest.onOutput = options.onOutput;
+      }
+
+      return newRequest;
+    },
+    checkAbortStatus(result) {
+      return result.analysisByAgentAborted || this.projectAgentAborted;
+    },
+    updateAgentProgress(result, agent, message) {
+      result.analysingByAgent = agent;
+      result.analysingByAgentMessage = message;
+    },
+    createStreamingCallback(onStreamingUpdate, onFinished) {
+      return (fullText, newText, isFinished, isError) => {
+        if (this.projectAgentAborted) {
+          return;
+        }
+
+        if (onStreamingUpdate) {
+          onStreamingUpdate(fullText, newText, isFinished, isError);
+        }
+
+        if (isFinished && onFinished) {
+          onFinished(fullText, isError);
+        }
+      };
+    },
+    async executeAgentPrompt(request, options = {}) {
       const promptStore = usePromptStore();
 
+      try {
+        const result = await promptStore.promptInternal2(request);
+        return result;
+      } catch (error) {
+        if (options.onError) {
+          options.onError(error);
+        }
+        throw error;
+      }
+    },
+    findNextParagraph(agent) {
+      const editorStore = useEditorStore();
+      const editor = editorStore.editor;
+
+      if (!editor) return null;
+
+      const doc = editor.state.doc;
+      let nextItem = null;
+
+      doc.nodesBetween(0, doc.content.size, (node, pos) => {
+        if (nextItem) return false; // Stop if we found one
+
+        if (node.type.name === 'paragraph') {
+          const from = pos;
+          const to = pos + node.nodeSize;
+          const text = editorTextBetween(doc, { from, to }, '\\n', '\\n');
+
+          if (text.trim().startsWith(agent.searchPrefix) && text.trim().length > agent.searchPrefix.length) {
+            const instruction = text.trim().substring(agent.searchPrefix.length).trim();
+
+            if (!this.projectAgentSkippedParagraphs.has(text.trim()) && instruction.length > 0) {
+              nextItem = {
+                node,
+                pos,
+                from,
+                to,
+                text: text.trim(),
+                instruction,
+                originalContent: text
+              };
+            }
+          }
+        }
+      });
+
+      return nextItem;
+    },
+    manageParagraphDecoration(item, state) {
+      const editorStore = useEditorStore();
+
+      switch (state) {
+        case 'pending':
+          editorStore.addAgentDecoration(item.from, item.to, 'pending');
+          break;
+        case 'processing':
+          editorStore.updateAgentDecoration(item.from, item.to, 'processing');
+          break;
+        case 'streaming':
+          editorStore.updateAgentDecoration(item.from, item.to, 'streaming');
+          break;
+        case 'awaiting_confirmation':
+          editorStore.updateAgentDecoration(item.from, item.to, 'awaiting_confirmation');
+          break;
+        case 'remove':
+          editorStore.removeAgentDecoration(item.from, item.to);
+          break;
+      }
+    },
+    shouldAbortStreaming(streamingAborted) {
+      return streamingAborted || this.projectAgentAborted;
+    },
+    async runCriticAgent(request, result, agent) {
+      const promptStore = usePromptStore();
       const agentMessages = [];
-      let iterations = 0;
       const maxIterations = agent.maxRuns ?? 5;
 
-      // Keep applying follow-up instructions until stop word is reached or max iterations
-      while (iterations < maxIterations) {
-        iterations++;
+      for (let iteration = 1; iteration <= maxIterations; iteration++) {
+        if (this.checkAbortStatus(result)) return;
 
-        if(result.analysisByAgentAborted) {
-          return;
-        }
+        // CREATE INSTRUCTIONS
+        this.updateAgentProgress(result, agent, `${agent.title}: Evaluating...`);
 
-        // CREATE INSTRUCTIONS:
-        result.analysingByAgentMessage = `${agent.title}: Evaluating...`;
+        const instructionMessages = [...agentMessages,
+          { type: 'assistant', text: result.originalText },
+          { type: 'user', text: agent.prompt }
+        ];
 
-        let newRequest = cloneRequest(request);
-        newRequest.silent = true;
-        newRequest.agentMessages = [...agentMessages];
+        const instructionRequest = this.createAgentRequest(request, instructionMessages);
+        const criticResult = await this.executeAgentPrompt(instructionRequest);
 
-        newRequest.agentMessages.push({ type: 'assistant', text: result.originalText });
-        newRequest.agentMessages.push({ type: 'user', text: agent.prompt });
+        if (this.checkAbortStatus(result)) return;
 
-        let criticResult = await promptStore.promptInternal2(newRequest);
-
-        if(result.analysisByAgentAborted) {
-          return;
-        }
-
-        // If the critic says to ignore (result is OK), stop execution
+        // Check if critic approves content
         if (this.shouldIgnoreAgentResult(criticResult.originalText, agent)) {
           console.log('runCriticAgent content approved, stopping');
-          result.analysingByAgentMessage = `${agent.title}: Content approved, no changes needed.`;
-          return; // No further action needed
-        }
-
-        const followUpInstruction = criticResult.originalText;
-
-
-        // GENERATE NEW TEXT:
-        result.analysingByAgentMessage = `${agent.title}: Iter ${iterations}/${maxIterations} - Working...`;
-        // Create new request with original result and current follow-up instruction
-        newRequest = cloneRequest(request);
-        newRequest.silent = true;
-
-        agentMessages.push({ type: 'assistant', text: result.originalText });
-        agentMessages.push({ type: 'user', text: followUpInstruction });
-
-        newRequest.agentMessages = agentMessages;
-
-        const refinementResult = await promptStore.promptInternal2(newRequest);
-
-        if (result.analysisByAgentAborted) {
+          this.updateAgentProgress(result, agent, `${agent.title}: Content approved, no changes needed.`);
           return;
         }
 
-        this.addPreviousAgentResult(result, agent);
+        // GENERATE NEW TEXT
+        this.updateAgentProgress(result, agent, `${agent.title}: Iter ${iteration}/${maxIterations} - Working...`);
 
-        // Update the result with the refined content
+        agentMessages.push(
+          { type: 'assistant', text: result.originalText },
+          { type: 'user', text: criticResult.originalText }
+        );
+
+        const refinementRequest = this.createAgentRequest(request, agentMessages);
+        const refinementResult = await this.executeAgentPrompt(refinementRequest);
+
+        if (this.checkAbortStatus(result)) return;
+
+        this.addPreviousAgentResult(result, agent);
         result.text = refinementResult.text;
         result.originalText = refinementResult.originalText;
-
         promptStore.calculateDiffs(request, result);
       }
     },
     async runRefinerAgent(request, result, agent) {
       const promptStore = usePromptStore();
-
       const agentMessages = [];
       const maxRuns = agent.allowMultipleRuns ? (agent.maxRuns ?? 1) : 1;
 
-      for (let run = 0; run < maxRuns; run++) {
-        if(result.analysisByAgentAborted) {
-          return;
-        }
+      for (let run = 1; run <= maxRuns; run++) {
+        if (this.checkAbortStatus(result)) return;
 
-        result.analysingByAgentMessage = `${agent.title}: Run ${run + 1}/${maxRuns} - Working...`;
+        this.updateAgentProgress(result, agent, `${agent.title}: Run ${run}/${maxRuns} - Working...`);
 
-        const newRequest = cloneRequest(request);
-        newRequest.silent = true;
+        agentMessages.push(
+          { type: 'assistant', text: result.originalText },
+          { type: 'user', text: agent.prompt }
+        );
 
-        agentMessages.push({ type: 'assistant', text: result.originalText });
-        agentMessages.push({ type: 'user', text: agent.prompt });
+        const agentRequest = this.createAgentRequest(request, agentMessages);
+        const newResult = await this.executeAgentPrompt(agentRequest);
 
-        newRequest.agentMessages = agentMessages;
-
-        const newResult = await promptStore.promptInternal2(newRequest);
-
-        if (result.analysisByAgentAborted) {
-          return;
-        }
+        if (this.checkAbortStatus(result)) return;
 
         if (this.shouldIgnoreAgentResult(newResult.originalText, agent)) {
-          result.analysingByAgentMessage = `${agent.title}: Content refined successfully (${run + 1} runs).`;
-          // already good, break
+          this.updateAgentProgress(result, agent, `${agent.title}: Content refined successfully (${run} runs).`);
           break;
-        } else {
-          this.addPreviousAgentResult(result, agent);
-
-          // change the result
-          result.text = newResult.text;
-          result.originalText = newResult.originalText;
-
-          promptStore.calculateDiffs(request, result);
         }
+
+        this.addPreviousAgentResult(result, agent);
+        result.text = newResult.text;
+        result.originalText = newResult.originalText;
+        promptStore.calculateDiffs(request, result);
       }
     },
     addPreviousAgentResult(result, agent) {
@@ -209,436 +300,275 @@ export const useAiAgentStore = defineStore('ai-agent', {
       promptStore.currentPromptConfirmationRequest = request;
     },
     async confirmProjectAgent(request) {
-      const agent = request.agent;
       const editorStore = useEditorStore();
       const promptStore = usePromptStore();
 
-      this.autonomousAgentContext = [...promptStore.promptContext];
-      this.autonomousAgentProcessing = true;
-      this.autonomousAgentRequest = cloneRequest(request);
-      this.globalStreamingAborted = false; // Reset global abort flag
+      const agent = request.agent;
+
+      this.projectAgentContext = [...promptStore.promptContext];
+      this.projectAgentProcessing = true;
+      this.projectAgentRequest = cloneRequest(request);
+      this.projectAgentAborted = false;
 
       editorStore.clearAllAgentDecorations();
-      this.skippedParagraphs.clear();
+      this.projectAgentSkippedParagraphs.clear();
 
-      // Get the editor instance
       const editor = editorStore.editor;
       if (!editor) {
-        console.log('No editor instance found');
-        this.autonomousAgentProcessing = false;
-        return [];
-      }
-
-      const doc = editor.state.doc;
-      const toProcess = [];
-
-      // Find all paragraphs starting with search prefix
-      doc.nodesBetween(0, doc.content.size, (node, pos, parent, index) => {
-        if (node.type.name === 'paragraph') {
-          const from = pos;
-          const to = pos + node.nodeSize;
-          const text = editorTextBetween(doc, { from, to }, '\n', '\n');
-
-          // Check if paragraph starts with search prefix
-          if (text.trim().startsWith(agent.searchPrefix) && text.trim().length > agent.searchPrefix.length) {
-            const instruction = text.trim().substring(agent.searchPrefix.length).trim();
-
-            if (instruction.length > 0) {
-              toProcess.push({
-                node: node,
-                pos: pos,
-                from: from,
-                to: to,
-                text: text.trim(),
-                instruction: instruction,
-                originalContent: text
-              });
-            }
-          }
-        }
-      });
-
-      console.log(`Found ${toProcess.length} paragraphs to process with agent: ${agent.title}`);
-
-      if (toProcess.length === 0) {
-        this.autonomousAgentProcessing = false;
+        this.projectAgentProcessing = false;
         return;
       }
 
-      // Start processing paragraphs one by one (dynamically find next)
       await this.processNextParagraph(agent);
     },
-    async runAgentOnParagraph(agent, item) {
+    async processNextParagraph(agent) {
+      const nextItem = this.findNextParagraph(agent);
+      if (!nextItem) {
+        this.projectAgentProcessing = false;
+        return;
+      }
+
+      const result = await this.runAgentOnParagraph(agent, nextItem);
+      if (result === 'stopped' || result === 'error' || !this.projectAgentProcessing) {
+        return;
+      }
+
+      await this.processNextParagraph(agent);
+    },
+    onWidgetAccept(data) {
+      console.log('User accepted changes:', data);
       const editorStore = useEditorStore();
-      const promptStore = usePromptStore();
 
-      this.currentProcessingItem = item;
+      this.confirmationWidgetData.streamingAborted = true;
+      this.confirmationWidgetData.isStreaming = false;
 
-      // Track conversation history for this paragraph
-      let conversationMessages = [];
+      const { from, to } = data.paragraphRange;
 
-      // Mark paragraph as pending
-      console.log(`Marking paragraph as pending: ${item.from}-${item.to}`, item.text);
-      editorStore.addAgentDecoration(item.from, item.to, 'pending');
+      if(editorStore.editor) {
+        editorStore.editor.commands.blur();
+      }
 
-      // Update to processing
-      await new Promise(resolve => setTimeout(resolve, 500));
-      editorStore.updateAgentDecoration(item.from, item.to, 'processing');
+      this.manageParagraphDecoration({from, to}, 'remove');
 
-      // Function to execute AI prompt with current conversation
-      const executeAiPrompt = async (onOutput = null) => {
-        try {
-          // Clone the autonomous agent request and prepare for prompt execution
-          const newRequest = cloneRequest(this.autonomousAgentRequest);
-          newRequest.silent = true;
-          newRequest.text = item.instruction;
+      editorStore.editor
+        .chain()
+        .focus()
+        .command(({ tr, state }) => {
+          // Replace the content at the specified range
+          tr.replaceWith(from, to, state.schema.text(data.aiSuggestion));
+          return true;
+        })
+        .run();
 
-          // Set the prompt context from saved agent context
-          newRequest.contextTypes = this.autonomousAgentContext;
+      if (this.currentConfirmationPromise) {
+        debugger;
+        this.currentConfirmationPromise.resolve('accepted');
+        this.currentConfirmationPromise = null;
+      }
+    },
+    onWidgetReject(data) {
+      const editorStore = useEditorStore();
+      console.log('User skipped paragraph:', data);
+      this.confirmationWidgetData.streamingAborted = true;
+      this.confirmationWidgetData.isStreaming = false;
 
-          // Add conversation history if exists
-          if (conversationMessages.length > 0) {
-            newRequest.appendMessages = [...conversationMessages];
-          }
+      this.projectAgentSkippedParagraphs.add(data.originalText);
 
-          // Add streaming callback if provided
-          if (onOutput) {
-            newRequest.onOutput = onOutput;
-          }
+      if(editorStore.editor) {
+        editorStore.editor.commands.blur();
+      }
 
-          console.log(`Executing AI agent prompt for: "${item.instruction.substring(0, 50)}..."`);
+      this.confirmationWidgetData.hidden = true;
 
-          // Execute the prompt
-          const result = await promptStore.promptMultiple2(newRequest);
-          return result.originalText;
+      this.manageParagraphDecoration(this.projectAgentCurrentProcessingItem, 'remove');
 
-        } catch (error) {
-          console.error('Error executing AI agent prompt:', error);
+      debugger;
 
-          // Stop processing on failure
-          editorStore.removeAgentDecoration(item.from, item.to);
-          this.autonomousAgentProcessing = false;
-          this.skippedParagraphs.clear();
+      if (this.currentConfirmationPromise) {
+        debugger;
+        this.currentConfirmationPromise.resolve('skipped');
+        this.currentConfirmationPromise = null;
+      }
+    },
+    async onWidgetChat(userFeedback) {
+      this.confirmationWidgetData.conversationMessages.push({ type: 'assistant', text: this.confirmationWidgetData.aiSuggestion });
+      this.confirmationWidgetData.conversationMessages.push({ type: 'user', text: userFeedback });
 
-          // Show error to user (optional)
-          console.log(`Agent processing stopped due to error: ${error.message || error}`);
+      this.confirmationWidgetData.streamingText = '';
+      this.confirmationWidgetData.isStreaming = true;
 
-          throw error;
-        }
-      };
+      this.manageParagraphDecoration(this.projectAgentCurrentProcessingItem, 'streaming');
 
-      // Set editor selection to the target paragraph for BubbleMenu positioning
-      // Select the first few characters of the paragraph content to create a valid text selection
-      const paragraphContentStart = item.from + 1; // Skip the paragraph opening tag
-      const paragraphContentEnd = Math.min(paragraphContentStart + 10, item.to - 1); // Select first 10 chars, don't include closing tag
-
-      editorStore.editor.commands.setTextSelection({
-        from: paragraphContentStart,
-        to: paragraphContentEnd
-      });
-
-      // Streaming state for widget
-      let streamingText = '';
-      let isStreaming = true; // Start with streaming for initial processing
-      let aiSuggestion = '';
-      let streamingAborted = false; // Flag to stop streaming when user takes action
-
-      // Small delay to ensure selection is processed before showing widget
-      await new Promise(resolve => setTimeout(resolve, 100));
-
-      // Show confirmation widget
-      const showWidget = () => {
-        editorStore.showConfirmationWidget({
-          agentTitle: agent.title,
-          originalText: item.text,
-          suggestedText: aiSuggestion,
-          paragraphRange: { from: item.from, to: item.to },
-          streamingText: streamingText,
-          isStreaming: isStreaming,
-          onAccept: (data) => {
-            console.log('User accepted changes:', data);
-
-            // Stop any ongoing streaming
-            streamingAborted = true;
-            isStreaming = false;
-
-            // Apply the suggested text to the editor
-            const { from, to } = data.paragraphRange;
-            const { suggestedText } = data;
-
-            // Remove the existing decoration first
-            editorStore.removeAgentDecoration(from, to);
-
-            // Use Tiptap command to replace the paragraph content
-            const result = editorStore.editor
-              .chain()
-              .focus()
-              .command(({ tr, state }) => {
-                // Replace the content at the specified range
-                tr.replaceWith(from, to, state.schema.text(suggestedText));
-                return true;
-              })
-              .run();
-
-            // Calculate new range after replacement (text length might have changed)
-            const lengthDiff = suggestedText.length - (to - from);
-            const newTo = to + lengthDiff;
-
-            // Remove the decoration since text was replaced
-            // (No need to add completion decoration - the replacement is the completion)
-
-            // Hide confirmation widget
-            editorStore.hideConfirmationWidget();
-
-            // Clear selection
-            editorStore.editor.commands.blur();
-
-            // Resolve the confirmation promise to continue processing
-            if (this.currentConfirmationPromise) {
-              this.currentConfirmationPromise.resolve('accepted');
-              this.currentConfirmationPromise = null;
-            }
-          },
-          onReject: (data) => {
-            console.log('User skipped paragraph:', data);
-
-            // Stop any ongoing streaming
-            streamingAborted = true;
-            isStreaming = false;
-
-            // Add this paragraph to skipped set
-            this.skippedParagraphs.add(data.originalText);
-
-            // Remove decoration and hide widget
-            editorStore.removeAgentDecoration(item.from, item.to);
-            editorStore.hideConfirmationWidget();
-
-            // Clear selection
-            editorStore.editor.commands.blur();
-
-            // Resolve the confirmation promise to continue processing
-            if (this.currentConfirmationPromise) {
-              this.currentConfirmationPromise.resolve('skipped');
-              this.currentConfirmationPromise = null;
-            }
-          },
-          onChat: async (userFeedback) => {
-            console.log('User provided feedback:', userFeedback);
-
-            // Add current AI suggestion as assistant message
-            conversationMessages.push({ type: 'assistant', text: aiSuggestion });
-            // Add user feedback as user message
-            conversationMessages.push({ type: 'user', text: userFeedback });
-
-            // Reset streaming state
-            streamingText = '';
-            isStreaming = true;
-
-            // Update to streaming state and show streaming widget
-            editorStore.updateAgentDecoration(item.from, item.to, 'streaming');
-            showWidget();
-
-            try {
-              // Create streaming callback
-              const onOutput = (fullText, newText, isFinished, isError) => {
-                // Check if streaming was aborted locally or globally
-                if (streamingAborted || this.globalStreamingAborted) {
-                  console.log('Chat streaming aborted by user action');
-                  return;
-                }
-
-                streamingText = fullText;
-
-                if (isFinished) {
-                  isStreaming = false;
-                  if (!isError && !streamingAborted && !this.globalStreamingAborted) {
-                    aiSuggestion = fullText;
-                    console.log(`AI agent updated suggestion: "${aiSuggestion.substring(0, 100)}..."`);
-                    // Update back to awaiting confirmation
-                    editorStore.updateAgentDecoration(item.from, item.to, 'awaiting_confirmation');
-                  }
-                }
-
-                // Refresh widget with updated streaming text only if not aborted
-                if (!streamingAborted && !this.globalStreamingAborted) {
-                  showWidget();
-                }
-              };
-
-              // Re-execute AI prompt with streaming
-              await executeAiPrompt(onOutput);
-
-            } catch (error) {
-              // Handle error - will stop processing via executeAiPrompt
-              isStreaming = false;
-              return;
-            }
-          }
-        });
-      };
-
-      showWidget();
-
-      // Execute initial AI prompt with streaming
       try {
-        // Create streaming callback for initial processing
-        const onInitialOutput = (fullText, newText, isFinished, isError) => {
-          // Check if streaming was aborted locally or globally
-          if (streamingAborted || this.globalStreamingAborted) {
-            console.log('Initial streaming aborted by user action');
+        const onOutput = (fullText, newText, isFinished, isError) => {
+          if (this.confirmationWidgetData.streamingAborted || this.projectAgentAborted) {
+            console.log('Chat streaming aborted by user action');
             return;
           }
 
-          streamingText = fullText;
+          this.confirmationWidgetData.streamingText = fullText;
 
           if (isFinished) {
-            isStreaming = false;
-            if (!isError && !streamingAborted && !this.globalStreamingAborted) {
-              aiSuggestion = fullText;
-              console.log(`AI agent generated suggestion: "${aiSuggestion.substring(0, 100)}..."`);
-              
-              // Check if agent result should be ignored (auto-skip)
-              if (this.shouldIgnoreAgentResult(aiSuggestion, agent)) {
+            this.confirmationWidgetData.isStreaming = false;
+            if (!isError && !this.shouldAbortStreaming(this.confirmationWidgetData.streamingAborted)) {
+              this.confirmationWidgetData.aiSuggestion = fullText;
+              this.manageParagraphDecoration(this.projectAgentCurrentProcessingItem, 'awaiting_confirmation');
+            }
+          }
+        };
+
+        this.confirmationWidgetData.aiResult = await this.executeProjectAgentPrompt(onOutput);
+
+      } catch (error) {
+        this.confirmationWidgetData.isStreaming = false;
+      }
+    },
+    onWidgetUndo() {
+      this.confirmationWidgetData.streamingAborted = true;
+      this.confirmationWidgetData.isStreaming = false;
+
+      this.confirmationWidgetData.aiSuggestion = this.confirmationWidgetData.originalAiSuggestion;
+      this.confirmationWidgetData.conversationMessages = [];
+      this.confirmationWidgetData.streamingAborted = false;
+
+      this.manageParagraphDecoration(this.projectAgentCurrentProcessingItem, 'awaiting_confirmation');
+    },
+    async executeProjectAgentPrompt(onOutput) {
+      const promptStore = usePromptStore();
+      const editorStore = useEditorStore();
+
+      try {
+        const newRequest = cloneRequest(this.projectAgentRequest);
+        newRequest.silent = true;
+        newRequest.text = this.projectAgentCurrentProcessingItem.instruction;
+
+        newRequest.contextTypes = this.projectAgentContext;
+
+        if (this.confirmationWidgetData.conversationMessages.length > 0) {
+          newRequest.appendMessages = [...this.confirmationWidgetData.conversationMessages];
+        }
+
+        if (onOutput) {
+          newRequest.onOutput = onOutput;
+        }
+
+        const result = await promptStore.promptMultiple2(newRequest);
+        return result;
+
+      } catch (error) {
+        editorStore.removeAgentDecoration(this.projectAgentCurrentProcessingItem.from, this.projectAgentCurrentProcessingItem.to);
+        this.projectAgentProcessing = false;
+        this.projectAgentSkippedParagraphs.clear();
+
+        throw error;
+      }
+    },
+    async runAgentOnParagraph(agent, item) {
+      const editorStore = useEditorStore();
+
+      this.projectAgentCurrentProcessingItem = item;
+
+      let conversationMessages = [];
+
+      editorStore.updateAgentDecoration(item.from, item.to, 'processing');
+
+      this.confirmationWidgetData = {
+        agentTitle: agent.title,
+        paragraphRange: { from: item.from, to: item.to },
+
+        originalText: item.text,
+        originalAiSuggestion: '',
+
+        streamingText: '',
+        isStreaming: true,
+        chatLoading: false,
+        streamingAborted: false,
+        aiSuggestion: '',
+
+        aiResult: null,
+        conversationMessages: conversationMessages,
+      };
+
+      let promiseResolve;
+      const confirmationPromise = new Promise((resolve) => {
+        promiseResolve = resolve;
+      });
+      this.currentConfirmationPromise = { resolve: promiseResolve };
+
+      try {
+        let ignored = false;
+
+        const onInitialOutput = (fullText, newText, isFinished, isError) => {
+          if (this.confirmationWidgetData.streamingAborted || this.projectAgentAborted || ignored) {
+            return;
+          }
+
+          this.confirmationWidgetData.streamingText = fullText;
+
+          if (isFinished) {
+            this.confirmationWidgetData.isStreaming = false;
+            if (!isError && !this.shouldAbortStreaming(this.confirmationWidgetData.streamingAborted)) {
+              this.confirmationWidgetData.aiSuggestion = fullText;
+
+              if (!this.confirmationWidgetData.originalAiSuggestion) {
+                this.confirmationWidgetData.originalAiSuggestion = fullText;
+              }
+
+              if (this.shouldIgnoreAgentResult(this.confirmationWidgetData.aiSuggestion, agent)) {
                 console.log(`Agent result matches ignore text "${agent.ignoreResultText || 'OK'}", auto-skipping paragraph`);
-                
-                // Add to skipped paragraphs and clean up
-                this.skippedParagraphs.add(item.text);
-                editorStore.removeAgentDecoration(item.from, item.to);
-                editorStore.hideConfirmationWidget();
-                
-                // Auto-resolve as skipped
+
+                this.projectAgentSkippedParagraphs.add(item.text);
+                this.manageParagraphDecoration(item, 'remove');
+
                 if (this.currentConfirmationPromise) {
                   this.currentConfirmationPromise.resolve('skipped');
                   this.currentConfirmationPromise = null;
                 }
+
+                ignored = true;
                 return;
               }
-              
-              // Update to awaiting confirmation
-              editorStore.updateAgentDecoration(item.from, item.to, 'awaiting_confirmation');
-            }
-          }
 
-          // Refresh widget with updated streaming text only if not aborted
-          if (!streamingAborted && !this.globalStreamingAborted) {
-            showWidget();
+              this.manageParagraphDecoration(item, 'awaiting_confirmation');
+            }
           }
         };
 
-        // Execute AI prompt with streaming
-        await executeAiPrompt(onInitialOutput);
-
+        //TODO bug - even if user aborts, it still waits to complete this before continuing with the next paragraph
+        this.confirmationWidgetData.aiResult = await this.executeProjectAgentPrompt(onInitialOutput);
       } catch (error) {
-        // Handle error - will stop processing via executeAiPrompt
-        isStreaming = false;
+        this.confirmationWidgetData.isStreaming = false;
         return 'error';
       }
 
-      console.log(`Paragraph awaiting confirmation: ${item.from}-${item.to}`);
-
-      // Create a promise that will be resolved when user makes a choice
-      const confirmationPromise = new Promise((resolve) => {
-        this.currentConfirmationPromise = { resolve };
-      });
-
-      // Wait for user confirmation
       const userChoice = await confirmationPromise;
-      console.log(`User choice: ${userChoice} for paragraph ${item.from}-${item.to}`);
 
       return userChoice;
     },
-    async processNextParagraph(agent) {
-      const editorStore = useEditorStore();
-
-      // Get the editor instance
-      const editor = editorStore.editor;
-      if (!editor) {
-        console.log('No editor instance found');
-        this.autonomousAgentProcessing = false;
-        return;
-      }
-
-      // Dynamically find the next paragraph to process
-      const doc = editor.state.doc;
-      let nextItem = null;
-
-      doc.nodesBetween(0, doc.content.size, (node, pos, parent, index) => {
-        if (nextItem) return false; // Stop if we found one
-
-        if (node.type.name === 'paragraph') {
-          const from = pos;
-          const to = pos + node.nodeSize;
-          const text = editorTextBetween(doc, { from, to }, '\\n', '\\n');
-
-          // Check if paragraph starts with search prefix and hasn't been processed or skipped
-          if (text.trim().startsWith(agent.searchPrefix) && text.trim().length > agent.searchPrefix.length) {
-            const instruction = text.trim().substring(agent.searchPrefix.length).trim();
-
-            // Skip if this paragraph was previously skipped
-            if (!this.skippedParagraphs.has(text.trim()) && instruction.length > 0) {
-              nextItem = {
-                node: node,
-                pos: pos,
-                from: from,
-                to: to,
-                text: text.trim(),
-                instruction: instruction,
-                originalContent: text
-              };
-            }
-          }
-        }
-      });
-
-      if (!nextItem) {
-        // No more paragraphs to process
-        this.autonomousAgentProcessing = false;
-        console.log(`Project agent ${agent.title} completed processing`);
-        return;
-      }
-
-      console.log(`Processing next paragraph: ${nextItem.text.substring(0, 50)}...`);
-
-      // Process the current paragraph and wait for user confirmation
-      const userChoice = await this.runAgentOnParagraph(agent, nextItem);
-
-      // Check if agent was stopped or failed before continuing
-      if (userChoice === 'stopped' || userChoice === 'error' || !this.autonomousAgentProcessing) {
-        console.log('Agent processing stopped, not continuing to next paragraph');
-        return;
-      }
-
-      // Process the next paragraph
-      await this.processNextParagraph(agent);
-    },
     stopAgentProcessing() {
-      console.log('Agent processing stop requested by user');
-
       const editorStore = useEditorStore();
 
-      // Abort all streaming immediately
-      this.globalStreamingAborted = true;
+      this.projectAgentAborted = true;
 
-      // Clear confirmation promise to stop processing
+      if(editorStore.editor) {
+        editorStore.editor.commands.blur();
+      }
+
       if (this.currentConfirmationPromise) {
+        debugger;
         this.currentConfirmationPromise.resolve('stopped');
         this.currentConfirmationPromise = null;
       }
 
-      if (this.currentProcessingItem) {
-        editorStore.removeAgentDecoration(this.currentProcessingItem.from, this.currentProcessingItem.to);
+      if (this.projectAgentCurrentProcessingItem) {
+        editorStore.removeAgentDecoration(this.projectAgentCurrentProcessingItem.from, this.projectAgentCurrentProcessingItem.to);
       }
 
-      // Clear current processing item
-      this.currentProcessingItem = null;
-
-      // Update reactive state to hide UI elements and stop processing
-      this.autonomousAgentProcessing = false;
+      this.projectAgentCurrentProcessingItem = null;
+      this.projectAgentProcessing = false;
 
       // Clean up remaining state
-      this.skippedParagraphs.clear();
-
-      console.log('Agent processing stopped - use Skip button to remove current paragraph highlight');
+      this.projectAgentSkippedParagraphs.clear();
     }
   }
 });

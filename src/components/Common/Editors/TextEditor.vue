@@ -22,15 +22,18 @@
 
             <q-btn v-if="predefinedWordFinderPrompts && predefinedWordFinderPrompts.length > 0" size="11px" dense flat icon="mdi-text-search" padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="accent" @click="runWordFinder()" :loading="wordFinderLoading">
               <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="popup-gradient-1">
-                <q-card style="width: 400px; height: 300px;" class="popup-gradient-1 idea-card column">
+                <q-card style="width: 400px; height: 300px;" class="popup-gradient-1 idea-card column ">
                   <div class="col-auto" style="height: 35px;">
-                    <div class="row text-center bg-accent q-py-xs q-px-md q-mb-sm full-width">
+                    <div class="row text-center bg-accent q-py-sm q-px-md q-mb-sm full-width">
                       <div class="col justify-start flex">
-                        <span class=text-white>{{ truncate(getSelectedText(), 40) }}</span>
+                        <div class="text-white text-weight-medium">
+                          <q-icon name="mdi-text-search" class="q-mr-xs" />
+                          {{ truncate(getSelectedText(), 40) }}
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div class="col scroll-y">
+                  <div class="col scroll-y q-mt-sm">
                     <div class="row">
                       <template v-for="(word, i) in wordFinderOutput" :key="i">
                         <div class="col-auto">
@@ -58,8 +61,20 @@
 
             <q-btn v-if="promptStore.analysisPromptsSettings.prompts && promptStore.analysisPromptsSettings.prompts.length > 0" size="11px" dense flat icon="mdi-chart-timeline-variant-shimmer" padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="accent" @click="runSelectionAnalysis" :loading="promptStore.selectionAnalysisRunning">
               <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="gradient-variation-2 no-border" @on-before-show="console.log($event)" @show="console.log($event)">
-                <q-card style="min-width: 400px; max-width: 650px; height: 500px" class="scroll-y q-pa-md" v-if="promptStore.selectionPromptResults && promptStore.selectionPromptResults.length > 0">
-                  <div class="q-mb-sm" v-for="(promptResult, index) in promptStore.selectionPromptResults" :key="index">
+                <q-card style="min-width: 400px; max-width: 650px; height: 500px" class="scroll-y" v-if="promptStore.selectionPromptResults && promptStore.selectionPromptResults.length > 0">
+                  <div class="q-pa-sm bg-accent text-white">
+                    <div class="row items-center no-wrap">
+                      <div class="col">
+                        <div class="q-ml-xs text-body2 text-weight-medium">
+                          <q-icon name="mdi-chart-timeline-variant-shimmer" class="q-mr-xs" />
+                          Analysis
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+
+                  <div class="q-mb-sm q-mt-sm q-mx-sm" v-for="(promptResult, index) in promptStore.selectionPromptResults" :key="index">
                     <PromptResult :promptResult="promptResult" type="inline"/>
                   </div>
                 </q-card>
@@ -385,7 +400,7 @@
 
   <!-- Agent Confirmation Widget -->
   <bubble-menu
-    v-if="editor && confirmationWidgetVisible && confirmationWidgetData"
+    v-if="editor && confirmationWidgetData && !confirmationWidgetData.hidden && !aiAgentStore.projectAgentAborted"
     :editor="editor"
     :tippy-options="{
       placement: 'bottom-start',
@@ -397,9 +412,6 @@
       interactiveDebounce: 75,
       hideOnClick: false,
       trigger: 'manual',
-      boundary: 'viewport',
-      flip: true,
-      flipOnUpdate: true,
       arrow: true,
       theme: 'light-border',
       maxWidth: 500,
@@ -408,16 +420,14 @@
     :should-show="shouldShowConfirmationWidget"
   >
     <AgentConfirmationWidget
+      v-if="confirmationWidgetData"
+      :prompt-result="confirmationWidgetData"
       :agent-title="confirmationWidgetData.agentTitle"
-      :original-text="confirmationWidgetData.originalText"
-      :suggested-text="confirmationWidgetData.suggestedText"
       :paragraph-range="confirmationWidgetData.paragraphRange"
-      :chat-loading="confirmationWidgetData.chatLoading"
-      :streaming-text="confirmationWidgetData.streamingText"
-      :is-streaming="confirmationWidgetData.isStreaming"
-      @accept="confirmationWidgetData.onAccept"
-      @reject="confirmationWidgetData.onReject"
-      @chat="confirmationWidgetData.onChat"
+      @accept="aiAgentStore.onWidgetAccept"
+      @reject="aiAgentStore.onWidgetReject"
+      @chat="aiAgentStore.onWidgetChat"
+      @undo="aiAgentStore.onWidgetUndo"
     />
   </bubble-menu>
 
@@ -633,22 +643,18 @@ const currentSelectionPromptCategory = ref('');
 const fileInfo = ref(null);
 const fileInfoHover = useElementHover(fileInfo)
 
-// Agent confirmation widget state
-const confirmationWidgetVisible = ref(false);
-const confirmationWidgetData = ref(null);
+const confirmationWidgetData = computed(() => aiAgentStore.confirmationWidgetData);
 
-// shouldShow function for default BubbleMenu (hide only for paragraph with pending confirmation)
 const shouldShowDefaultBubbleMenu = ({ editor, view, state, from, to }) => {
-  // Default BubbleMenu logic: show when there's a non-empty text selection
   const { selection } = state;
   const { empty } = selection;
 
-  if (empty || !editor.isEditable) {
+  if(empty || !selection) {
     return false;
   }
 
   // Hide default bubble menu only if current selection overlaps with paragraph that has pending confirmation
-  if (confirmationWidgetVisible.value && confirmationWidgetData.value && confirmationWidgetData.value.paragraphRange) {
+  if (!aiAgentStore.projectAgentAborted && confirmationWidgetData.value && confirmationWidgetData.value.paragraphRange) {
     const targetRange = confirmationWidgetData.value.paragraphRange;
 
     // Simplified overlap detection: ranges overlap if they're NOT completely separate
@@ -660,7 +666,6 @@ const shouldShowDefaultBubbleMenu = ({ editor, view, state, from, to }) => {
       selection: { from, to },
       targetRange,
       overlaps: overlapsWithPendingParagraph,
-      confirmationVisible: confirmationWidgetVisible.value
     });
 
     if (overlapsWithPendingParagraph) {
@@ -674,8 +679,8 @@ const shouldShowDefaultBubbleMenu = ({ editor, view, state, from, to }) => {
 };
 
 // shouldShow function for Agent Confirmation BubbleMenu
-const shouldShowConfirmationWidget = ({ editor, view, state, from, to }) => {
-  if (!confirmationWidgetVisible.value || !confirmationWidgetData.value) {
+function shouldShowConfirmationWidget ({ editor, view, state, from, to }) {
+  if (!confirmationWidgetData.value || confirmationWidgetData.value.hidden || aiAgentStore.projectAgentAborted) {
     return false;
   }
 
@@ -686,25 +691,8 @@ const shouldShowConfirmationWidget = ({ editor, view, state, from, to }) => {
                    (from <= targetRange.from && to >= targetRange.to);
 
   return overlaps;
-};
-
-computed(() => {
-  const prompts = promptStore.selectionPrompts.filter(p => promptStore.canPrompt(p)).map(p => p.category ?? "");
-
-  return [...new Set(prompts)];
-});
-computed(() => {
-  const prompts = promptStore.insertPrompts.filter(p => promptStore.canPrompt(p)).map(p => p.category ?? "");
-
-  return [...new Set(prompts)];
-});
+}
 const emits = defineEmits(['update:modelValue']);
-computed(() => {
-  const prompts = promptStore.selectionPrompts.filter(p => promptStore.canPrompt(p)).filter(p => p.category === currentSelectionPromptCategory.value || (currentSelectionPromptCategory.value === '' && !p.category))
-  const grouping = groupBy(prompts, 'modelId');
-
-  return groupByToArray(grouping);
-});
 const writeClasses = computed(() => {
   return {
     'write-serif': (fileStore.selectedFile?.settings?.fontType ?? 'serif') === 'serif',
@@ -881,22 +869,6 @@ onMounted(() =>{
   editorStore.setEditor(editor.value);
   promptStore.updateTokens();
   promptStore.setCharsCount(editor.value.storage.characterCount.characters());
-
-  // Add event listeners for agent confirmation widget
-  if (editor.value) {
-    editor.value.on('showAgentConfirmation', (data) => {
-      confirmationWidgetData.value = data;
-      confirmationWidgetVisible.value = true;
-    });
-
-    editor.value.on('hideAgentConfirmation', () => {
-      confirmationWidgetVisible.value = false;
-      // Keep confirmationWidgetData briefly for proper hiding animation
-      setTimeout(() => {
-        confirmationWidgetData.value = null;
-      }, 200); // Match the hide animation duration
-    });
-  }
 })
 
 onDeactivated(() => {

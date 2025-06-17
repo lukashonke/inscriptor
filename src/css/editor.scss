@@ -535,7 +535,7 @@
   padding-left: 8px;
   margin-left: -8px;
 
-  animation: agent-pulse 1.5s ease-in-out infinite;
+  animation: agent-pulse 2s ease-in-out infinite;
 }
 
 .agent-streaming {
@@ -545,7 +545,7 @@
   padding-left: 8px;
   margin-left: -8px;
 
-  animation: agent-pulse-purple 1.5s ease-in-out infinite;
+  animation: agent-pulse-purple 2s ease-in-out infinite;
 }
 
 .agent-awaiting-confirmation {
@@ -556,8 +556,9 @@
   margin-left: -8px;
 
   // Subtle glow effect for awaiting confirmation
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
   cursor: pointer;
+
+  animation: agent-pulse-purple 2s ease-in-out infinite;
 }
 
 
