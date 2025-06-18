@@ -70,7 +70,7 @@ export const usePromptStore = defineStore('prompts', {
 
     isPrompting: false,
     isSilentPrompting: false,
-    promptAbortController: null,
+    singletonPromptAbortController: null,
 
     promptParametersShown: false,
     currentPromptConfirmationRequest: null,
@@ -149,7 +149,7 @@ export const usePromptStore = defineStore('prompts', {
       const aiAgentStore = useAiAgentStore();
 
       let lastResult = null;
-      
+
 
       try {
         if(request.prompt.enablePromptRuns === true && request.prompt.runs && request.prompt.runs.length > 0 && !request.silent) {
@@ -180,9 +180,17 @@ export const usePromptStore = defineStore('prompts', {
               request.userPrompt = userPrompt;
             }
 
+            if ((request.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
+              return null;
+            }
+
             const result = await this.promptInternal2(request);
 
             this.calculateDiffs(request, result);
+
+            if ((request.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
+              return null;
+            }
 
             await aiAgentStore.runAgentsOnPromptResult(request, result);
 
@@ -198,7 +206,15 @@ export const usePromptStore = defineStore('prompts', {
 
             const result = await this.promptInternal2(request);
 
+            if ((request.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
+              return null;
+            }
+
             this.calculateDiffs(request, result);
+
+            if ((request.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
+              return null;
+            }
 
             await aiAgentStore.runAgentsOnPromptResult(request, result);
 
@@ -1038,12 +1054,16 @@ export const usePromptStore = defineStore('prompts', {
     promptInternal2(request) {
       if(this.shouldCancelRunningPrompt(request)) {
         if(this.isPrompting) {
-          this.promptAbortController?.abort();
+          this.singletonPromptAbortController?.abort();
         }
 
         this.isPrompting = true;
       } else {
         this.isSilentPrompting = request.silent;
+      }
+
+      if ((request.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
+        return;
       }
 
       const layoutStore = useLayoutStore();
@@ -1065,7 +1085,7 @@ export const usePromptStore = defineStore('prompts', {
         });
       }
 
-      this.promptAbortController = new AbortController();
+      this.singletonPromptAbortController = new AbortController();
 
       if(this.hasCustomPromptUi(request) && !request.executeCustomPromptUi) {
         return new Promise(async (resolve, reject) => {
@@ -1082,6 +1102,12 @@ export const usePromptStore = defineStore('prompts', {
           pr.model = model;
           pr.temperature = input.temperature;
           pr.executedTextMessages = input.textMessages ? [...input.textMessages] : undefined;
+
+          if(request.abortController && request.abortController.signal && request.abortController.signal.aborted) {
+            reject(new Error('Prompt was aborted.'));
+            this.onPromptingEnd(request, pr);
+            return;
+          }
 
           const inferenceEngine = input.model.args.inferenceEngine;
           let customApiKey = null;
@@ -1296,9 +1322,6 @@ export const usePromptStore = defineStore('prompts', {
                 if (pr.meta === null) {
                   pr.text += text;
                   pr.originalText += text;
-                  if (request.onOutput) {
-                    request.onOutput(pr.text, text, false);
-                  }
 
                   if (pr.text.includes('[[META]]')) {
                     // extract text after [[META]]
@@ -1309,6 +1332,10 @@ export const usePromptStore = defineStore('prompts', {
                     pr.meta = '';
                     pr.meta += meta;
                   }
+
+                  if (request.onOutput) {
+                    request.onOutput(pr.text, text, false, false, request, pr);
+                  }
                 } else {
                   pr.meta += text;
                 }
@@ -1316,7 +1343,7 @@ export const usePromptStore = defineStore('prompts', {
               () => {
 
                 if (request.onOutput) {
-                  request.onOutput(pr.text, null, true, false);
+                  request.onOutput(pr.text, null, true, false, request, pr);
                 }
 
                 pr.waitingForResponse = false;
@@ -1385,7 +1412,7 @@ export const usePromptStore = defineStore('prompts', {
               },
               (err) => {
                 if (request.onOutput) {
-                  request.onOutput(pr.text, null, true, true);
+                  request.onOutput(pr.text, null, true, true, request, pr);
                 }
 
                 pr.waitingForResponse = false;
@@ -1397,7 +1424,7 @@ export const usePromptStore = defineStore('prompts', {
 
                 this.onPromptingEnd(request, pr);
               },
-              this.promptAbortController,
+              request.abortController ?? this.singletonPromptAbortController,
               controllerName, actionName);
           }
           else if (promptingEngineToUse === 'lmstudio') {
@@ -1445,13 +1472,21 @@ export const usePromptStore = defineStore('prompts', {
                 //response_format: input.jsonMode === true ? { "type": "json_object" } : undefined,
               },
                 {
-                  signal: this.promptAbortController.signal,
+                  signal: request.abortController?.signal ?? this.singletonPromptAbortController.signal,
                   method: 'POST',
                 });
               for await (const chunk of stream) {
                 pr.waitingForResponse = false;
                 pr.text += chunk.choices[0]?.delta?.content ?? '';
                 pr.originalText += chunk.choices[0]?.delta?.content ?? '';
+
+                if (request.onOutput) {
+                  request.onOutput(pr.text, chunk.choices[0]?.delta?.content, false, false, request, pr);
+                }
+              }
+
+              if (request.onOutput) {
+                request.onOutput(pr.text, null, true, false, request, pr);
               }
 
               pr.waitingForResponse = false;
@@ -1464,6 +1499,10 @@ export const usePromptStore = defineStore('prompts', {
               pr.waitingForResponse = false;
               if (loggedPrompt) loggedPrompt.error = err;
               pr.error = err;
+
+              if (request.onOutput) {
+                request.onOutput(pr.text, null, true, true, request, pr);
+              }
 
               reject(err);
 
@@ -1514,15 +1553,23 @@ export const usePromptStore = defineStore('prompts', {
                 response_format: input.jsonMode === true ? { type: "json_object" } : undefined,
               },
                 {
-                  signal: this.promptAbortController.signal,
+                  signal: request.abortController?.signal ?? this.singletonPromptAbortController.signal,
                 });
               for await (const chunk of stream) {
                 pr.waitingForResponse = false;
                 pr.text += chunk.choices[0]?.delta?.content ?? '';
                 pr.originalText += chunk.choices[0]?.delta?.content ?? '';
+
+                if (request.onOutput) {
+                  request.onOutput(pr.text, chunk.choices[0]?.delta?.content, false, false, request, pr);
+                }
               }
 
               pr.waitingForResponse = false;
+
+              if (request.onOutput) {
+                request.onOutput(pr.text, null, true, false, request, pr);
+              }
 
               resolve(pr);
 
@@ -1531,6 +1578,10 @@ export const usePromptStore = defineStore('prompts', {
               pr.waitingForResponse = false;
               if (loggedPrompt) loggedPrompt.error = err;
               pr.error = err;
+
+              if (request.onOutput) {
+                request.onOutput(pr.text, null, true, true, request, pr);
+              }
 
               reject(err);
 
@@ -1580,11 +1631,15 @@ export const usePromptStore = defineStore('prompts', {
                 model: model.modelName,
                 stream: true,
               }, {
-                signal: this.promptAbortController.signal,
+                signal: request.abortController?.signal ?? this.singletonPromptAbortController.signal,
               }).on('text', (text) => {
                 pr.waitingForResponse = false;
                 pr.text += text;
                 pr.originalText += text;
+
+                if (request.onOutput) {
+                  request.onOutput(pr.text, text, false, false, request, pr);
+                }
               });
 
               const message = await stream.finalMessage();
@@ -1594,6 +1649,10 @@ export const usePromptStore = defineStore('prompts', {
 
               pr.waitingForResponse = false;
 
+              if (request.onOutput) {
+                request.onOutput(pr.text, null, true, false, request, pr);
+              }
+
               resolve(pr);
 
               this.onPromptingEnd(request, pr);
@@ -1601,6 +1660,10 @@ export const usePromptStore = defineStore('prompts', {
               pr.waitingForResponse = false;
               if (loggedPrompt) loggedPrompt.error = err;
               pr.error = err;
+
+              if (request.onOutput) {
+                request.onOutput(pr.text, null, true, true, request, pr);
+              }
 
               reject(err);
 
@@ -1656,6 +1719,14 @@ export const usePromptStore = defineStore('prompts', {
                   pr.waitingForResponse = false;
                   pr.text += chunk?.response ?? '';
                   pr.originalText += chunk?.response ?? '';
+
+                  if (request.onOutput) {
+                    request.onOutput(pr.text, chunk?.response, false, false, request, pr);
+                  }
+                }
+
+                if (request.onOutput) {
+                  request.onOutput(pr.text, null, true, false, request, pr);
                 }
 
                 pr.waitingForResponse = false;
@@ -1698,6 +1769,14 @@ export const usePromptStore = defineStore('prompts', {
                   pr.waitingForResponse = false;
                   pr.text += chunk?.message?.content ?? '';
                   pr.originalText += chunk?.message?.content ?? '';
+
+                  if (request.onOutput) {
+                    request.onOutput(pr.text, chunk?.message?.content, false, false, request, pr);
+                  }
+                }
+
+                if (request.onOutput) {
+                  request.onOutput(pr.text, null, true, false, request, pr);
                 }
 
                 pr.waitingForResponse = false;
@@ -1712,6 +1791,10 @@ export const usePromptStore = defineStore('prompts', {
 
               if (loggedPrompt) loggedPrompt.error = err;
               pr.error = err;
+
+              if (request.onOutput) {
+                request.onOutput(pr.text, null, true, true, request, pr);
+              }
 
               reject(err);
 
@@ -1744,7 +1827,7 @@ export const usePromptStore = defineStore('prompts', {
 
               const idToken = await user.value.getIdToken();
 
-              response = await generateImage(idToken, promptRequest, this.promptAbortController);
+              response = await generateImage(idToken, promptRequest, request.abortController?.signal ?? this.singletonPromptAbortController);
 
               pr.type = 'image';
               if (!pr.images) {
@@ -1780,7 +1863,7 @@ export const usePromptStore = defineStore('prompts', {
             const promptData = applyPromptFormatPrefixSuffix(input.systemPrefix, input.systemSuffix, input.systemPrompt, input.userPrefix, input.userSuffix, input.userPrompt, input.assistantPrefix, input.assistantSuffix);
 
             try {
-              const result = await promptLocalAutomatic1111(model.args.url, promptData, this.promptAbortController);
+              const result = await promptLocalAutomatic1111(model.args.url, promptData, request.abortController?.signal ?? this.singletonPromptAbortController);
 
               if (result) {
                 pr.type = 'image';
@@ -1828,7 +1911,7 @@ export const usePromptStore = defineStore('prompts', {
     },
     stopPrompt() {
       if(this.isPrompting) {
-        this.promptAbortController.abort();
+        this.singletonPromptAbortController.abort();
         this.isPrompting = false;
         this.onPromptingEnd(null, null);
       }

@@ -61,7 +61,7 @@
               </q-tooltip>
             </q-btn>
           </div>
-          <div class="col-auto">
+          <div class="col-auto" v-if="hasCopy">
             <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-content-copy" v-if="type !== 'inline'" class="hoverable-btn-semi">
               <q-menu>
                 <q-list dense>
@@ -124,7 +124,7 @@
             <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-close" @click="onClose" class="hoverable-btn-semi">
             </q-btn>
           </div>
-          <div class="col-auto" v-else>
+          <div class="col-auto" v-else-if="showMenu">
             <div class="col-auto">
               <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-dots-vertical" class="hoverable-btn-semi">
                 <q-menu>
@@ -337,7 +337,7 @@
           </span>
         </div>
 
-        <div v-if="promptResult.analysingByAgent" class="q-mt-lg">
+        <div v-if="promptResult.analysingByAgent" class="q-mt-lg text-caption">
           <q-spinner-grid class="q-mr-sm" />
           <span v-if="promptResult.analysingByAgentMessage">
             {{ promptResult.analysingByAgentMessage }}
@@ -614,6 +614,14 @@
       type: Boolean,
       default: false,
     },
+    showMenu: {
+      type: Boolean,
+      default: true,
+    },
+    hasCopy: {
+      type: Boolean,
+      default: true,
+    }
   });
 
   const selection = useTextSelection();
@@ -954,7 +962,7 @@
 
     treeItem.loading = true;
 
-    const onOutput = (fullText, newText, isFinished, isError) => {
+    const onOutput = (fullText, newText, isFinished, isError, request, result) => {
       treeItem.progressText = fullText;
     };
 

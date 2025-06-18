@@ -156,9 +156,6 @@ export const AgentDecorationPlugin = Extension.create({
       clearAllAgentDecorations: () => ({ tr, dispatch, state }) => {
         if (!dispatch) return true
 
-        // Also hide any confirmation widgets
-        extension.editor.emit('hideAgentConfirmation')
-
         const newTr = state.tr.setMeta(pluginKey, {
           type: 'set',
           decorationSet: DecorationSet.empty

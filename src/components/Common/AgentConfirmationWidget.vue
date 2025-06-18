@@ -7,7 +7,7 @@
           <div class="col">
             <div class="text-body2 text-weight-medium">
               <q-icon name="mdi-robot-outline" class="q-mr-xs q-ml-xs" />
-              {{ agentTitle || promptResult.agentTitle }} suggestions:
+              {{ widgetData.agentTitle }} suggestions:
             </div>
           </div>
           <div class="col-auto">
@@ -25,38 +25,63 @@
         </div>
       </div>
 
+      <q-card-section class="q-pa-sm q-mb-none">
+        <div class="comparison-container">
+          <div class="suggested-text q-mb-sm">
+            <div 
+              v-if="!isEditingNow"
+              class="q-pa-xs rounded border-accent" 
+              :class="writeClasses" 
+              v-html="diffHtml" 
+              contenteditable
+              @focus="startEditing"
+            >
+            </div>
+            <div 
+              v-else
+              class="q-pa-xs rounded border-accent" 
+              :class="writeClasses"
+              contenteditable
+              ref="editableDiv"
+              @input="handleInput"
+              @blur="finishEditing"
+            ></div>
+          </div>
+        </div>
+      </q-card-section>
+
       <!-- Agent analysis status -->
-      <div v-if="promptResult.aiResult?.analysingByAgent" class="q-pa-sm bg-blue-grey-1">
+      <div v-if="widgetData.executingPromptRequest?.promptAgent && widgetData.isStreaming" class="q-pa-sm">
         <div class="row items-center">
-          <div class="col-auto">
+          <div class="q-ml-xs col-auto flex items-center">
             <q-spinner-grid class="q-mr-sm" size="16px" />
           </div>
-          <div class="col">
-            <div class="text-caption text-blue-grey-8">
-              <span v-if="promptResult.aiResult.analysingByAgentMessage">
-                {{ promptResult.aiResult.analysingByAgentMessage }}
-              </span>
-              <span v-else>
-                Analysing by {{ promptResult.aiResult.analysingByAgent.title }}...
+          <div class="col flex items-center">
+            <div class="text-caption">
+              <span>
+                Analysing by {{ widgetData.executingPromptRequest.promptAgent.title }}...
               </span>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Changes comparison -->
-      <q-card-section class="q-pa-sm q-mb-none">
-        <!-- Proposed changes with diff highlighting -->
-        <div class="comparison-container">
-          <div class="suggested-text q-mb-sm">
-            <div class="q-pa-xs rounded border-accent" :class="writeClasses" v-html="diffHtml">
+      <div v-if="widgetData.promptResult && widgetData.promptResult.prevResults && widgetData.promptResult.prevResults.length > 0" class="text-center">
+        <q-btn class="text-weight-bold hoverable-btn-semi" :label="previousResultsExpanded ? 'Hide results before agents' : 'Show results before agents (' + widgetData.promptResult.prevResults.length + ')'" flat color="grey-7" unelevated size="sm" no-caps @click="previousResultsExpanded = !previousResultsExpanded" />
+      </div>
+
+      <template v-if="widgetData.promptResult && previousResultsExpanded && widgetData.promptResult.prevResults && widgetData.promptResult.prevResults.length > 0">
+        <template v-for="(previousResult, index) in widgetData.promptResult.prevResults" :key="index">
+          <transition appear enter-active-class="animated fadeIn slow" leave-active-class="animated fadeOut">
+            <div class="q-mx-md q-mb-sm">
+              <PromptResult :prompt-result="previousResult" :showPromptInfo="false" :isPreviousPromptResult="true" :show-menu="false" :insert-func="acceptReplyBeforeAgent" :has-copy="false"/>
             </div>
-          </div>
-        </div>
-      </q-card-section>
+          </transition>
+        </template>
+      </template>
 
       <!-- Chat input section -->
-      <q-card-section class="q-px-sm q-py-none q-pb-sm q-mb-none" v-if="!promptResult.chatLoading && !promptResult.isStreaming && (promptResult.aiSuggestion || '').trim()">
+      <q-card-section class="q-px-sm q-py-none q-pb-sm q-mb-none" v-if="!widgetData.isStreaming && (widgetData.aiSuggestion ?? '').trim()">
         <div class="row">
           <div class="col">
             <q-input
@@ -69,18 +94,18 @@
               label="Reply to AI..."
               placeholder="e.g., Make it shorter, Add more detail, Change tone..."
               @keyup.enter="onChat"
-              :disable="promptResult.chatLoading || promptResult.isStreaming"
+              :disable="widgetData.isStreaming"
             />
           </div>
           <div class="col-auto flex items-center">
-            <q-spinner-grid v-if="promptResult.isStreaming"></q-spinner-grid>
+            <q-spinner-grid v-if="widgetData.isStreaming"></q-spinner-grid>
             <q-btn
               v-else-if="chatInput && chatInput.length > 0"
               icon="mdi-reply-outline"
               color="primary"
               @click="onChat"
-              :disable="!chatInput.trim() || promptResult.chatLoading"
-              :loading="promptResult.chatLoading"
+              :disable="!chatInput.trim()"
+              :loading="widgetData.isStreaming"
             >
               <q-tooltip>Send feedback to improve suggestion</q-tooltip>
             </q-btn>
@@ -101,19 +126,19 @@
               @click="onReject"
               class="full-width"
               no-caps
-              :disable="promptResult.chatLoading || promptResult.isStreaming"
+              :disable="widgetData.isStreaming"
             />
           </div>
-          <div class="col-auto" v-if="promptResult.conversationMessages && promptResult.conversationMessages.length > 0">
+          <div class="col-auto q-ml-sm" v-if="widgetData.conversationMessages && widgetData.conversationMessages.length > 0">
             <q-btn
               flat
-              color="orange"
+              color="primary"
               icon="mdi-undo"
-              label="Undo to Original"
+              label="Undo Chat"
               @click="onUndo"
               class="full-width q-ml-sm"
               no-caps
-              :disable="promptResult.chatLoading || promptResult.isStreaming"
+              :disable="widgetData.isStreaming"
             >
               <q-tooltip>Revert to original AI suggestion</q-tooltip>
             </q-btn>
@@ -127,7 +152,7 @@
               @click="onAccept"
               class="full-width"
               no-caps
-              :disable="promptResult.chatLoading || promptResult.isStreaming"
+              :disable="widgetData.isStreaming"
             />
           </div>
         </div>
@@ -137,30 +162,39 @@
 </template>
 
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, nextTick } from 'vue'
 import { diffStrings } from 'src/common/utils/textUtils'
 import { useFileStore } from 'stores/file-store'
+import PromptResult from 'components/RightMenu/PromptResult.vue';
+import {useAiAgentStore} from 'stores/aiagent-store';
 
 const props = defineProps({
-  promptResult: {
+  widgetData: {
     type: Object,
     required: true
   },
-  // Legacy props for backward compatibility
-  agentTitle: {
-    type: String,
-    default: ''
-  },
-  paragraphRange: {
-    type: Object,
-    default: () => ({ from: 0, to: 0 })
-  }
 })
+
+const aiAgentStore = useAiAgentStore();
 
 const emits = defineEmits(['accept', 'reject', 'chat', 'undo'])
 
 // Store instance
 const fileStore = useFileStore()
+
+const previousResultsExpanded = ref(false);
+const editableContent = ref('');
+const isEditingNow = ref(false);
+
+const aiSuggestionEdit = computed({
+  get() {
+    return props.widgetData.aiSuggestion;
+  },
+  set(value) {
+    // eslint-disable-next-line vue/no-mutating-props
+    props.widgetData.aiSuggestion = value;
+  }
+})
 
 // Chat input reactive data
 const chatInput = ref('')
@@ -186,11 +220,9 @@ const writeClasses = computed(() => {
 // Calculate diff and render it with highlighting
 const diffHtml = computed(() => {
   // Use streaming text if available and streaming, otherwise use final suggested text
-  const textToCompare = props.promptResult.isStreaming && props.promptResult.streamingText
-    ? props.promptResult.streamingText
-    : props.promptResult.aiSuggestion;
+  const textToCompare = props.widgetData.aiSuggestion;
 
-  const diff = diffStrings(props.promptResult.originalText ?? '', textToCompare ?? '');
+  const diff = diffStrings(props.widgetData.originalText ?? '', textToCompare ?? '');
 
   let html = '';
   for (const part of diff) {
@@ -200,11 +232,10 @@ const diffHtml = computed(() => {
     } else if (!part.added && !part.removed) {
       html += value;
     }
-    // Skip removed parts (like PromptResult.vue does)
   }
 
   // Add typing indicator when streaming
-  if (props.promptResult.isStreaming) {
+  if (props.widgetData.isStreaming) {
     html += '<span class="streaming-cursor">|</span>';
   }
 
@@ -213,16 +244,21 @@ const diffHtml = computed(() => {
 
 function onAccept() {
   emits('accept', {
-    paragraphRange: props.paragraphRange || props.promptResult.paragraphRange,
-    originalText: props.promptResult.originalText,
-    aiSuggestion: props.promptResult.aiSuggestion
+    paragraphRange: props.widgetData.paragraphRange,
+    originalText: props.widgetData.originalText,
+    aiSuggestion: props.widgetData.aiSuggestion
   })
+}
+
+function acceptReplyBeforeAgent(result) {
+  aiAgentStore.onWidgetReplaceText(result);
+  onAccept();
 }
 
 function onReject() {
   emits('reject', {
-    paragraphRange: props.paragraphRange || props.promptResult.paragraphRange,
-    originalText: props.promptResult.originalText
+    paragraphRange: props.widgetData.paragraphRange,
+    originalText: props.widgetData.originalText
   })
 }
 
@@ -239,6 +275,28 @@ function onUndo() {
   // Clear chat input when undoing to reset state
   chatInput.value = ''
   emits('undo')
+}
+
+function handleInput(event) {
+  editableContent.value = event.target.innerText;
+}
+
+function startEditing() {
+  editableContent.value = props.widgetData.aiSuggestion;
+  isEditingNow.value = true;
+  // Focus the editable div after Vue updates the DOM and set its content
+  nextTick(() => {
+    const editableDiv = document.querySelector('.suggested-text div[contenteditable]');
+    if (editableDiv) {
+      editableDiv.innerText = editableContent.value;
+      editableDiv.focus();
+    }
+  });
+}
+
+function finishEditing() {
+  aiSuggestionEdit.value = editableContent.value;
+  isEditingNow.value = false;
 }
 </script>
 

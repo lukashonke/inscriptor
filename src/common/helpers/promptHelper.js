@@ -329,9 +329,8 @@ async function executeChatPrompt2(request) {
   return await promptStore.promptMultiple2(request);
 }
 
-export function cloneRequest(request) {
+export function cloneRequest(request, copyAbortController = false) {
   return {
-    //TODO implement
     prompt: request.prompt,
     text: request.text, // automatic input
     userInputs: request.userInputs ? [...request.userInputs] : null, // user specified inputs
@@ -344,7 +343,13 @@ export function cloneRequest(request) {
     forceBypassMoreParameters: request.forceBypassMoreParameters,
     forceShowContextSelection: request.forceShowContextSelection,
     silent: request.silent,
+    abortController: copyAbortController ? request.abortController : (request.abortController ? new AbortController() : null),
     onOutput: request.onOutput,
+
+    isPromptAgent: request.isPromptAgent,
+    isInstructionGeneratorRequest: request.isInstructionGeneratorRequest,
+    isProjectAgent: request.isProjectAgent,
+    promptAgent: request.promptAgent,
 
     allowParallel: request.allowParallel,
 

@@ -400,7 +400,7 @@
 
   <!-- Agent Confirmation Widget -->
   <bubble-menu
-    v-if="editor && confirmationWidgetData && !confirmationWidgetData.hidden && !aiAgentStore.projectAgentAborted"
+    v-if="editor"
     :editor="editor"
     :tippy-options="{
       placement: 'bottom-start',
@@ -420,10 +420,8 @@
     :should-show="shouldShowConfirmationWidget"
   >
     <AgentConfirmationWidget
-      v-if="confirmationWidgetData"
-      :prompt-result="confirmationWidgetData"
-      :agent-title="confirmationWidgetData.agentTitle"
-      :paragraph-range="confirmationWidgetData.paragraphRange"
+      v-if="confirmationWidgetData && !aiAgentStore.projectAgentUserAborted"
+      :widget-data="confirmationWidgetData"
       @accept="aiAgentStore.onWidgetAccept"
       @reject="aiAgentStore.onWidgetReject"
       @chat="aiAgentStore.onWidgetChat"
@@ -654,7 +652,7 @@ const shouldShowDefaultBubbleMenu = ({ editor, view, state, from, to }) => {
   }
 
   // Hide default bubble menu only if current selection overlaps with paragraph that has pending confirmation
-  if (!aiAgentStore.projectAgentAborted && confirmationWidgetData.value && confirmationWidgetData.value.paragraphRange) {
+  if (!aiAgentStore.projectAgentUserAborted && confirmationWidgetData.value && confirmationWidgetData.value.paragraphRange) {
     const targetRange = confirmationWidgetData.value.paragraphRange;
 
     // Simplified overlap detection: ranges overlap if they're NOT completely separate
@@ -680,7 +678,7 @@ const shouldShowDefaultBubbleMenu = ({ editor, view, state, from, to }) => {
 
 // shouldShow function for Agent Confirmation BubbleMenu
 function shouldShowConfirmationWidget ({ editor, view, state, from, to }) {
-  if (!confirmationWidgetData.value || confirmationWidgetData.value.hidden || aiAgentStore.projectAgentAborted) {
+  if (!confirmationWidgetData.value || confirmationWidgetData.value.hidden || aiAgentStore.projectAgentUserAborted) {
     return false;
   }
 
@@ -1091,7 +1089,7 @@ async function triggerQuickPrompt(type, command) {
 
     try {
       for (const prompt of prompts) {
-        const onOutput = (fullText, newText, isFinished, isError) => {
+        const onOutput = (fullText, newText, isFinished, isError, request, result) => {
           quickCommandTemporaryResult.value = fullText;
         };
 
@@ -1121,7 +1119,7 @@ async function triggerQuickPrompt(type, command) {
 
     try {
       for (const prompt of prompts) {
-        const onOutput = (fullText, newText, isFinished, isError) => {
+        const onOutput = (fullText, newText, isFinished, isError, request, result) => {
           quickCommandTemporaryResult.value = fullText;
         };
 
@@ -1180,7 +1178,7 @@ async function runWordFinder(replace = true) {
 
       //console.log(message);
 
-      const onOutput = (fullText, newText, isFinished, isError) => {
+      const onOutput = (fullText, newText, isFinished, isError, request, result) => {
         //console.log(fullText);
       };
 
