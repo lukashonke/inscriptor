@@ -770,10 +770,10 @@ export const usePromptStore = defineStore('prompts', {
           if(contextType.id === 'Current File' || contextType.id === 'Current & Children Files') {
             if(text && text.length > 0) {
               if(request.contextTypes.length > 1) {
-                context += fileStore.getFileNameWithPath(fileStore.selectedFile) + ' Text: ';
+                context += 'CURRENT FILE (' + fileStore.getFileNameWithPath(fileStore.selectedFile) + ') TEXT: \n';
               }
               context += convertHtmlToText(text);
-              context += '\n-----\n';
+              context += '\n\n-----\n\n';
             }
 
             if(contextType.id === 'Current & Children Files') {
@@ -783,9 +783,9 @@ export const usePromptStore = defineStore('prompts', {
                     const childText = convertHtmlToText(child.content);
 
                     if(childText && childText.length > 0) {
-                      context += '' + fileStore.getFileNameWithPath(child) + ' Text: \n';
+                      context += 'CHILD FILE ' + fileStore.getFileNameWithPath(child) + ' TEXT: \n';
                       context += childText;
-                      context += '\n-----\n';
+                      context += '\n\n-----\n\n';
                     }
 
                     addChildrenFunc(child);
@@ -798,20 +798,20 @@ export const usePromptStore = defineStore('prompts', {
           } else if(contextType.id === 'Selected Text') {
             if(selectedText && selectedText.length > 0) {
               if(request.contextTypes.length > 1) {
-                context += 'Selected Text inside ' + (fileStore.getFileNameWithPath(fileStore.selectedFile)) + ': ';
+                context += 'SELECTED TEXT INSIDE FILE ' + (fileStore.getFileNameWithPath(fileStore.selectedFile)) + ': \n';
               }
               context += convertHtmlToText(selectedText);
-              context += '\n-----\n';
+              context += '\n\n-----\n\n';
             }
           } else if(contextType.contextType === 'Dynamic' && contextType.value) {
-              context += '' + contextType.label + ':\n';
-              context += convertHtmlToText(contextType.value);
-              context += '\n-----\n';
+            context += '' + contextType.label + ':\n';
+            context += convertHtmlToText(contextType.value);
+            context += '\n\n-----\n\n';
           } else if(contextType.id === 'Current File Summary' || contextType.id === 'Current & Children File Summary') {
             const contextValue = fileStore.selectedFile?.synopsis ?? '';
             if(contextValue && contextValue.length > 0) {
-              context += fileStore.getFileNameWithPath(fileStore.selectedFile) + ' Summary: ' + convertHtmlToText(contextValue);
-              context += '\n-----\n';
+              context += 'CURRENT FILE SUMMARY ' + fileStore.getFileNameWithPath(fileStore.selectedFile) + ': ' + convertHtmlToText(contextValue);
+              context += '\n\n-----\n\n';
             }
 
             if(contextType.id === 'Current & Children File Summary') {
@@ -821,9 +821,9 @@ export const usePromptStore = defineStore('prompts', {
                     const childText = child.synopsis ?? '';
 
                     if(childText && childText.length > 0) {
-                      context += '' + fileStore.getFileNameWithPath(child) + ' Text Summary:\n';
+                      context += 'CHILD FILE SUMMARY (' + fileStore.getFileNameWithPath(child) + '):\n';
                       context += convertHtmlToText(childText);
-                      context += '\n-----\n';
+                      context += '\n\n-----\n\n';
                     }
 
                     addChildrenFunc(child);
@@ -839,8 +839,8 @@ export const usePromptStore = defineStore('prompts', {
               const charactersToTake = contextType.parameters;
               const previousCharacters = getTextBeforeKeepingWordsIntact(textBefore, charactersToTake);
 
-              context += 'Preceding text: ' + convertHtmlToText(previousCharacters);
-              context += '\n-----\n';
+              context += 'PREVIOUS TEXT: \n\n' + convertHtmlToText(previousCharacters);
+              context += '\n\n-----\n\n';
 
               //contextTextMessages.push({type: 'assistant', text: previousCharacters});
             }
@@ -849,7 +849,7 @@ export const usePromptStore = defineStore('prompts', {
             const contextValue = fileStore.getContextText(contextType.parameters);
 
             if(contextValue && contextValue.length > 0) {
-              context += 'Context: ' + contextType.parameters + ': \n';
+              context += 'CONTEXT ' + contextType.parameters + ': \n';
               context += convertHtmlToText(contextValue);
               context += '\n-----\n';
             }
@@ -861,7 +861,7 @@ export const usePromptStore = defineStore('prompts', {
               const fileText = convertHtmlToText(file.content);
 
               if(fileText && fileText.length > 0) {
-                context += '' + fileStore.getFileNameWithPath(file) + ' Text: \n';
+                context += 'FILE ' + fileStore.getFileNameWithPath(file) + ' TEXT: \n';
                 context += fileText;
                 context += '\n-----\n';
               }
@@ -873,7 +873,7 @@ export const usePromptStore = defineStore('prompts', {
                       const childText = convertHtmlToText(child.content);
 
                       if(childText && childText.length > 0) {
-                        context += '' + fileStore.getFileNameWithPath(child) + ' Text: \n';
+                        context += 'CHILD FILE ' + fileStore.getFileNameWithPath(child) + ' TEXT: \n';
                         context += childText;
                         context += '\n-----\n';
                       }
@@ -896,9 +896,9 @@ export const usePromptStore = defineStore('prompts', {
               const fileText = file.synopsis ?? '';
 
               if(fileText && fileText.length > 0) {
-                context += '' + fileStore.getFileNameWithPath(file) + ' Text Summary:\n';
+                context += 'FILE SUMMARY ' + fileStore.getFileNameWithPath(file) + ':\n';
                 context += convertHtmlToText(fileText);
-                context += '\n-----\n';
+                context += '\n\n-----\n\n';
               }
 
               if(contextType.contextType === 'File and Children Summary') {
@@ -908,9 +908,9 @@ export const usePromptStore = defineStore('prompts', {
                       const childText = child.synopsis ?? '';
 
                       if(childText && childText.length > 0) {
-                        context += '' + fileStore.getFileNameWithPath(child) + ' Text Summary:\n';
+                        context += 'CHILD FILE SUMMARY ' + fileStore.getFileNameWithPath(child) + ':\n';
                         context += convertHtmlToText(childText);
-                        context += '\n-----\n';
+                        context += '\n\n-----\n\n';
                       }
 
                       addChildrenFunc(child);
@@ -925,9 +925,9 @@ export const usePromptStore = defineStore('prompts', {
             const contextValue = fileStore.getContextSummary(contextType.parameters);
 
             if(contextValue && contextValue.length > 0) {
-              context += 'Context Summaries: ' + contextType.parameters + ':\n';
+              context += 'CONTEXT SUMMARIES ' + contextType.parameters + ':\n';
               context += convertHtmlToText(contextValue);
-              context += '\n-----\n';
+              context += '\n\n-----\n\n';
             }
           } else if(contextType.contextType === "Variable") {
             const variable = fileStore.variables.find(v => v.title === contextType.parameters);
@@ -935,7 +935,7 @@ export const usePromptStore = defineStore('prompts', {
 
             if(variableText && variableText.length > 0) {
               context += variable.title + ': ' + convertHtmlToText(variableText);
-              context += '\n-----\n';
+              context += '\n\n-----\n\n';
             }
           } else {
             // log
@@ -1457,20 +1457,20 @@ export const usePromptStore = defineStore('prompts', {
             try {
 
               const stream = await openai.chat.completions.create({
-                model: model.modelName,
-                messages: messages,
-                stream: true,
+                  model: model.modelName,
+                  messages: messages,
+                  stream: true,
 
-                frequency_penalty: input.frequencyPenalty,
-                presence_penalty: input.presencePenalty,
+                  frequency_penalty: input.frequencyPenalty,
+                  presence_penalty: input.presencePenalty,
 
-                temperature: model.hasTemperature === false ? undefined : input.temperature,
-                top_p: input.topP,
+                  temperature: model.hasTemperature === false ? undefined : input.temperature,
+                  top_p: input.topP,
 
-                max_tokens: input.maxTokens,
-                stop: model.defaultStopStrings.length > 0 ? undefined : model.defaultStopStrings,
-                //response_format: input.jsonMode === true ? { "type": "json_object" } : undefined,
-              },
+                  max_tokens: input.maxTokens,
+                  stop: model.defaultStopStrings.length > 0 ? undefined : model.defaultStopStrings,
+                  //response_format: input.jsonMode === true ? { "type": "json_object" } : undefined,
+                },
                 {
                   signal: request.abortController?.signal ?? this.singletonPromptAbortController.signal,
                   method: 'POST',
@@ -1538,20 +1538,20 @@ export const usePromptStore = defineStore('prompts', {
 
             try {
               const stream = await openai.chat.completions.create({
-                model: model.modelName,
-                messages: messages,
-                stream: true,
+                  model: model.modelName,
+                  messages: messages,
+                  stream: true,
 
-                frequency_penalty: input.frequencyPenalty,
-                presence_penalty: input.presencePenalty,
+                  frequency_penalty: input.frequencyPenalty,
+                  presence_penalty: input.presencePenalty,
 
-                temperature: model.hasTemperature === false ? undefined : input.temperature,
-                top_p: input.topP,
+                  temperature: model.hasTemperature === false ? undefined : input.temperature,
+                  top_p: input.topP,
 
-                max_completion_tokens: input.maxTokens,
-                //stop: model.defaultStopStrings.length > 0 ? undefined : model.defaultStopStrings,
-                response_format: input.jsonMode === true ? { type: "json_object" } : undefined,
-              },
+                  max_completion_tokens: input.maxTokens,
+                  //stop: model.defaultStopStrings.length > 0 ? undefined : model.defaultStopStrings,
+                  response_format: input.jsonMode === true ? { type: "json_object" } : undefined,
+                },
                 {
                   signal: request.abortController?.signal ?? this.singletonPromptAbortController.signal,
                 });
@@ -2483,7 +2483,7 @@ export const usePromptStore = defineStore('prompts', {
       prompt.agents.splice(index + 1, 0, agent);
     },
     addPromptAction(prompt) {
-     if(!prompt) return;
+      if(!prompt) return;
 
       if(!prompt.actions) {
         prompt.actions = [];
@@ -2847,7 +2847,7 @@ export const usePromptStore = defineStore('prompts', {
 
       this.currentSpellCheckLanguage = {
         "label": "English (USA)",
-          "value": "en_US"
+        "value": "en_US"
       };
 
       //this.analysisEnabled = false;

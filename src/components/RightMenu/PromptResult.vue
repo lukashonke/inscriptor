@@ -1198,7 +1198,14 @@
   }
   async function copyToClipboard(event) {
     event.stopPropagation();
-    await writeText(replaceParameterEditorText(promptResultText.value));
+    
+    if(layoutStore.runsInDesktopApp()) {
+      await writeText(replaceParameterEditorText(promptResultText.value));
+    } else {
+      // copy to clipboard 
+      navigator.clipboard.writeText(replaceParameterEditorText(promptResultText.value));
+    }
+
     $q.notify({
       message: 'Copied to clipboard',
       color: 'positive',
