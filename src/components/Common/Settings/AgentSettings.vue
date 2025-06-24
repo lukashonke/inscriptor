@@ -125,6 +125,10 @@
                       <div class="row q-mt-sm q-col-gutter-x-lg">
                         <div class="col-auto flex items-center">
                           <div class="col-auto flex items-center">
+                            <q-checkbox dense filled label="Is Independent" :model-value="agent.isIndependent ?? false" v-on:update:model-value="updateProjectAgent(agent, {isIndependent: $event})" />
+                            <HelpIcon :tooltip="$t('tooltips.parameters.isIndependent')"></HelpIcon>
+                          </div>
+                          <div class="col-auto flex items-center" v-if="!agent.isIndependent">
                             <q-input dense filled label="Search prefix" :model-value="agent.searchPrefix ?? '//'" v-on:update:model-value="updateProjectAgent(agent, {searchPrefix: $event})" />
                             <HelpIcon :tooltip="$t('tooltips.parameters.searchPrefix')"></HelpIcon>
                           </div>

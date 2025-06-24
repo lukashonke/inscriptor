@@ -39,6 +39,7 @@ export default {
       hasExtendedChatMessages: 'If checked, the AI will be fed more messages that you specify. It might be used to fool AI that it has generated some text (even if it has not) and to continue in similar style.',
 
       searchPrefix: 'The prefix that the agent will search for in each paragraph of the text. Use this to mark paragraphs to be processed by the AI agent. Keep this field empty to run AI agent on all paragraphs.',
+      isIndependent: 'If checked, the agent will be run on the whole text and decide which paragraphs to process. If unchecked, the agent will be run on all paragraphs, from top to bottom.',
     },
   },
 }
