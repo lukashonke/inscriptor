@@ -19,6 +19,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
     projectAgentCurrentPromptRequest: null,
 
     projectAgentUserAborted: false, // Global flag to abort all streaming
+    independentAgentChatHistory: [], // Persistent conversation messages for independent agents
   }),
   getters: {
     agentState: (state) => {
@@ -54,6 +55,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
       const editorStore = useEditorStore();
       const promptStore = usePromptStore();
 
+      const editor = editorStore.editor;
+      if (!editor) {
+        this.clearProjectAgent();
+        return;
+      }
+
       const agent = request.agent;
 
       this.projectAgentContext = [...promptStore.promptContext];
@@ -64,13 +71,11 @@ export const useAiAgentStore = defineStore('ai-agent', {
       editorStore.clearAllAgentDecorations();
       this.projectAgentSkippedParagraphs.clear();
 
-      const editor = editorStore.editor;
-      if (!editor) {
-        this.clearProjectAgent();
-        return;
+      if (agent.isIndependent) {
+        await this.processIndependentAgent(agent);
+      } else {
+        await this.processNextParagraph(agent);
       }
-
-      await this.processNextParagraph(agent);
     },
     clearProjectAgent() {
       const editorStore = useEditorStore();
@@ -83,6 +88,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
       this.projectAgentCurrentPromptRequest = null;
       this.projectAgentSkippedParagraphs.clear();
       this.projectAgentCurrentProcessingParagraphItem = null;
+      this.independentAgentChatHistory = [];
 
       if (this.currentConfirmationPromise) {
         this.currentConfirmationPromise.resolve('stopped');
@@ -129,7 +135,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           if (text.trim().startsWith(agent.searchPrefix) && text.trim().length > agent.searchPrefix.length) {
             const instruction = text.trim().substring(agent.searchPrefix.length).trim();
 
-            if (!this.projectAgentSkippedParagraphs.has(node.id) && instruction.length > 0) {
+            if (!this.projectAgentSkippedParagraphs.has(node.attrs.id) && instruction.length > 0) {
               nextItem = {
                 node,
                 pos,
@@ -138,7 +144,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
                 text: text.trim(),
                 instruction,
                 originalContent: text,
-                nodeId: node.id
+                nodeId: node.attrs.id
               };
             }
           }
@@ -436,6 +442,205 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
       return userChoice;
     },
+    parseIndependentAgentToolCall(responseText) {
+      try {
+        debugger;
+
+        // Try to parse as JSON first (for direct tool call response)
+        let response;
+        try {
+          response = JSON.parse(responseText);
+        } catch {
+          // If not JSON, look for tool_calls in the text
+          const toolCallMatch = responseText.match(/\{[\s\S]*"tool_calls"[\s\S]*\}/);
+          if (toolCallMatch) {
+            response = JSON.parse(toolCallMatch[0]);
+          } else {
+            return { error: "No tool calls found in response" };
+          }
+        }
+
+        if (!response.tool_calls || !Array.isArray(response.tool_calls) || response.tool_calls.length === 0) {
+          return { error: "No valid tool calls found" };
+        }
+
+        const toolCall = response.tool_calls[0]; // Take first tool call
+
+        if (!toolCall.function || !toolCall.function.name) {
+          return { error: "Invalid tool call structure" };
+        }
+
+        let args;
+        try {
+          args = typeof toolCall.function.arguments === 'string'
+            ? JSON.parse(toolCall.function.arguments)
+            : toolCall.function.arguments;
+        } catch {
+          return { error: "Invalid tool call arguments" };
+        }
+
+        return {
+          toolName: toolCall.function.name,
+          arguments: args,
+          toolCallId: toolCall.id
+        };
+      } catch (error) {
+        return { error: `Failed to parse tool call: ${error.message}` };
+      }
+    },
+    async processIndependentAgent(agent) {
+      const editorStore = useEditorStore();
+
+      // Generate full file content with node IDs
+      const fullFileContent = this.generateFullFileWithNodeIds();
+      if (!fullFileContent.trim()) {
+        this.clearProjectAgent();
+        return;
+      }
+
+      // Set up confirmation widget for independent agent
+      this.confirmationWidgetData = {
+        agentTitle: agent.title,
+        paragraphRange: null, // Will be set after tool execution
+        originalText: '',
+        nodeId: null,
+        conversationMessages: [...this.independentAgentChatHistory],
+        isStreaming: true,
+        originalAiSuggestion: '',
+        aiSuggestion: '',
+        promptResult: null,
+        isIndependentAgent: true,
+        fullFileContent: fullFileContent
+      };
+
+      let promiseResolve;
+      const confirmationPromise = new Promise((resolve) => {
+        promiseResolve = resolve;
+      });
+      this.currentConfirmationPromise = { resolve: promiseResolve };
+
+      try {
+        const onOutput = (fullText, newText, isFinished, isError, request, result) => {
+          if (this.shouldAbortStreaming() || !this.confirmationWidgetData) {
+            return;
+          }
+
+          this.confirmationWidgetData.isStreaming = true;
+          this.confirmationWidgetData.executingPromptRequest = request;
+          this.confirmationWidgetData.promptResult = result;
+
+          if (!request.isPromptAgent) {
+            this.confirmationWidgetData.aiSuggestion = fullText;
+          }
+
+          if (isFinished) {
+            debugger;
+            this.confirmationWidgetData.isStreaming = false;
+
+            if (!isError && !this.shouldAbortStreaming()) {
+              // Parse the AI tool call response
+              const toolCallResult = this.parseIndependentAgentToolCall(fullText);
+
+              if (toolCallResult.error) {
+                this.confirmationWidgetData.aiSuggestion = `Error parsing tool call: ${toolCallResult.error}`;
+                return;
+              }
+
+              // Execute the tool
+              const toolResult = this.executeIndependentAgentTool(toolCallResult);
+
+              if (toolResult.error) {
+                this.confirmationWidgetData.aiSuggestion = `Error executing tool: ${toolResult.error}`;
+                return;
+              }
+
+              if (toolResult.action === 'stop') {
+                // AI decided to stop
+                this.confirmationWidgetData.aiSuggestion = `Agent completed processing.\n\nReasoning: ${toolResult.reasoning}`;
+                this.confirmationWidgetData.isAgentStopped = true;
+
+                // Add to chat history
+                this.independentAgentChatHistory.push({
+                  type: 'assistant',
+                  text: `Used tool: stop\nReasoning: ${toolResult.reasoning}`
+                });
+
+                return;
+              }
+
+              if (toolResult.action === 'modify') {
+                // Set up for user confirmation
+                const targetNode = toolResult.targetNode;
+                this.confirmationWidgetData.paragraphRange = { from: targetNode.from, to: targetNode.to };
+                this.confirmationWidgetData.originalText = targetNode.text;
+                this.confirmationWidgetData.nodeId = targetNode.nodeId;
+                this.confirmationWidgetData.aiSuggestion = toolResult.newContent;
+                this.confirmationWidgetData.reasoning = toolResult.reasoning;
+                this.confirmationWidgetData.toolCallResult = toolResult;
+
+                // Add decoration to target paragraph
+                editorStore.addAgentDecoration(targetNode.from, targetNode.to, 'awaiting_confirmation');
+
+                // Add to chat history
+                this.independentAgentChatHistory.push({
+                  type: 'assistant',
+                  text: `Used tool: modifyParagraph\nTarget: ${targetNode.nodeId}\nReasoning: ${toolResult.reasoning}`
+                });
+              }
+            }
+          }
+        };
+
+        await this.executeIndependentAgentPrompt(onOutput, fullFileContent);
+      } catch (error) {
+        this.confirmationWidgetData.isStreaming = false;
+        this.clearProjectAgent();
+        return;
+      }
+
+      const userChoice = await confirmationPromise;
+
+      if (userChoice === 'accepted' && !this.confirmationWidgetData.isAgentStopped) {
+        // Continue with the agent for next iteration
+        await this.processIndependentAgent(agent);
+      }
+    },
+    async executeIndependentAgentPrompt(onOutput, fullFileContent) {
+      const promptStore = usePromptStore();
+
+      try {
+        this.confirmationWidgetData.isStreaming = true;
+
+        const newRequest = cloneRequest(this.projectAgentCurrentPromptRequest);
+        this.projectAgentCurrentPromptRequest = newRequest;
+
+        newRequest.userPrompt = fullFileContent;
+        newRequest.text = fullFileContent;
+        newRequest.isProjectAgent = true;
+        newRequest.isIndependentAgent = true;
+        newRequest.abortController = new AbortController();
+        newRequest.silent = true;
+        newRequest.contextTypes = this.projectAgentContext;
+        newRequest.tools = this.getIndependentAgentTools();
+
+        if (this.independentAgentChatHistory.length > 0) {
+          newRequest.appendMessages = [...this.independentAgentChatHistory];
+        }
+
+        if (onOutput) {
+          newRequest.onOutput = onOutput;
+        }
+
+        debugger;
+
+        const result = await promptStore.promptInternal2(newRequest);
+        debugger;
+        return result;
+      } catch (error) {
+        this.clearProjectAgent();
+        throw error;
+      }
+    },
     stopAgentProcessing() {
       const editorStore = useEditorStore();
 
@@ -454,6 +659,151 @@ export const useAiAgentStore = defineStore('ai-agent', {
       }
 
       this.clearProjectAgent();
-    }
-  }
+    },
+    generateFullFileWithNodeIds() {
+      const editorStore = useEditorStore();
+      const editor = editorStore.editor;
+
+      if (!editor) return '';
+
+      const doc = editor.state.doc;
+      let fullContent = '';
+
+      doc.nodesBetween(0, doc.content.size, (node, pos) => {
+        if (node.type.name === 'paragraph') {
+          const from = pos;
+          const to = pos + node.nodeSize;
+          const text = editorTextBetween(doc, { from, to }, '\\n', '\\n');
+
+          if (text.trim().length > 0) {
+            fullContent += `[${node.attrs.id}]: ${text.trim()}\n\n`;
+          }
+        }
+      });
+
+      return fullContent;
+    },
+    findParagraphByNodeId(nodeId) {
+      const editorStore = useEditorStore();
+      const editor = editorStore.editor;
+
+      if (!editor) return null;
+
+      const doc = editor.state.doc;
+      let foundItem = null;
+
+      doc.nodesBetween(0, doc.content.size, (node, pos) => {
+        if (foundItem) return false;
+
+        if (node.type.name === 'paragraph' && node.attrs.id === nodeId) {
+          const from = pos;
+          const to = pos + node.nodeSize;
+          const text = editorTextBetween(doc, { from, to }, '\\n', '\\n');
+
+          foundItem = {
+            node,
+            pos,
+            from,
+            to,
+            text: text.trim(),
+            nodeId: node.attrs.id
+          };
+        }
+      });
+
+      return foundItem;
+    },
+    getIndependentAgentTools() {
+      return [
+        {
+          type: "function",
+          function: {
+            name: "modifyParagraph",
+            description: "Modify the content of a specific paragraph in the document",
+            parameters: {
+              type: "object",
+              properties: {
+                nodeId: {
+                  type: "string",
+                  description: "The ID of the paragraph node to modify"
+                },
+                newContent: {
+                  type: "string",
+                  description: "The new content to replace the paragraph with"
+                },
+                reasoning: {
+                  type: "string",
+                  description: "Explanation of why this change is being made"
+                }
+              },
+              required: ["nodeId", "newContent", "reasoning"]
+            }
+          }
+        },
+        {
+          type: "function",
+          function: {
+            name: "stop",
+            description: "Stop the agent processing when no more changes are needed",
+            parameters: {
+              type: "object",
+              properties: {
+                reasoning: {
+                  type: "string",
+                  description: "Explanation of why processing is being stopped"
+                }
+              },
+              required: ["reasoning"]
+            }
+          }
+        }
+      ];
+    },
+    executeIndependentAgentTool(toolCall) {
+      const { toolName, arguments: args } = toolCall;
+
+      switch (toolName) {
+        case 'modifyParagraph':
+          return this.executeModifyParagraphTool(args);
+        case 'stop':
+          return this.executeStopTool(args);
+        default:
+          return { error: `Unknown tool: ${toolName}` };
+      }
+    },
+    executeModifyParagraphTool(args) {
+      const { nodeId, newContent, reasoning } = args;
+
+      if (!nodeId || !newContent || !reasoning) {
+        return { error: "Missing required arguments for modifyParagraph" };
+      }
+
+      // Find the target paragraph
+      const targetNode = this.findParagraphByNodeId(nodeId);
+      if (!targetNode) {
+        return { error: `Paragraph with ID ${nodeId} not found` };
+      }
+
+      return {
+        success: true,
+        action: 'modify',
+        targetNode,
+        newContent,
+        reasoning
+      };
+    },
+    executeStopTool(args) {
+      const { reasoning } = args;
+
+      if (!reasoning) {
+        return { error: "Missing reasoning for stop" };
+      }
+
+      return {
+        success: true,
+        action: 'stop',
+        reasoning
+      };
+    },
+  },
 });
