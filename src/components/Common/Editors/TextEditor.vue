@@ -498,6 +498,7 @@ import PromptContextSelector from 'components/Common/PromptSelector/PromptContex
 import {HorizontalRule} from '@tiptap/extension-horizontal-rule';
 import {useAiAgentStore} from "stores/aiagent-store";
 import AgentConfirmationWidget from 'src/components/Common/AgentConfirmationWidget.vue';
+import {UniqueID} from '@tiptap/extension-unique-id';
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
@@ -802,6 +803,9 @@ const editor = useEditor({
     Italic,
     Bold,
     HorizontalRule,
+    UniqueID.configure({
+      types: ['heading', 'paragraph'],
+    }),
     CodeBlock,
     CharacterCount.configure({
       limit: characterLimit.value,

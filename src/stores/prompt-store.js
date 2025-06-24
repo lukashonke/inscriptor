@@ -30,7 +30,7 @@ import {useCurrentUser} from "vuefire";
 import {getCloudModelApiKey} from "src/common/utils/modelUtils";
 import Anthropic from "@anthropic-ai/sdk";
 import {chatTabId, getPromptTabId, promptTabId} from 'src/common/resources/tabs';
-import {useAiAgentStore} from 'stores/aiagent-store';
+import {usePromptAgentStore} from 'stores/promptagent-store';
 
 export const usePromptStore = defineStore('prompts', {
   state: () => ({
@@ -146,7 +146,7 @@ export const usePromptStore = defineStore('prompts', {
 
       this.updateTokens();
 
-      const aiAgentStore = useAiAgentStore();
+      const promptAgentStore = usePromptAgentStore();
 
       let lastResult = null;
 
@@ -192,7 +192,7 @@ export const usePromptStore = defineStore('prompts', {
               return null;
             }
 
-            await aiAgentStore.runAgentsOnPromptResult(request, result);
+            await promptAgentStore.runAgentsOnPromptResult(request, result);
 
             runResults.push({
               runName: run.name,
@@ -216,7 +216,7 @@ export const usePromptStore = defineStore('prompts', {
               return null;
             }
 
-            await aiAgentStore.runAgentsOnPromptResult(request, result);
+            await promptAgentStore.runAgentsOnPromptResult(request, result);
 
             lastResult = result;
 
@@ -2339,17 +2339,22 @@ export const usePromptStore = defineStore('prompts', {
 
       this.onUpdatePrompt(prompt);
     },
-    addProjectAgent() {
+    addProjectAgent(agent) {
       if(!this.projectAgents) {
         this.projectAgents = [];
       }
 
-      this.projectAgents.push({
-        id: guid(),
-        title: 'New Project Agent',
-        promptId: null,
-        ignoreResultText: 'OK',
-      });
+      if(!agent) {
+        agent = {
+          id: guid(),
+          title: 'New Project Agent',
+          promptId: null,
+          ignoreResultText: 'OK',
+          isIndependent: false,
+        };
+      }
+
+      this.projectAgents.push(agent);
     },
     updateProjectAgent(agent, args) {
       if(!agent || !args) return;
@@ -2364,6 +2369,10 @@ export const usePromptStore = defineStore('prompts', {
 
       if(args.searchPrefix !== undefined) {
         agent.searchPrefix = args.searchPrefix;
+      }
+
+      if(args.isIndependent !== undefined) {
+        agent.isIndependent = args.isIndependent;
       }
     },
     deleteProjectAgent(agent) {
@@ -2383,18 +2392,22 @@ export const usePromptStore = defineStore('prompts', {
       this.projectAgents.splice(index, 1);
       this.projectAgents.splice(index + 1, 0, agent);
     },
-    addPromptAgent() {
+    addPromptAgent(agent) {
       if(!this.promptAgents) {
         this.promptAgents = [];
       }
 
-      this.promptAgents.push({
-        id: guid(),
-        title: 'New Agent',
-        type: 'Refiner',
-        prompt: '',
-        ignoreResultText: 'OK',
-      });
+      if(!agent) {
+        agent = {
+          id: guid(),
+          title: 'New Agent',
+          type: 'Refiner',
+          prompt: '',
+          ignoreResultText: 'OK',
+        };
+      }
+
+      this.promptAgents.push(agent);
     },
     updatePromptAgent(agent, args) {
       if(!agent || !args) return;
