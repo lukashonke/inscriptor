@@ -7,7 +7,9 @@
           <div class="col">
             <div class="text-body2 text-weight-medium">
               <q-icon name="mdi-robot-outline" class="q-mr-xs q-ml-xs" />
-              {{ widgetData.agentTitle }} suggestions:
+              {{ widgetData.agentTitle }}
+              <span v-if="widgetData.isIndependentAgent" class="q-ml-xs text-caption">(Independent)</span>
+              {{ widgetData.isAgentStopped ? 'completed:' : 'suggestions:' }}
             </div>
           </div>
           <div class="col-auto">
@@ -28,18 +30,18 @@
       <q-card-section class="q-pa-sm q-mb-none">
         <div class="comparison-container">
           <div class="suggested-text q-mb-sm">
-            <div 
+            <div
               v-if="!isEditingNow"
-              class="q-pa-xs rounded border-accent" 
-              :class="writeClasses" 
-              v-html="diffHtml" 
+              class="q-pa-xs rounded border-accent"
+              :class="writeClasses"
+              v-html="diffHtml"
               contenteditable
               @focus="startEditing"
             >
             </div>
-            <div 
+            <div
               v-else
-              class="q-pa-xs rounded border-accent" 
+              class="q-pa-xs rounded border-accent"
               :class="writeClasses"
               contenteditable
               ref="editableDiv"
@@ -80,8 +82,29 @@
         </template>
       </template>
 
+      <!-- Independent agent chat history -->
+      <q-card-section
+        v-if="widgetData.isIndependentAgent && widgetData.conversationMessages && widgetData.conversationMessages.length > 0"
+        class="q-px-sm q-py-sm bg-grey-1"
+      >
+        <div class="text-caption text-grey-7 q-mb-xs">Conversation History:</div>
+        <div class="conversation-history">
+          <div
+            v-for="(message, index) in widgetData.conversationMessages.slice(-3)"
+            :key="index"
+            class="q-mb-xs text-caption"
+            :class="message.type === 'user' ? 'text-primary' : 'text-grey-8'"
+          >
+            <strong>{{ message.type === 'user' ? 'You' : 'AI' }}:</strong> {{ message.text }}
+          </div>
+        </div>
+      </q-card-section>
+
       <!-- Chat input section -->
-      <q-card-section class="q-px-sm q-py-none q-pb-sm q-mb-none" v-if="!widgetData.isStreaming && (widgetData.aiSuggestion ?? '').trim()">
+      <q-card-section
+        class="q-px-sm q-py-none q-pb-sm q-mb-none"
+        v-if="!widgetData.isStreaming && (widgetData.aiSuggestion ?? '').trim() && !widgetData.isAgentStopped"
+      >
         <div class="row">
           <div class="col">
             <q-input
@@ -117,7 +140,8 @@
 
       <!-- Action buttons -->
       <q-card-actions class="q-pa-sm">
-        <div class="row full-width">
+        <!-- Regular agent buttons -->
+        <div v-if="!widgetData.isIndependentAgent" class="row full-width">
           <div class="col-auto">
             <q-btn
               flat
@@ -155,6 +179,68 @@
               :disable="widgetData.isStreaming"
             />
           </div>
+        </div>
+
+        <!-- Independent agent buttons -->
+        <div v-else class="row full-width">
+          <!-- Agent stopped - only close button -->
+          <div v-if="widgetData.isAgentStopped" class="col">
+            <q-btn
+              color="primary"
+              icon="mdi-check"
+              label="Close"
+              @click="onReject"
+              class="full-width"
+              no-caps
+            >
+              <q-tooltip>Agent completed all tasks</q-tooltip>
+            </q-btn>
+          </div>
+
+          <!-- Agent has suggestions -->
+          <template v-else>
+            <div class="col-auto">
+              <q-btn
+                flat
+                color="negative"
+                label="Stop Agent"
+                @click="onReject"
+                class="full-width"
+                no-caps
+                :disable="widgetData.isStreaming"
+              >
+                <q-tooltip>Stop the independent agent</q-tooltip>
+              </q-btn>
+            </div>
+            <div class="col-auto q-ml-sm" v-if="widgetData.conversationMessages && widgetData.conversationMessages.length > 0">
+              <q-btn
+                flat
+                color="primary"
+                icon="mdi-undo"
+                label="Undo Chat"
+                @click="onUndo"
+                class="full-width q-ml-sm"
+                no-caps
+                :disable="widgetData.isStreaming"
+              >
+                <q-tooltip>Revert to original AI suggestion</q-tooltip>
+              </q-btn>
+            </div>
+            <div class="col"/>
+            <div class="col-auto">
+              <q-btn
+                color="accent"
+                icon="mdi-check"
+                label="Accept & Continue"
+                @click="onAccept"
+                class="full-width"
+                no-caps
+                :disable="widgetData.isStreaming"
+              >
+                <q-tooltip>Accept this change and continue to next task</q-tooltip>
+              </q-btn>
+            </div>
+          </template>
         </div>
       </q-card-actions>
     </q-card>
@@ -258,7 +344,8 @@ function acceptReplyBeforeAgent(result) {
 function onReject() {
   emits('reject', {
     paragraphRange: props.widgetData.paragraphRange,
-    originalText: props.widgetData.originalText
+    originalText: props.widgetData.originalText,
+    nodeId: props.widgetData.nodeId
   })
 }
 
