@@ -354,6 +354,7 @@ export function cloneRequest(request, copyAbortController = false) {
     allowParallel: request.allowParallel,
 
     noTrim: request.noTrim,
+    tools: request.tools,
 
     promptSource: request.promptSource,
     forceTemperature: request.forceTemperature,

@@ -1019,6 +1019,8 @@ export const usePromptStore = defineStore('prompts', {
         textMessage.text = reduceLineBreaks(textMessage.text);
       }
 
+      const tools = request.tools;
+
       return {
         systemPrefix, systemSuffix, userPrefix, userSuffix, assistantPrefix, assistantSuffix,
         textMessages, contextTextMessages,
@@ -1028,7 +1030,8 @@ export const usePromptStore = defineStore('prompts', {
         missingVariable,
         promptResultInput, promptResultAppendMessages,
         model,
-        jsonMode
+        jsonMode,
+        tools
       }
     },
     hasCustomPromptUi(request) {
@@ -1246,6 +1249,7 @@ export const usePromptStore = defineStore('prompts', {
                 presencePenalty: input.presencePenalty,
 
                 jsonMode: input.jsonMode,
+                tools: input.tools,
               };
 
               loggedPrompt = this.pushLastPrompt({
@@ -1306,6 +1310,7 @@ export const usePromptStore = defineStore('prompts', {
                 presencePenalty: input.presencePenalty,
 
                 jsonMode: input.jsonMode,
+                tools: input.tools,
               }
             }
 
