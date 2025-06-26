@@ -97,7 +97,7 @@ const startLeftMenuWidth = ref(12); // Default 10% for left menu (matches minimu
 const startRightPanelWidth = ref(15); // Starting width for right panel resize (matches minimum)
 
 // Store panel widths as percentages
-const leftMenuWidthPercent = ref(layoutStore.leftDrawerOpen ? 12 : 0); // 10% for left menu when open, 0% when closed
+const leftMenuWidthPercent = ref(layoutStore.leftDrawerOpen ? 12 : 0); // Will be updated to use dynamic minimum
 const rightPanelWidthPercent = ref(layoutStore.rightDrawerOpen ? (layoutStore.prevLayoutSplitterModel || 15) : 0); // Show/hide based on rightDrawerOpen
 
 // Computed properties for panel widths
@@ -107,6 +107,13 @@ const leftMenuWidth = computed(() => {
 
 const rightPanelWidth = computed(() => {
   return `${rightPanelWidthPercent.value}%`;
+});
+
+// Calculate minimum percentage for 270px left panel width
+const leftMenuMinPercent = computed(() => {
+  if (!splitterContainer.value) return 12; // fallback when container not ready
+  const containerWidth = splitterContainer.value.clientWidth;
+  return Math.max(12, (270 / containerWidth) * 100);
 });
 
 const mainPanelWidth = computed(() => {
@@ -161,8 +168,8 @@ const handleResize = (e) => {
     // Resizing left menu
     let newLeftMenuWidth = startLeftMenuWidth.value + deltaPercent;
 
-    // Apply limits (10% to 35% for left menu)
-    newLeftMenuWidth = Math.max(12, Math.min(35, newLeftMenuWidth));
+    // Apply limits (dynamic minimum based on 270px to 35% for left menu)
+    newLeftMenuWidth = Math.max(leftMenuMinPercent.value, Math.min(35, newLeftMenuWidth));
 
     // Ensure main panel doesn't get too small
     const remainingForMain = 100 - newLeftMenuWidth - rightPanelWidthPercent.value;
@@ -207,7 +214,7 @@ const stopResize = () => {
 
 // Watchers to sync with layout store
 watch(() => layoutStore.leftDrawerOpen, (newValue) => {
-  leftMenuWidthPercent.value = newValue ? 10 : 0;
+  leftMenuWidthPercent.value = newValue ? leftMenuMinPercent.value : 0;
 });
 
 watch(() => layoutStore.rightDrawerOpen, (newValue) => {
@@ -227,7 +234,22 @@ watch(() => layoutStore.layoutSplitterModel, (newValue) => {
   }
 });
 
+// Handle window resize to recalculate minimum percentages
+const handleWindowResize = () => {
+  // Ensure left panel doesn't shrink below 270px when window is resized
+  if (layoutStore.leftDrawerOpen && leftMenuWidthPercent.value < leftMenuMinPercent.value) {
+    leftMenuWidthPercent.value = leftMenuMinPercent.value;
+  }
+};
+
 onMounted(() => {
+  // Initialize left panel width with proper minimum on mount
+  if (layoutStore.leftDrawerOpen) {
+    leftMenuWidthPercent.value = leftMenuMinPercent.value;
+  }
+  
+  // Add window resize listener
+  window.addEventListener('resize', handleWindowResize);
 })
 
 onBeforeUnmount(() => {
@@ -235,6 +257,9 @@ onBeforeUnmount(() => {
   if (isResizing.value) {
     stopResize();
   }
+  
+  // Remove window resize listener
+  window.removeEventListener('resize', handleWindowResize);
 });
 
 </script>
