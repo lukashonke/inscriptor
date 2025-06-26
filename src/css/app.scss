@@ -98,6 +98,10 @@ body {
   overflow-y: auto;
 }
 
+.z-5 {
+  z-index: 5 !important;
+}
+
 .prompt-card-image {
 }
 
@@ -265,6 +269,26 @@ textarea::-webkit-scrollbar-button {
 
 .inscriptor-insert-shadow-bottom {
   box-shadow: inset 0px -1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.bg-inscriptorblue-dark {
+  background-color: #191d43;
+}
+
+.bg-inscriptorblue {
+  background-color: #23285c;
+}
+
+.bg-inscriptorblue-light {
+  background-color: #3f48a8;
+}
+
+.text-inscriptorblue-dark {
+  color: #626bb8;
+}
+
+.text-inscriptorblue-light {
+  color: #cfd1e8;
 }
 
 .idea-card-rounded {

@@ -123,8 +123,6 @@ export const useAiAgentStore = defineStore('ai-agent', {
       let nextItem = null;
 
       doc.nodesBetween(0, doc.content.size, (node, pos) => {
-        debugger;
-
         if (nextItem) return false; // Stop if we found one
 
         if (node.type.name === 'paragraph') {
@@ -444,8 +442,6 @@ export const useAiAgentStore = defineStore('ai-agent', {
     },
     parseIndependentAgentToolCall(responseText) {
       try {
-        debugger;
-
         // Try to parse as JSON first (for direct tool call response)
         let response;
         try {
@@ -534,7 +530,6 @@ export const useAiAgentStore = defineStore('ai-agent', {
           }
 
           if (isFinished) {
-            debugger;
             this.confirmationWidgetData.isStreaming = false;
 
             if (!isError && !this.shouldAbortStreaming()) {
@@ -631,10 +626,6 @@ export const useAiAgentStore = defineStore('ai-agent', {
           newRequest.onOutput = onOutput;
         }
 
-        debugger;
-
-        const result = await promptStore.promptInternal2(newRequest);
-        debugger;
         return result;
       } catch (error) {
         this.clearProjectAgent();
