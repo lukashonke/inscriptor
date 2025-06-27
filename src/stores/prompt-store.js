@@ -31,6 +31,8 @@ import {getCloudModelApiKey} from "src/common/utils/modelUtils";
 import Anthropic from "@anthropic-ai/sdk";
 import {chatTabId, getPromptTabId, promptTabId} from 'src/common/resources/tabs';
 import {usePromptAgentStore} from 'stores/promptagent-store';
+import {useLocalDataStore} from 'stores/localdata-store';
+import {url} from 'boot/axios';
 
 export const usePromptStore = defineStore('prompts', {
   state: () => ({
@@ -102,7 +104,6 @@ export const usePromptStore = defineStore('prompts', {
 
     defaultFileTemplate: null,
     fileTemplates: [],
-    currentSpellCheckLanguage: null,
 
     lastSettingsSyncHash: null,
 
@@ -184,7 +185,7 @@ export const usePromptStore = defineStore('prompts', {
               return null;
             }
 
-            const result = await this.promptInternal2(request);
+            const result = await this.promptInternalStreaming(request);
 
             this.calculateDiffs(request, result);
 
@@ -204,7 +205,7 @@ export const usePromptStore = defineStore('prompts', {
         } else {
           for(let i = 0; i < (request.promptTimes ?? 1); i++) {
 
-            const result = await this.promptInternal2(request);
+            const result = await this.promptInternalStreaming(request);
 
             if ((request.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
               return null;
@@ -499,10 +500,6 @@ export const usePromptStore = defineStore('prompts', {
         nodeAfter = $anchor.nodeAfter?.text ?? '';
         nodeParent = $anchor.parent?.textContent ?? '';
 
-        //textBefore = editor.state.doc.textBetween(0, from, '\n\n');
-        //textAfter = editor.state.doc.textBetween(to, editor.state.doc.content.size, '\n\n');
-        //text = editor.state.doc.textBetween(0, editor.state.doc.content.size, '\n\n');
-
         textBefore = editorMarkdownBetween(editor.state, { from: 0, to: from });
         textAfter = editorMarkdownBetween(editor.state, { from: to, to: editor.state.doc.content.size });
         text = getAllMarkdown();
@@ -550,9 +547,6 @@ export const usePromptStore = defineStore('prompts', {
 
         replaceDynamic(/\$textAround\((\d+)\)\((\d+)\)/g);
       }
-
-      //console.log('textBefore:', textBefore);
-      ///console.log('textAfter:', textAfter);
 
       function replace(what, withWhat) {
         if(systemPrefix.includes(what)) {
@@ -1054,7 +1048,106 @@ export const usePromptStore = defineStore('prompts', {
 
       return true;
     },
-    promptInternal2(request) {
+    checkBeforePrompting(input, request) {
+      if(input.missingVariable !== null) {
+        Notify.create({
+          icon: 'error',
+          color: 'warning',
+          position: 'bottom-right',
+          message: 'Variable $' + input.missingVariable.title + ' is not set. The prompt output might not be ideal.',
+          actions: [
+            { icon: 'close', color: 'white', round: true, handler: () => { /* ... */ } }
+          ]
+        });
+      }
+    },
+    async promptInternalSimple(request) {
+      if (request.abortController?.signal?.aborted) {
+        return;
+      }
+
+      //TODO support local api keys
+
+      const pr = this.createPromptResult2(request);
+      request.pr = pr;
+
+      const input = this.constructPromptInput2(request);
+
+      this.checkBeforePrompting(input, request);
+
+      const model = input.model;
+
+      pr.model = model;
+      pr.temperature = input.temperature;
+      pr.executedTextMessages = input.textMessages ? [...input.textMessages] : undefined;
+      pr.waitingForResponse = true;
+
+      let options = {
+        apiKey: 'key',
+        dangerouslyAllowBrowser: true,
+      }
+
+      options.baseURL = url + "OpenAiPrompt/v1/";
+
+      // Get authorization token and add to headers
+      const user = useCurrentUser();
+      const idToken = await user.value.getIdToken();
+
+      if (idToken) {
+        options.defaultHeaders = {
+          'Authorization': idToken
+        };
+      }
+
+      const openai = new OpenAI(options);
+
+      const messages = input.textMessages.map(m => {
+        return {
+          role: m.type,
+          tool_call_id: m.toolCallId,
+          name: m.name,
+          content: m.text,
+        };
+      })
+
+      const loggedPrompt = this.pushLastPrompt({
+        model: model.modelName,
+        input: JSON.stringify(messages),
+        timeStamp: new Date().toISOString(),
+        pr: pr
+      });
+
+      try {
+        const completion = await openai.chat.completions.create({
+            model: model.modelName,
+            messages: messages,
+
+            temperature: model.hasTemperature === false ? undefined : input.temperature,
+
+            max_completion_tokens: input.maxTokens,
+
+            tools: input.tools,
+            //stop: model.defaultStopStrings.length > 0 ? undefined : model.defaultStopStrings,
+            response_format: input.jsonMode === true ? { type: "json_object" } : undefined,
+          },
+          {
+            signal: request.abortController?.signal ?? this.singletonPromptAbortController.signal,
+          });
+
+        pr.completionResponse = completion;
+
+        pr.waitingForResponse = false;
+
+      } catch (err) {
+        pr.waitingForResponse = false;
+        if (loggedPrompt) loggedPrompt.error = err;
+        pr.error = err;
+        throw err;
+      }
+
+      return pr;
+    },
+    promptInternalStreaming(request) {
       if(this.shouldCancelRunningPrompt(request)) {
         if(this.isPrompting) {
           this.singletonPromptAbortController?.abort();
@@ -1076,24 +1169,14 @@ export const usePromptStore = defineStore('prompts', {
 
       const input = this.constructPromptInput2(request);
 
-      if(input.missingVariable !== null) {
-        Notify.create({
-          icon: 'error',
-          color: 'warning',
-          position: 'bottom-right',
-          message: 'Variable $' + input.missingVariable.title + ' is not set. The prompt output might not be ideal.',
-          actions: [
-            { icon: 'close', color: 'white', round: true, handler: () => { /* ... */ } }
-          ]
-        });
-      }
+      this.checkBeforePrompting(input, request);
 
       this.singletonPromptAbortController = new AbortController();
 
       if(this.hasCustomPromptUi(request) && !request.executeCustomPromptUi) {
         return new Promise(async (resolve, reject) => {
           await this.handleCustomPromptUi(request, input);
-          this.onPromptingEnd(request, pr);
+          this.onStreamingPromptingEnd(request, pr);
           pr.waitingForResponse = false;
           resolve(pr);
         });
@@ -1108,7 +1191,7 @@ export const usePromptStore = defineStore('prompts', {
 
           if(request.abortController && request.abortController.signal && request.abortController.signal.aborted) {
             reject(new Error('Prompt was aborted.'));
-            this.onPromptingEnd(request, pr);
+            this.onStreamingPromptingEnd(request, pr);
             return;
           }
 
@@ -1161,7 +1244,7 @@ export const usePromptStore = defineStore('prompts', {
 
             pr.error = 'Model is not downloaded or enabled.';
             reject(new Error('Model is not downloaded or enabled.'));
-            this.onPromptingEnd(request, pr);
+            this.onStreamingPromptingEnd(request, pr);
             return;
           }
 
@@ -1179,7 +1262,7 @@ export const usePromptStore = defineStore('prompts', {
 
             pr.error = 'Inscriptor Cloud AI prompting not available to guests. You can still provide API tokens.';
             resolve(pr);
-            this.onPromptingEnd(request, pr);
+            this.onStreamingPromptingEnd(request, pr);
             pr.waitingForResponse = false;
             return;
           }
@@ -1218,7 +1301,7 @@ export const usePromptStore = defineStore('prompts', {
                 pr.error = 'Input text is too long for the model.';
 
                 reject(new Error('Input text is too long for the model.'));
-                this.onPromptingEnd(request, pr);
+                this.onStreamingPromptingEnd(request, pr);
                 return;
               }
 
@@ -1413,7 +1496,7 @@ export const usePromptStore = defineStore('prompts', {
 
                 resolve(pr);
 
-                this.onPromptingEnd(request, pr);
+                this.onStreamingPromptingEnd(request, pr);
               },
               (err) => {
                 if (request.onOutput) {
@@ -1427,7 +1510,7 @@ export const usePromptStore = defineStore('prompts', {
 
                 reject(err);
 
-                this.onPromptingEnd(request, pr);
+                this.onStreamingPromptingEnd(request, pr);
               },
               request.abortController ?? this.singletonPromptAbortController,
               controllerName, actionName);
@@ -1498,7 +1581,7 @@ export const usePromptStore = defineStore('prompts', {
 
               resolve(pr);
 
-              this.onPromptingEnd(request, pr);
+              this.onStreamingPromptingEnd(request, pr);
             }
             catch (err) {
               pr.waitingForResponse = false;
@@ -1511,7 +1594,7 @@ export const usePromptStore = defineStore('prompts', {
 
               reject(err);
 
-              this.onPromptingEnd(request, pr);
+              this.onStreamingPromptingEnd(request, pr);
             }
           }
           else if (promptingEngineToUse === 'client-openai') { // JS client for openai
@@ -1578,7 +1661,7 @@ export const usePromptStore = defineStore('prompts', {
 
               resolve(pr);
 
-              this.onPromptingEnd(request, pr);
+              this.onStreamingPromptingEnd(request, pr);
             } catch (err) {
               pr.waitingForResponse = false;
               if (loggedPrompt) loggedPrompt.error = err;
@@ -1590,7 +1673,7 @@ export const usePromptStore = defineStore('prompts', {
 
               reject(err);
 
-              this.onPromptingEnd(request, pr);
+              this.onStreamingPromptingEnd(request, pr);
             }
           }
           else if (promptingEngineToUse === 'client-anthropic') { // JS client for openai
@@ -1660,7 +1743,7 @@ export const usePromptStore = defineStore('prompts', {
 
               resolve(pr);
 
-              this.onPromptingEnd(request, pr);
+              this.onStreamingPromptingEnd(request, pr);
             } catch (err) {
               pr.waitingForResponse = false;
               if (loggedPrompt) loggedPrompt.error = err;
@@ -1789,7 +1872,7 @@ export const usePromptStore = defineStore('prompts', {
 
               resolve(pr);
 
-              this.onPromptingEnd(request, pr);
+              this.onStreamingPromptingEnd(request, pr);
             }
             catch (err) {
               pr.waitingForResponse = false;
@@ -1803,7 +1886,7 @@ export const usePromptStore = defineStore('prompts', {
 
               reject(err);
 
-              this.onPromptingEnd(request, pr);
+              this.onStreamingPromptingEnd(request, pr);
             }
           }
           else if (promptingEngineToUse === 'client-dall-e') {
@@ -1844,7 +1927,7 @@ export const usePromptStore = defineStore('prompts', {
               resolve(pr);
 
               pr.waitingForResponse = false;
-              this.onPromptingEnd(request, pr);
+              this.onStreamingPromptingEnd(request, pr);
             } catch (err) {
               pr.waitingForResponse = false;
 
@@ -1852,7 +1935,7 @@ export const usePromptStore = defineStore('prompts', {
               pr.error = err;
               reject(err);
 
-              this.onPromptingEnd(request, pr);
+              this.onStreamingPromptingEnd(request, pr);
             }
           }
           else if (promptingEngineToUse === 'automatic1111-sd') {
@@ -1882,7 +1965,7 @@ export const usePromptStore = defineStore('prompts', {
               }
 
               pr.waitingForResponse = false;
-              this.onPromptingEnd(request, pr);
+              this.onStreamingPromptingEnd(request, pr);
             } catch (err) {
               pr.waitingForResponse = false;
 
@@ -1891,7 +1974,7 @@ export const usePromptStore = defineStore('prompts', {
 
               reject(err);
 
-              this.onPromptingEnd(request, pr);
+              this.onStreamingPromptingEnd(request, pr);
             }
           }
         });
@@ -1918,10 +2001,10 @@ export const usePromptStore = defineStore('prompts', {
       if(this.isPrompting) {
         this.singletonPromptAbortController.abort();
         this.isPrompting = false;
-        this.onPromptingEnd(null, null);
+        this.onStreamingPromptingEnd(null, null);
       }
     },
-    onPromptingEnd(request, pr) {
+    onStreamingPromptingEnd(request, pr) {
       if(request) {
         if(this.shouldCancelRunningPrompt(request)) {
           this.isPrompting = false;
@@ -2352,7 +2435,7 @@ export const usePromptStore = defineStore('prompts', {
       if(!agent) {
         agent = {
           id: guid(),
-          title: 'New Project Agent',
+          title: 'New Agent',
           promptId: null,
           ignoreResultText: 'OK',
           isIndependent: false,
@@ -2817,7 +2900,6 @@ export const usePromptStore = defineStore('prompts', {
         currentModelPath: this.currentModelPath,
         defaultFileTemplate: this.defaultFileTemplate,
         fileTemplates: this.fileTemplates,
-        currentSpellCheckLanguage: this.currentSpellCheckLanguage,
         //analysisEnabled: this.analysisEnabled,
         analysisPromptsSettings: this.analysisPromptsSettings,
         labels: this.labels,
@@ -2862,11 +2944,6 @@ export const usePromptStore = defineStore('prompts', {
       this.defaultFileTemplate = createFile('Template file');
 
       this.fileTemplates = [];
-
-      this.currentSpellCheckLanguage = {
-        "label": "English (USA)",
-        "value": "en_US"
-      };
 
       //this.analysisEnabled = false;
       this.analysisPromptsSettings = {
@@ -3099,26 +3176,6 @@ export const usePromptStore = defineStore('prompts', {
           this.fileTemplates.push(template);
         }
       }
-
-      if(aiSettings.currentSpellCheckLanguage) {
-        this.currentSpellCheckLanguage = aiSettings.currentSpellCheckLanguage;
-      }
-
-      /*if(aiSettings.analysisEnabled !== undefined) {
-        this.analysisEnabled = aiSettings.analysisEnabled;
-      }*/
-
-      /*if(aiSettings.selectedAnalysisPrompts) {
-        this.selectedAnalysisPrompts = [];
-        for(const analysisPrompt of aiSettings.selectedAnalysisPrompts) {
-          const prompt = this.prompts.find(p => p.id === analysisPrompt.value);
-
-          if (prompt && !this.selectedAnalysisPrompts.find(p => p.id === prompt.id)) {
-            this.onUpdatePrompt(prompt);
-            this.selectedAnalysisPrompts.push(analysisPrompt);
-          }
-        }
-      }*/
 
       if(aiSettings.analysisPromptsSettings) {
         this.analysisPromptsSettings = aiSettings.analysisPromptsSettings;

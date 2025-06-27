@@ -258,12 +258,6 @@
         </q-btn-dropdown>
       </div>
 
-      <!--<div class="col-auto">
-        <q-btn size="11px" dense flat square icon="format_list_bulleted"  @click="editor.chain().focus().toggleBulletList().run()" :class="{ 'text-light': !editor.isActive('bulletList'), 'text-primary': editor.isActive('bulletList') }"/>
-      </div>
-      <div class="col-auto">
-        <q-btn size="11px" dense flat square icon="format_list_numbered"  @click="editor.chain().focus().toggleOrderedList().run()" :class="{ 'text-light': !editor.isActive('orderedList'), 'text-primary': editor.isActive('orderedList') }"/>
-      </div>-->
       <div class="col-auto">
         <q-btn size="11px" dense flat icon="code"  @click="editor.chain().focus().toggleCodeBlock().run()" :class="{ 'text-grey-5': !editor.isActive('codeBlock'), 'text-primary': editor.isActive('codeBlock') }"/>
       </div>
@@ -285,10 +279,6 @@
         <q-chip dense v-if="fileStore.projectSettings.syncToCloud && promptStore.currentCharsCount >= layoutStore.getMaxFileSize()" color="negative" text-color="white" label="Max file size for your subscription plan reached." icon="mdi-exclamation-thick" class="text-caption" clickable @click="layoutStore.showUserDialog" />
       </div>
 
-      <!--<div class="col-auto">
-        <q-btn size="11px" dense flat square icon="person_outline"  @click="editor.chain().focus().toggleBlockquote().run()" :class="{ 'text-light': !editor.isActive('blockquote'), 'text-primary': editor.isActive('blockquote') }"/>
-      </div>-->
-
       <div class="col-auto">
         <q-btn size="11px" id="togglePrompts" dense flat icon="mdi-creation-outline" class="text-accent" :class="{ 'text-primary': showPrompts }">
           <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" anchor="bottom start">
@@ -302,7 +292,7 @@
         </q-btn>
       </div>
 
-      <div class="col-auto" v-if="promptStore.projectAgents.length > 0">
+      <div class="col-auto" v-if="promptStore.projectAgents.length > 0" ref="agentSelectorButton">
         <q-btn
           v-if="!isAgentActive"
           size="11px"
@@ -324,8 +314,8 @@
             <q-list dense>
               <q-item v-for="agent in promptStore.projectAgents" :key="agent.id" clickable v-close-popup @click="runProjectAgent(agent)">
                 <q-item-section>
-                  <q-item-label class="flex items-center">
-                    <q-icon name="mdi-robot-outline" color="accent" size="xs" class="q-mr-sm" />
+                  <q-item-label class="flex items-center text-caption">
+                    <q-icon :name="promptStore.getPromptById(agent.promptId)?.icon ?? 'mdi-robot-outline'" color="accent" size="xs" class="q-mr-sm" />
                     {{ agent.title }}
                   </q-item-label>
                 </q-item-section>
@@ -347,10 +337,40 @@
           icon="mdi-stop"
           class="text-negative q-ml-xs"
           @click="stopAgentProcessing"
-          label="Stop AI Agent"
           no-caps
+          style="min-width: 120px;"
         >
+          Stop AI Agent<AnimatedDots :speed="300" fixed-width="10px" />
         </q-btn>
+
+        <q-popup-proxy
+          :model-value="agentSelectorButtonHovered"
+          v-if="aiAgentStore.agentStatus"
+          :offset="[10, 10]"
+        >
+          <q-card style="min-width: 300px; max-width: 400px;">
+            <q-card-section class="q-pb-sm">
+              <div class="text-subtitle2 text-weight-bold q-mb-sm">
+                {{ aiAgentStore.projectAgent?.title || 'AI Agent' }}
+              </div>
+              <div class="text-body2 text-grey-8">
+                {{ aiAgentStore.agentStatus }}
+              </div>
+            </q-card-section>
+
+            <q-card-section class="" style="max-height: 600px; ">
+              <div class="text-caption text-weight-medium q-mb-sm">History:</div>
+              <div v-for="(action, index) in aiAgentStore.agentActionHistory.slice().reverse()"
+                   :key="index"
+                   class="q-mb-sm text-body2"
+              >
+                <span class="text-caption text-grey-6">{{ action.timestamp }}</span>
+                <span class="text-caption q-ml-sm">{{ action.action }}</span>
+                <span class="text-caption q-ml-sm" v-if="action.reasoning">({{ action.reasoning }})</span>
+              </div>
+            </q-card-section>
+          </q-card>
+        </q-popup-proxy>
       </div>
 
       <div class="col-auto q-ml-md">
@@ -393,12 +413,10 @@
       </transition>
 
       <editor-content :class="writeClasses" class="no-outline" :editor="editor" :spellcheck="spellcheck" />
-      <!--<q-btn @click="fileStore.spellCheck()">Spell check</q-btn>-->
       <div class="text-editor-bottom" @click="onClickBelowEditor" />
     </div>
   </div>
 
-  <!-- Agent Confirmation Widget -->
   <bubble-menu
     v-if="editor"
     :editor="editor"
@@ -429,7 +447,7 @@
     />
   </bubble-menu>
 
-  <q-page-sticky position="bottom-left" :offset="[18, 18]" v-if="promptStore.hasStickyPrompts(fileStore.selectedFile)">
+  <q-page-sticky position="bottom-left" :offset="[8, 8]" v-if="promptStore.hasStickyPrompts(fileStore.selectedFile)">
     <q-fab
       v-model="aiFab"
       vertical-actions-align="left"
@@ -498,6 +516,7 @@ import PromptContextSelector from 'components/Common/PromptSelector/PromptContex
 import {HorizontalRule} from '@tiptap/extension-horizontal-rule';
 import {useAiAgentStore} from "stores/aiagent-store";
 import AgentConfirmationWidget from 'src/components/Common/AgentConfirmationWidget.vue';
+import AnimatedDots from 'src/components/Common/AnimatedDots.vue';
 import {UniqueID} from '@tiptap/extension-unique-id';
 
 const promptStore = usePromptStore();
@@ -529,10 +548,6 @@ const aiBubbleMenu = ref(true);
 
 function toggleAiBubbleMenu() {
   aiBubbleMenu.value = !aiBubbleMenu.value;
-}
-
-function onBubbleMenuShow() {
-  quickSelectionPromptShown.value = false;
 }
 
 function toggleAutomaticCorrections() {
@@ -1365,6 +1380,8 @@ function onClickBelowEditor(event) {
 // Agent status computed properties
 const agentState = computed(() => aiAgentStore.agentState);
 const isAgentActive = computed(() => aiAgentStore.isAgentActive);
+const agentSelectorButton = ref();
+const agentSelectorButtonHovered = useElementHover(agentSelectorButton);
 
 const agentIcon = computed(() => {
   switch (agentState.value) {

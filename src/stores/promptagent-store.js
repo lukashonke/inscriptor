@@ -150,7 +150,7 @@ export const usePromptAgentStore = defineStore('prompt-agent', {
       const promptStore = usePromptStore();
 
       try {
-        const result = await promptStore.promptInternal2(request);
+        const result = await promptStore.promptInternalStreaming(request);
         return result;
       } catch (error) {
         if (options.onError) {

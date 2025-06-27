@@ -190,13 +190,20 @@
 
       <q-card-section class="q-px-md q-pb-none" v-if="promptVariablesIncluded.length > 0">
         <div class="row q-px-md text-grey-7 text-weight-regular">
-          <div class=" flex items-center"><q-icon name="mdi-check" class="q-mr-xs" />Prompt Includes:</div>
           <template v-if="request.agent">
+            <div class=" flex items-center"><q-icon name="mdi-check" class="q-mr-xs" />Prompt will run on:</div>
             <q-chip color="transparent" text-color="grey-7">
-              All paragraphs starting with "{{ request.agent.searchPrefix }}" in the current file, processed one by one.
+              <template v-if="request.agent.searchPrefix && request.agent.searchPrefix.length > 0">
+                All paragraphs starting with "{{ request.agent.searchPrefix }}" in the current file, processed one by one.
+              </template>
+              <template v-else>
+                All paragraphs in the current file, processed one by one
+              </template>
+
             </q-chip>
           </template>
           <template v-else>
+            <div class=" flex items-center"><q-icon name="mdi-check" class="q-mr-xs" />Prompt Includes:</div>
             <template v-for="variable in promptVariablesIncluded" :key="variable">
               <q-chip color="transparent" text-color="grey-7">
                 {{ variable }}

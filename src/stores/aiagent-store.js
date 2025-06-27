@@ -12,6 +12,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
     confirmationWidgetData: null,
     currentConfirmationPromise: null,
 
+    projectAgent: null,
     projectAgentCurrentProcessingParagraphItem: null,
     projectAgentSkippedParagraphs: new Set(), // Track skipped paragraph text content
     projectAgentProcessing: false,
@@ -20,6 +21,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
     projectAgentUserAborted: false, // Global flag to abort all streaming
     independentAgentChatHistory: [], // Persistent conversation messages for independent agents
+    agentActionHistory: [],
+    agentStatus: null,
   }),
   getters: {
     agentState: (state) => {
@@ -34,6 +37,19 @@ export const useAiAgentStore = defineStore('ai-agent', {
     isAgentActive: (state) => state.projectAgentProcessing,
   },
   actions: {
+    // Helper methods for action history and status
+    addActionToHistory(action, details = {}) {
+      const timestamp = new Date().toLocaleTimeString();
+      this.agentActionHistory.push({
+        timestamp,
+        action,
+        details,
+        ...details
+      });
+    },
+    updateAgentStatus(status) {
+      this.agentStatus = status;
+    },
     async openProjectAgent(agent) {
       const promptStore = usePromptStore();
 
@@ -67,6 +83,10 @@ export const useAiAgentStore = defineStore('ai-agent', {
       this.projectAgentProcessing = true;
       this.projectAgentCurrentPromptRequest = cloneRequest(request, true);
       this.projectAgentUserAborted = false;
+      this.projectAgent = agent;
+
+      this.agentActionHistory = [];
+      this.agentStatus = null;
 
       editorStore.clearAllAgentDecorations();
       this.projectAgentSkippedParagraphs.clear();
@@ -74,6 +94,15 @@ export const useAiAgentStore = defineStore('ai-agent', {
       if (agent.isIndependent) {
         await this.processIndependentAgent(agent);
       } else {
+        // Log project agent start
+        this.addActionToHistory('🚀 Agent started', {
+          type: 'start',
+          agentName: agent.title,
+          searchPrefix: agent.searchPrefix,
+          mode: 'paragraph_based'
+        });
+        this.updateAgentStatus('Looking for paragraphs to process...');
+
         await this.processNextParagraph(agent);
       }
     },
@@ -83,6 +112,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
         editorStore.removeAgentDecoration(this.projectAgentCurrentProcessingParagraphItem.from, this.projectAgentCurrentProcessingParagraphItem.to);
       }
 
+      this.projectAgent = null;
       this.projectAgentProcessing = false;
       this.projectAgentUserAborted = false;
       this.projectAgentCurrentPromptRequest = null;
@@ -101,15 +131,36 @@ export const useAiAgentStore = defineStore('ai-agent', {
     async processNextParagraph(agent) {
       const nextItem = this.findNextParagraph(agent);
       if (!nextItem) {
+        // Log completion
+        this.addActionToHistory('✅ All paragraphs processed', {
+          type: 'completed',
+          reason: 'No more paragraphs found to process'
+        });
+        this.updateAgentStatus('Completed');
+
         this.clearProjectAgent();
         return;
       }
+
+      // Log found paragraph
+      this.addActionToHistory('📝 Found paragraph to process', {
+        type: 'found_paragraph',
+        paragraphId: nextItem.nodeId,
+        instruction: nextItem.instruction.substring(0, 100) + (nextItem.instruction.length > 100 ? '...' : '')
+      });
+      this.updateAgentStatus(`Processing paragraph: ${nextItem.instruction.substring(0, 50)}...`);
 
       const result = await this.runAgentOnParagraph(agent, nextItem);
 
       if (result === 'stopped' || result === 'error' || !this.projectAgentProcessing) {
         return;
       }
+
+      // Log continuation
+      this.addActionToHistory('🔄 Looking for next paragraph', {
+        type: 'continue'
+      });
+      this.updateAgentStatus('Looking for next paragraph...');
 
       await this.processNextParagraph(agent);
     },
@@ -204,6 +255,18 @@ export const useAiAgentStore = defineStore('ai-agent', {
         })
         .run();
 
+      if(this.projectAgentCurrentProcessingParagraphItem) {
+        this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'remove');
+
+        // Log user acceptance for project agent
+        if (!this.confirmationWidgetData?.isIndependentAgent) {
+          this.addActionToHistory('✅ User accepted change', {
+            type: 'user_accept',
+            paragraphId: this.projectAgentCurrentProcessingParagraphItem.nodeId
+          });
+        }
+      }
+
       if (this.currentConfirmationPromise) {
         this.currentConfirmationPromise.resolve('accepted');
         this.currentConfirmationPromise = null;
@@ -217,6 +280,14 @@ export const useAiAgentStore = defineStore('ai-agent', {
       const editorStore = useEditorStore();
       console.log('User skipped paragraph:', data);
       this.projectAgentSkippedParagraphs.add(data.nodeId);
+
+      // Log user rejection for project agent
+      if (!this.confirmationWidgetData?.isIndependentAgent) {
+        this.addActionToHistory('❌ User skipped paragraph', {
+          type: 'user_skip',
+          paragraphId: data.nodeId
+        });
+      }
 
       if(editorStore.editor) {
         editorStore.editor.commands.blur();
@@ -245,56 +316,115 @@ export const useAiAgentStore = defineStore('ai-agent', {
         return;
       }
 
-      this.confirmationWidgetData.conversationMessages.push({ type: 'assistant', text: this.confirmationWidgetData.aiSuggestion });
-      this.confirmationWidgetData.conversationMessages.push({ type: 'user', text: userFeedback });
+      if(this.confirmationWidgetData.isIndependentAgent) {
+        this.independentAgentChatHistory.push({
+          type: 'user',
+          text: userFeedback
+        });
 
-      this.confirmationWidgetData.aiSuggestion = '';
+        // Log user feedback
+        this.addActionToHistory('💬 User provided feedback', {
+          type: 'user_chat',
+          feedback: userFeedback,
+          paragraphId: this.confirmationWidgetData.nodeId
+        });
+        this.updateAgentStatus('Processing feedback...');
 
-      this.projectAgentCurrentPromptRequest?.abortController?.abort();
+        // Clear current suggestion and set streaming state
+        this.confirmationWidgetData.aiMessage = '';
+        this.confirmationWidgetData.isLoading = true;
 
-      if(this.projectAgentCurrentProcessingParagraphItem) {
-        this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'streaming');
-      }
+        // Abort any current request
+        this.projectAgentCurrentPromptRequest?.abortController?.abort();
 
-      try {
-        const onOutput = (fullText, newText, isFinished, isError, request, result) => {
-          if (this.shouldAbortStreaming() || !this.confirmationWidgetData || request.isInstructionGeneratorRequest) {
-            return;
+        try {
+          const promptStore = usePromptStore();
+
+          const request = cloneRequest(this.projectAgentCurrentPromptRequest);
+          this.projectAgentCurrentPromptRequest = request;
+
+          request.abortController = new AbortController();
+          if (this.independentAgentChatHistory.length > 0) {
+            request.appendMessages = [...this.independentAgentChatHistory];
           }
 
-          this.confirmationWidgetData.isStreaming = true;
+          const result = await promptStore.promptInternalSimple(request);
 
-          this.confirmationWidgetData.executingPromptRequest = request;
-          this.confirmationWidgetData.promptResult = result;
+          this.confirmationWidgetData.isLoading = false;
 
-          if(!request.isPromptAgent) { // do not stream when analysing by agent
-            this.confirmationWidgetData.aiSuggestion = fullText;
+          await this.processIndependentAgentResult(result, false);
+
+          // Update status after processing feedback
+          this.updateAgentStatus('Waiting for user confirmation...');
+        } catch (error) {
+          this.clearProjectAgent();
+        } finally {
+          if(this.confirmationWidgetData) {
+            this.confirmationWidgetData.isLoading = false;
           }
+        }
 
-          if (isFinished) {
-            this.confirmationWidgetData.isStreaming = false;
+        await this.continueIndependentAgent(this.projectAgent);
+      } else {
+        // Log user feedback for project agent
+        this.addActionToHistory('💬 User provided feedback', {
+          type: 'user_chat',
+          feedback: userFeedback,
+          paragraphId: this.confirmationWidgetData.nodeId
+        });
+        this.updateAgentStatus('Processing feedback...');
 
-            if (!isError && !this.shouldAbortStreaming()) {
+        this.confirmationWidgetData.conversationMessages.push({ type: 'assistant', text: this.confirmationWidgetData.aiSuggestion });
+        this.confirmationWidgetData.conversationMessages.push({ type: 'user', text: userFeedback });
 
-              if (request.isPromptAgent) {
-                if(this.shouldIgnoreAgentResult(fullText, request.promptAgent)) {
-                  return;
+        this.confirmationWidgetData.aiSuggestion = '';
+
+        this.projectAgentCurrentPromptRequest?.abortController?.abort();
+
+        if(this.projectAgentCurrentProcessingParagraphItem) {
+          this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'streaming');
+        }
+
+        try {
+          const onOutput = (fullText, newText, isFinished, isError, request, result) => {
+            if (this.shouldAbortStreaming() || !this.confirmationWidgetData || request.isInstructionGeneratorRequest) {
+              return;
+            }
+
+            this.confirmationWidgetData.isStreaming = true;
+
+            this.confirmationWidgetData.executingPromptRequest = request;
+            this.confirmationWidgetData.promptResult = result;
+
+            if(!request.isPromptAgent) { // do not stream when analysing by agent
+              this.confirmationWidgetData.aiSuggestion = fullText;
+            }
+
+            if (isFinished) {
+              this.confirmationWidgetData.isStreaming = false;
+
+              if (!isError && !this.shouldAbortStreaming()) {
+
+                if (request.isPromptAgent) {
+                  if(this.shouldIgnoreAgentResult(fullText, request.promptAgent)) {
+                    return;
+                  }
+                }
+
+                this.confirmationWidgetData.aiSuggestion = fullText;
+
+                if(this.projectAgentCurrentProcessingParagraphItem) {
+                  this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'awaiting_confirmation');
                 }
               }
-
-              this.confirmationWidgetData.aiSuggestion = fullText;
-
-              if(this.projectAgentCurrentProcessingParagraphItem) {
-                this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'awaiting_confirmation');
-              }
             }
-          }
-        };
+          };
 
-        this.confirmationWidgetData.promptResult = await this.executeProjectAgentPrompt(onOutput);
+          this.confirmationWidgetData.promptResult = await this.executeProjectAgentPrompt(onOutput);
 
-      } catch (error) {
-        this.confirmationWidgetData.isStreaming = false;
+        } catch (error) {
+          this.confirmationWidgetData.isStreaming = false;
+        }
       }
     },
     onWidgetUndo() {
@@ -305,10 +435,13 @@ export const useAiAgentStore = defineStore('ai-agent', {
       this.projectAgentCurrentPromptRequest?.abortController?.abort();
 
       this.confirmationWidgetData.aiSuggestion = this.confirmationWidgetData.originalAiSuggestion;
-      this.confirmationWidgetData.conversationMessages = [];
 
-      if(this.projectAgentCurrentProcessingParagraphItem) {
-        this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'awaiting_confirmation');
+      if(!this.confirmationWidgetData.isIndependentAgent) {
+        this.confirmationWidgetData.conversationMessages = [];
+
+        if(this.projectAgentCurrentProcessingParagraphItem) {
+          this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'awaiting_confirmation');
+        }
       }
     },
     async executeProjectAgentPrompt(onOutput) {
@@ -338,6 +471,13 @@ export const useAiAgentStore = defineStore('ai-agent', {
         const result = await promptStore.promptMultiple2(newRequest);
         return result;
       } catch (error) {
+        // Log error
+        this.addActionToHistory('⚠️ Error in prompt execution', {
+          type: 'prompt_error',
+          error: error.message || 'Unknown error'
+        });
+        this.updateAgentStatus('Error occurred');
+
         this.clearProjectAgent();
 
         throw error;
@@ -351,6 +491,14 @@ export const useAiAgentStore = defineStore('ai-agent', {
       let conversationMessages = [];
 
       console.log('RUN AGENT ON PARAGRAPH', item.text);
+
+      // Log processing start
+      this.addActionToHistory('⚙️ Processing paragraph', {
+        type: 'processing',
+        paragraphId: item.nodeId,
+        instruction: item.instruction.substring(0, 100) + (item.instruction.length > 100 ? '...' : '')
+      });
+      this.updateAgentStatus(`Processing: ${item.instruction.substring(0, 50)}...`);
 
       editorStore.updateAgentDecoration(item.from, item.to, 'processing');
 
@@ -409,6 +557,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
               }
 
               if (this.shouldIgnoreAgentResult(this.confirmationWidgetData.aiSuggestion, agent)) {
+                // Log ignored result
+                this.addActionToHistory('🚫 Suggestion ignored', {
+                  type: 'ignored',
+                  paragraphId: item.nodeId,
+                  reason: 'Agent returned ignore text'
+                });
 
                 this.projectAgentCurrentPromptRequest?.abortController?.abort();
 
@@ -424,6 +578,14 @@ export const useAiAgentStore = defineStore('ai-agent', {
                 return;
               }
 
+              // Log suggestion
+              this.addActionToHistory('✏️ Suggested change', {
+                type: 'suggest',
+                paragraphId: item.nodeId,
+                preview: fullText.substring(0, 100) + (fullText.length > 100 ? '...' : '')
+              });
+              this.updateAgentStatus('Waiting for user confirmation...');
+
               this.manageParagraphDecoration(item, 'awaiting_confirmation');
             }
           }
@@ -432,6 +594,14 @@ export const useAiAgentStore = defineStore('ai-agent', {
         //TODO bug - even if user aborts, it still waits to complete this before continuing with the next paragraph
         this.confirmationWidgetData.promptResult = await this.executeProjectAgentPrompt(onInitialOutput);
       } catch (error) {
+        // Log error for project agent
+        this.addActionToHistory('⚠️ Error occurred', {
+          type: 'error',
+          paragraphId: item.nodeId,
+          error: error.message || 'Unknown error'
+        });
+        this.updateAgentStatus('Error occurred');
+
         this.confirmationWidgetData.isStreaming = false;
         return 'error';
       }
@@ -440,53 +610,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
       return userChoice;
     },
-    parseIndependentAgentToolCall(responseText) {
-      try {
-        // Try to parse as JSON first (for direct tool call response)
-        let response;
-        try {
-          response = JSON.parse(responseText);
-        } catch {
-          // If not JSON, look for tool_calls in the text
-          const toolCallMatch = responseText.match(/\{[\s\S]*"tool_calls"[\s\S]*\}/);
-          if (toolCallMatch) {
-            response = JSON.parse(toolCallMatch[0]);
-          } else {
-            return { error: "No tool calls found in response" };
-          }
-        }
-
-        if (!response.tool_calls || !Array.isArray(response.tool_calls) || response.tool_calls.length === 0) {
-          return { error: "No valid tool calls found" };
-        }
-
-        const toolCall = response.tool_calls[0]; // Take first tool call
-
-        if (!toolCall.function || !toolCall.function.name) {
-          return { error: "Invalid tool call structure" };
-        }
-
-        let args;
-        try {
-          args = typeof toolCall.function.arguments === 'string'
-            ? JSON.parse(toolCall.function.arguments)
-            : toolCall.function.arguments;
-        } catch {
-          return { error: "Invalid tool call arguments" };
-        }
-
-        return {
-          toolName: toolCall.function.name,
-          arguments: args,
-          toolCallId: toolCall.id
-        };
-      } catch (error) {
-        return { error: `Failed to parse tool call: ${error.message}` };
-      }
-    },
     async processIndependentAgent(agent) {
-      const editorStore = useEditorStore();
-
       // Generate full file content with node IDs
       const fullFileContent = this.generateFullFileWithNodeIds();
       if (!fullFileContent.trim()) {
@@ -494,118 +618,209 @@ export const useAiAgentStore = defineStore('ai-agent', {
         return;
       }
 
-      // Set up confirmation widget for independent agent
-      this.confirmationWidgetData = {
-        agentTitle: agent.title,
-        paragraphRange: null, // Will be set after tool execution
-        originalText: '',
-        nodeId: null,
-        conversationMessages: [...this.independentAgentChatHistory],
-        isStreaming: true,
-        originalAiSuggestion: '',
-        aiSuggestion: '',
-        promptResult: null,
-        isIndependentAgent: true,
-        fullFileContent: fullFileContent
-      };
-
-      let promiseResolve;
-      const confirmationPromise = new Promise((resolve) => {
-        promiseResolve = resolve;
+      // Log agent start
+      this.addActionToHistory('🚀 Agent started', {
+        type: 'start',
+        agentName: agent.title,
+        documentLength: fullFileContent.split('\n').filter(line => line.trim()).length + ' paragraphs'
       });
-      this.currentConfirmationPromise = { resolve: promiseResolve };
+      this.updateAgentStatus('Analyzing document...');
 
       try {
-        const onOutput = (fullText, newText, isFinished, isError, request, result) => {
-          if (this.shouldAbortStreaming() || !this.confirmationWidgetData) {
-            return;
-          }
 
-          this.confirmationWidgetData.isStreaming = true;
-          this.confirmationWidgetData.executingPromptRequest = request;
-          this.confirmationWidgetData.promptResult = result;
+        const result = await this.executeIndependentAgentPrompt(fullFileContent);
 
-          if (!request.isPromptAgent) {
-            this.confirmationWidgetData.aiSuggestion = fullText;
-          }
+        await this.processIndependentAgentResult(result, true);
 
-          if (isFinished) {
-            this.confirmationWidgetData.isStreaming = false;
-
-            if (!isError && !this.shouldAbortStreaming()) {
-              // Parse the AI tool call response
-              const toolCallResult = this.parseIndependentAgentToolCall(fullText);
-
-              if (toolCallResult.error) {
-                this.confirmationWidgetData.aiSuggestion = `Error parsing tool call: ${toolCallResult.error}`;
-                return;
-              }
-
-              // Execute the tool
-              const toolResult = this.executeIndependentAgentTool(toolCallResult);
-
-              if (toolResult.error) {
-                this.confirmationWidgetData.aiSuggestion = `Error executing tool: ${toolResult.error}`;
-                return;
-              }
-
-              if (toolResult.action === 'stop') {
-                // AI decided to stop
-                this.confirmationWidgetData.aiSuggestion = `Agent completed processing.\n\nReasoning: ${toolResult.reasoning}`;
-                this.confirmationWidgetData.isAgentStopped = true;
-
-                // Add to chat history
-                this.independentAgentChatHistory.push({
-                  type: 'assistant',
-                  text: `Used tool: stop\nReasoning: ${toolResult.reasoning}`
-                });
-
-                return;
-              }
-
-              if (toolResult.action === 'modify') {
-                // Set up for user confirmation
-                const targetNode = toolResult.targetNode;
-                this.confirmationWidgetData.paragraphRange = { from: targetNode.from, to: targetNode.to };
-                this.confirmationWidgetData.originalText = targetNode.text;
-                this.confirmationWidgetData.nodeId = targetNode.nodeId;
-                this.confirmationWidgetData.aiSuggestion = toolResult.newContent;
-                this.confirmationWidgetData.reasoning = toolResult.reasoning;
-                this.confirmationWidgetData.toolCallResult = toolResult;
-
-                // Add decoration to target paragraph
-                editorStore.addAgentDecoration(targetNode.from, targetNode.to, 'awaiting_confirmation');
-
-                // Add to chat history
-                this.independentAgentChatHistory.push({
-                  type: 'assistant',
-                  text: `Used tool: modifyParagraph\nTarget: ${targetNode.nodeId}\nReasoning: ${toolResult.reasoning}`
-                });
-              }
-            }
-          }
-        };
-
-        await this.executeIndependentAgentPrompt(onOutput, fullFileContent);
       } catch (error) {
-        this.confirmationWidgetData.isStreaming = false;
+        // Log error
+        this.addActionToHistory('⚠️ Error occurred', {
+          type: 'error',
+          error: error.message || 'Unknown error'
+        });
+        this.updateAgentStatus('Error occurred');
+
         this.clearProjectAgent();
         return;
       }
 
-      const userChoice = await confirmationPromise;
+      await this.continueIndependentAgent(this.projectAgent);
+    },
+    async continueIndependentAgent(agent) {
+      if (agent && !this.confirmationWidgetData?.isAgentStopped) {
+        // Generate current file content for next iteration
+        const currentFileContent = this.generateFullFileWithNodeIds();
 
-      if (userChoice === 'accepted' && !this.confirmationWidgetData.isAgentStopped) {
+        this.independentAgentChatHistory.push({
+          type: 'user',
+          text: `${currentFileContent}`
+        })
+
+        // Log continuation
+        this.addActionToHistory('🔄 Continuing to next task', {
+          type: 'continue'
+        });
+        this.updateAgentStatus('Looking for next task...');
+
         // Continue with the agent for next iteration
         await this.processIndependentAgent(agent);
       }
     },
-    async executeIndependentAgentPrompt(onOutput, fullFileContent) {
+    async processIndependentAgentResult(result, createNewWidget) {
+      if (!result || this.shouldAbortStreaming()) {
+        this.clearProjectAgent();
+        return;
+      }
+
+      // Extract tool calls from the OpenAI response
+      const completion = result.completionResponse;
+      if (!completion || !completion.choices || completion.choices.length === 0) {
+        this.clearProjectAgent();
+        return;
+      }
+
+      const message = completion.choices[0].message;
+      if (!message.tool_calls || message.tool_calls.length === 0) {
+        // Log no tool calls
+        this.addActionToHistory('⚠️ No actions suggested', {
+          type: 'no_actions',
+          reason: 'AI did not suggest any modifications'
+        });
+        this.updateAgentStatus('No actions to perform');
+
+        this.clearProjectAgent();
+        return;
+      }
+
+      for (const toolCall of message.tool_calls) {
+        // Get the first tool call
+        const toolCallResult = {
+          toolName: toolCall.function.name,
+          arguments: JSON.parse(toolCall.function.arguments),
+          toolCallId: toolCall.id
+        };
+
+        // Execute the tool
+        const toolResult = this.executeIndependentAgentTool(toolCallResult);
+
+        if (toolResult.error) {
+          console.log(toolResult.error);
+          continue;
+        }
+
+        if (toolResult.action === 'stop') {
+          // Log stop action
+          this.addActionToHistory('🛑 Agent finished his work', {
+            type: 'stop',
+            reasoning: toolResult.reasoning
+          });
+          this.updateAgentStatus('Completed');
+
+          this.clearProjectAgent();
+          return;
+        }
+
+        if (toolResult.action === 'modify') {
+          this.projectAgentCurrentProcessingParagraphItem = toolResult.targetNode;
+
+          if(!this.projectAgentCurrentProcessingParagraphItem) {
+            this.clearProjectAgent();
+            return;
+          }
+
+          // Log modification suggestion
+          this.addActionToHistory('✏️ Suggested modification', {
+            type: 'suggest',
+            paragraphId: this.projectAgentCurrentProcessingParagraphItem.nodeId,
+            reasoning: toolResult.reasoning,
+            preview: toolResult.newContent.substring(0, 100) + (toolResult.newContent.length > 100 ? '...' : '')
+          });
+          this.updateAgentStatus('Waiting for user confirmation...');
+
+          if(createNewWidget || !this.confirmationWidgetData) {
+            // Set up confirmation widget for independent agent
+            this.confirmationWidgetData = {
+              agentTitle: this.projectAgent.title,
+              paragraphRange: { from: this.projectAgentCurrentProcessingParagraphItem.from, to: this.projectAgentCurrentProcessingParagraphItem.to },
+              originalText: this.projectAgentCurrentProcessingParagraphItem.text,
+              nodeId:  this.projectAgentCurrentProcessingParagraphItem.nodeId,
+              conversationMessages: [...this.independentAgentChatHistory],
+              isStreaming: false,
+              originalAiSuggestion: toolResult.newContent,
+              aiSuggestion: toolResult.newContent,
+              promptResult: result,
+              isIndependentAgent: true,
+              reasoning: toolResult.reasoning,
+              toolCallResult: toolResult
+            };
+          } else {
+            this.confirmationWidgetData.aiSuggestion = toolResult.newContent;
+            this.confirmationWidgetData.conversationMessages = [...this.independentAgentChatHistory];
+            this.confirmationWidgetData.promptResult = result;
+            this.confirmationWidgetData.reasoning = toolResult.reasoning;
+            this.confirmationWidgetData.toolCallResult = toolResult;
+          }
+
+          this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'awaiting_confirmation');
+
+          // Add to chat history
+          this.independentAgentChatHistory.push({
+            type: 'assistant',
+            text: `Used tool: modifyParagraph\nTarget: ${this.projectAgentCurrentProcessingParagraphItem.nodeId}\nReasoning: ${toolResult.reasoning}`
+          });
+
+          let promiseResolve;
+          const confirmationPromise = new Promise((resolve) => {
+            promiseResolve = resolve;
+          });
+          this.currentConfirmationPromise = { resolve: promiseResolve };
+
+          const confirmationResult = await confirmationPromise;
+
+          // Add tool result to assistant history
+          if(confirmationResult === 'accepted') {
+            this.independentAgentChatHistory.push({
+              type: 'function',
+              name: 'modifyParagraph',
+              toolCallId: toolCallResult.toolCallId,
+              text: `Successfully modified paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId}. User ACCEPTED the change.`
+            });
+
+            // Log user acceptance
+            this.addActionToHistory('✅ User accepted change', {
+              type: 'user_accept',
+              paragraphId: this.projectAgentCurrentProcessingParagraphItem.nodeId
+            });
+
+            this.confirmationWidgetData = null;
+          } else if (confirmationResult === 'skipped') {
+            this.independentAgentChatHistory.push({
+              type: 'function',
+              name: 'modifyParagraph',
+              toolCallId: toolCallResult.toolCallId,
+              text: `Modification of paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId} was SKIPPED by user. Do not suggest it again!`
+            });
+
+            // Log user rejection
+            this.addActionToHistory('❌ User skipped change', {
+              type: 'user_skip',
+              paragraphId: this.projectAgentCurrentProcessingParagraphItem.nodeId
+            });
+
+            this.confirmationWidgetData = null;
+          }
+
+          const editorStore = useEditorStore();
+
+          editorStore.clearAllAgentDecorations();
+          this.currentConfirmationPromise = null;
+        }
+      }
+    },
+    async executeIndependentAgentPrompt(fullFileContent) {
       const promptStore = usePromptStore();
 
       try {
-        this.confirmationWidgetData.isStreaming = true;
-
         const newRequest = cloneRequest(this.projectAgentCurrentPromptRequest);
         this.projectAgentCurrentPromptRequest = newRequest;
 
@@ -622,9 +837,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           newRequest.appendMessages = [...this.independentAgentChatHistory];
         }
 
-        if (onOutput) {
-          newRequest.onOutput = onOutput;
-        }
+        const result = await promptStore.promptInternalSimple(newRequest);
 
         return result;
       } catch (error) {
@@ -641,6 +854,14 @@ export const useAiAgentStore = defineStore('ai-agent', {
         editorStore.editor.commands.blur();
       }
 
+      // Log agent stop
+      if (this.projectAgent) {
+        this.addActionToHistory('🛑 User stopped agent', {
+          type: 'user_stop',
+          agentType: this.projectAgent.isIndependent ? 'independent' : 'paragraph_based'
+        });
+        this.updateAgentStatus('Stopped by user');
+      }
 
       this.projectAgentCurrentPromptRequest?.abortController?.abort();
 

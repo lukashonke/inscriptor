@@ -50,15 +50,14 @@
                         <q-input dense filled label="Stop & Ignore text" :model-value="agent.ignoreResultText ?? 'OK'" v-on:update:model-value="updatePromptAgent(agent, {ignoreResultText: $event})" />
                         <HelpIcon :tooltip="$t('tooltips.parameters.ignoreResultText')"></HelpIcon>
                       </div>
+                      <div class="col" />
                       <div class="col-auto flex items-center">
                         <q-checkbox dense label="Allow multiple runs" :model-value="agent.allowMultipleRuns ?? false" v-on:update:model-value="updatePromptAgent(agent, {allowMultipleRuns: $event})" />
                         <q-input v-if="agent.allowMultipleRuns" dense filled label="Max runs" type="number" :model-value="agent.maxRuns ?? 1" v-on:update:model-value="updatePromptAgent(agent, {maxRuns: $event})" class="q-ml-sm" />
                         <HelpIcon :tooltip="$t('tooltips.parameters.agentMaxRuns')"></HelpIcon>
                       </div>
                     </div>
-
                   </q-card-section>
-
                   <q-card-section v-if="agent.type === 'Critic'" >
                     <div class="row">
                       <div class="col">
@@ -71,6 +70,7 @@
                         <q-input dense filled label="Stop text" :model-value="agent.ignoreResultText ?? 'OK'" v-on:update:model-value="updatePromptAgent(agent, {ignoreResultText: $event})" />
                         <HelpIcon :tooltip="$t('tooltips.parameters.ignoreResultText')"></HelpIcon>
                       </div>
+                      <div class="col" />
                       <div class="col-auto flex items-center">
                         <q-input dense filled label="Max iterations" type="number" :model-value="agent.maxRuns ?? 5" v-on:update:model-value="updatePromptAgent(agent, {maxRuns: $event})" class="q-ml-sm" />
                       </div>
@@ -93,20 +93,10 @@
                 <div v-for="agent in promptStore.projectAgents" :key="agent.id" class="q-mb-md">
                   <q-card>
                     <q-card-section>
-                      <div class="row items-center">
+                      <div class="row items-center q-gutter-x-sm">
                         <div class="col">
-                          <q-input dense filled label="Title" :model-value="agent.title" v-on:update:model-value="updateProjectAgent(agent, {title: $event})" />
+                          <q-input dense filled label="Agent Name" :model-value="agent.title" v-on:update:model-value="updateProjectAgent(agent, {title: $event})" />
                         </div>
-                        <div class="col-auto q-ml-sm">
-                          <q-btn-group flat>
-                            <q-btn flat dense icon="mdi-arrow-up" @click="moveProjectAgentUp(agent)" />
-                            <q-btn flat dense icon="mdi-arrow-down" @click="moveProjectAgentDown(agent)" />
-                            <q-btn flat dense icon="mdi-delete-outline" @click="deleteProjectAgent(agent)" color="red"/>
-                          </q-btn-group>
-                        </div>
-                      </div>
-
-                      <div class="row q-mt-sm">
                         <div class="col">
                           <q-select
                             dense
@@ -120,19 +110,26 @@
                             map-options
                           />
                         </div>
+                        <div class="col-auto q-ml-sm">
+                          <q-btn-group flat>
+                            <q-btn flat dense icon="mdi-arrow-up" @click="moveProjectAgentUp(agent)" />
+                            <q-btn flat dense icon="mdi-arrow-down" @click="moveProjectAgentDown(agent)" />
+                            <q-btn flat dense icon="mdi-delete-outline" @click="deleteProjectAgent(agent)" color="red"/>
+                          </q-btn-group>
+                        </div>
                       </div>
 
                       <div class="row q-mt-sm q-col-gutter-x-lg">
-                        <div class="col-auto flex items-center">
-                          <!--<div class="col-auto flex items-center">
-                            <q-checkbox dense filled label="Is Independent" :model-value="agent.isIndependent ?? false" v-on:update:model-value="updateProjectAgent(agent, {isIndependent: $event})" />
+                        <div class="col-auto flex items-center q-gutter-x-sm">
+                          <div class="col-auto flex items-center">
+                            <q-checkbox dense filled label="Automatically Identify Paragraphs to Improve" :model-value="agent.isIndependent ?? false" v-on:update:model-value="updateProjectAgent(agent, {isIndependent: $event})" />
                             <HelpIcon :tooltip="$t('tooltips.parameters.isIndependent')"></HelpIcon>
-                          </div>-->
+                          </div>
                           <div class="col-auto flex items-center" v-if="!agent.isIndependent">
                             <q-input dense filled label="Search prefix" :model-value="agent.searchPrefix ?? '//'" v-on:update:model-value="updateProjectAgent(agent, {searchPrefix: $event})" />
                             <HelpIcon :tooltip="$t('tooltips.parameters.searchPrefix')"></HelpIcon>
                           </div>
-                          <div class="col-auto flex items-center">
+                          <div class="col-auto flex items-center" v-if="!agent.isIndependent">
                             <q-input dense filled label="Ignore Reply text" :model-value="agent.ignoreResultText ?? 'OK'" v-on:update:model-value="updateProjectAgent(agent, {ignoreResultText: $event})" />
                             <HelpIcon :tooltip="$t('tooltips.parameters.ignoreResultText')"></HelpIcon>
                           </div>

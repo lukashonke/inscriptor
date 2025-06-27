@@ -350,6 +350,7 @@ export function cloneRequest(request, copyAbortController = false) {
     isInstructionGeneratorRequest: request.isInstructionGeneratorRequest,
     isProjectAgent: request.isProjectAgent,
     promptAgent: request.promptAgent,
+    isIndependentAgent: request.isIndependentAgent,
 
     allowParallel: request.allowParallel,
 

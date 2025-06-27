@@ -52,16 +52,47 @@
         </div>
       </q-card-section>
 
+      <!-- AI Message Section -->
+      <q-card-section class="q-pa-sm" v-if="widgetData.aiMessage">
+        <div class="ai-message-container">
+          <div class="ai-message-header q-mb-xs">
+            <q-icon name="mdi-message-text-outline" class="q-mr-xs text-primary" size="sm" />
+            <span class="text-weight-medium text-primary text-caption">AI Response</span>
+          </div>
+          <div class="ai-message-content">
+            <p class="q-ma-none text-body2" v-html="formatMessage(widgetData.aiMessage)"></p>
+          </div>
+        </div>
+      </q-card-section>
+
+      <!-- Reasoning Section -->
+      <q-card-section class="q-pa-sm q-mb-sm" v-if="widgetData.reasoning">
+        <div class="reasoning-container q-pa-md">
+          <div class="reasoning-header q-mb-xs">
+            <q-icon name="mdi-lightbulb-outline" class="q-mr-xs text-amber-7" size="sm" />
+            <span class="text-weight-medium text-amber-7 text-caption">Reasoning</span>
+          </div>
+          <div class="reasoning-content">
+            <div class="text-body2 text-grey-8 text-caption">
+              {{widgetData.reasoning}}
+            </div>
+          </div>
+        </div>
+      </q-card-section>
+
       <!-- Agent analysis status -->
-      <div v-if="widgetData.executingPromptRequest?.promptAgent && widgetData.isStreaming" class="q-pa-sm">
+      <div v-if="(widgetData.executingPromptRequest?.promptAgent && widgetData.isStreaming) || widgetData.isLoading" class="q-pa-sm">
         <div class="row items-center">
           <div class="q-ml-xs col-auto flex items-center">
             <q-spinner-grid class="q-mr-sm" size="16px" />
           </div>
           <div class="col flex items-center">
             <div class="text-caption">
-              <span>
+              <span v-if="widgetData.executingPromptRequest?.promptAgent?.title">
                 Analysing by {{ widgetData.executingPromptRequest.promptAgent.title }}...
+              </span>
+              <span v-else>
+                Loading...
               </span>
             </div>
           </div>
@@ -81,24 +112,6 @@
           </transition>
         </template>
       </template>
-
-      <!-- Independent agent chat history -->
-      <q-card-section
-        v-if="widgetData.isIndependentAgent && widgetData.conversationMessages && widgetData.conversationMessages.length > 0"
-        class="q-px-sm q-py-sm bg-grey-1"
-      >
-        <div class="text-caption text-grey-7 q-mb-xs">Conversation History:</div>
-        <div class="conversation-history">
-          <div
-            v-for="(message, index) in widgetData.conversationMessages.slice(-3)"
-            :key="index"
-            class="q-mb-xs text-caption"
-            :class="message.type === 'user' ? 'text-primary' : 'text-grey-8'"
-          >
-            <strong>{{ message.type === 'user' ? 'You' : 'AI' }}:</strong> {{ message.text }}
-          </div>
-        </div>
-      </q-card-section>
 
       <!-- Chat input section -->
       <q-card-section
@@ -203,16 +216,16 @@
               <q-btn
                 flat
                 color="negative"
-                label="Stop Agent"
+                label="Skip"
                 @click="onReject"
                 class="full-width"
                 no-caps
-                :disable="widgetData.isStreaming"
+                :disable="widgetData.isStreaming || widgetData.isLoading"
               >
-                <q-tooltip>Stop the independent agent</q-tooltip>
+                <q-tooltip>Skip this paragraph</q-tooltip>
               </q-btn>
             </div>
-            <div class="col-auto q-ml-sm" v-if="widgetData.conversationMessages && widgetData.conversationMessages.length > 0">
+            <div class="col-auto q-ml-sm" v-if="widgetData.aiSuggestion != widgetData.originalAiSuggestion">
               <q-btn
                 flat
                 color="primary"
@@ -221,7 +234,7 @@
                 @click="onUndo"
                 class="full-width q-ml-sm"
                 no-caps
-                :disable="widgetData.isStreaming"
+                :disable="widgetData.isStreaming || widgetData.isLoading"
               >
                 <q-tooltip>Revert to original AI suggestion</q-tooltip>
               </q-btn>
@@ -235,9 +248,9 @@
                 @click="onAccept"
                 class="full-width"
                 no-caps
-                :disable="widgetData.isStreaming"
+                :disable="widgetData.isStreaming || widgetData.isLoading"
               >
-                <q-tooltip>Accept this change and continue to next task</q-tooltip>
+                <q-tooltip>Accept this change</q-tooltip>
               </q-btn>
             </div>
           </template>
@@ -249,7 +262,7 @@
 
 <script setup>
 import { computed, ref, nextTick } from 'vue'
-import { diffStrings } from 'src/common/utils/textUtils'
+import {diffStrings, markdownToHtml} from 'src/common/utils/textUtils'
 import { useFileStore } from 'stores/file-store'
 import PromptResult from 'components/RightMenu/PromptResult.vue';
 import {useAiAgentStore} from 'stores/aiagent-store';
@@ -385,6 +398,13 @@ function finishEditing() {
   aiSuggestionEdit.value = editableContent.value;
   isEditingNow.value = false;
 }
+
+function formatMessage(text) {
+  if (!text) return '';
+
+  // Basic formatting: convert line breaks to <br>, preserve whitespace
+  return markdownToHtml(text);
+}
 </script>
 
 <style lang="scss" scoped>
@@ -410,10 +430,68 @@ function finishEditing() {
     font-weight: bold;
   }
 
-  // Dark mode support for accent border
+  // AI Message styling
+  .ai-message-container {
+    background-color: rgba(var(--q-primary-rgb), 0.05);
+    border-left: 3px solid var(--q-primary);
+    border-radius: 8px;
+    padding: 12px;
+
+    .ai-message-header {
+      display: flex;
+      align-items: center;
+    }
+
+    .ai-message-content {
+      padding-left: 20px; // Align with header text
+      line-height: 1.5;
+
+      p {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+      }
+    }
+  }
+
+  // Reasoning styling
+  .reasoning-container {
+    background-color: rgba(255, 193, 7, 0.05); // Amber background
+    border-radius: 8px;
+
+    .reasoning-header {
+      display: flex;
+      align-items: center;
+      transition: all 0.2s ease;
+    }
+
+    .reasoning-content {
+      padding-left: 28px; // Align with header text
+      line-height: 1.5;
+
+      div {
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        padding-bottom: 0px;
+      }
+    }
+  }
+
+  // Dark mode support
   .body--dark & {
     .suggested-text > div {
       background-color: rgba(var(--q-primary-rgb), 0.1);
+    }
+
+    .ai-message-container {
+      background-color: rgba(var(--q-primary-rgb), 0.1);
+    }
+
+    .reasoning-container {
+      background-color: rgba(255, 193, 7, 0.1);
+
+      .reasoning-content p {
+        color: #e0e0e0;
+      }
     }
   }
 }
