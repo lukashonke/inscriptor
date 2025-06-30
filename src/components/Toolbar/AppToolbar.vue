@@ -38,7 +38,7 @@
           </q-tooltip>
         </q-btn>
 
-        <q-btn flat no-caps @click="layoutStore.feedbackWindowOpened = true" label="Feedback">
+        <q-btn flat icon="mdi-message-fast-outline" no-caps @click="layoutStore.feedbackWindowOpened = true" label="Feedback">
           <q-tooltip>
             Feedback
           </q-tooltip>
