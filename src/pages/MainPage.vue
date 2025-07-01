@@ -252,11 +252,26 @@ watch(() => layoutStore.layoutSplitterModel, (newValue) => {
   }
 });
 
-// Handle window resize to recalculate minimum percentages
+// Handle window resize to maintain pixel widths
+let previousContainerWidth = 0;
+
 const handleWindowResize = () => {
-  // Ensure left panel doesn't shrink below 270px when window is resized
-  if (layoutStore.leftDrawerOpen && leftMenuWidthPercent.value < leftMenuMinPercent.value) {
-    leftMenuWidthPercent.value = leftMenuMinPercent.value;
+  if (layoutStore.leftDrawerOpen && splitterContainer.value) {
+    const oldWidth = previousContainerWidth || splitterContainer.value.clientWidth;
+    const newWidth = splitterContainer.value.clientWidth;
+    
+    // Calculate what the current pixel width was
+    const currentPixelWidth = (leftMenuWidthPercent.value / 100) * oldWidth;
+    
+    // Calculate new percentage to maintain same pixel width
+    let newPercent = (currentPixelWidth / newWidth) * 100;
+    
+    // Apply constraints: minimum pixel width and maximum percentage
+    const minPercent = (LEFT_MENU_MIN_WIDTH_PX.value / newWidth) * 100;
+    newPercent = Math.max(minPercent, Math.min(MAX_LEFT_MENU_WIDTH_PCT.value, newPercent));
+    
+    leftMenuWidthPercent.value = newPercent;
+    previousContainerWidth = newWidth;
   }
 };
 
@@ -264,6 +279,11 @@ onMounted(() => {
   // Initialize left panel width with proper minimum on mount
   if (layoutStore.leftDrawerOpen) {
     leftMenuWidthPercent.value = leftMenuMinPercent.value;
+  }
+
+  // Initialize previous container width
+  if (splitterContainer.value) {
+    previousContainerWidth = splitterContainer.value.clientWidth;
   }
 
   // Add window resize listener
