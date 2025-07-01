@@ -38,8 +38,8 @@ export default {
       agentMaxRuns: 'The maximum number of times the agent can be run. If the agent is allowed to run multiple times, this will be the maximum number of times the agent will be run.',
       hasExtendedChatMessages: 'If checked, the AI will be fed more messages that you specify. It might be used to fool AI that it has generated some text (even if it has not) and to continue in similar style.',
 
-      searchPrefix: 'The prefix that the agent will search for in each paragraph of the text. Use this to mark paragraphs to be processed by the AI agent. Keep this field empty to run AI agent on all paragraphs.',
-      isIndependent: 'If checked, the agent will be run on the whole text and decide which paragraphs to process. If unchecked, the agent will be run on all paragraphs, from top to bottom.',
+      searchPrefix: 'Text that marks paragraphs for processing (e.g., "//" for comments, "TODO:" for tasks). Leave empty to process all paragraphs sequentially. Only applies to non-independent agents.',
+      isIndependent: 'Independent agents analyze your entire document and intelligently choose which paragraphs need improvement, asking for permission before changes. Non-independent agents process paragraphs with the search prefix or all paragraphs if no prefix is set.',
     },
   },
 }

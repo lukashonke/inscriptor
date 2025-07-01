@@ -6,8 +6,19 @@
           <div class="q-pa-sm">
             <q-card flat>
               <q-card-section class="q-pb-none">
-                <div class="text-caption text-grey">Tip: Define AI agents to further improve the output of this prompt before presenting it to you.</div>
-                <div class="text-caption text-grey">Tip: Agents are executed from first to last.</div>
+                <div class="text-body2 text-primary q-mb-sm">📝 How Prompt Agents Work</div>
+                <div class="text-caption text-grey q-mb-xs">Prompt agents may execute after your main prompt to refine and improve its output automatically. You need to assign them to the prompts.</div>
+                <div class="text-caption text-grey q-mb-xs"><strong>Example:</strong> Main prompt generates a paragraph of text → Refiner agent polishes the writing style → Critic agent checks for plot consistency</div>
+                <div class="text-caption text-grey">Agents are executed sequentially from first to last in the order you define them.</div>
+                <q-card flat class="q-mt-md bg-yellow-1">
+                  <q-card-section class="q-pa-sm">
+                    <div class="text-caption text-primary"><strong>💡 Quick Reference</strong></div>
+                    <div class="text-caption text-grey-8">
+                      <div><strong>Refiner:</strong> "Polish this text to match my writing style"</div>
+                      <div><strong>Critic:</strong> "Review this story and suggest improvements. Then, take this suggestion and actually improve the text"</div>
+                    </div>
+                  </q-card-section>
+                </q-card>
               </q-card-section>
               <q-card-section class="q-gutter-y-md" v-if="agents?.length > 0">
                 <q-card v-for="(agent, index) in agents" :key="index">
@@ -86,9 +97,26 @@
           </div>
         </q-expansion-item>
 
-        <q-expansion-item label="Project Agents" caption="Define agents that run on the project, processing paragraph after paragraph.">
+        <q-expansion-item label="Project Agents" caption="Define agents that process paragraphs in your document to make improvements.">
           <div class="q-pa-md">
             <q-card flat>
+              <q-card-section class="q-pb-none">
+                <div class="text-body2 text-primary q-mb-sm">🤖 How Project Agents Work</div>
+                <div class="text-caption text-grey q-mb-xs">Project agents work directly on your page content, processing individual paragraphs to make improvements. They ask for your permission before making changes.</div>
+                <div class="text-caption text-grey q-mb-xs"><strong>Independent agents:</strong> Analyze the entire opened page and intelligently choose which paragraphs need improvement.</div>
+                <div class="text-caption text-grey q-mb-sm"><strong>Non-independent agents:</strong> Process paragraphs marked with a search prefix (like "//TODO" or "//improve") or all paragraphs if no prefix is specified.</div>
+
+                <q-card flat class="q-mt-md bg-yellow-1">
+                  <q-card-section class="q-pa-sm">
+                    <div class="text-caption text-primary"><strong>🔄 Workflow Examples</strong></div>
+                    <div class="text-caption text-grey-8">
+                      <div class="q-mb-xs"><strong>Independent:</strong> Agent scans document → "I think paragraph 3 needs better flow" → asks permission → you approve/reject</div>
+                      <div><strong>With prefix "//fix":</strong> Agent finds "//fix grammar here" → processes that paragraph → asks permission</div>
+                    </div>
+                  </q-card-section>
+                </q-card>
+              </q-card-section>
+
               <q-card-section>
                 <div v-for="agent in promptStore.projectAgents" :key="agent.id" class="q-mb-md">
                   <q-card>
@@ -122,11 +150,11 @@
                       <div class="row q-mt-sm q-col-gutter-x-lg">
                         <div class="col-auto flex items-center q-gutter-x-sm">
                           <div class="col-auto flex items-center">
-                            <q-checkbox dense filled label="Automatically Identify Paragraphs to Improve" :model-value="agent.isIndependent ?? false" v-on:update:model-value="updateProjectAgent(agent, {isIndependent: $event})" />
+                            <q-checkbox dense filled label="Independent Mode (AI chooses paragraphs)" :model-value="agent.isIndependent ?? false" v-on:update:model-value="updateProjectAgent(agent, {isIndependent: $event})" />
                             <HelpIcon :tooltip="$t('tooltips.parameters.isIndependent')"></HelpIcon>
                           </div>
                           <div class="col-auto flex items-center" v-if="!agent.isIndependent">
-                            <q-input dense filled label="Search prefix" :model-value="agent.searchPrefix ?? '//'" v-on:update:model-value="updateProjectAgent(agent, {searchPrefix: $event})" />
+                            <q-input dense filled label="Search prefix (e.g. '//', 'TODO:')" :model-value="agent.searchPrefix ?? '//'" v-on:update:model-value="updateProjectAgent(agent, {searchPrefix: $event})" />
                             <HelpIcon :tooltip="$t('tooltips.parameters.searchPrefix')"></HelpIcon>
                           </div>
                           <div class="col-auto flex items-center" v-if="!agent.isIndependent">
@@ -163,8 +191,8 @@ const promptStore = usePromptStore();
 const agents = computed(() => promptStore.promptAgents);
 
 const agentTypes = [
-  { label: "Refiner", value: "Refiner", description: "Takes the output of this prompt and improves it according to your instructions. Can run multiple times, keeping previous messages in chat history, until it decides there is nothing more to improve." },
-  { label: "Critic", value: "Critic", description: "Takes the output of this prompt and iterates - by crafting additional instructions to improve the result." },
+  { label: "Refiner", value: "Refiner", description: "Continuously improves the prompt output by applying your instructions multiple times until satisfied. Perfect for polishing writing style, grammar, or content quality. Can run up to the max runs limit you set." },
+  { label: "Critic", value: "Critic", description: "Acts as a critical reviewer that evaluates the output and provides specific feedback for improvements. Creates a conversation loop: evaluates → suggests changes → applies changes → evaluates again. Great for complex refinements." },
 ];
 
 const availablePrompts = computed(() => {

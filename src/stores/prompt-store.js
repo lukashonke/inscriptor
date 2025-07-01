@@ -1085,9 +1085,8 @@ export const usePromptStore = defineStore('prompts', {
       let options = {
         apiKey: 'key',
         dangerouslyAllowBrowser: true,
+        baseURL: url + "OpenAiPrompt/v1/",
       }
-
-      options.baseURL = url + "OpenAiPrompt/v1/";
 
       // Get authorization token and add to headers
       const user = useCurrentUser();
