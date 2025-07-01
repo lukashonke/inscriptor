@@ -2,7 +2,7 @@
   <q-card class="q-mb-md" :class="{ 'bg-red-1': !enabled }" bordered flat>
     <q-card-section class="q-px-md q-py-sm">
       <div class="row flex items-center">
-        <div class="col q-ml-sm">
+        <div class="col q-ml-sm q-py-sm">
           <div class="">
             <span class="text-subtitle1 text-weight-medium">{{ title }}</span>
           </div>
@@ -79,8 +79,8 @@
       </div>
 
       <q-slide-transition v-if="settingsExpanded">
-        <q-card bordered flat>
-          <q-card-section class="q-gutter-y-sm">
+        <q-card flat class="q-mt-sm">
+          <q-card-section class="q-gutter-y-sm q-py-sm q-px-sm">
             <div class="row">
               <div class="col-auto"><ColorPicker v-model="color"></ColorPicker></div>
               <div class="col-aut flex items-center bordered q-ml-sm">
@@ -140,7 +140,7 @@
 
           <q-separator class="q-my-sm"></q-separator>
 
-          <q-card-section class="q-gutter-y-md">
+          <q-card-section class="q-gutter-y-md q-px-sm">
             <div class="row">
               <div class="col">
                 <span class="text-subtitle2">Prompt AI Settings</span>
@@ -412,7 +412,7 @@
 
           </q-card-section>
 
-          <q-card-section class="q-pt-none q-mt-sm" v-if="showAdvancedSettings">
+          <q-card-section class="q-pt-none q-mt-sm q-px-sm" v-if="showAdvancedSettings">
             <q-expansion-item label="Advanced Prompt Parameters" dense icon="mdi-cog-outline">
               <q-card class="q-py-sm">
                 <q-card-section class="q-gutter-y-md">

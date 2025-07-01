@@ -47,7 +47,7 @@
           <!-- <q-btn color="primary" label="Add model" @click="promptStore.addNewModel" /> -->
         </q-tab-panel>
 
-        <q-tab-panel name="models">
+        <q-tab-panel name="models" class="q-pt-xs">
           <div v-for="model in models" :key="model.id">
             <ModelSettingsItem :model="model" />
           </div>
@@ -58,7 +58,7 @@
           <!-- <q-btn color="primary" label="Add model" @click="promptStore.addNewModel" /> -->
         </q-tab-panel>
 
-        <q-tab-panel name="prompts" class="q-pt-none">
+        <q-tab-panel name="prompts" class="q-pt-xs">
           <div class="q-ml-md" v-if="!anyModelImported">
 
             <div class="q-mb-lg">
@@ -137,11 +137,11 @@
 
          </q-tab-panel>
 
-         <q-tab-panel name="files">
+         <q-tab-panel name="files" class="q-pt-xs">
            <PagePropertiesSettings />
          </q-tab-panel>
 
-        <q-tab-panel name="agents">
+        <q-tab-panel name="agents" class="q-pt-xs">
           <AgentSettings />
         </q-tab-panel>
 
