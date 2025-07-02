@@ -4,6 +4,7 @@ import {
 } from "src/common/helpers/promptHelper";
 import {usePromptStore} from 'stores/prompt-store';
 import {useEditorStore} from 'stores/editor-store';
+import {useFileStore} from 'stores/file-store';
 import { editorTextBetween} from 'src/common/utils/editorUtils';
 import {currentFilePromptContext} from 'src/common/resources/promptContexts';
 
@@ -23,16 +24,26 @@ export const useAiAgentStore = defineStore('ai-agent', {
     independentAgentChatHistory: [], // Persistent conversation messages for independent agents
     agentActionHistory: [],
     agentStatus: null,
+
+    // Agent chat state for AgentChatTab
+    agentChats: {
+      chats: [],           // Array of chat sessions
+      activeChat: null,    // Current active chat ID
+      isAgentRunning: false // Flag to prevent multiple agent runs
+    },
   }),
   getters: {
     agentState: (state) => {
-      if (!state.projectAgentProcessing) {
-        return 'idle';
-      }
       if (state.currentConfirmationPromise) {
         return 'waiting_for_user';
       }
-      return 'processing';
+      if (state.projectAgentProcessing) {
+        return 'processing';
+      }
+      if(state.agentChats && state.agentChats.isAgentRunning) {
+        return 'processing';
+      }
+      return 'idle';
     },
     isAgentActive: (state) => state.projectAgentProcessing,
   },
@@ -300,7 +311,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
       }
 
       if (this.currentConfirmationPromise) {
-        this.currentConfirmationPromise.resolve('skipped');
+        // For agent chat, pass the feedback along with the result
+        if (this.confirmationWidgetData.isAgentChat && data.userFeedback) {
+          this.currentConfirmationPromise.resolve({ result: 'skipped', feedback: data.userFeedback });
+        } else {
+          this.currentConfirmationPromise.resolve('skipped');
+        }
         this.currentConfirmationPromise = null;
       }
     },
@@ -971,6 +987,81 @@ export const useAiAgentStore = defineStore('ai-agent', {
         }
       ];
     },
+    getChatAgentTools() {
+      return [
+        {
+          type: "function",
+          function: {
+            name: "getCurrentDocument",
+            description: "Get the current document content with paragraph IDs. Each paragraph is formatted as [nodeId]: content",
+            parameters: {
+              type: "object",
+              properties: {},
+              required: []
+            }
+          }
+        },
+        {
+          type: "function",
+          function: {
+            name: "listProjectFiles",
+            description: "Get a list of all files in the project with their structure, metadata, and hierarchy",
+            parameters: {
+              type: "object",
+              properties: {},
+              required: []
+            }
+          }
+        },
+        {
+          type: "function",
+          function: {
+            name: "readFile",
+            description: "Read the content of a specific file in the project. Can read full content or just synopsis. Use the file ID from listProjectFiles (shown as 'ID: abc123' in the brackets).",
+            parameters: {
+              type: "object",
+              properties: {
+                fileId: {
+                  type: "string",
+                  description: "The exact file ID from listProjectFiles output (e.g., 'abc123def456', not a file path)"
+                },
+                readType: {
+                  type: "string",
+                  description: "Type of read operation: 'full' for complete content or 'synopsis' for synopsis only",
+                  enum: ["full", "synopsis"]
+                }
+              },
+              required: ["fileId"]
+            }
+          }
+        },
+        {
+          type: "function",
+          function: {
+            name: "modifyParagraph",
+            description: "Modify the content of a specific paragraph in the document",
+            parameters: {
+              type: "object",
+              properties: {
+                nodeId: {
+                  type: "string",
+                  description: "The ID of the paragraph node to modify"
+                },
+                newContent: {
+                  type: "string",
+                  description: "The new content to replace the paragraph with"
+                },
+                reasoning: {
+                  type: "string",
+                  description: "Explanation of why this change is being made"
+                }
+              },
+              required: ["nodeId", "newContent", "reasoning"]
+            }
+          }
+        }
+      ];
+    },
     executeIndependentAgentTool(toolCall) {
       const { toolName, arguments: args } = toolCall;
 
@@ -1016,6 +1107,583 @@ export const useAiAgentStore = defineStore('ai-agent', {
         action: 'stop',
         reasoning
       };
+    },
+    executeChatAgentTool(toolCall) {
+      const { toolName, arguments: args } = toolCall;
+
+      switch (toolName) {
+        case 'getCurrentDocument':
+          return this.executeGetCurrentDocumentTool();
+        case 'listProjectFiles':
+          return this.executeListProjectFilesTool();
+        case 'readFile':
+          return this.executeReadFileTool(args);
+        case 'modifyParagraph':
+          return this.executeModifyParagraphTool(args);
+        default:
+          return { error: `Unknown tool: ${toolName}` };
+      }
+    },
+    executeGetCurrentDocumentTool() {
+      const documentContent = this.generateFullFileWithNodeIds();
+
+      if (!documentContent) {
+        return {
+          success: true,
+          content: "The document is empty."
+        };
+      }
+
+      return {
+        success: true,
+        content: documentContent
+      };
+    },
+    executeListProjectFilesTool() {
+      const fileStore = useFileStore();
+
+      if (!fileStore.files || fileStore.files.length === 0) {
+        return {
+          success: true,
+          content: "No files found in the project."
+        };
+      }
+
+      let output = "PROJECT FILES:\n";
+      output += "Note: Use the ID values shown in brackets to read specific files with the readFile tool.\n\n";
+
+      const formatFileTree = (files, depth = 0, isLast = true, prefix = "") => {
+        let result = "";
+
+        for (let i = 0; i < files.length; i++) {
+          const file = files[i];
+          const isLastFile = i === files.length - 1;
+
+          // Create tree structure visual
+          const connector = isLastFile ? "└── " : "├── ";
+          const fullPrefix = prefix + connector;
+
+          // Format file title with metadata
+          let fileInfo = file.title;
+
+          // Add metadata in brackets
+          const metadata = [];
+
+          // Add file ID first - make it more prominent
+          metadata.push(`ID: ${file.id}`);
+
+          // Add labels if any
+          if (file.labels && file.labels.length > 0) {
+            const labelNames = file.labels.map(label => typeof label === 'string' ? label : label.label).join(', ');
+            metadata.push(`labels: ${labelNames}`);
+          }
+
+          // Add context type if set
+          if (file.settings && file.settings.contextType && file.settings.contextType.label) {
+            metadata.push(`context: ${file.settings.contextType.label}`);
+          }
+
+          // Add synopsis if available
+          /*if (file.synopsis && file.synopsis.trim()) {
+            const shortSynopsis = file.synopsis.length > 50 ? file.synopsis.substring(0, 50) + "..." : file.synopsis;
+            metadata.push(`synopsis: "${shortSynopsis}"`);
+          }*/
+
+          // Add state if set
+          if (file.state && file.state.trim()) {
+            metadata.push(`state: ${file.state}`);
+          }
+
+          // Add word count
+          const wordCount = fileStore.getTextWords(file, true, false);
+          if (wordCount) {
+            metadata.push(wordCount);
+          }
+
+          // Add icon if not default
+          if (file.icon && file.icon !== 'mdi-file-outline') {
+            metadata.push(`icon: ${file.icon}`);
+          }
+
+          // Add folder indicator
+          if (file.children && file.children.length > 0) {
+            metadata.push(`${file.children.length} items`);
+          }
+
+          // Format the line
+          if (metadata.length > 0) {
+            fileInfo += ` [${metadata.join('] [')}]`;
+          }
+
+          result += fullPrefix + fileInfo + "\n";
+
+          // Add children if any
+          if (file.children && file.children.length > 0) {
+            const childPrefix = prefix + (isLastFile ? "    " : "│   ");
+            result += formatFileTree(file.children, depth + 1, isLastFile, childPrefix);
+          }
+        }
+
+        return result;
+      };
+
+      output += formatFileTree(fileStore.files);
+
+      // Add project summary
+      const totalFiles = this.countAllFiles(fileStore.files);
+      const totalWords = this.getTotalProjectWordCount(fileStore.files);
+
+      output += `\nPROJECT SUMMARY:\n`;
+      output += `Total files: ${totalFiles}\n`;
+      output += `Total words: ${totalWords}\n`;
+      output += `Project name: ${fileStore.projectName || 'Untitled'}\n\n`;
+      output += `USAGE: To read a specific file, use readFile tool with the ID value (e.g., readFile with fileId: "abc123def456")\n`;
+      output += `Example: readFile({"fileId": "abc123def456", "readType": "full"})`;
+
+      return {
+        success: true,
+        content: output
+      };
+    },
+    executeReadFileTool(args) {
+      const { fileId, readType = 'full' } = args;
+
+      if (!fileId) {
+        return { error: "fileId parameter is required" };
+      }
+
+      const fileStore = useFileStore();
+      const file = fileStore.getFile(fileId);
+
+      if (!file) {
+        return { error: `File with ID ${fileId} not found` };
+      }
+
+      // Build file metadata
+      const metadata = [];
+
+      // Add file path
+      const filePath = fileStore.getFileNameWithPath(file);
+
+      // Add labels if any
+      if (file.labels && file.labels.length > 0) {
+        const labelNames = file.labels.map(label => typeof label === 'string' ? label : label.label).join(', ');
+        metadata.push(`Labels: ${labelNames}`);
+      }
+
+      // Add context type if set
+      if (file.settings && file.settings.contextType && file.settings.contextType.label) {
+        metadata.push(`Context: ${file.settings.contextType.label}`);
+      }
+
+      // Add state if set
+      if (file.state && file.state.trim()) {
+        metadata.push(`State: ${file.state}`);
+      }
+
+      // Add word count
+      const wordCount = fileStore.getTextWords(file, true, false);
+      if (wordCount) {
+        metadata.push(`Word Count: ${wordCount}`);
+      }
+
+      // Add icon if not default
+      if (file.icon && file.icon !== 'mdi-file-outline') {
+        metadata.push(`Icon: ${file.icon}`);
+      }
+
+      // Build output based on read type
+      let output = `FILE: ${file.title}\n`;
+      output += `Path: ${filePath}\n`;
+
+      if (metadata.length > 0) {
+        output += metadata.join('\n') + '\n';
+      }
+
+      output += '\n';
+
+      if (readType === 'synopsis') {
+        output += 'SYNOPSIS:\n';
+        if (file.synopsis && file.synopsis.trim()) {
+          output += file.synopsis;
+        } else {
+          output += 'No synopsis available for this file.';
+        }
+      } else {
+        // Default to full content
+        output += 'CONTENT:\n';
+        if (file.content && file.content.trim()) {
+          output += file.content;
+        } else {
+          output += 'This file is empty.';
+        }
+      }
+
+      return {
+        success: true,
+        content: output
+      };
+    },
+    countAllFiles(files) {
+      let count = 0;
+      for (const file of files) {
+        count += 1;
+        if (file.children && file.children.length > 0) {
+          count += this.countAllFiles(file.children);
+        }
+      }
+      return count;
+    },
+    getTotalProjectWordCount(files) {
+      const fileStore = useFileStore();
+      let totalWords = 0;
+      for (const file of files) {
+        const wordCount = fileStore.getTextWords(file, true, false);
+        if (wordCount) {
+          const words = parseInt(wordCount.replace(' words', ''));
+          if (!isNaN(words)) {
+            totalWords += words;
+          }
+        }
+        if (file.children && file.children.length > 0) {
+          totalWords += this.getTotalProjectWordCount(file.children);
+        }
+      }
+      return totalWords;
+    },
+
+    // Agent Chat Tab actions
+    createAgentChat() {
+      const chatId = `chat-${Date.now()}`;
+      const newChat = {
+        id: chatId,
+        messages: [],
+        createdAt: Date.now(),
+        lastActivity: Date.now()
+      };
+
+      this.agentChats.chats.push(newChat);
+      this.agentChats.activeChat = chatId;
+
+      return chatId;
+    },
+    setActiveAgentChat(chatId) {
+      if (this.agentChats.chats.find(c => c.id === chatId)) {
+        this.agentChats.activeChat = chatId;
+      }
+    },
+    deleteAgentChat(chatId) {
+      const index = this.agentChats.chats.findIndex(c => c.id === chatId);
+      if (index !== -1) {
+        this.agentChats.chats.splice(index, 1);
+
+        // If deleted chat was active, set the first chat as active
+        if (this.agentChats.activeChat === chatId) {
+          this.agentChats.activeChat = this.agentChats.chats.length > 0 ? this.agentChats.chats[0].id : null;
+        }
+      }
+    },
+    deleteAllAgentChats() {
+      this.agentChats.chats = [];
+      this.agentChats.activeChat = null;
+    },
+    addAgentMessage(chatId, message) {
+      const chat = this.agentChats.chats.find(c => c.id === chatId);
+      if (chat) {
+        const messageWithId = {
+          ...message,
+          id: `msg-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          timestamp: Date.now()
+        };
+        chat.messages.push(messageWithId);
+        chat.lastActivity = Date.now();
+        return messageWithId;
+      }
+    },
+    updateAgentRunningState(isRunning) {
+      this.agentChats.isAgentRunning = isRunning;
+    },
+    async executeAgentPrompt(userMessage, selectedPrompt) {
+      if (this.agentChats.isAgentRunning || !this.agentChats.activeChat) {
+        return;
+      }
+
+      const promptStore = usePromptStore();
+      const chat = this.agentChats.chats.find(c => c.id === this.agentChats.activeChat);
+      if (!chat) {
+        return;
+      }
+
+      this.updateAgentRunningState(true);
+
+      try {
+        // Use the selected prompt or find a suitable one
+        let agentPrompt = selectedPrompt;
+        if (!agentPrompt) {
+          throw new Error('No suitable prompt found for agent');
+        }
+
+        // Add system and user prompts to chat if this is the first message
+        if (chat.messages.length === 0) {
+          // Add system prompt if it exists
+          if (agentPrompt.systemPrompt) {
+            this.addAgentMessage(this.agentChats.activeChat, {
+              role: 'system',
+              content: agentPrompt.systemPrompt,
+              hidden: true
+            });
+          }
+
+          // Add initial user prompt if it exists, replacing $chat with user message
+          const userPromptWithMessage = agentPrompt.userPrompt.replace('$chat', userMessage);
+          this.addAgentMessage(this.agentChats.activeChat, {
+            role: 'user',
+            content: userPromptWithMessage,
+            hidden: true
+          });
+        } else {
+          // Add new user message
+          this.addAgentMessage(this.agentChats.activeChat, {
+            role: 'user',
+            content: userMessage
+          });
+        }
+
+        // Prepare messages for AI
+        const messages = chat.messages.map(msg => ({
+          type: msg.role === 'user' ? 'user' : msg.role === 'system' ? 'system' : 'assistant',
+          text: msg.content,
+          toolCalls: msg.toolCalls
+        }));
+
+        // Create request with tools
+        const request = {
+          prompt: agentPrompt,
+          text: userMessage,
+          agentMessages: messages, // All messages from chat history
+          agentMessagesOnly: true,
+          tools: this.getChatAgentTools(),
+          silent: true,
+          contextTypes: [], // Chat agent will get context through tools
+          abortController: new AbortController()
+        };
+
+        // Execute prompt
+        const result = await promptStore.promptInternalSimple(request);
+
+        if (!result || !result.completionResponse) {
+          throw new Error('No response from AI');
+        }
+
+        const completion = result.completionResponse;
+        const message = completion.choices[0].message;
+
+        // Add assistant message
+        const assistantMessage = this.addAgentMessage(this.agentChats.activeChat, {
+          role: 'assistant',
+          content: message.content || '',
+          toolCalls: message.tool_calls || []
+        });
+
+        // Process tool calls if any
+        if (message.tool_calls && message.tool_calls.length > 0) {
+          await this.processAgentToolCalls(message.tool_calls, assistantMessage.id, agentPrompt);
+        }
+
+      } catch (error) {
+        console.error('Error in executeAgentPrompt:', error);
+        this.addAgentMessage(this.agentChats.activeChat, {
+          role: 'system',
+          content: `Error: ${error.message}`
+        });
+      } finally {
+        this.updateAgentRunningState(false);
+      }
+    },
+
+    async processAgentToolCalls(toolCalls, messageId, agentPrompt) {
+      const promptStore = usePromptStore();
+      const chat = this.agentChats.chats.find(c => c.id === this.agentChats.activeChat);
+      if (!chat) return;
+
+      const toolResults = [];
+
+      for (const toolCall of toolCalls) {
+        const toolCallResult = {
+          toolName: toolCall.function.name,
+          arguments: JSON.parse(toolCall.function.arguments),
+          toolCallId: toolCall.id
+        };
+
+        // Execute the tool - use chat agent tools for AgentChatTab
+        const toolResult = this.executeChatAgentTool(toolCallResult);
+
+        if (toolResult.error) {
+          toolResults.push({
+            role: 'function',
+            name: toolCall.function.name,
+            content: `Error: ${toolResult.error}`,
+            tool_call_id: toolCall.id
+          });
+        } else {
+          let content = '';
+
+          // Handle chat agent tool results
+          if (toolResult.content) {
+            content = toolResult.content;
+          } else if (toolResult.action === 'stop') {
+            content = `Stopped: ${toolResult.reasoning}`;
+          } else if (toolResult.action === 'modify') {
+            // Show the confirmation widget and wait for user response
+            const modificationResult = await this.processChatAgentModification(toolResult, toolCall.id);
+            content = modificationResult.content;
+          }
+
+          toolResults.push({
+            role: 'function',
+            name: toolCall.function.name,
+            content: content,
+            tool_call_id: toolCall.id
+          });
+        }
+      }
+
+      // If we have tool results, make another call to get the AI's response
+      if (toolResults.length > 0) {
+        try {
+          const messages = chat.messages.map(msg => ({
+            type: msg.role === 'user' ? 'user' : msg.role === 'system' ? 'system' : 'assistant',
+            text: msg.content,
+            toolCalls: msg.toolCalls
+          }));
+
+          // Add tool results as function messages
+          for (const toolResult of toolResults) {
+            messages.push({
+              type: 'function',
+              name: toolResult.name,
+              text: toolResult.content,
+              toolCallId: toolResult.tool_call_id
+            });
+          }
+
+          const request = {
+            prompt: agentPrompt,
+            text: '',
+            agentMessages: messages,
+            agentMessagesOnly: true,
+            tools: this.getChatAgentTools(),
+            silent: true,
+            contextTypes: [], // Chat agent will get context through tools
+            abortController: new AbortController()
+          };
+
+          const result = await promptStore.promptInternalSimple(request);
+
+          if (result && result.completionResponse) {
+            const completion = result.completionResponse;
+            const message = completion.choices[0].message;
+
+            // Add the final assistant response
+            const newAssistantMessage = this.addAgentMessage(this.agentChats.activeChat, {
+              role: 'assistant',
+              content: message.content || '',
+              toolCalls: message.tool_calls || []
+            });
+
+            // Process any new tool calls recursively
+            if (message.tool_calls && message.tool_calls.length > 0) {
+              await this.processAgentToolCalls(message.tool_calls, newAssistantMessage.id, agentPrompt);
+            }
+          }
+        } catch (error) {
+          console.error('Error processing tool results:', error);
+        }
+      }
+    },
+
+    getActiveAgentChat() {
+      return this.agentChats.chats.find(c => c.id === this.agentChats.activeChat);
+    },
+
+    stopAgentChatExecution() {
+      this.updateAgentRunningState(false);
+      // Any cleanup needed
+    },
+
+    async processChatAgentModification(toolResult, toolCallId) {
+      const editorStore = useEditorStore();
+
+      this.projectAgentCurrentProcessingParagraphItem = toolResult.targetNode;
+
+      if(!this.projectAgentCurrentProcessingParagraphItem) {
+        return {
+          success: false,
+          content: 'Target paragraph not found'
+        };
+      }
+
+      // Set up confirmation widget for chat agent
+      this.confirmationWidgetData = {
+        agentTitle: 'AI Agent Chat',
+        paragraphRange: {
+          from: this.projectAgentCurrentProcessingParagraphItem.from,
+          to: this.projectAgentCurrentProcessingParagraphItem.to
+        },
+        originalText: this.projectAgentCurrentProcessingParagraphItem.text,
+        nodeId: this.projectAgentCurrentProcessingParagraphItem.nodeId,
+        conversationMessages: [],
+        isStreaming: false,
+        originalAiSuggestion: toolResult.newContent,
+        aiSuggestion: toolResult.newContent,
+        promptResult: null,
+        isAgentChat: true,
+        reasoning: toolResult.reasoning,
+        toolCallResult: toolResult
+      };
+
+      this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'awaiting_confirmation');
+
+      // Wait for user confirmation
+      let promiseResolve;
+      const confirmationPromise = new Promise((resolve) => {
+        promiseResolve = resolve;
+      });
+      this.currentConfirmationPromise = { resolve: promiseResolve };
+
+      const confirmationResult = await confirmationPromise;
+
+      // Clean up
+      editorStore.clearAllAgentDecorations();
+      this.currentConfirmationPromise = null;
+      this.confirmationWidgetData = null;
+
+      // Return appropriate result based on user's decision
+      if(confirmationResult === 'accepted') {
+        return {
+          success: true,
+          content: `Successfully modified paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId}. The change has been applied.`
+        };
+      } else if (confirmationResult === 'skipped' || (confirmationResult && confirmationResult.result === 'skipped')) {
+        debugger;
+        // Handle both simple 'skipped' string and object with feedback
+        if (confirmationResult && confirmationResult.feedback) {
+          return {
+            success: true,
+            content: `User provided feedback on paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId}: "${confirmationResult.feedback}". The change was not applied.`
+          };
+        } else {
+          return {
+            success: true,
+            content: `Modification of paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId} was skipped by user.`
+          };
+        }
+      } else {
+        return {
+          success: false,
+          content: 'Operation was cancelled'
+        };
+      }
     },
   },
 });

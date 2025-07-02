@@ -115,10 +115,10 @@
                 <q-card-section v-if="settingsOpen" class="q-gutter-y-xs left-border">
                   <div class="row">
                     <div class="col q-mr-xs">
-                      <q-select v-model="modelForChatId" filled dense label="Model used for chat" :options="models" />
+                      <q-select v-model="modelForChatId" filled dense options-dense label="Model used for chat" :options="models" />
                     </div>
                     <div class="col q-ml-xs">
-                      <q-select v-model="promptForChatId" filled dense label="Prompt used for chat" :options="prompts" />
+                      <q-select v-model="promptForChatId" filled dense options-dense label="Prompt used for chat" :options="prompts" />
                     </div>
                   </div>
                   <div class="row q-gutter-x-xs">

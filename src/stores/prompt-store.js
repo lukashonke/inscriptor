@@ -42,6 +42,9 @@ export const usePromptStore = defineStore('prompts', {
     currentPromptForChatId: null,
     currentChatInsertUserQueries: true,
 
+    currentModelForAgentChatId: null,
+    currentPromptForAgentChatId: null,
+
     etag: null,
     tabs: [],
 
@@ -1003,7 +1006,11 @@ export const usePromptStore = defineStore('prompts', {
       }
 
       if(request.agentMessages) {
-        textMessages.push(...request.agentMessages);
+        if(request.agentMessagesOnly) {
+          textMessages = [...request.agentMessages];
+        } else {
+          textMessages.push(...request.agentMessages);
+        }
       }
 
       for (const textMessage of textMessages ?? []) {
@@ -2895,6 +2902,8 @@ export const usePromptStore = defineStore('prompts', {
         currentModelForChatId: this.currentModelForChatId,
         currentPromptForChatId: this.currentPromptForChatId,
         currentChatInsertUserQueries: this.currentChatInsertUserQueries,
+        currentModelForAgentChatId: this.currentModelForAgentChatId,
+        currentPromptForAgentChatId: this.currentPromptForAgentChatId,
         currentDataPath: this.currentDataPath,
         currentModelPath: this.currentModelPath,
         defaultFileTemplate: this.defaultFileTemplate,
@@ -2921,6 +2930,9 @@ export const usePromptStore = defineStore('prompts', {
       this.currentModelForChatId = null;
       this.currentPromptForChatId = null;
       this.currentChatInsertUserQueries = true;
+
+      this.currentPromptForAgentChatId = null;
+      this.currentPromptForAgentChatId = null;
 
       this.etag = null;
 
@@ -3042,6 +3054,14 @@ export const usePromptStore = defineStore('prompts', {
 
       if(aiSettings.currentPromptForChatId) {
         this.currentPromptForChatId = aiSettings.currentPromptForChatId;
+      }
+
+      if(aiSettings.currentModelForAgentChatId) {
+        this.currentModelForAgentChatId = aiSettings.currentModelForAgentChatId;
+      }
+
+      if(aiSettings.currentPromptForAgentChatId) {
+        this.currentPromptForAgentChatId = aiSettings.currentPromptForAgentChatId;
       }
 
       if(aiSettings.currentChatInsertUserQueries !== undefined) {

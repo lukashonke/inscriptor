@@ -159,7 +159,7 @@
             <q-btn
               flat
               color="negative"
-              label="Skip paragraph"
+              :label="widgetData.isAgentChat ? 'Reject change' : 'Skip paragraph'"
               @click="onReject"
               class="full-width"
               no-caps
@@ -365,7 +365,18 @@ function onReject() {
 function onChat() {
   if (!chatInput.value.trim()) return
 
-  emits('chat', chatInput.value.trim())
+  if (props.widgetData.isAgentChat) {
+    // For agent chat, emit reject with feedback (feedback will be stored in onWidgetChat before rejection)
+    emits('reject', {
+      paragraphRange: props.widgetData.paragraphRange,
+      originalText: props.widgetData.originalText,
+      nodeId: props.widgetData.nodeId,
+      userFeedback: chatInput.value.trim()
+    })
+  } else {
+    // For other agents, use normal chat
+    emits('chat', chatInput.value.trim())
+  }
 
   // Clear the input after sending
   chatInput.value = ''
