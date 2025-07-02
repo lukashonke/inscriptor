@@ -113,6 +113,17 @@
                 </div>
               </div>
 
+              <!-- Function/Tool result messages -->
+              <div v-else-if="message.role === 'function'" class="row">
+                <div class="chat-message chat-function-message q-mt-md">
+                  <div class="chat-message-header">
+                    <span class="chat-message-role">{{ message.toolName || 'Tool' }}:</span>
+                  </div>
+                  <div class="chat-message-content" :class="writeClasses" v-html="markdownToHtml(message.content)">
+                  </div>
+                </div>
+              </div>
+
             </template>
 
             <!-- Loading indicator when agent is processing -->
@@ -409,6 +420,16 @@ watch(currentChatMessages, () => {
   max-width: 90%;
 }
 
+.chat-function-message {
+  margin-right: auto;
+  background-color: rgba(255, 152, 0, 0.1);
+  color: rgba(0, 0, 0, 0.87);
+  padding: 8px 12px;
+  border-radius: 8px;
+  border-left: 3px solid rgba(255, 152, 0, 0.5);
+  max-width: 85%;
+}
+
 .chat-message-header {
   font-size: 0.85em;
   font-weight: bold;
@@ -482,6 +503,12 @@ body.body--dark .chat-assistant-message {
 body.body--dark .chat-system-message {
   background-color: rgba(244, 67, 54, 0.15);
   color: rgba(255, 255, 255, 0.87);
+}
+
+body.body--dark .chat-function-message {
+  background-color: rgba(255, 152, 0, 0.15);
+  color: rgba(255, 255, 255, 0.87);
+  border-left: 3px solid rgba(255, 152, 0, 0.7);
 }
 
 body.body--dark .chat-message-header {
