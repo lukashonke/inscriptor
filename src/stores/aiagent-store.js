@@ -1551,21 +1551,23 @@ export const useAiAgentStore = defineStore('ai-agent', {
       // If we have tool results, make another call to get the AI's response
       if (toolResults.length > 0) {
         try {
-          const messages = chat.messages.map(msg => ({
-            type: msg.role === 'user' ? 'user' : msg.role === 'system' ? 'system' : 'assistant',
-            text: msg.content,
-            toolCalls: msg.toolCalls
-          }));
-
-          // Add tool results as function messages
+          // First, add tool results to permanent chat history
           for (const toolResult of toolResults) {
-            messages.push({
-              type: 'function',
-              name: toolResult.name,
-              text: toolResult.content,
+            this.addAgentMessage(this.agentChats.activeChat, {
+              role: 'function',
+              content: toolResult.content,
+              toolName: toolResult.name,
               toolCallId: toolResult.tool_call_id
             });
           }
+
+          const messages = chat.messages.map(msg => ({
+            type: msg.role === 'user' ? 'user' : msg.role === 'system' ? 'system' : msg.role === 'function' ? 'function' : 'assistant',
+            text: msg.content,
+            toolCalls: msg.toolCalls,
+            name: msg.toolName,
+            toolCallId: msg.toolCallId
+          }));
 
           const request = {
             prompt: agentPrompt,
@@ -1665,7 +1667,6 @@ export const useAiAgentStore = defineStore('ai-agent', {
           content: `Successfully modified paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId}. The change has been applied.`
         };
       } else if (confirmationResult === 'skipped' || (confirmationResult && confirmationResult.result === 'skipped')) {
-        debugger;
         // Handle both simple 'skipped' string and object with feedback
         if (confirmationResult && confirmationResult.feedback) {
           return {
