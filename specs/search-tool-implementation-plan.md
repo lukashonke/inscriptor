@@ -1,18 +1,17 @@
-# Search Tool Implementation Plan
+# Search Tool Implementation Plan - Remaining Tasks
 
-## Status: In Progress
-- [x] Install Fuse.js dependency (version 7.1.0 added to package.json)
-- [ ] Add search tool definition to getChatAgentTools()
-- [ ] Implement executeSearchTool() method
-- [ ] Add search case to executeChatAgentTool() switch
-- [ ] Update documentation
+## Status
+- ✅ Fuse.js dependency added to package.json
+- ⏳ Tool definition needs to be added to getChatAgentTools()
+- ⏳ executeSearchTool() method needs implementation
+- ⏳ Tool routing needs to be added
+- ⏳ Documentation needs updating
 
-## Remaining Implementation Steps
+## Next Steps
 
-### 2. Add Search Tool Definition to getChatAgentTools()
-**Location:** `src/stores/aiagent-store.js`
+### 1. Add Search Tool Definition to getChatAgentTools()
 
-Add this tool definition to the array in `getChatAgentTools()`:
+Location: `src/stores/aiagent-store.js` - in the `getChatAgentTools()` method, add after setFileSummary tool:
 
 ```javascript
 {
@@ -55,10 +54,16 @@ Add this tool definition to the array in `getChatAgentTools()`:
 }
 ```
 
-### 3. Implement executeSearchTool() Method
-**Location:** `src/stores/aiagent-store.js`
+### 2. Import Fuse.js at the top of aiagent-store.js
 
-Add this method after `executeSetFileSummaryTool()`:
+Add this import:
+```javascript
+import Fuse from 'fuse.js';
+```
+
+### 3. Implement executeSearchTool() Method
+
+Add this method in `src/stores/aiagent-store.js` after `executeSetFileSummaryTool()`:
 
 ```javascript
 executeSearchTool(args) {
@@ -70,69 +75,116 @@ executeSearchTool(args) {
     threshold = 0.3 
   } = args;
   
-  if (!searchQuery || searchQuery.trim() === '') {
+  if (!searchQuery || !searchQuery.trim()) {
     return { error: "searchQuery parameter is required and cannot be empty" };
   }
 
   const fileStore = useFileStore();
-  const { flattenFiles } = require("src/common/utils/fileUtils");
-  
-  // Get all files (flattened to include nested files)
-  const allFiles = flattenFiles(fileStore.files);
-  
+  const allFiles = this.flattenFilesForSearch(fileStore.files);
+
   if (allFiles.length === 0) {
     return {
       success: true,
-      content: "No files found in the project.",
-      totalResults: 0
+      content: "No files found in the project to search."
     };
   }
 
-  let results = [];
+  let results;
   
   if (fuzzySearch) {
-    // Import Fuse.js for fuzzy search
-    const Fuse = require('fuse.js');
-    
-    // Configure search fields based on searchType
-    const searchFields = this.getSearchFields(searchType);
-    
-    const fuseOptions = {
-      keys: searchFields,
-      threshold: threshold,
-      includeScore: true,
-      includeMatches: true,
-      minMatchCharLength: 2
-    };
-    
-    const fuse = new Fuse(allFiles, fuseOptions);
-    const fuseResults = fuse.search(searchQuery);
-    
-    results = fuseResults
-      .slice(0, maxResults)
-      .map(result => this.formatFuzzySearchResult(result, fileStore));
-      
+    results = this.performFuzzySearch(allFiles, searchQuery, searchType, threshold, maxResults);
   } else {
-    // Exact search using queryFiles pattern
-    const searchQueryLower = searchQuery.toLowerCase();
+    results = this.performExactSearch(allFiles, searchQuery, searchType, maxResults);
+  }
+
+  return this.formatSearchResults(results, searchQuery, searchType, fuzzySearch);
+},
+
+flattenFilesForSearch(files, parentPath = '') {
+  const flattened = [];
+  
+  for (const file of files) {
+    const fullPath = parentPath ? `${parentPath} / ${file.title}` : file.title;
     
-    results = allFiles
-      .filter(file => this.matchesExactSearch(file, searchQueryLower, searchType))
-      .slice(0, maxResults)
-      .map(file => this.formatExactSearchResult(file, searchQuery, searchType, fileStore));
+    flattened.push({
+      id: file.id,
+      title: file.title,
+      content: file.content || '',
+      synopsis: file.synopsis || '',
+      fullPath: fullPath,
+      originalFile: file
+    });
+    
+    if (file.children && file.children.length > 0) {
+      flattened.push(...this.flattenFilesForSearch(file.children, fullPath));
+    }
   }
   
-  // Format output
-  const output = this.formatSearchOutput(searchQuery, searchType, fuzzySearch, results);
-  
-  return {
-    success: true,
-    content: output,
-    totalResults: results.length
-  };
-}
+  return flattened;
+},
 
-// Helper methods to add:
+performFuzzySearch(files, query, searchType, threshold, maxResults) {
+  const searchFields = this.getSearchFields(searchType);
+  
+  const fuse = new Fuse(files, {
+    keys: searchFields,
+    threshold: threshold,
+    includeScore: true,
+    includeMatches: true
+  });
+
+  const fuseResults = fuse.search(query);
+  return fuseResults.slice(0, maxResults).map(result => ({
+    file: result.item,
+    score: result.score,
+    matches: result.matches,
+    matchType: this.determineMatchType(result.matches)
+  }));
+},
+
+performExactSearch(files, query, searchType, maxResults) {
+  const queryLower = query.toLowerCase();
+  const results = [];
+  
+  for (const file of files) {
+    const matches = [];
+    let matchType = '';
+    
+    if (searchType === 'all' || searchType === 'title') {
+      if (file.title.toLowerCase().includes(queryLower)) {
+        matches.push({ key: 'title', value: file.title });
+        matchType = 'title';
+      }
+    }
+    
+    if (searchType === 'all' || searchType === 'content') {
+      if (file.content.toLowerCase().includes(queryLower)) {
+        matches.push({ key: 'content', value: file.content });
+        if (!matchType) matchType = 'content';
+      }
+    }
+    
+    if (searchType === 'all' || searchType === 'synopsis') {
+      if (file.synopsis.toLowerCase().includes(queryLower)) {
+        matches.push({ key: 'synopsis', value: file.synopsis });
+        if (!matchType) matchType = 'synopsis';
+      }
+    }
+    
+    if (matches.length > 0) {
+      results.push({
+        file: file,
+        score: 0, // Exact matches have perfect score
+        matches: matches,
+        matchType: matchType
+      });
+    }
+    
+    if (results.length >= maxResults) break;
+  }
+  
+  return results;
+},
 
 getSearchFields(searchType) {
   switch (searchType) {
@@ -140,145 +192,112 @@ getSearchFields(searchType) {
     case 'content': return ['content'];
     case 'synopsis': return ['synopsis'];
     case 'all': 
-    default: 
-      return ['title', 'content', 'synopsis'];
+    default: return ['title', 'content', 'synopsis'];
   }
-}
+},
 
-matchesExactSearch(file, searchQueryLower, searchType) {
-  switch (searchType) {
-    case 'title':
-      return file.title && file.title.toLowerCase().includes(searchQueryLower);
-    case 'content':
-      return file.content && file.content.toLowerCase().includes(searchQueryLower);
-    case 'synopsis':
-      return file.synopsis && file.synopsis.toLowerCase().includes(searchQueryLower);
-    case 'all':
-    default:
-      return (file.title && file.title.toLowerCase().includes(searchQueryLower)) ||
-             (file.content && file.content.toLowerCase().includes(searchQueryLower)) ||
-             (file.synopsis && file.synopsis.toLowerCase().includes(searchQueryLower));
+determineMatchType(matches) {
+  if (!matches || matches.length === 0) return 'unknown';
+  
+  // Priority: title > synopsis > content
+  if (matches.some(m => m.key === 'title')) return 'title';
+  if (matches.some(m => m.key === 'synopsis')) return 'synopsis';
+  if (matches.some(m => m.key === 'content')) return 'content';
+  
+  return matches[0].key;
+},
+
+formatSearchResults(results, query, searchType, fuzzySearch) {
+  if (results.length === 0) {
+    return {
+      success: true,
+      content: `No results found for "${query}" in ${searchType === 'all' ? 'any field' : searchType}.`
+    };
   }
-}
 
-formatFuzzySearchResult(fuseResult, fileStore) {
-  const file = fuseResult.item;
-  const matches = fuseResult.matches || [];
-  const score = fuseResult.score;
-  
-  return {
-    fileId: file.id,
-    title: file.title,
-    path: fileStore.getFileNameWithPath(file),
-    matchType: matches.length > 0 ? matches[0].key : 'unknown',
-    score: Math.round((1 - score) * 100), // Convert to percentage
-    snippet: this.generateSnippet(file, matches, 100)
-  };
-}
+  let output = `SEARCH RESULTS for "${query}":\n`;
+  output += `Search type: ${searchType}, Fuzzy: ${fuzzySearch ? 'enabled' : 'disabled'}\n`;
+  output += `Found ${results.length} result(s)\n\n`;
 
-formatExactSearchResult(file, searchQuery, searchType, fileStore) {
-  const matchType = this.getMatchType(file, searchQuery.toLowerCase(), searchType);
-  
-  return {
-    fileId: file.id,
-    title: file.title,
-    path: fileStore.getFileNameWithPath(file),
-    matchType: matchType,
-    snippet: this.generateExactSnippet(file, searchQuery, matchType, 100)
-  };
-}
-
-getMatchType(file, searchQueryLower, searchType) {
-  if (searchType !== 'all') return searchType;
-  
-  if (file.title && file.title.toLowerCase().includes(searchQueryLower)) return 'title';
-  if (file.content && file.content.toLowerCase().includes(searchQueryLower)) return 'content';
-  if (file.synopsis && file.synopsis.toLowerCase().includes(searchQueryLower)) return 'synopsis';
-  return 'unknown';
-}
-
-generateSnippet(file, matches, maxLength) {
-  if (matches.length > 0) {
-    const match = matches[0];
-    const text = file[match.key] || '';
-    const indices = match.indices[0];
+  for (let i = 0; i < results.length; i++) {
+    const result = results[i];
+    const file = result.file;
     
-    if (indices) {
-      const start = Math.max(0, indices[0] - 30);
-      const end = Math.min(text.length, indices[1] + 30);
+    output += `${i + 1}. ${file.title}\n`;
+    output += `   ID: ${file.id}\n`;
+    output += `   Path: ${file.fullPath}\n`;
+    output += `   Match type: ${result.matchType}\n`;
+    
+    if (fuzzySearch && result.score !== undefined) {
+      output += `   Relevance: ${(1 - result.score).toFixed(2)}\n`;
+    }
+    
+    // Add context snippet
+    const snippet = this.createSearchSnippet(result, query);
+    if (snippet) {
+      output += `   Context: "${snippet}"\n`;
+    }
+    
+    output += '\n';
+  }
+
+  return {
+    success: true,
+    content: output
+  };
+},
+
+createSearchSnippet(result, query, maxLength = 150) {
+  const file = result.file;
+  const queryLower = query.toLowerCase();
+  
+  // Try to find the best snippet from matches
+  if (result.matches && result.matches.length > 0) {
+    for (const match of result.matches) {
+      const text = file[match.key] || '';
+      const index = text.toLowerCase().indexOf(queryLower);
+      
+      if (index !== -1) {
+        const start = Math.max(0, index - 50);
+        const end = Math.min(text.length, index + query.length + 50);
+        let snippet = text.substring(start, end);
+        
+        if (start > 0) snippet = '...' + snippet;
+        if (end < text.length) snippet = snippet + '...';
+        
+        if (snippet.length > maxLength) {
+          snippet = snippet.substring(0, maxLength - 3) + '...';
+        }
+        
+        return snippet;
+      }
+    }
+  }
+  
+  // Fallback: try to find query in any field
+  for (const field of ['title', 'synopsis', 'content']) {
+    const text = file[field] || '';
+    const index = text.toLowerCase().indexOf(queryLower);
+    
+    if (index !== -1) {
+      const start = Math.max(0, index - 30);
+      const end = Math.min(text.length, index + query.length + 30);
       let snippet = text.substring(start, end);
       
       if (start > 0) snippet = '...' + snippet;
       if (end < text.length) snippet = snippet + '...';
       
-      return snippet.length > maxLength ? snippet.substring(0, maxLength) + '...' : snippet;
+      return snippet.length > maxLength ? snippet.substring(0, maxLength - 3) + '...' : snippet;
     }
   }
   
-  // Fallback snippet
-  const content = file.content || file.synopsis || file.title || '';
-  return content.length > maxLength ? content.substring(0, maxLength) + '...' : content;
-}
-
-generateExactSnippet(file, searchQuery, matchType, maxLength) {
-  const text = file[matchType] || '';
-  const queryLower = searchQuery.toLowerCase();
-  const textLower = text.toLowerCase();
-  const index = textLower.indexOf(queryLower);
-  
-  if (index !== -1) {
-    const start = Math.max(0, index - 30);
-    const end = Math.min(text.length, index + searchQuery.length + 30);
-    let snippet = text.substring(start, end);
-    
-    if (start > 0) snippet = '...' + snippet;
-    if (end < text.length) snippet = snippet + '...';
-    
-    return snippet.length > maxLength ? snippet.substring(0, maxLength) + '...' : snippet;
-  }
-  
-  return text.length > maxLength ? text.substring(0, maxLength) + '...' : text;
-}
-
-formatSearchOutput(searchQuery, searchType, fuzzySearch, results) {
-  let output = `SEARCH RESULTS\n`;
-  output += `Query: "${searchQuery}"\n`;
-  output += `Search Type: ${searchType}\n`;
-  output += `Mode: ${fuzzySearch ? 'Fuzzy' : 'Exact'} search\n`;
-  output += `Results: ${results.length}\n\n`;
-  
-  if (results.length === 0) {
-    output += `No files found matching "${searchQuery}".\n\n`;
-    output += `Try:\n`;
-    output += `- Different search terms\n`;
-    output += `- Fuzzy search for typo tolerance\n`;
-    output += `- Broader search type (e.g., "all" instead of "title")\n`;
-    return output;
-  }
-  
-  results.forEach((result, index) => {
-    output += `${index + 1}. ${result.title}\n`;
-    output += `   ID: ${result.fileId}\n`;
-    output += `   Path: ${result.path}\n`;
-    output += `   Match: ${result.matchType}`;
-    if (result.score !== undefined) {
-      output += ` (${result.score}% relevance)`;
-    }
-    output += `\n`;
-    if (result.snippet) {
-      output += `   Preview: ${result.snippet}\n`;
-    }
-    output += `\n`;
-  });
-  
-  return output;
+  return null;
 }
 ```
 
-### 4. Add Search Case to executeChatAgentTool()
-**Location:** `src/stores/aiagent-store.js`
+### 4. Add Tool Routing
 
-Add this case to the switch statement in `executeChatAgentTool()`:
+In the `executeChatAgentTool()` method, add this case before the default case:
 
 ```javascript
 case 'search':
@@ -286,41 +305,38 @@ case 'search':
 ```
 
 ### 5. Update Documentation
-**Location:** `specs/ai-agent-tools-implementation.md`
 
-Add to Project Tools section:
+Update `specs/ai-agent-tools-implementation.md`:
+
+1. Add to Project Tools section:
 ```markdown
 4. **search** - Search through all project files with exact or fuzzy matching
-   - Parameters: `searchQuery`, `searchType` (title/content/synopsis/all), `fuzzySearch` (boolean), `maxResults`, `threshold`
+   - Parameters: `searchQuery` (required), `searchType` (title/content/synopsis/all), `fuzzySearch` (boolean), `maxResults` (number), `threshold` (number)
 ```
 
-Add to Tool Execution section:
+2. Add to Tool Execution section:
 ```markdown
-- `executeSearchTool()` - Implements both exact and fuzzy search using Fuse.js library
+- `executeSearchTool()` - Performs exact or fuzzy search across all project files
 ```
 
-Mark TODO as completed:
+3. Update TODO section:
 ```markdown
 - [x] search tool (be inspired in file-store queryFiles - but feel free to create your own implementation suitable for tool calling)
 ```
 
 ## Implementation Notes
 
-### Key Features
-- **Dual Mode**: Supports both exact and fuzzy search
-- **Flexible Search Types**: Can search in titles, content, synopsis, or all
-- **Configurable**: Adjustable result limits and fuzzy search sensitivity
-- **Rich Results**: Includes file metadata, match context, and relevance scores
-- **Performance**: Uses existing `flattenFiles()` for comprehensive file access
+- The search tool will search across ALL files in the project (flattened hierarchy)
+- Fuzzy search uses Fuse.js for typo tolerance and approximate matching
+- Exact search uses simple string includes() for precise matching
+- Results include context snippets showing where matches were found
+- Search scores are provided for fuzzy search results
+- File paths show the full hierarchy for better identification
 
-### Integration Points
-- Uses `fileStore.getFileNameWithPath()` for full file paths
-- Leverages existing `flattenFiles()` utility for file traversal
-- Follows existing tool patterns for error handling and result formatting
-- Compatible with existing AI agent tool architecture
+## Testing
 
-### Error Handling
-- Validates required searchQuery parameter
-- Handles empty search results gracefully
-- Provides helpful suggestions when no results found
-- Graceful fallbacks for missing file properties
+After implementation, test with:
+1. Simple exact searches: `search({"searchQuery": "chapter"})`
+2. Fuzzy searches: `search({"searchQuery": "chaptr", "fuzzySearch": true})`
+3. Field-specific searches: `search({"searchQuery": "summary", "searchType": "synopsis"})`
+4. Limited results: `search({"searchQuery": "text", "maxResults": 5})`
