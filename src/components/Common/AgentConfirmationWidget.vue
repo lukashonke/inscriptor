@@ -327,7 +327,7 @@ const diffHtml = computed(() => {
   for (const part of diff) {
     let value = part.value;
     if (part.added) {
-      html += '<span class="text-green-7">' + value + '</span>';
+      html += '<span class="diff-added">' + value + '</span>';
     } else if (!part.added && !part.removed) {
       html += value;
     }
@@ -432,10 +432,9 @@ function formatMessage(text) {
 
   // AI Message styling
   .ai-message-container {
-    background-color: rgba(var(--q-primary-rgb), 0.05);
-    border-left: 3px solid var(--q-primary);
     border-radius: 8px;
     padding: 12px;
+    border-left: 3px solid;
 
     .ai-message-header {
       display: flex;
@@ -455,7 +454,6 @@ function formatMessage(text) {
 
   // Reasoning styling
   .reasoning-container {
-    background-color: rgba(255, 193, 7, 0.05); // Amber background
     border-radius: 8px;
 
     .reasoning-header {
@@ -476,24 +474,7 @@ function formatMessage(text) {
     }
   }
 
-  // Dark mode support
-  .body--dark & {
-    .suggested-text > div {
-      background-color: rgba(var(--q-primary-rgb), 0.1);
-    }
-
-    .ai-message-container {
-      background-color: rgba(var(--q-primary-rgb), 0.1);
-    }
-
-    .reasoning-container {
-      background-color: rgba(255, 193, 7, 0.1);
-
-      .reasoning-content p {
-        color: #e0e0e0;
-      }
-    }
-  }
+  // Dark mode support handled by global CSS
 }
 
 .agent-confirmation-widget {

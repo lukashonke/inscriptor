@@ -152,12 +152,10 @@ defineEmits([
 <style scoped>
 .card {
   transition: transform 0.5s ease;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1) !important;
 }
 
 .liked-card {
   transform: scale(1.02);
-  background: linear-gradient(135deg, #ededf8 85%, #d9dcf3 100%);
 }
 
 .disliked-card {
@@ -166,29 +164,23 @@ defineEmits([
 }
 
 .neutral-card {
-  background-color: #f8f8f8;
 }
 
 
 /* Subtle gradient background variations for neutral cards */
 .variation-0 {
-  background: linear-gradient(135deg, #ffffff 80%, #ededf8 100%);
 }
 
 .variation-1 {
-  background: linear-gradient(135deg, #ffffff 80%, #edf6f8 100%);
 }
 
 .variation-2 {
-  background: linear-gradient(135deg, #ffffff 80%, #f3f8ed 100%);
 }
 
 .variation-3 {
-  background: linear-gradient(135deg, #ffffff 80%, #f8f5ed 100%);
 }
 
 .variation-4 {
-  background: linear-gradient(135deg, #ffffff 80%, #f4edf8 100%);
 }
 
 .removing-card {

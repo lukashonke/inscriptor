@@ -75,7 +75,7 @@
 
       <div class="col">
         <div class="full-width" style="position: absolute; bottom: 0; right: 0; z-index: 1000" >
-          <div class="q-mr-lg bg-white">
+          <div class="q-mr-lg bg-theme-primary">
             <div class="" >
 
               <div class="text-caption q-pa-md q-pb-sm q-pt-sm text-grey-7 left-border" v-if="results.length === 0">

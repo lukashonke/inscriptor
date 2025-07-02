@@ -9,7 +9,7 @@
       <div class="q-gutter-y-xs" v-if="aiBubbleMenu">
         <div class="row">
           <div class="q-gutter-x-xs">
-            <q-btn size="11px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white bordered" inscriptor-shadow-1 color="accent" :class="{ 'text-primary': showPrompts }">
+            <q-btn size="11px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-theme-primary bordered" inscriptor-shadow-1 color="accent" :class="{ 'text-primary': showPrompts }">
               <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" >
                 <q-card v-show="showPrompts">
                   <PromptSelector prompt-types="selection" @promptClick="promptClick" />
@@ -20,7 +20,7 @@
               </q-tooltip>
             </q-btn>
 
-            <q-btn v-if="predefinedWordFinderPrompts && predefinedWordFinderPrompts.length > 0" size="11px" dense flat icon="mdi-text-search" padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="accent" @click="runWordFinder()" :loading="wordFinderLoading">
+            <q-btn v-if="predefinedWordFinderPrompts && predefinedWordFinderPrompts.length > 0" size="11px" dense flat icon="mdi-text-search" padding="4px 6px" class="bg-theme-primary bordered inscriptor-shadow-1" color="accent" @click="runWordFinder()" :loading="wordFinderLoading">
               <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="popup-gradient-1">
                 <q-card style="width: 400px; height: 300px;" class="popup-gradient-1 idea-card column ">
                   <div class="col-auto" style="height: 35px;">
@@ -59,7 +59,7 @@
               </q-tooltip>
             </q-btn>
 
-            <q-btn v-if="promptStore.analysisPromptsSettings.prompts && promptStore.analysisPromptsSettings.prompts.length > 0" size="11px" dense flat icon="mdi-chart-timeline-variant-shimmer" padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="accent" @click="runSelectionAnalysis" :loading="promptStore.selectionAnalysisRunning">
+            <q-btn v-if="promptStore.analysisPromptsSettings.prompts && promptStore.analysisPromptsSettings.prompts.length > 0" size="11px" dense flat icon="mdi-chart-timeline-variant-shimmer" padding="4px 6px" class="bg-theme-primary bordered inscriptor-shadow-1" color="accent" @click="runSelectionAnalysis" :loading="promptStore.selectionAnalysisRunning">
               <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" class="gradient-variation-2 no-border" @on-before-show="console.log($event)" @show="console.log($event)">
                 <q-card style="min-width: 400px; max-width: 650px; height: 500px" class="scroll-y" v-if="promptStore.selectionPromptResults && promptStore.selectionPromptResults.length > 0">
                   <div class="q-pa-sm bg-accent text-white">
@@ -85,10 +85,10 @@
               </q-tooltip>
             </q-btn>
 
-            <q-btn size="11px" dense flat label="Quick command..." no-caps padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="primary" :class="{ 'text-primary': showPrompts }" @click="quickSelectionPromptShown = true" v-if="!quickSelectionPromptShown && quickSelectionCommandPrompts && quickSelectionCommandPrompts.length > 0" :loading="quickCommandRunning">
+            <q-btn size="11px" dense flat label="Quick command..." no-caps padding="4px 6px" class="bg-theme-primary bordered inscriptor-shadow-1" color="primary" :class="{ 'text-primary': showPrompts }" @click="quickSelectionPromptShown = true" v-if="!quickSelectionPromptShown && quickSelectionCommandPrompts && quickSelectionCommandPrompts.length > 0" :loading="quickCommandRunning">
             </q-btn>
           </div>
-          <div class="bg-white">
+          <div class="bg-theme-primary">
             <template v-if="quickSelectionPromptShown">
               <q-card class="q-ml-xs hoverable-card idea-card gradient-variation-1 q-pa-xs no-p-margin" style="min-width: 300px; max-width: 500px;">
                 <div class="row">
@@ -154,7 +154,7 @@
       <div class="q-gutter-y-xs" v-if="aiBubbleMenu">
         <div class="row">
           <div class="q-gutter-x-xs">
-            <q-btn size="11px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="accent" :class="{ 'text-primary': showPrompts }">
+            <q-btn size="11px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-theme-primary bordered inscriptor-shadow-1" color="accent" :class="{ 'text-primary': showPrompts }">
               <q-popup-proxy transition-show="jump-down" transition-hide="fade" anchor="top right" self="top left" :offset="[10, 0]"  >
                 <q-card v-show="showPrompts">
                   <PromptSelector prompt-types="insert" @promptClick="promptClick" />
@@ -165,10 +165,10 @@
               </q-tooltip>
             </q-btn>
 
-            <q-btn size="11px" dense flat label="Quick command..." no-caps padding="4px 6px" class="bg-white bordered inscriptor-shadow-1" color="primary" :class="{ 'text-primary': showPrompts }" @click="quickInlinePromptShown = true" v-if="!quickInlinePromptShown && quickInlineCommandPrompts && quickInlineCommandPrompts.length > 0" :loading="quickCommandRunning">
+            <q-btn size="11px" dense flat label="Quick command..." no-caps padding="4px 6px" class="bg-theme-primary bordered inscriptor-shadow-1" color="primary" :class="{ 'text-primary': showPrompts }" @click="quickInlinePromptShown = true" v-if="!quickInlinePromptShown && quickInlineCommandPrompts && quickInlineCommandPrompts.length > 0" :loading="quickCommandRunning">
             </q-btn>
           </div>
-          <div class="bg-white">
+          <div class="bg-theme-primary">
             <template v-if="quickInlinePromptShown">
               <q-card class="q-ml-xs hoverable-card idea-card gradient-variation-1 q-pa-xs no-p-margin" style="min-width: 300px; max-width: 500px;">
                 <div class="row">
@@ -1438,19 +1438,18 @@ function stopAgentProcessing() {
     padding: 8px 0px 0px 0px;
     margin: 0px 0px 8px 0px;
   }
-  background-color: #f0f0f0;
   padding: 0.5rem;
   border-radius: 0.5rem;
-  border-left: 2px solid rgba(#0D0D0D, 0.1);
-
+  border-left: 2px solid;
   margin: 0.5rem 0;
 }
+
 
 .user-message::before {
   content: 'User:';
   font-weight: bold;
-  color: #626F9B;
 }
+
 
 .bubble-menu {
   display: flex;
@@ -1458,8 +1457,8 @@ function stopAgentProcessing() {
 
 .has-focus {
   border-radius: 3px;
-  box-shadow: 0 0 0 3px #68cef8;
 }
+
 
 .floating-menu {
   display: flex;
@@ -1471,7 +1470,6 @@ function stopAgentProcessing() {
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;

@@ -5,27 +5,20 @@
       <q-card-section class="q-pa-xs q-gutter-xs">
         <div class="row q-gutter-x-xs">
           <div class="col-auto">
-            <q-btn @click="promptResultInlinePrompt(promptResult.prompt, 'Expand')" label="Expand" no-caps size="12px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white" color="primary" :loading="replyLoading">
+            <q-btn @click="promptResultInlinePrompt(promptResult.prompt, 'Expand')" label="Expand" no-caps size="12px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-theme-primary" color="primary" :loading="replyLoading">
             </q-btn>
           </div>
           <div class="col-auto">
-            <q-btn @click="promptResultInlinePrompt(promptResult.prompt, 'Explain')" label="Explain" no-caps size="12px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-white" color="primary" :loading="replyLoading">
+            <q-btn @click="promptResultInlinePrompt(promptResult.prompt, 'Explain')" label="Explain" no-caps size="12px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-theme-primary" color="primary" :loading="replyLoading">
             </q-btn>
           </div>
-          <!--<div class="col">
-
-          </div>
-          <div class="col-auto">
-            <q-btn no-caps size="12px" dense flat icon="mdi-close" padding="4px 6px" class="bg-white" color="primary">
-            </q-btn>
-          </div>-->
         </div>
         <div class="row">
           <div class="col">
             <q-input autofocus dense filled v-model="inlineReactText" label="Instruction" />
           </div>
           <div class="col-auto flex items-center">
-            <q-btn @click="promptResultInlinePrompt(promptResult.prompt, inlineReactText)" no-caps size="12px" dense flat icon="mdi-send" padding="4px 6px" class="bg-white" color="primary" :loading="replyLoading">
+            <q-btn @click="promptResultInlinePrompt(promptResult.prompt, inlineReactText)" no-caps size="12px" dense flat icon="mdi-send" padding="4px 6px" class="bg-theme-primary" color="primary" :loading="replyLoading">
             </q-btn>
           </div>
         </div>
@@ -1198,11 +1191,11 @@
   }
   async function copyToClipboard(event) {
     event.stopPropagation();
-    
+
     if(layoutStore.runsInDesktopApp()) {
       await writeText(replaceParameterEditorText(promptResultText.value));
     } else {
-      // copy to clipboard 
+      // copy to clipboard
       navigator.clipboard.writeText(replaceParameterEditorText(promptResultText.value));
     }
 

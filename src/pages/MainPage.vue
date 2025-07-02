@@ -15,7 +15,7 @@
               </div>
               <div class="absolute full-width" style="bottom: 0">
                 <q-separator />
-                <div class="row items-center bg-white justify-center no-wrap" id="variables">
+                <div class="row items-center bg-theme-primary justify-center no-wrap" id="variables">
                   <div class="col-auto">
                     <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="mdi-database-outline" label="Variables" @click="layoutStore.setVariableSettingsOpen(true)" />
                   </div>
@@ -326,8 +326,7 @@ const cssVariables = computed(() => ({
 
 .splitter-left-menu {
   flex-shrink: 0;
-  border-right: 1px solid #e0e0e0;
-  background-color: #fafafa;
+  border-right: 1px solid;
   transition: width 0.3s ease;
   overflow: hidden; /* Hide content when width is 0 */
 }
@@ -342,7 +341,7 @@ const cssVariables = computed(() => ({
 
 .splitter-right {
   flex-shrink: 0;
-  border-left: 1px solid #e0e0e0;
+  border-left: 1px solid;
   transition: width 0.3s ease;
   overflow: hidden; /* Hide content when width is 0 */
   z-index: 1; /* Lower z-index so dialogs can appear above */
@@ -357,11 +356,9 @@ const cssVariables = computed(() => ({
 }
 
 .splitter-handle:hover {
-  background-color: #d0d0d0;
 }
 
 .splitter-handle:active {
-  background-color: #1976d2;
 }
 
 /* Add visual indicator on hover */
@@ -372,7 +369,6 @@ const cssVariables = computed(() => ({
   left: 50%;
   width: var(--splitter-indicator-width, 2px);
   height: var(--splitter-indicator-height, 20px);
-  background-color: #999;
   transform: translate(-50%, -50%);
   border-radius: 1px;
   opacity: 0;
@@ -399,8 +395,6 @@ const cssVariables = computed(() => ({
 
 /* Shadow for Variables/Settings/History area */
 .inscriptor-insert-shadow-top {
-  box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1);
-  background-color: #fff;
 }
 
 /* Handle mobile touch */

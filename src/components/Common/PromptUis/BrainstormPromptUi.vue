@@ -1079,7 +1079,6 @@ defineExpose({
   }
 
   .pinned-ideas-section {
-    background-color: rgba(0, 0, 0, 0.02);
     border-radius: 22px;
     padding: 8px;
     margin-bottom: 16px;
@@ -1109,14 +1108,12 @@ defineExpose({
   }
 
   .disliked-column .column-content {
-    background-color: rgba(0, 0, 0, 0.02);
   }
 
   .neutral-column .column-content {
   }
 
   .liked-column .column-content {
-    background-color: rgba(82, 91, 177, 0.04);
   }
 
   /* Add media queries for responsive column adjustment */
