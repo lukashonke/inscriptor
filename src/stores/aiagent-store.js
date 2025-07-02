@@ -1059,6 +1059,27 @@ export const useAiAgentStore = defineStore('ai-agent', {
               required: ["nodeId", "newContent", "reasoning"]
             }
           }
+        },
+        {
+          type: "function",
+          function: {
+            name: "setFileSummary",
+            description: "Set the synopsis/summary for a specific file in the project",
+            parameters: {
+              type: "object",
+              properties: {
+                fileId: {
+                  type: "string",
+                  description: "The ID of the file to set the summary for"
+                },
+                synopsis: {
+                  type: "string",
+                  description: "The synopsis/summary content to set for the file"
+                }
+              },
+              required: ["fileId", "synopsis"]
+            }
+          }
         }
       ];
     },
@@ -1120,6 +1141,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
           return this.executeReadFileTool(args);
         case 'modifyParagraph':
           return this.executeModifyParagraphTool(args);
+        case 'setFileSummary':
+          return this.executeSetFileSummaryTool(args);
         default:
           return { error: `Unknown tool: ${toolName}` };
       }
@@ -1322,6 +1345,32 @@ export const useAiAgentStore = defineStore('ai-agent', {
       return {
         success: true,
         content: output
+      };
+    },
+    executeSetFileSummaryTool(args) {
+      const { fileId, synopsis } = args;
+      
+      if (!fileId) {
+        return { error: "fileId parameter is required" };
+      }
+
+      if (!synopsis) {
+        return { error: "synopsis parameter is required" };
+      }
+
+      const fileStore = useFileStore();
+      const file = fileStore.getFile(fileId);
+      
+      if (!file) {
+        return { error: `File with ID ${fileId} not found` };
+      }
+
+      // Use the file store method to set the synopsis
+      fileStore.setFileSummary(file, synopsis);
+
+      return {
+        success: true,
+        content: `Successfully set synopsis for file "${file.title}". Synopsis: "${synopsis}"`
       };
     },
     countAllFiles(files) {

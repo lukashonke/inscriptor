@@ -420,6 +420,10 @@ export const useFileStore = defineStore('files', {
       file.state = state;
       this.setDirty(file);
     },
+    setFileSummary(file, synopsis) {
+      file.synopsis = synopsis;
+      this.setDirty(file);
+    },
     addVariable() {
       this.variables.push({
         title: 'new variable',
