@@ -28,7 +28,6 @@ export function useFileSearch() {
     }
 
     const results = performUnifiedSearch(searchQuery, searchType, fuzzySearch, maxResults, threshold);
-
     if (returnRaw) {
       return results;
     }

@@ -437,7 +437,6 @@ watch(currentChatMessages, () => {
 }
 
 .chat-message-content {
-  white-space: pre-wrap;
   word-break: break-word;
 }
 

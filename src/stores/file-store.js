@@ -374,11 +374,11 @@ export const useFileStore = defineStore('files', {
           fuzzyOptions.threshold || 0.3,
           true // Return raw results
         );
-        
+
         // Extract original file objects from search results
-        return results.map(result => result.file.originalFile);
+        return results.map(result => result);
       }
-      
+
       // Original function-based query behavior (backward compatibility)
       const results = [];
       for (const file of files) {
@@ -450,11 +450,6 @@ export const useFileStore = defineStore('files', {
     },
     removeVariable(index) {
       this.variables.splice(index, 1);
-    },
-    pageSuggestions(query) {
-      const queryFn = (file) => file.title.toLowerCase().startsWith(query.toLowerCase());
-
-      return this.queryFiles(queryFn, this.files, true);
     },
     stickyPrompt(prompt, file) {
       if(!file.settings) {
