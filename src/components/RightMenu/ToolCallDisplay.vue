@@ -31,9 +31,24 @@
               <pre class="tool-params-pre">{{ formattedArguments }}</pre>
             </div>
 
-            <div v-if="toolResult" class="tool-result q-mt-sm q-pa-sm bg-blue-1 rounded-borders">
-              <div class="text-caption text-grey-8 q-mb-xs">Result:</div>
-              <div class="tool-result-content">{{ toolResult }}</div>
+            <div v-if="hasToolResult" class="tool-result q-mt-sm q-pa-sm rounded-borders" :class="resultStatusClass">
+              <div class="text-caption text-grey-8 q-mb-xs flex items-center">
+                <q-icon :name="resultStatusIcon" :color="resultStatusColor" size="xs" class="q-mr-xs" />
+                Result:
+              </div>
+              <div class="tool-result-content">
+                <pre class="result-pre">{{ truncatedResult }}</pre>
+                <div v-if="isResultLong" class="q-mt-xs">
+                  <q-btn 
+                    flat 
+                    dense 
+                    size="sm" 
+                    :label="resultExpanded ? 'Show less' : 'Show more'" 
+                    @click="resultExpanded = !resultExpanded"
+                    color="primary"
+                  />
+                </div>
+              </div>
             </div>
           </div>
         </q-slide-transition>
@@ -44,15 +59,22 @@
 
 <script setup>
 import { ref, computed } from 'vue';
+import { truncate } from 'src/common/utils/textUtils';
 
 const props = defineProps({
   toolCall: {
     type: Object,
     required: true
+  },
+  toolResult: {
+    type: String,
+    default: null
   }
 });
 
 const expanded = ref(false);
+const resultExpanded = ref(false);
+const maxResultLength = 500;
 
 const toolFriendlyNames = {
   'modifyParagraph': 'Modify Paragraph',
@@ -107,9 +129,63 @@ const hasParameters = computed(() => {
   }
 });
 
-const toolResult = computed(() => {
-  // This will be populated once we handle tool results properly
-  return null;
+const hasToolResult = computed(() => {
+  return props.toolResult && props.toolResult.length > 0;
+});
+
+const isResultLong = computed(() => {
+  return props.toolResult && props.toolResult.length > maxResultLength;
+});
+
+const truncatedResult = computed(() => {
+  if (!props.toolResult) return '';
+  if (resultExpanded.value || !isResultLong.value) {
+    return props.toolResult;
+  }
+  return truncate(props.toolResult, maxResultLength);
+});
+
+const resultStatus = computed(() => {
+  if (!hasToolResult.value) return 'none';
+  // Simple heuristic to determine if result indicates success or error
+  const result = props.toolResult.toLowerCase();
+  if (result.includes('error') || result.includes('failed') || result.includes('exception')) {
+    return 'error';
+  }
+  return 'success';
+});
+
+const resultStatusClass = computed(() => {
+  switch (resultStatus.value) {
+    case 'error':
+      return 'bg-red-1';
+    case 'success':
+      return 'bg-green-1';
+    default:
+      return 'bg-blue-1';
+  }
+});
+
+const resultStatusIcon = computed(() => {
+  switch (resultStatus.value) {
+    case 'error':
+      return 'mdi-alert-circle';
+    case 'success':
+      return 'mdi-check-circle';
+    default:
+      return 'mdi-information';
+  }
+});
+
+const resultStatusColor = computed(() => {
+  switch (resultStatus.value) {
+    case 'error':
+      return 'red';
+    case 'success':
+      return 'green';
+    default:
+      return 'blue';
+  }
 });
 </script>
 
@@ -133,11 +209,31 @@ const toolResult = computed(() => {
   font-size: 0.9em;
 }
 
+.result-pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: monospace;
+  font-size: 0.85em;
+}
+
 body.body--dark .tool-parameters {
   background-color: #1a1a1a;
 }
 
 body.body--dark .tool-result {
+  background-color: #1a2332;
+}
+
+body.body--dark .bg-red-1 {
+  background-color: #2d1b1b;
+}
+
+body.body--dark .bg-green-1 {
+  background-color: #1b2d1b;
+}
+
+body.body--dark .bg-blue-1 {
   background-color: #1a2332;
 }
 </style>

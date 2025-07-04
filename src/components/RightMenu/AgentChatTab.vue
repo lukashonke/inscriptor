@@ -95,6 +95,7 @@
                         v-for="(toolCall, index) in message.toolCalls"
                         :key="index"
                         :toolCall="toolCall"
+                        :toolResult="getToolResult(toolCall)"
                       />
                     </div>
                   </div>
@@ -113,16 +114,6 @@
                 </div>
               </div>
 
-              <!-- Function/Tool result messages -->
-              <div v-else-if="message.role === 'function'" class="row">
-                <div class="chat-message chat-function-message q-mt-md">
-                  <div class="chat-message-header">
-                    <span class="chat-message-role">{{ message.toolName || 'Tool' }}:</span>
-                  </div>
-                  <div class="chat-message-content" :class="writeClasses" v-html="markdownToHtml(message.content)">
-                  </div>
-                </div>
-              </div>
 
             </template>
 
@@ -242,6 +233,26 @@ const currentChatMessages = computed(() => {
   // Filter out hidden messages (initial system and user prompts)
   return messages.filter(msg => !msg.hidden);
 });
+
+// Create a map of tool call IDs to their results
+const toolCallResults = computed(() => {
+  const messages = currentChat.value?.messages || [];
+  const results = new Map();
+  
+  messages.forEach(msg => {
+    if (msg.role === 'function' && msg.toolCallId) {
+      results.set(msg.toolCallId, msg.content);
+    }
+  });
+  
+  return results;
+});
+
+// Enhanced function to get tool result for a specific tool call
+function getToolResult(toolCall) {
+  if (!toolCall?.id) return null;
+  return toolCallResults.value.get(toolCall.id) || null;
+}
 
 const allChats = computed(() => aiAgentStore.agentChats.chats);
 
