@@ -7,6 +7,7 @@ import {useEditorStore} from 'stores/editor-store';
 import {useFileStore} from 'stores/file-store';
 import { editorTextBetween} from 'src/common/utils/editorUtils';
 import {currentFilePromptContext} from 'src/common/resources/promptContexts';
+import { useFileSearch } from 'src/composables/useFileSearch';
 
 export const useAiAgentStore = defineStore('ai-agent', {
   state: () => ({
@@ -1064,7 +1065,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "setFileSummary",
-            description: "Set the synopsis/summary for a specific file in the project",
+            description: "Set the synopsis/summary for a file. Use the current active file unless the user specifies a different file.",
             parameters: {
               type: "object",
               properties: {
@@ -1078,6 +1079,44 @@ export const useAiAgentStore = defineStore('ai-agent', {
                 }
               },
               required: ["fileId", "synopsis"]
+            }
+          }
+        },
+        {
+          type: "function",
+          function: {
+            name: "search",
+            description: "Search through all project files using exact or fuzzy matching",
+            parameters: {
+              type: "object",
+              properties: {
+                searchQuery: {
+                  type: "string",
+                  description: "The text to search for"
+                },
+                searchType: {
+                  type: "string",
+                  description: "Type of content to search in",
+                  enum: ["title", "content", "synopsis", "all"],
+                  default: "all"
+                },
+                fuzzySearch: {
+                  type: "boolean",
+                  description: "Enable fuzzy search for typo tolerance and approximate matching",
+                  default: false
+                },
+                maxResults: {
+                  type: "number",
+                  description: "Maximum number of results to return",
+                  default: 20
+                },
+                threshold: {
+                  type: "number",
+                  description: "Fuzzy search sensitivity (0.0 = exact match, 1.0 = match anything)",
+                  default: 0.3
+                }
+              },
+              required: ["searchQuery"]
             }
           }
         }
@@ -1143,6 +1182,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
           return this.executeModifyParagraphTool(args);
         case 'setFileSummary':
           return this.executeSetFileSummaryTool(args);
+        case 'search':
+          return this.executeSearchTool(args);
         default:
           return { error: `Unknown tool: ${toolName}` };
       }
@@ -1372,6 +1413,22 @@ export const useAiAgentStore = defineStore('ai-agent', {
         success: true,
         content: `Successfully set synopsis for file "${file.title}". Synopsis: "${synopsis}"`
       };
+    },
+    executeSearchTool(args) {
+      const { 
+        searchQuery, 
+        searchType = 'all', 
+        fuzzySearch = false, 
+        maxResults = 20, 
+        threshold = 0.3 
+      } = args;
+      
+      if (!searchQuery || !searchQuery.trim()) {
+        return { error: "searchQuery parameter is required and cannot be empty" };
+      }
+
+      const { searchFiles } = useFileSearch();
+      return searchFiles(searchQuery, searchType, fuzzySearch, maxResults, threshold);
     },
     countAllFiles(files) {
       let count = 0;

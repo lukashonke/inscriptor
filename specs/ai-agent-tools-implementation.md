@@ -44,6 +44,8 @@ Conversational agents that maintain dialogue context and respond to user message
    - Parameters: `fileId`, `readType` (full/synopsis)
 3. **setFileSummary** - Sets the synopsis/summary for a specific file
    - Parameters: `fileId`, `synopsis`
+4. **search** - Search through all project files with exact or fuzzy matching
+   - Parameters: `searchQuery` (required), `searchType` (title/content/synopsis/all), `fuzzySearch` (boolean), `maxResults` (number), `threshold` (number)
 
 ## Tool Call Processing
 
@@ -102,6 +104,7 @@ agentChats: {
 - `executeListProjectFilesTool()` - Returns formatted project file structure
 - `executeReadFileTool()` - Reads file content or synopsis based on readType
 - `executeSetFileSummaryTool()` - Sets file synopsis using file store method
+- `executeSearchTool()` - Performs exact or fuzzy search across all project files
 
 ## Integration Points
 
@@ -141,5 +144,42 @@ The tool system is designed for easy expansion:
 
 # TODO:
 - [x] add setFileSummary function that sets file.synopsis (using the apropriate file-store method)
-- [ ] search tool (be inspired in file-store queryFiles - but feel free to create your own implementation suitable for tool calling)
-- [ ] fix setFileSummary context awareness - tool should be aware of current active file and not set synopsis for wrong file when user is working on different file
+- [x] search tool (be inspired in file-store queryFiles - but feel free to create your own implementation suitable for tool calling)
+- [x] fix setFileSummary context awareness - tool should be aware of current active file and not set synopsis for wrong file when user is working on different file
+
+## Future Tool Enhancements
+
+### Document Structure Tools
+- [ ] insertParagraph - Insert new paragraphs at specific positions in document
+- [ ] deleteParagraph - Remove paragraphs from document
+- [ ] moveParagraph - Reorder paragraphs within document
+- [ ] mergeParagraphs - Combine multiple paragraphs into one
+- [ ] splitParagraph - Split a paragraph at specific position
+
+### File Management Tools
+- [ ] createFile - Create new files with templates and metadata
+- [ ] deleteFile - Remove files from project
+- [ ] moveFile - Change file hierarchy/parent relationships
+- [ ] duplicateFile - Create copies of existing files
+- [ ] setFileMetadata - Update file properties (title, icon, labels, state)
+
+### Content Analysis Tools
+- [ ] analyzeDocument - Get document statistics, readability metrics
+- [ ] findInconsistencies - Detect plot holes, character inconsistencies
+- [ ] extractEntities - Identify characters, locations, themes
+- [ ] generateOutline - Create structured outlines from content
+
+### Cross-Reference Tools
+- [ ] findReferences - Find mentions of characters/topics across files
+- [ ] createCrossReference - Generate reference maps between files
+- [ ] validateContinuity - Check timeline and story consistency
+
+### Template & Style Tools
+- [ ] applyTemplate - Apply writing templates to files
+- [ ] analyzeWritingStyle - Assess tone, voice, style consistency
+- [ ] suggestImprovements - Provide writing enhancement suggestions
+
+### Project Organization Tools
+- [ ] reorganizeProject - Suggest/implement project structure improvements
+- [ ] createChapterStructure - Generate chapter breakdown from content
+- [ ] exportSelection - Export specific files/sections in various formats
