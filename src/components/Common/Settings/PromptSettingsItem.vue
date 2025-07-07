@@ -446,6 +446,9 @@
                       <q-checkbox v-model="hiddenInPromptSelector" dense label="Hidden in prompt selector" />
                       <HelpIcon :tooltip="$t('tooltips.parameters.hiddenInPromptSelector')"></HelpIcon>
                     </div>
+                    <div class="col-auto">
+                      <q-checkbox v-model="canBeUsedByAgent" dense label="Can be used by AI agent" />
+                    </div>
                   </div>
 
                   <div v-if="overrideTemperature">
@@ -1278,6 +1281,13 @@ const hasResultsSeparator = computed({
     set: (value) => {
       console.log(value);
       promptStore.updatePrompt(props.prompt, {presencePenalty: value});
+    }
+  });
+
+  const canBeUsedByAgent = computed({
+    get: () => props.prompt.canBeUsedByAgent ?? false,
+    set: (value) => {
+      promptStore.updatePrompt(props.prompt, {canBeUsedByAgent: value});
     }
   });
 

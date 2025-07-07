@@ -93,19 +93,20 @@ const toolName = computed(() => {
       
       switch (action) {
         case 'add':
-          return position ? `Add Paragraph (${position})` : 'Add Paragraph';
+          return position ? `Agent wants to: Add Paragraph (${position})` : 'Agent wants to: Add Paragraph';
         case 'remove':
-          return 'Remove Paragraph';
+          return 'Agent wants to: Remove Paragraph';
         case 'modify':
         default:
-          return 'Modify Paragraph';
+          return 'Agent wants to: Modify Paragraph';
       }
     } catch (e) {
-      return 'Modify Paragraph';
+      return 'Agent wants to: Modify Paragraph';
     }
   }
   
-  return toolFriendlyNames[technicalName] || technicalName || 'Unknown Tool';
+  const baseName = toolFriendlyNames[technicalName] || technicalName || 'Unknown Tool';
+  return `Agent wants to: ${baseName}`;
 });
 
 const toolIcon = computed(() => {

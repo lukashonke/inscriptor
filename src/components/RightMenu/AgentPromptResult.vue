@@ -16,7 +16,7 @@
   <div v-else-if="message && message.role === 'assistant'" class="row">
     <div class="chat-message chat-assistant-message q-mt-md full-width">
       <div class="chat-message-header">
-        <span class="chat-message-role">Agent:</span>
+        <span class="chat-message-role">AI:</span>
       </div>
       <div class="chat-message-content">
         <div v-if="message.content" :class="writeClasses" v-html="markdownToHtml(message.content)"></div>
@@ -312,9 +312,10 @@ body.body--dark .chat-message-content :deep(pre) {
 }
 
 body.body--dark .chat-message-content :deep(blockquote) {
-  border-left: 4px solid rgba(107, 126, 214, 0.5);
-  background-color: rgba(107, 126, 214, 0.1);
-  color: rgba(255, 255, 255, 0.8);
+  border-left: 4px solid rgba(107, 126, 214, 0.7);
+  background: linear-gradient(135deg, rgba(107, 126, 214, 0.2) 80%, rgba(107, 126, 214, 0.3) 100%);
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 10px rgba(107, 126, 214, 0.1);
 }
 
 /* Dark mode copy button styles */

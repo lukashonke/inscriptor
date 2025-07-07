@@ -2367,6 +2367,9 @@ export const usePromptStore = defineStore('prompts', {
       if(args.sourceLanguage !== undefined) {
         prompt.sourceLanguage = args.sourceLanguage;
       }
+      if(args.canBeUsedByAgent !== undefined) {
+        prompt.canBeUsedByAgent = args.canBeUsedByAgent;
+      }
 
       this.onUpdatePrompt(prompt);
     },
