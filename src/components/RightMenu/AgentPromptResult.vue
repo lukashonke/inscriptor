@@ -3,7 +3,7 @@
 
   <!-- User messages -->
   <div v-else-if="message && message.role === 'user'" class="row">
-    <div class="chat-message chat-user-message q-mt-md">
+    <div class="chat-message chat-user-message q-mt-md fu">
       <div class="chat-message-header">
         <span class="chat-message-role">You:</span>
       </div>
@@ -14,7 +14,7 @@
 
   <!-- Assistant messages -->
   <div v-else-if="message && message.role === 'assistant'" class="row">
-    <div class="chat-message chat-assistant-message q-mt-md">
+    <div class="chat-message chat-assistant-message q-mt-md full-width">
       <div class="chat-message-header">
         <span class="chat-message-role">Agent:</span>
       </div>
@@ -61,8 +61,11 @@
 </template>
 
 <script setup>
-import { computed } from 'vue';
+import { computed, nextTick, onMounted, onUpdated } from 'vue';
 import { useFileStore } from 'stores/file-store';
+import { useLayoutStore } from 'stores/layout-store';
+import { useQuasar } from 'quasar';
+import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { markdownToHtml } from 'src/common/utils/textUtils';
 import AnimatedDots from 'src/components/Common/AnimatedDots.vue';
 import ToolCallDisplay from './ToolCallDisplay.vue';
@@ -88,12 +91,79 @@ const props = defineProps({
 });
 
 const fileStore = useFileStore();
+const layoutStore = useLayoutStore();
+const $q = useQuasar();
 
 // Function to get tool result for a specific tool call
 function getToolResult(toolCall) {
   if (!toolCall?.id) return null;
   return props.toolCallResults.get(toolCall.id) || null;
 }
+
+// Function to copy blockquote content to clipboard
+async function copyBlockquoteToClipboard(blockquote) {
+  if (!blockquote) return;
+
+  // Extract text content from blockquote
+  const textContent = blockquote.innerText || blockquote.textContent || '';
+
+  try {
+    if (layoutStore.runsInDesktopApp()) {
+      await writeText(textContent);
+    } else {
+      await navigator.clipboard.writeText(textContent);
+    }
+
+    $q.notify({
+      message: 'Copied to clipboard',
+      color: 'positive',
+      position: 'top-right',
+      timeout: 1000,
+    });
+  } catch (error) {
+    console.error('Failed to copy to clipboard:', error);
+    $q.notify({
+      message: 'Failed to copy to clipboard',
+      color: 'negative',
+      position: 'top-right',
+      timeout: 2000,
+    });
+  }
+}
+
+// Function to add copy buttons to blockquotes
+function addCopyButtonsToBlockquotes() {
+  nextTick(() => {
+    const blockquotes = document.querySelectorAll('.chat-message-content blockquote');
+    blockquotes.forEach(blockquote => {
+      // Check if copy button already exists
+      if (blockquote.querySelector('.blockquote-copy-btn')) return;
+
+      // Create copy button element
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'blockquote-copy-btn';
+      copyBtn.innerHTML = `
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="18" height="18">
+          <path d="M19,21H8V7H19M19,5H8A2,2 0 0,0 6,7V21A2,2 0 0,0 8,23H19A2,2 0 0,0 21,21V7A2,2 0 0,0 19,5M16,1H4A2,2 0 0,0 2,3V17H4V3H16V1Z" fill="currentColor"/>
+        </svg>
+      `;
+      copyBtn.title = 'Copy to clipboard';
+
+      // Add click handler
+      copyBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        copyBlockquoteToClipboard(blockquote);
+      });
+
+      // Append to blockquote
+      blockquote.appendChild(copyBtn);
+    });
+  });
+}
+
+// Add copy buttons when component mounts and updates
+onMounted(addCopyButtonsToBlockquotes);
+onUpdated(addCopyButtonsToBlockquotes);
 
 // Computed property for markdown styling classes
 const writeClasses = computed(() => {
@@ -188,11 +258,44 @@ const writeClasses = computed(() => {
 }
 
 .chat-message-content :deep(blockquote) {
-  border-left: 4px solid rgba(79, 94, 214, 0.3);
+  position: relative;
   margin: 0.5em 0;
   padding: 0.5em 1em;
-  background-color: rgb(253, 253, 253);
   color: rgba(0, 0, 0, 0.75);
+  background: linear-gradient(135deg, #ffffff 80%, #ededf8 100%);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+/* Copy button for blockquotes */
+.chat-message-content :deep(blockquote .blockquote-copy-btn) {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7e7e8e;
+  padding: 0;
+}
+
+.chat-message-content :deep(blockquote):hover .blockquote-copy-btn {
+  opacity: 1;
+}
+
+.chat-message-content :deep(blockquote .blockquote-copy-btn):hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 1);
+  color: #7e7e8e;
 }
 
 .chat-message-content :deep(blockquote p) {
@@ -212,6 +315,18 @@ body.body--dark .chat-message-content :deep(blockquote) {
   border-left: 4px solid rgba(107, 126, 214, 0.5);
   background-color: rgba(107, 126, 214, 0.1);
   color: rgba(255, 255, 255, 0.8);
+}
+
+/* Dark mode copy button styles */
+body.body--dark .chat-message-content :deep(blockquote .blockquote-copy-btn) {
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+body.body--dark .chat-message-content :deep(blockquote .blockquote-copy-btn):hover {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: rgba(255, 255, 255, 1);
 }
 
 /* Dark mode overrides */

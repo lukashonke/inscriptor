@@ -77,20 +77,58 @@ const resultExpanded = ref(false);
 const maxResultLength = 500;
 
 const toolFriendlyNames = {
-  'modifyParagraph': 'Modify Paragraph',
   'stop': 'Stop Processing', 
   'getCurrentDocument': 'Get Current Document'
 };
 
 const toolName = computed(() => {
   const technicalName = props.toolCall?.function?.name;
+  
+  // Special handling for modifyParagraph to show specific action type
+  if (technicalName === 'modifyParagraph') {
+    try {
+      const args = JSON.parse(props.toolCall?.function?.arguments || '{}');
+      const action = args.action || 'modify'; // Default to 'modify' if no action specified
+      const position = args.position;
+      
+      switch (action) {
+        case 'add':
+          return position ? `Add Paragraph (${position})` : 'Add Paragraph';
+        case 'remove':
+          return 'Remove Paragraph';
+        case 'modify':
+        default:
+          return 'Modify Paragraph';
+      }
+    } catch (e) {
+      return 'Modify Paragraph';
+    }
+  }
+  
   return toolFriendlyNames[technicalName] || technicalName || 'Unknown Tool';
 });
 
 const toolIcon = computed(() => {
   const technicalName = props.toolCall?.function?.name;
+  
+  // Special handling for modifyParagraph to show specific action icons
   if (technicalName === 'modifyParagraph') {
-    return 'mdi-pencil';
+    try {
+      const args = JSON.parse(props.toolCall?.function?.arguments || '{}');
+      const action = args.action || 'modify'; // Default to 'modify' if no action specified
+      
+      switch (action) {
+        case 'add':
+          return 'mdi-plus';
+        case 'remove':
+          return 'mdi-delete';
+        case 'modify':
+        default:
+          return 'mdi-pencil';
+      }
+    } catch (e) {
+      return 'mdi-pencil';
+    }
   } else if (technicalName === 'stop') {
     return 'mdi-stop';
   } else if (technicalName === 'getCurrentDocument') {
@@ -101,8 +139,25 @@ const toolIcon = computed(() => {
 
 const toolColor = computed(() => {
   const technicalName = props.toolCall?.function?.name;
+  
+  // Special handling for modifyParagraph to show specific action colors
   if (technicalName === 'modifyParagraph') {
-    return 'primary';
+    try {
+      const args = JSON.parse(props.toolCall?.function?.arguments || '{}');
+      const action = args.action || 'modify'; // Default to 'modify' if no action specified
+      
+      switch (action) {
+        case 'add':
+          return 'green';
+        case 'remove':
+          return 'red';
+        case 'modify':
+        default:
+          return 'primary';
+      }
+    } catch (e) {
+      return 'primary';
+    }
   } else if (technicalName === 'stop') {
     return 'red';
   } else if (technicalName === 'getCurrentDocument') {

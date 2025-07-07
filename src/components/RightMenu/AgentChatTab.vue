@@ -67,17 +67,17 @@
       <div class="col">
         <div class="q-gutter-y-sm q-ml-xs chat-history-container" style="margin-bottom: 100px;">
           <div class="chat-messages-container-unhinged">
-            <template v-for="message in currentChatMessages" :key="message.id">
+            <div v-for="message in currentChatMessages" :key="message.id" class="full-width">
               <!-- Complete message display with tool calls -->
-              <AgentPromptResult 
-                :message="message" 
+              <AgentPromptResult
+                :message="message"
                 :tool-call-results="toolCallResults"
               />
-            </template>
+            </div>
 
             <!-- Loading indicator when agent is processing -->
-            <AgentPromptResult 
-              v-if="aiAgentStore.agentChats.isAgentRunning" 
+            <AgentPromptResult
+              v-if="aiAgentStore.agentChats.isAgentRunning"
               :is-loading="true"
               :loading-text="aiAgentStore.agentState === 'waiting_for_user' ? 'Agent is waiting for approval' : 'Agent is thinking'"
               :tool-call-results="toolCallResults"
@@ -191,13 +191,13 @@ const currentChatMessages = computed(() => {
 const toolCallResults = computed(() => {
   const messages = currentChat.value?.messages || [];
   const results = new Map();
-  
+
   messages.forEach(msg => {
     if (msg.role === 'function' && msg.toolCallId) {
       results.set(msg.toolCallId, msg.content);
     }
   });
-  
+
   return results;
 });
 
