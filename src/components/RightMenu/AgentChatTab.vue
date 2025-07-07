@@ -68,67 +68,20 @@
         <div class="q-gutter-y-sm q-ml-xs chat-history-container" style="margin-bottom: 100px;">
           <div class="chat-messages-container-unhinged">
             <template v-for="message in currentChatMessages" :key="message.id">
-
-              <!-- User messages -->
-              <div v-if="message.role === 'user'" class="row">
-                <div class="chat-message chat-user-message q-mt-md">
-                  <div class="chat-message-header">
-                    <span class="chat-message-role">You:</span>
-                  </div>
-                  <div class="chat-message-content" :class="writeClasses" v-html="markdownToHtml(message.content)">
-                  </div>
-                </div>
-              </div>
-
-              <!-- Assistant messages -->
-              <div v-else-if="message.role === 'assistant'" class="row">
-                <div class="chat-message chat-assistant-message q-mt-md">
-                  <div class="chat-message-header">
-                    <span class="chat-message-role">Agent:</span>
-                  </div>
-                  <div class="chat-message-content">
-                    <div v-if="message.content" :class="writeClasses" v-html="markdownToHtml(message.content)"></div>
-
-                    <!-- Tool calls display -->
-                    <div v-if="message.toolCalls && message.toolCalls.length > 0" class="q-mt-md">
-                      <ToolCallDisplay
-                        v-for="(toolCall, index) in message.toolCalls"
-                        :key="index"
-                        :toolCall="toolCall"
-                        :toolResult="getToolResult(toolCall)"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- System messages -->
-              <div v-else-if="message.role === 'system'" class="row">
-                <div class="chat-message chat-system-message q-mt-md">
-                  <div class="chat-message-header">
-                    <span class="chat-message-role">System:</span>
-                  </div>
-                  <div class="chat-message-content text-red">
-                    {{ message.content }}
-                  </div>
-                </div>
-              </div>
-
-
+              <!-- Complete message display with tool calls -->
+              <AgentPromptResult 
+                :message="message" 
+                :tool-call-results="toolCallResults"
+              />
             </template>
 
             <!-- Loading indicator when agent is processing -->
-            <div v-if="aiAgentStore.agentChats.isAgentRunning" class="row">
-              <div class="chat-message chat-assistant-message q-mt-md">
-                <div class="chat-message-header">
-                  <span class="chat-message-role">Agent:</span>
-                </div>
-                <div class="chat-message-content">
-                  <span class="text-grey-7">{{ aiAgentStore.agentState === 'waiting_for_user' ? 'Agent is waiting for approval' : 'Agent is thinking' }}</span>
-                  <AnimatedDots :fixedWidth="'30px'" :speed="500" />
-                </div>
-              </div>
-            </div>
+            <AgentPromptResult 
+              v-if="aiAgentStore.agentChats.isAgentRunning" 
+              :is-loading="true"
+              :loading-text="aiAgentStore.agentState === 'waiting_for_user' ? 'Agent is waiting for approval' : 'Agent is thinking'"
+              :tool-call-results="toolCallResults"
+            />
           </div>
         </div>
       </div>
@@ -214,7 +167,7 @@ import { usePromptStore } from 'stores/prompt-store';
 import { useFileStore } from 'stores/file-store';
 import { Dialog } from 'quasar';
 import ToolCallDisplay from './ToolCallDisplay.vue';
-import { markdownToHtml } from 'src/common/utils/textUtils';
+import AgentPromptResult from './AgentPromptResult.vue';
 import AnimatedDots from 'src/components/Common/AnimatedDots.vue';
 
 const aiAgentStore = useAiAgentStore();
@@ -311,24 +264,6 @@ const promptForAgentChatId = computed({
   }
 });
 
-// Computed property for markdown styling classes
-const writeClasses = computed(() => {
-  return {
-    'write-serif': (fileStore.selectedFile?.settings?.fontType ?? 'serif') === 'serif',
-    'write-sans-serif': fileStore.selectedFile?.settings?.fontType === 'sans-serif',
-    'write-monospace': fileStore.selectedFile?.settings?.fontType === 'monospace',
-    'write-small': fileStore.selectedFile?.settings?.fontSize === 'small',
-    'write-medium': (fileStore.selectedFile?.settings?.fontSize ?? 'medium') === 'medium',
-    'write-large': fileStore.selectedFile?.settings?.fontSize === 'large',
-
-    'text-editor': (fileStore.selectedFile?.settings?.editorType ?? 'regular') === 'regular',
-    'text-editor-condensed': fileStore.selectedFile?.settings?.editorType === 'condensed',
-    'text-editor-non-indented': fileStore.selectedFile?.settings?.editorType === 'non-indented',
-
-    'prompt-text-editor': true,
-    'prompt-results': true,
-  }
-});
 
 // Methods
 async function onInputKey(e) {
@@ -400,96 +335,6 @@ watch(currentChatMessages, () => {
 </script>
 
 <style scoped>
-.chat-message {
-  max-width: 80%;
-  margin-bottom: 8px;
-}
-
-.chat-user-message {
-  margin-left: auto;
-  background-color: rgba(79, 94, 214, 0.1);
-  color: rgba(0, 0, 0, 0.87);
-  padding: 8px 12px;
-  border-radius: 8px;
-}
-
-.chat-assistant-message {
-  margin-right: auto;
-  background-color: rgba(0, 0, 0, 0.05);
-  color: rgba(0, 0, 0, 0.87);
-  padding: 8px 12px;
-  border-radius: 8px;
-}
-
-.chat-system-message {
-  margin: 0 auto;
-  background-color: rgba(244, 67, 54, 0.1);
-  color: rgba(0, 0, 0, 0.87);
-  padding: 8px 12px;
-  border-radius: 8px;
-  text-align: center;
-  max-width: 90%;
-}
-
-.chat-function-message {
-  margin-right: auto;
-  background-color: rgba(255, 152, 0, 0.1);
-  color: rgba(0, 0, 0, 0.87);
-  padding: 8px 12px;
-  border-radius: 8px;
-  border-left: 3px solid rgba(255, 152, 0, 0.5);
-  max-width: 85%;
-}
-
-.chat-message-header {
-  font-size: 0.85em;
-  font-weight: bold;
-  margin-bottom: 4px;
-}
-
-.chat-message-content {
-  word-break: break-word;
-}
-
-/* Markdown content styles */
-.chat-message-content :deep(p) {
-  margin: 0 0 0.5em 0;
-}
-
-.chat-message-content :deep(p:last-child) {
-  margin-bottom: 0;
-}
-
-.chat-message-content :deep(code) {
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 0.2em 0.4em;
-  border-radius: 3px;
-  font-size: 0.9em;
-  font-family: monospace;
-}
-
-.chat-message-content :deep(pre) {
-  background-color: rgba(0, 0, 0, 0.05);
-  padding: 1em;
-  border-radius: 4px;
-  overflow-x: auto;
-  margin: 0.5em 0;
-}
-
-.chat-message-content :deep(pre code) {
-  background-color: transparent;
-  padding: 0;
-}
-
-/* Dark mode markdown styles */
-body.body--dark .chat-message-content :deep(code) {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
-body.body--dark .chat-message-content :deep(pre) {
-  background-color: rgba(255, 255, 255, 0.1);
-}
-
 .chat-history-container {
   overflow-y: auto;
   max-height: calc(100vh - 400px);
@@ -497,36 +342,6 @@ body.body--dark .chat-message-content :deep(pre) {
 
 .left-border {
   border-left: 2px solid var(--q-primary);
-}
-
-/* Dark mode overrides */
-body.body--dark .chat-user-message {
-  background-color: rgba(107, 126, 214, 0.2);
-  color: rgba(255, 255, 255, 0.87);
-}
-
-body.body--dark .chat-assistant-message {
-  background-color: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.87);
-}
-
-body.body--dark .chat-system-message {
-  background-color: rgba(244, 67, 54, 0.15);
-  color: rgba(255, 255, 255, 0.87);
-}
-
-body.body--dark .chat-function-message {
-  background-color: rgba(255, 152, 0, 0.15);
-  color: rgba(255, 255, 255, 0.87);
-  border-left: 3px solid rgba(255, 152, 0, 0.7);
-}
-
-body.body--dark .chat-message-header {
-  color: rgba(255, 255, 255, 0.87);
-}
-
-body.body--dark .text-grey-7 {
-  color: rgba(255, 255, 255, 0.6);
 }
 
 .help-text-area {

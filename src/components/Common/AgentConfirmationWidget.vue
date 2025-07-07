@@ -6,10 +6,10 @@
         <div class="row items-center no-wrap">
           <div class="col">
             <div class="text-body2 text-weight-medium">
-              <q-icon name="mdi-robot-outline" class="q-mr-xs q-ml-xs" />
+              <q-icon :name="getOperationIcon()" class="q-mr-xs q-ml-xs" />
               {{ widgetData.agentTitle }}
               <span v-if="widgetData.isIndependentAgent" class="q-ml-xs text-caption">(Independent)</span>
-              {{ widgetData.isAgentStopped ? 'completed:' : 'suggestions:' }}
+              {{ widgetData.isAgentStopped ? 'completed:' : getOperationLabel() }}
             </div>
           </div>
           <div class="col-auto">
@@ -29,7 +29,53 @@
 
       <q-card-section class="q-pa-sm q-mb-none">
         <div class="comparison-container">
-          <div class="suggested-text q-mb-sm">
+          <!-- Operation type indicator -->
+          <div v-if="getOperationType() !== 'modify'" class="operation-indicator q-mb-sm">
+            <q-chip 
+              :color="getOperationColor()" 
+              text-color="white" 
+              :icon="getOperationIcon()"
+              size="sm"
+            >
+              {{ getOperationDescription() }}
+            </q-chip>
+          </div>
+          
+          <!-- Content display for different operations -->
+          <div v-if="getOperationType() === 'remove'" class="removal-preview q-mb-sm">
+            <div class="text-caption text-grey-6 q-mb-xs">Content to be removed:</div>
+            <div class="q-pa-xs rounded border-negative bg-negative-1 text-grey-8">
+              <del>{{ widgetData.originalText }}</del>
+            </div>
+          </div>
+          
+          <div v-else-if="getOperationType() === 'add'" class="addition-preview q-mb-sm">
+            <div class="text-caption text-grey-6 q-mb-xs">{{ getPositionDescription() }}:</div>
+            <div class="q-pa-xs rounded border-positive bg-positive-1">
+              <div class="text-grey-6 text-caption">{{ widgetData.originalText }}</div>
+            </div>
+            <div class="text-caption text-grey-6 q-mb-xs q-mt-sm">New content to insert:</div>
+            <div
+              v-if="!isEditingNow"
+              class="q-pa-xs rounded border-accent bg-accent-1"
+              :class="writeClasses"
+              contenteditable
+              @focus="startEditing"
+            >
+              {{ widgetData.aiSuggestion }}
+            </div>
+            <div
+              v-else
+              class="q-pa-xs rounded border-accent bg-accent-1"
+              :class="writeClasses"
+              contenteditable
+              ref="editableDiv"
+              @input="handleInput"
+              @blur="finishEditing"
+            ></div>
+          </div>
+          
+          <div v-else class="suggested-text q-mb-sm">
             <div
               v-if="!isEditingNow"
               class="q-pa-xs rounded border-accent"
@@ -415,6 +461,71 @@ function formatMessage(text) {
 
   // Basic formatting: convert line breaks to <br>, preserve whitespace
   return markdownToHtml(text);
+}
+
+// Operation type helpers
+function getOperationType() {
+  return props.widgetData.toolCallResult?.action || 'modify';
+}
+
+function getOperationIcon() {
+  const type = getOperationType();
+  switch (type) {
+    case 'add':
+      return 'mdi-plus-circle-outline';
+    case 'remove':
+      return 'mdi-minus-circle-outline';
+    case 'modify':
+    default:
+      return 'mdi-robot-outline';
+  }
+}
+
+function getOperationColor() {
+  const type = getOperationType();
+  switch (type) {
+    case 'add':
+      return 'positive';
+    case 'remove':
+      return 'negative';
+    case 'modify':
+    default:
+      return 'accent';
+  }
+}
+
+function getOperationLabel() {
+  const type = getOperationType();
+  switch (type) {
+    case 'add':
+      return 'suggests adding:';
+    case 'remove':
+      return 'suggests removing:';
+    case 'modify':
+    default:
+      return 'suggestions:';
+  }
+}
+
+function getOperationDescription() {
+  const type = getOperationType();
+  const position = props.widgetData.toolCallResult?.position;
+  switch (type) {
+    case 'add':
+      return `Add paragraph ${position || 'after'}`;
+    case 'remove':
+      return 'Remove paragraph';
+    case 'modify':
+    default:
+      return 'Modify paragraph';
+  }
+}
+
+function getPositionDescription() {
+  const position = props.widgetData.toolCallResult?.position;
+  return position === 'before' 
+    ? 'Insert new paragraph before this content' 
+    : 'Insert new paragraph after this content';
 }
 </script>
 

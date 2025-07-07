@@ -257,15 +257,43 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
       this.manageParagraphDecoration({from, to}, 'remove');
 
-      editorStore.editor
-        .chain()
-        .focus()
-        .command(({ tr, state }) => {
-          // Replace the content at the specified range
-          tr.replaceWith(from, to, state.schema.text(data.aiSuggestion));
-          return true;
-        })
-        .run();
+      // Get operation type from widget data
+      const operationType = this.confirmationWidgetData?.toolCallResult?.action || 'modify';
+      const position = this.confirmationWidgetData?.toolCallResult?.position;
+
+      // Execute different operations based on type
+      if (operationType === 'remove') {
+        // Remove the paragraph
+        editorStore.editor
+          .chain()
+          .focus()
+          .command(({ tr }) => {
+            tr.delete(from, to);
+            return true;
+          })
+          .run();
+      } else if (operationType === 'add') {
+        // Insert new paragraph at specified position
+        const insertPos = position === 'before' ? from : to;
+        // Create paragraph HTML content - UniqueID extension will auto-generate ID
+        const paragraphContent = `<p>${data.aiSuggestion}</p>`;
+        editorStore.editor
+          .chain()
+          .focus()
+          .insertContentAt(insertPos, paragraphContent)
+          .run();
+      } else {
+        // Default modify operation
+        editorStore.editor
+          .chain()
+          .focus()
+          .command(({ tr, state }) => {
+            // Replace the content at the specified range
+            tr.replaceWith(from, to, state.schema.text(data.aiSuggestion));
+            return true;
+          })
+          .run();
+      }
 
       if(this.projectAgentCurrentProcessingParagraphItem) {
         this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'remove');
@@ -274,7 +302,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
         if (!this.confirmationWidgetData?.isIndependentAgent) {
           this.addActionToHistory('✅ User accepted change', {
             type: 'user_accept',
-            paragraphId: this.projectAgentCurrentProcessingParagraphItem.nodeId
+            paragraphId: this.projectAgentCurrentProcessingParagraphItem.nodeId,
+            operationType
           });
         }
       }
@@ -737,7 +766,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           return;
         }
 
-        if (toolResult.action === 'modify') {
+        if (toolResult.action === 'modify' || toolResult.action === 'add' || toolResult.action === 'remove') {
           this.projectAgentCurrentProcessingParagraphItem = toolResult.targetNode;
 
           if(!this.projectAgentCurrentProcessingParagraphItem) {
@@ -745,12 +774,16 @@ export const useAiAgentStore = defineStore('ai-agent', {
             return;
           }
 
-          // Log modification suggestion
-          this.addActionToHistory('✏️ Suggested modification', {
+          // Log appropriate action suggestion
+          const actionEmoji = toolResult.action === 'add' ? '➕' : toolResult.action === 'remove' ? '🗑️' : '✏️';
+          const actionLabel = toolResult.action === 'add' ? 'addition' : toolResult.action === 'remove' ? 'removal' : 'modification';
+          
+          this.addActionToHistory(`${actionEmoji} Suggested ${actionLabel}`, {
             type: 'suggest',
+            action: toolResult.action,
             paragraphId: this.projectAgentCurrentProcessingParagraphItem.nodeId,
             reasoning: toolResult.reasoning,
-            preview: toolResult.newContent.substring(0, 100) + (toolResult.newContent.length > 100 ? '...' : '')
+            preview: toolResult.newContent ? toolResult.newContent.substring(0, 100) + (toolResult.newContent.length > 100 ? '...' : '') : 'Remove paragraph'
           });
           this.updateAgentStatus('Waiting for user confirmation...');
 
@@ -763,15 +796,15 @@ export const useAiAgentStore = defineStore('ai-agent', {
               nodeId:  this.projectAgentCurrentProcessingParagraphItem.nodeId,
               conversationMessages: [...this.independentAgentChatHistory],
               isStreaming: false,
-              originalAiSuggestion: toolResult.newContent,
-              aiSuggestion: toolResult.newContent,
+              originalAiSuggestion: toolResult.newContent || '',
+              aiSuggestion: toolResult.newContent || '',
               promptResult: result,
               isIndependentAgent: true,
               reasoning: toolResult.reasoning,
               toolCallResult: toolResult
             };
           } else {
-            this.confirmationWidgetData.aiSuggestion = toolResult.newContent;
+            this.confirmationWidgetData.aiSuggestion = toolResult.newContent || '';
             this.confirmationWidgetData.conversationMessages = [...this.independentAgentChatHistory];
             this.confirmationWidgetData.promptResult = result;
             this.confirmationWidgetData.reasoning = toolResult.reasoning;
@@ -1040,24 +1073,34 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "modifyParagraph",
-            description: "Modify the content of a specific paragraph in the document",
+            description: "Modify, add, or remove paragraphs in the document",
             parameters: {
               type: "object",
               properties: {
+                action: {
+                  type: "string",
+                  description: "The type of action to perform",
+                  enum: ["modify", "add", "remove"]
+                },
                 nodeId: {
                   type: "string",
-                  description: "The ID of the paragraph node to modify"
+                  description: "For modify/remove: The ID of the paragraph to modify/remove. For add: The ID of the paragraph to insert relative to"
                 },
                 newContent: {
                   type: "string",
-                  description: "The new content to replace the paragraph with"
+                  description: "For modify/add: The content for the paragraph"
+                },
+                position: {
+                  type: "string",
+                  description: "For add action: Where to insert the new paragraph",
+                  enum: ["before", "after"]
                 },
                 reasoning: {
                   type: "string",
                   description: "Explanation of why this change is being made"
                 }
               },
-              required: ["nodeId", "newContent", "reasoning"]
+              required: ["action", "nodeId", "reasoning"]
             }
           }
         },
@@ -1135,10 +1178,18 @@ export const useAiAgentStore = defineStore('ai-agent', {
       }
     },
     executeModifyParagraphTool(args) {
-      const { nodeId, newContent, reasoning } = args;
+      const { action = 'modify', nodeId, newContent, position, reasoning } = args;
 
-      if (!nodeId || !newContent || !reasoning) {
-        return { error: "Missing required arguments for modifyParagraph" };
+      if (!nodeId || !reasoning) {
+        return { error: "Missing required arguments: nodeId and reasoning" };
+      }
+
+      if ((action === 'modify' || action === 'add') && !newContent) {
+        return { error: `Missing newContent for ${action} action` };
+      }
+
+      if (action === 'add' && !position) {
+        return { error: "Missing position for add action" };
       }
 
       // Find the target paragraph
@@ -1149,9 +1200,10 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
       return {
         success: true,
-        action: 'modify',
+        action,
         targetNode,
         newContent,
+        position,
         reasoning
       };
     },
@@ -1544,8 +1596,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           const userPromptWithMessage = agentPrompt.userPrompt.replace('$chat', userMessage);
           this.addAgentMessage(this.agentChats.activeChat, {
             role: 'user',
-            content: userPromptWithMessage,
-            hidden: true
+            content: userPromptWithMessage
           });
         } else {
           // Add new user message
@@ -1639,7 +1690,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
             content = toolResult.content;
           } else if (toolResult.action === 'stop') {
             content = `Stopped: ${toolResult.reasoning}`;
-          } else if (toolResult.action === 'modify') {
+          } else if (toolResult.action === 'modify' || toolResult.action === 'add' || toolResult.action === 'remove') {
             // Show the confirmation widget and wait for user response
             const modificationResult = await this.processChatAgentModification(toolResult, toolCall.id);
             content = modificationResult.content;
@@ -1742,8 +1793,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
         nodeId: this.projectAgentCurrentProcessingParagraphItem.nodeId,
         conversationMessages: [],
         isStreaming: false,
-        originalAiSuggestion: toolResult.newContent,
-        aiSuggestion: toolResult.newContent,
+        originalAiSuggestion: toolResult.newContent || '',
+        aiSuggestion: toolResult.newContent || '',
         promptResult: null,
         isAgentChat: true,
         reasoning: toolResult.reasoning,
@@ -1767,22 +1818,25 @@ export const useAiAgentStore = defineStore('ai-agent', {
       this.confirmationWidgetData = null;
 
       // Return appropriate result based on user's decision
+      const action = toolResult.action || 'modify';
+      const actionLabel = action === 'add' ? 'addition' : action === 'remove' ? 'removal' : 'modification';
+      
       if(confirmationResult === 'accepted') {
         return {
           success: true,
-          content: `Successfully modified paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId}. The change has been applied.`
+          content: `Successfully applied ${actionLabel} to paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId}. The change has been applied.`
         };
       } else if (confirmationResult === 'skipped' || (confirmationResult && confirmationResult.result === 'skipped')) {
         // Handle both simple 'skipped' string and object with feedback
         if (confirmationResult && confirmationResult.feedback) {
           return {
             success: true,
-            content: `User provided feedback on paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId}: "${confirmationResult.feedback}". The change was not applied.`
+            content: `User provided feedback on paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId}: "${confirmationResult.feedback}". The ${actionLabel} was not applied.`
           };
         } else {
           return {
             success: true,
-            content: `Modification of paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId} was skipped by user.`
+            content: `${actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1)} of paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId} was skipped by user.`
           };
         }
       } else {
