@@ -73,11 +73,21 @@
         <div class="q-gutter-y-sm q-ml-xs chat-history-container" style="margin-bottom: 100px;">
           <div class="chat-messages-container-unhinged">
             <div v-for="message in currentChatMessages" :key="message.id" class="full-width">
-              <!-- Complete message display with tool calls -->
+              <!-- Display message content -->
               <AgentPromptResult
                 :message="message"
                 :tool-call-results="toolCallResults"
               />
+
+              <!-- Display tool calls separately with assistant styling -->
+              <div v-if="message.toolCalls && message.toolCalls.length > 0" class="q-mt-sm">
+                <div v-for="(toolCall, index) in message.toolCalls" :key="index" class="tool-call-container q-mb-sm">
+                  <ToolCallDisplay
+                    :toolCall="toolCall"
+                    :toolResult="getToolResult(toolCall)"
+                  />
+                </div>
+              </div>
             </div>
 
             <!-- Loading indicator when agent is processing -->
@@ -344,7 +354,7 @@ watch(currentChatMessages, () => {
 <style scoped>
 .chat-history-container {
   overflow-y: auto;
-  max-height: calc(100vh - 400px);
+  max-height: calc(100vh - 300px);
 }
 
 .left-border {
@@ -365,5 +375,24 @@ body.body--dark .help-text-area {
 }
 
 body.body--dark .file-indicator {
+}
+
+.tool-call-container {
+  max-width: 80%;
+  margin-right: auto;
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 4px 4px;
+  border-radius: 8px;
+}
+
+.tool-call-container :deep(.q-card) {
+  background-color: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+body.body--dark .tool-call-container {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.87);
 }
 </style>

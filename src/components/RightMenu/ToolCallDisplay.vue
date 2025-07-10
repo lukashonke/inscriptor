@@ -1,6 +1,6 @@
 <template>
   <div class="tool-call-display">
-    <q-card flat bordered class="q-mb-sm">
+    <q-card flat bordered class="">
       <q-card-section class="q-pa-sm">
         <div class="row items-center q-gutter-x-sm">
           <div class="col-auto">
@@ -238,11 +238,20 @@ const truncatedResult = computed(() => {
 
 const resultStatus = computed(() => {
   if (!hasToolResult.value) return 'none';
-  // Simple heuristic to determine if result indicates success or error
-  const result = props.toolResult.toLowerCase();
-  if (result.includes('error') || result.includes('failed') || result.includes('exception')) {
-    return 'error';
+
+  // Try to parse as JSON first
+  try {
+    const parsed = JSON.parse(props.toolResult);
+    if (parsed.success === false || parsed.error) return 'error';
+  } catch (e) {
+    // Check if result starts with error indicators (case insensitive)
+    const result = props.toolResult.trim().toLowerCase();
+    if (result.startsWith('error') || result.startsWith('failed')) {
+      return 'error';
+    }
   }
+
+  // Default to success
   return 'success';
 });
 

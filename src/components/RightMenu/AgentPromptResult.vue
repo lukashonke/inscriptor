@@ -13,23 +13,13 @@
   </div>
 
   <!-- Assistant messages -->
-  <div v-else-if="message && message.role === 'assistant'" class="row">
+  <div v-else-if="message && message.role === 'assistant' && message.content && message.content.trim()" class="row">
     <div class="chat-message chat-assistant-message q-mt-md full-width">
       <div class="chat-message-header">
         <span class="chat-message-role">AI:</span>
       </div>
       <div class="chat-message-content text-editor">
         <div v-if="message.content" :class="writeClasses" v-html="markdownToHtml(message.content)"></div>
-
-        <!-- Tool calls display -->
-        <div v-if="message.toolCalls && message.toolCalls.length > 0" class="q-mt-md">
-          <ToolCallDisplay
-            v-for="(toolCall, index) in message.toolCalls"
-            :key="index"
-            :toolCall="toolCall"
-            :toolResult="getToolResult(toolCall)"
-          />
-        </div>
       </div>
     </div>
   </div>
