@@ -6,7 +6,7 @@ import {usePromptStore} from 'stores/prompt-store';
 import {useEditorStore} from 'stores/editor-store';
 import {useFileStore} from 'stores/file-store';
 import { editorTextBetween} from 'src/common/utils/editorUtils';
-import {currentFilePromptContext} from 'src/common/resources/promptContexts';
+import {currentFilePromptContext, createDynamicContext, allPromptContexts} from 'src/common/resources/promptContexts';
 import { useFileSearch } from 'src/composables/useFileSearch';
 
 export const useAiAgentStore = defineStore('ai-agent', {
@@ -777,7 +777,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           // Log appropriate action suggestion
           const actionEmoji = toolResult.action === 'add' ? '➕' : toolResult.action === 'remove' ? '🗑️' : '✏️';
           const actionLabel = toolResult.action === 'add' ? 'addition' : toolResult.action === 'remove' ? 'removal' : 'modification';
-          
+
           this.addActionToHistory(`${actionEmoji} Suggested ${actionLabel}`, {
             type: 'suggest',
             action: toolResult.action,
@@ -1027,7 +1027,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "getCurrentDocument",
-            description: "Get the current document content with paragraph IDs. Each paragraph is formatted as [nodeId]: content",
+            description: "Get the current document content with paragraph IDs. Each paragraph is formatted as [nodeId]: content. Call this before making changes to the current file to ensure proper position.",
             parameters: {
               type: "object",
               properties: {},
@@ -1039,10 +1039,15 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "listProjectFiles",
-            description: "Get a list of all files in the project with their structure, metadata, and hierarchy",
+            description: "Get a list of all files in the project with their structure, metadata, and hierarchy. Optionally filter by context type to focus on specific content types.",
             parameters: {
               type: "object",
-              properties: {},
+              properties: {
+                contextType: {
+                  type: "string",
+                  description: "Optional filter to only show files of a specific context type (e.g., 'Manuscript', 'Characters', 'Places', 'Notes', 'Research')"
+                }
+              },
               required: []
             }
           }
@@ -1073,7 +1078,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "modifyParagraph",
-            description: "Modify, add, or remove paragraphs in the document",
+            description: "Modify, add, or remove paragraphs in the current document",
             parameters: {
               type: "object",
               properties: {
@@ -1108,20 +1113,20 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "setFileSummary",
-            description: "Set the synopsis/summary for a file. Use the current active file unless the user specifies a different file.",
+            description: "Set the synopsis/summary for a file. If no fileId is provided, sets the summary for the current active file. Prefer this tool to appending summary paragraphs to the documents.",
             parameters: {
               type: "object",
               properties: {
                 fileId: {
                   type: "string",
-                  description: "The ID of the file to set the summary for"
+                  description: "The ID of the file to set the summary for. If not provided, uses the current active file."
                 },
                 synopsis: {
                   type: "string",
                   description: "The synopsis/summary content to set for the file"
                 }
               },
-              required: ["fileId", "synopsis"]
+              required: ["synopsis"]
             }
           }
         },
@@ -1129,7 +1134,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "search",
-            description: "Search through all project files using exact or fuzzy matching",
+            description: "Search through all project files using exact or fuzzy matching. Optionally filter by context type to focus search on specific content types.",
             parameters: {
               type: "object",
               properties: {
@@ -1142,6 +1147,10 @@ export const useAiAgentStore = defineStore('ai-agent', {
                   description: "Type of content to search in",
                   enum: ["title", "content", "synopsis", "all"],
                   default: "all"
+                },
+                contextType: {
+                  type: "string",
+                  description: "Optional filter to only search files of a specific context type (e.g., 'Manuscript', 'Characters', 'Places', 'Notes', 'Research')"
                 },
                 fuzzySearch: {
                   type: "boolean",
@@ -1160,6 +1169,51 @@ export const useAiAgentStore = defineStore('ai-agent', {
                 }
               },
               required: ["searchQuery"]
+            }
+          }
+        },
+        {
+          type: "function",
+          function: {
+            name: "getAvailableAIPrompts",
+            description: "Get a list of available AI prompts that can be executed for text generation and other tasks. Returns prompts with their titles and descriptions so you can choose the most appropriate one.",
+            parameters: {
+              type: "object",
+              properties: {},
+              required: []
+            }
+          }
+        },
+        {
+          type: "function",
+          function: {
+            name: "executeAIPrompt",
+            description: "Execute a specialized AI prompt with input text. Use getAvailableAIPrompts first to find the right prompt ID.",
+            parameters: {
+              type: "object",
+              properties: {
+                promptId: {
+                  type: "string",
+                  description: "ID of the prompt to execute (from getAvailableAIPrompts)"
+                },
+                inputText: {
+                  type: "string",
+                  description: "The text input to provide to the prompt"
+                }
+              },
+              required: ["promptId", "inputText"]
+            }
+          }
+        },
+        {
+          type: "function",
+          function: {
+            name: "getAllContextTypes",
+            description: "Get a list of all available context types in the project. Context types help organize files by purpose (e.g., Manuscript, Characters, Places, Notes, Research).",
+            parameters: {
+              type: "object",
+              properties: {},
+              required: []
             }
           }
         }
@@ -1220,14 +1274,14 @@ export const useAiAgentStore = defineStore('ai-agent', {
         reasoning
       };
     },
-    executeChatAgentTool(toolCall) {
+    async executeChatAgentTool(toolCall) {
       const { toolName, arguments: args } = toolCall;
 
       switch (toolName) {
         case 'getCurrentDocument':
           return this.executeGetCurrentDocumentTool();
         case 'listProjectFiles':
-          return this.executeListProjectFilesTool();
+          return this.executeListProjectFilesTool(args);
         case 'readFile':
           return this.executeReadFileTool(args);
         case 'modifyParagraph':
@@ -1236,6 +1290,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
           return this.executeSetFileSummaryTool(args);
         case 'search':
           return this.executeSearchTool(args);
+        case 'getAvailableAIPrompts':
+          return this.executeGetAvailableAIPromptsTool(args);
+        case 'executeAIPrompt':
+          return await this.executeAIPromptTool(args);
+        case 'getAllContextTypes':
+          return this.executeGetAllContextTypesTool();
         default:
           return { error: `Unknown tool: ${toolName}` };
       }
@@ -1255,7 +1315,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
         content: documentContent
       };
     },
-    executeListProjectFilesTool() {
+    executeListProjectFilesTool(args) {
+      const { contextType } = args || {};
       const fileStore = useFileStore();
 
       if (!fileStore.files || fileStore.files.length === 0) {
@@ -1263,6 +1324,18 @@ export const useAiAgentStore = defineStore('ai-agent', {
           success: true,
           content: "No files found in the project."
         };
+      }
+
+      // Filter files by contextType if specified
+      let filesToProcess = fileStore.files;
+      if (contextType) {
+        filesToProcess = fileStore.getContextFiles(contextType);
+        if (filesToProcess.length === 0) {
+          return {
+            success: true,
+            content: `No files found with context type "${contextType}".`
+          };
+        }
       }
 
       let output = "PROJECT FILES:\n";
@@ -1343,17 +1416,19 @@ export const useAiAgentStore = defineStore('ai-agent', {
         return result;
       };
 
-      output += formatFileTree(fileStore.files);
+      output += formatFileTree(filesToProcess);
 
       // Add project summary
-      const totalFiles = this.countAllFiles(fileStore.files);
-      const totalWords = this.getTotalProjectWordCount(fileStore.files);
+      const totalFiles = this.countAllFiles(filesToProcess);
+      const totalWords = this.getTotalProjectWordCount(filesToProcess);
 
-      output += `\nPROJECT SUMMARY:\n`;
+      output += `\n${contextType ? contextType.toUpperCase() + ' FILES' : 'PROJECT'} SUMMARY:\n`;
       output += `Total files: ${totalFiles}\n`;
       output += `Total words: ${totalWords}\n`;
-      output += `Project name: ${fileStore.projectName || 'Untitled'}\n\n`;
-      output += `USAGE: To read a specific file, use readFile tool with the ID value (e.g., readFile with fileId: "abc123def456")\n`;
+      if (!contextType) {
+        output += `Project name: ${fileStore.projectName || 'Untitled'}\n`;
+      }
+      output += `\nUSAGE: To read a specific file, use readFile tool with the ID value (e.g., readFile with fileId: "abc123def456")\n`;
       output += `Example: readFile({"fileId": "abc123def456", "readType": "full"})`;
 
       return {
@@ -1442,20 +1517,26 @@ export const useAiAgentStore = defineStore('ai-agent', {
     },
     executeSetFileSummaryTool(args) {
       const { fileId, synopsis } = args;
-      
-      if (!fileId) {
-        return { error: "fileId parameter is required" };
-      }
 
       if (!synopsis) {
         return { error: "synopsis parameter is required" };
       }
 
       const fileStore = useFileStore();
-      const file = fileStore.getFile(fileId);
-      
-      if (!file) {
-        return { error: `File with ID ${fileId} not found` };
+      let file;
+
+      if (fileId) {
+        // Use the provided fileId
+        file = fileStore.getFile(fileId);
+        if (!file) {
+          return { error: `File with ID ${fileId} not found` };
+        }
+      } else {
+        // Use the current active file
+        file = fileStore.selectedFile;
+        if (!file) {
+          return { error: "No file specified and no active file available" };
+        }
       }
 
       // Use the file store method to set the synopsis
@@ -1467,20 +1548,57 @@ export const useAiAgentStore = defineStore('ai-agent', {
       };
     },
     executeSearchTool(args) {
-      const { 
-        searchQuery, 
-        searchType = 'all', 
-        fuzzySearch = false, 
-        maxResults = 20, 
-        threshold = 0.3 
+      const {
+        searchQuery,
+        searchType = 'all',
+        contextType,
+        fuzzySearch = false,
+        maxResults = 20,
+        threshold = 0.3
       } = args;
-      
+
       if (!searchQuery || !searchQuery.trim()) {
         return { error: "searchQuery parameter is required and cannot be empty" };
       }
 
       const { searchFiles } = useFileSearch();
-      return searchFiles(searchQuery, searchType, fuzzySearch, maxResults, threshold);
+      return searchFiles(searchQuery, searchType, fuzzySearch, maxResults, threshold, false, contextType);
+    },
+    executeGetAvailableAIPromptsTool(args) {
+      const promptStore = usePromptStore();
+
+      try {
+        // Filter prompts by agent permission, enabled status, and type
+        const availablePrompts = promptStore.prompts.filter(p =>
+          p.enabled &&
+          p.canBeUsedByAgent === true &&
+          ['insert', 'general', 'selection'].includes(p.promptType)
+        );
+
+        return {
+          success: true,
+          content: JSON.stringify({
+            prompts: availablePrompts.map(p => this.formatPromptForAgent(p)),
+            totalCount: availablePrompts.length
+          }, null, 2)
+        };
+      } catch (error) {
+        return {
+          error: `Failed to get available AI prompts: ${error.message}`
+        };
+      }
+    },
+    formatPromptForAgent(prompt) {
+      // Get model name for this prompt
+      const promptStore = usePromptStore();
+      const model = promptStore.models.find(m => m.id === prompt.modelId);
+
+      return {
+        id: prompt.id,
+        title: prompt.title,
+        description: prompt.description || '',
+        modelName: model ? model.name : 'Unknown Model'
+      };
     },
     countAllFiles(files) {
       let count = 0;
@@ -1508,6 +1626,172 @@ export const useAiAgentStore = defineStore('ai-agent', {
         }
       }
       return totalWords;
+    },
+    async executeAIPromptTool(args) {
+      const promptStore = usePromptStore();
+
+      const { promptId, inputText } = args;
+
+      // Find the prompt by ID
+      const prompt = promptStore.prompts.find(p => p.id === promptId);
+      if (!prompt) {
+        return {
+          error: `Prompt with ID '${promptId}' not found`
+        };
+      }
+
+      // Validate prompt can be used by agent
+      if (!this.validatePromptForAgent(prompt)) {
+        return {
+          error: `Prompt '${prompt.title}' cannot be used by AI agents`
+        };
+      }
+
+      try {
+        // Get prompt's pre-configured contexts for AI agents
+        const contextTypes = [];
+        const fileStore = useFileStore();
+        const promptStore = usePromptStore();
+
+        // Add pre-configured contexts if available
+        if (prompt.agentDefaultContextTypes && prompt.agentDefaultContextTypes.length > 0) {
+          for (const contextId of prompt.agentDefaultContextTypes) {
+            debugger;
+            // Handle Variable contexts
+            if (contextId.startsWith('Variable ')) {
+              const variableName = contextId.replace('Variable ', '');
+              const variable = fileStore.variables.find(v => v.title === variableName);
+              if (variable && variable.value) {
+                // Create context with correct contextType for prompt-store recognition
+                contextTypes.push({
+                  id: contextId,
+                  label: `Variable: ${variableName}`,
+                  contextType: 'Variable',
+                  parameters: variableName,
+                  color: 'brown',
+                  description: `Content from variable ${variableName}`
+                });
+              }
+            }
+            // Handle Context Type Summary contexts
+            else if (contextId.startsWith('Context Type Summary ')) {
+              const contextTypeName = contextId.replace('Context Type Summary ', '');
+              const contextType = promptStore.contextTypes.find(ct => ct.label === contextTypeName);
+              if (contextType) {
+                // Create context with correct contextType for prompt-store recognition
+                contextTypes.push({
+                  id: contextId,
+                  label: `${contextType.label} summaries`,
+                  contextType: 'Context Type Summary',
+                  parameters: contextTypeName,
+                  color: contextType.color || 'deep-purple',
+                  description: `Summaries from all pages with context type ${contextTypeName}`
+                });
+              }
+            }
+            // Handle Context Type full content contexts
+            else if (contextId.startsWith('Context Type ')) {
+              const contextTypeName = contextId.replace('Context Type ', '');
+              const contextType = promptStore.contextTypes.find(ct => ct.label === contextTypeName);
+              if (contextType) {
+                // Create context with correct contextType for prompt-store recognition
+                contextTypes.push({
+                  id: contextId,
+                  label: `${contextType.label} (full text)`,
+                  contextType: 'Context Type',
+                  parameters: contextTypeName,
+                  color: contextType.color || 'purple',
+                  description: `Full content from all pages with context type ${contextTypeName}`
+                });
+              }
+            }
+            // Handle Previous Characters contexts with parameters
+            else if (contextId.startsWith('Previous Text ')) {
+              const characterCount = contextId.replace('Previous Text ', '');
+              const previousContext = allPromptContexts.find(c => c.id === 'Previous Text');
+              if (previousContext) {
+                // Create a copy with the parameter information
+                const parameterizedContext = {
+                  ...previousContext,
+                  parameters: parseInt(characterCount),
+                  description: `${characterCount} characters preceding your selected text`,
+                  label: `Previous ${characterCount} characters`
+                };
+                contextTypes.push(parameterizedContext);
+              }
+            }
+            // Handle standard contexts from allPromptContexts
+            else {
+              const contextType = allPromptContexts.find(c => c.id === contextId);
+              if (contextType) {
+                contextTypes.push(contextType);
+              }
+            }
+          }
+        }
+
+        // Always add the input text as dynamic context
+        contextTypes.push(createDynamicContext("Input text", inputText));
+
+        // Create request for prompt execution
+        const request = {
+          prompt: prompt,
+          text: inputText,
+          clear: true,
+          forceBypassMoreParameters: true,
+          contextTypes: contextTypes,
+          silent: true
+        };
+
+        // Execute the prompt using internal streaming
+        const result = await promptStore.promptInternalStreaming(request);
+
+        // Format and return the result
+        return this.formatSimpleResult(result);
+
+      } catch (error) {
+        return {
+          error: `Failed to execute prompt: ${error.message}`
+        };
+      }
+    },
+    validatePromptForAgent(prompt) {
+      return prompt.enabled && prompt.canBeUsedByAgent === true;
+    },
+    formatSimpleResult(result) {
+      const content = result.originalText || result.text || 'No result returned';
+      return {
+        success: true,
+        content: content
+      };
+    },
+    executeGetAllContextTypesTool() {
+      const promptStore = usePromptStore();
+      
+      if (!promptStore.contextTypes || promptStore.contextTypes.length === 0) {
+        return {
+          success: true,
+          content: "No context types defined in this project."
+        };
+      }
+
+      let output = "AVAILABLE CONTEXT TYPES:\n\n";
+      
+      for (let i = 0; i < promptStore.contextTypes.length; i++) {
+        const contextType = promptStore.contextTypes[i];
+        output += `${i + 1}. ${contextType.label}\n`;
+        output += `   Color: ${contextType.color}\n`;
+        output += `   Usage: Use "${contextType.label}" as contextType parameter in listProjectFiles and search tools\n\n`;
+      }
+      
+      output += "EXAMPLES:\n";
+      output += `listProjectFiles({"contextType": "${promptStore.contextTypes[0]?.label || 'Manuscript'}"}) - List only ${promptStore.contextTypes[0]?.label || 'Manuscript'} files\n`;
+      output += `search({"searchQuery": "keyword", "contextType": "${promptStore.contextTypes[1]?.label || 'Characters'}"}) - Search only in ${promptStore.contextTypes[1]?.label || 'Characters'} files`;
+
+      return {
+        success: true,
+        content: output
+      };
     },
 
     // Agent Chat Tab actions
@@ -1673,7 +1957,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
         };
 
         // Execute the tool - use chat agent tools for AgentChatTab
-        const toolResult = this.executeChatAgentTool(toolCallResult);
+        const toolResult = await this.executeChatAgentTool(toolCallResult);
 
         if (toolResult.error) {
           toolResults.push({
@@ -1695,6 +1979,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
             const modificationResult = await this.processChatAgentModification(toolResult, toolCall.id);
             content = modificationResult.content;
           }
+
+          debugger;
 
           toolResults.push({
             role: 'function',
@@ -1820,7 +2106,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
       // Return appropriate result based on user's decision
       const action = toolResult.action || 'modify';
       const actionLabel = action === 'add' ? 'addition' : action === 'remove' ? 'removal' : 'modification';
-      
+
       if(confirmationResult === 'accepted') {
         return {
           success: true,

@@ -621,6 +621,25 @@ export const usePromptStore = defineStore('prompts', {
       replace('$nodeAfter', () => convertHtmlToText(nodeAfter) ?? '');
       replace('$nodeParent', () => convertHtmlToText(nodeParent) ?? '');
 
+      replace('$currentFileMetadata', () => {
+        if (!fileStore.selectedFile) {
+          return 'No file currently selected';
+        }
+        
+        const file = fileStore.selectedFile;
+        const metadata = {
+          title: file.title || 'Untitled',
+          id: file.id,
+          synopsis: file.synopsis || '',
+          state: file.state || '',
+          labels: file.labels || [],
+          contextType: file.settings?.contextType?.label || '',
+          icon: file.icon || 'mdi-file-outline'
+        };
+        
+        return JSON.stringify(metadata, null, 2);
+      });
+
       if(request.prompt.hasParameters && request.parametersValue) {
         for (const parameter of request.prompt.parameters) {
           const parameterValue = request.parametersValue.find(p => p.name === parameter.name);
@@ -2369,6 +2388,9 @@ export const usePromptStore = defineStore('prompts', {
       }
       if(args.canBeUsedByAgent !== undefined) {
         prompt.canBeUsedByAgent = args.canBeUsedByAgent;
+      }
+      if(args.agentDefaultContextTypes !== undefined) {
+        prompt.agentDefaultContextTypes = args.agentDefaultContextTypes;
       }
 
       this.onUpdatePrompt(prompt);

@@ -39,11 +39,11 @@
               <div class="tool-result-content">
                 <pre class="result-pre">{{ truncatedResult }}</pre>
                 <div v-if="isResultLong" class="q-mt-xs">
-                  <q-btn 
-                    flat 
-                    dense 
-                    size="sm" 
-                    :label="resultExpanded ? 'Show less' : 'Show more'" 
+                  <q-btn
+                    flat
+                    dense
+                    size="sm"
+                    :label="resultExpanded ? 'Show less' : 'Show more'"
                     @click="resultExpanded = !resultExpanded"
                     color="primary"
                   />
@@ -77,20 +77,27 @@ const resultExpanded = ref(false);
 const maxResultLength = 500;
 
 const toolFriendlyNames = {
-  'stop': 'Stop Processing', 
-  'getCurrentDocument': 'Get Current Document'
+  'stop': 'Stop Processing',
+  'getCurrentDocument': 'Get Current Document',
+  'getAvailableAIPrompts': 'Get Available AI Prompts',
+  'executeAIPrompt': 'Execute AI Prompt',
+  'listProjectFiles': 'List Project Files',
+  'readFile': 'Read File',
+  'search': 'Search Project Files',
+  'setFileSummary': 'Set File Summary',
+  'getAllContextTypes': 'Get Available Context Types'
 };
 
 const toolName = computed(() => {
   const technicalName = props.toolCall?.function?.name;
-  
+
   // Special handling for modifyParagraph to show specific action type
   if (technicalName === 'modifyParagraph') {
     try {
       const args = JSON.parse(props.toolCall?.function?.arguments || '{}');
       const action = args.action || 'modify'; // Default to 'modify' if no action specified
       const position = args.position;
-      
+
       switch (action) {
         case 'add':
           return position ? `Agent wants to: Add Paragraph (${position})` : 'Agent wants to: Add Paragraph';
@@ -104,20 +111,20 @@ const toolName = computed(() => {
       return 'Agent wants to: Modify Paragraph';
     }
   }
-  
+
   const baseName = toolFriendlyNames[technicalName] || technicalName || 'Unknown Tool';
   return `Agent wants to: ${baseName}`;
 });
 
 const toolIcon = computed(() => {
   const technicalName = props.toolCall?.function?.name;
-  
+
   // Special handling for modifyParagraph to show specific action icons
   if (technicalName === 'modifyParagraph') {
     try {
       const args = JSON.parse(props.toolCall?.function?.arguments || '{}');
       const action = args.action || 'modify'; // Default to 'modify' if no action specified
-      
+
       switch (action) {
         case 'add':
           return 'mdi-plus';
@@ -134,19 +141,33 @@ const toolIcon = computed(() => {
     return 'mdi-stop';
   } else if (technicalName === 'getCurrentDocument') {
     return 'mdi-file-document-outline';
+  } else if (technicalName === 'getAvailableAIPrompts') {
+    return 'mdi-format-list-bulleted';
+  } else if (technicalName === 'executeAIPrompt') {
+    return 'mdi-play-circle-outline';
+  } else if (technicalName === 'listProjectFiles') {
+    return 'mdi-folder-open-outline';
+  } else if (technicalName === 'readFile') {
+    return 'mdi-file-search-outline';
+  } else if (technicalName === 'search') {
+    return 'mdi-magnify';
+  } else if (technicalName === 'setFileSummary') {
+    return 'mdi-file-edit-outline';
+  } else if (technicalName === 'getAllContextTypes') {
+    return 'mdi-tag-multiple-outline';
   }
   return 'mdi-tools';
 });
 
 const toolColor = computed(() => {
   const technicalName = props.toolCall?.function?.name;
-  
+
   // Special handling for modifyParagraph to show specific action colors
   if (technicalName === 'modifyParagraph') {
     try {
       const args = JSON.parse(props.toolCall?.function?.arguments || '{}');
       const action = args.action || 'modify'; // Default to 'modify' if no action specified
-      
+
       switch (action) {
         case 'add':
           return 'green';
@@ -163,6 +184,20 @@ const toolColor = computed(() => {
     return 'red';
   } else if (technicalName === 'getCurrentDocument') {
     return 'blue';
+  } else if (technicalName === 'getAvailableAIPrompts') {
+    return 'purple';
+  } else if (technicalName === 'executeAIPrompt') {
+    return 'green';
+  } else if (technicalName === 'listProjectFiles') {
+    return 'orange';
+  } else if (technicalName === 'readFile') {
+    return 'teal';
+  } else if (technicalName === 'search') {
+    return 'indigo';
+  } else if (technicalName === 'setFileSummary') {
+    return 'amber';
+  } else if (technicalName === 'getAllContextTypes') {
+    return 'pink';
   }
   return 'grey';
 });

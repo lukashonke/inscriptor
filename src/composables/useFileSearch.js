@@ -4,12 +4,18 @@ import { useFileStore } from 'stores/file-store';
 export function useFileSearch() {
   const fileStore = useFileStore();
 
-  function performUnifiedSearch(searchQuery, searchType = 'all', fuzzySearch = false, maxResults = 20, threshold = 0.3) {
+  function performUnifiedSearch(searchQuery, searchType = 'all', fuzzySearch = false, maxResults = 20, threshold = 0.3, contextType = null) {
     if (!searchQuery || !searchQuery.trim()) {
       return [];
     }
 
-    const allFiles = flattenFilesForSearch(fileStore.files);
+    // Filter files by context type if specified
+    let sourceFiles = fileStore.files;
+    if (contextType) {
+      sourceFiles = fileStore.getContextFiles(contextType);
+    }
+
+    const allFiles = flattenFilesForSearch(sourceFiles);
 
     if (allFiles.length === 0) {
       return [];
@@ -21,13 +27,13 @@ export function useFileSearch() {
     return performSearch(allFiles, searchQuery, searchType, searchThreshold, maxResults);
   }
 
-  function searchFiles(searchQuery, searchType = 'all', fuzzySearch = false, maxResults = 20, threshold = 0.3, returnRaw = false) {
-    if (!searchQuery || !searchQuery.trim()) {that
+  function searchFiles(searchQuery, searchType = 'all', fuzzySearch = false, maxResults = 20, threshold = 0.3, returnRaw = false, contextType = null) {
+    if (!searchQuery || !searchQuery.trim()) {
       if (returnRaw) return [];
       return { error: "searchQuery parameter is required and cannot be empty" };
     }
 
-    const results = performUnifiedSearch(searchQuery, searchType, fuzzySearch, maxResults, threshold);
+    const results = performUnifiedSearch(searchQuery, searchType, fuzzySearch, maxResults, threshold, contextType);
     if (returnRaw) {
       return results;
     }

@@ -209,7 +209,6 @@
 
         </q-card>
         <PromptsTab v-if="layoutStore.currentRightMenuView === 'prompts'"/>
-        <ChatTab v-if="layoutStore.currentRightMenuView === 'chat'"/>
         <AgentChatTab v-if="layoutStore.currentRightMenuView === 'agentChat'"/>
       </div>
 
@@ -224,7 +223,6 @@
   import {computed, ref, watch} from "vue";
   import PromptResult from "components/RightMenu/PromptResult.vue";
   import {useFileStore} from "stores/file-store";
-  import ChatTab from "components/RightMenu/ChatTab.vue";
   import PromptsTab from "components/RightMenu/PromptsTab.vue";
   import {useLayoutStore} from "stores/layout-store";
   import InputWithAi from "components/Common/InputWithAi.vue";
@@ -259,8 +257,7 @@
 
   const views = [
     {label: 'Prompts', value: 'prompts', icon: 'mdi-creation-outline'},
-    {label: 'Chat', value: 'chat', icon: 'mdi-chat-outline'},
-    {label: 'Agent', value: 'agentChat', icon: 'mdi-robot'},
+    {label: 'Chat', value: 'agentChat', icon: 'mdi-robot'},
     {label: 'Analysis', value: 'analysis', icon: 'mdi-chart-timeline-variant-shimmer'},
   ];
 

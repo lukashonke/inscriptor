@@ -17,7 +17,12 @@
             <q-pagination :max="maxChatsPage" v-model="page" direction-links :boundary-links="false" />
           </div>
 
-          <div class="col">
+          <!-- Current file indicator -->
+          <div class="col flex items-center justify-center">
+            <div v-if="currentFile" class="file-indicator q-mb-sm">
+              <q-icon :name="currentFile.icon" class="text-primary q-mr-xs" size="xs" />
+              <span class="text-caption text-grey-7">{{ currentFile.title }} chat</span>
+            </div>
           </div>
 
           <div class="col-auto flex items-center q-mr-sm">
@@ -79,7 +84,7 @@
             <AgentPromptResult
               v-if="aiAgentStore.agentChats.isAgentRunning"
               :is-loading="true"
-              :loading-text="aiAgentStore.agentState === 'waiting_for_user' ? 'Agent is waiting for approval' : 'Agent is thinking'"
+              :loading-text="aiAgentStore.agentState === 'waiting_for_user' ? 'Waiting for approval' : 'Thinking'"
               :tool-call-results="toolCallResults"
             />
           </div>
@@ -180,6 +185,8 @@ const settingsOpen = ref(false);
 
 // Computed properties
 const currentChat = computed(() => aiAgentStore.getActiveAgentChat());
+
+const currentFile = computed(() => fileStore.selectedFile);
 
 const currentChatMessages = computed(() => {
   const messages = currentChat.value?.messages || [];
@@ -352,5 +359,11 @@ watch(currentChatMessages, () => {
 body.body--dark .help-text-area {
   background-color: rgba(255, 255, 255, 0.08);
   color: rgba(255, 255, 255, 0.87);
+}
+
+.file-indicator {
+}
+
+body.body--dark .file-indicator {
 }
 </style>

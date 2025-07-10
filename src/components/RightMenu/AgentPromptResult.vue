@@ -7,7 +7,7 @@
       <div class="chat-message-header">
         <span class="chat-message-role">You:</span>
       </div>
-      <div class="chat-message-content" :class="writeClasses" v-html="markdownToHtml(message.content)">
+      <div class="chat-message-content text-editor" :class="writeClasses" v-html="markdownToHtml(message.content)">
       </div>
     </div>
   </div>
@@ -18,7 +18,7 @@
       <div class="chat-message-header">
         <span class="chat-message-role">AI:</span>
       </div>
-      <div class="chat-message-content">
+      <div class="chat-message-content text-editor">
         <div v-if="message.content" :class="writeClasses" v-html="markdownToHtml(message.content)"></div>
 
         <!-- Tool calls display -->
@@ -40,7 +40,7 @@
       <div class="chat-message-header">
         <span class="chat-message-role">System:</span>
       </div>
-      <div class="chat-message-content text-red">
+      <div class="chat-message-content text-editor text-red ">
         {{ message.content }}
       </div>
     </div>
@@ -52,7 +52,7 @@
       <div class="chat-message-header">
         <span class="chat-message-role">Agent:</span>
       </div>
-      <div class="chat-message-content">
+      <div class="chat-message-content text-editor">
         <span class="text-grey-7">{{ loadingText }}</span>
         <AnimatedDots :fixedWidth="'30px'" :speed="500" />
       </div>
@@ -223,15 +223,6 @@ const writeClasses = computed(() => {
   margin-bottom: 4px;
 }
 
-.chat-message-content {
-  word-break: break-word;
-}
-
-/* Markdown content styles */
-.chat-message-content :deep(p) {
-  margin: 0 0 0.5em 0;
-}
-
 .chat-message-content :deep(p:last-child) {
   margin-bottom: 0;
 }
@@ -300,6 +291,14 @@ const writeClasses = computed(() => {
 
 .chat-message-content :deep(blockquote p) {
   margin: 0;
+}
+
+.chat-message-content :deep(blockquote p:not(:last-child)) {
+  margin-bottom: 0.5em;
+}
+
+.chat-message-content :deep(p:not(:last-child)) {
+  margin-bottom: 0.5em;
 }
 
 /* Dark mode markdown styles */

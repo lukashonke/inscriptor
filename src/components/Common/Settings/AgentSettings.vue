@@ -3,6 +3,8 @@
     <q-card-section class="q-gutter-y-sm no-padding">
       <div class="q-gutter-y-sm">
 
+        <div class="text-caption text-amber q-mb-md"><strong>⭐ Note:</strong> AI Agents require Inscriptor AI cloud credits.</div>
+
         <div class="bordered">
 
           <q-expansion-item label="Prompt Agents" caption="Define agents to iteratively improve the output of prompts.">

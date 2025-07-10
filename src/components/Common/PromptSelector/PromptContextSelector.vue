@@ -305,7 +305,6 @@ import {Dialog} from 'quasar';
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
-const layoutStore = useLayoutStore();
 
 const props = defineProps({
   prompt: {
