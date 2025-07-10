@@ -2079,6 +2079,15 @@ export const useAiAgentStore = defineStore('ai-agent', {
       this.agentChatCurrentRequest?.abortController?.abort();
       this.agentChatCurrentRequest = null;
 
+      // Add system message to chat history indicating execution was stopped
+      if (this.agentChats.activeChat) {
+        this.addAgentMessage(this.agentChats.activeChat, {
+          role: 'system',
+          content: 'Agent execution was stopped by user.',
+          hidden: false
+        });
+      }
+
       // Clear any pending confirmation widgets (if agent chat was waiting for user input)
       if (this.currentConfirmationPromise) {
         this.currentConfirmationPromise.resolve('stopped');

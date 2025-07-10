@@ -102,12 +102,12 @@
       </div>
 
       <!-- Input area -->
-      <div class="col">
+      <div class="col-auto"  style="height: 170px">
         <div class="full-width" style="position: absolute; bottom: 0; right: 0; z-index: 1000">
           <div class="q-mr-lg bg-theme-primary">
             <div class="">
 
-              <div class="text-caption q-pa-md q-pb-sm q-pt-sm text-grey-7 left-border" v-if="currentChatMessages.length === 0">
+              <div class="text-caption q-pa-md q-pb-sm q-pt-sm text-grey-7" v-if="currentChatMessages.length === 0">
                 <div class="bordered q-pa-sm help-text-area">
                   <q-icon name="mdi-robot" class="text-accent q-mb-xs" />
                   AI Agent:
@@ -120,7 +120,7 @@
                 </div>
               </div>
 
-              <div class="row left-border">
+              <div class="row">
                 <div class="col q-ml-sm rounded-borders q-px-sm">
                   <q-input
                     v-model="inputText"
@@ -154,7 +154,7 @@
               </div>
 
               <q-slide-transition>
-                <q-card-section v-if="settingsOpen" class="q-gutter-y-xs left-border">
+                <q-card-section v-if="settingsOpen" class="q-gutter-y-xs">
                   <div class="row">
                     <div class="col q-mr-xs">
                       <q-select v-model="modelForAgentChatId" filled dense options-dense label="Model used for agent" :options="models" />
@@ -183,7 +183,6 @@ import { useFileStore } from 'stores/file-store';
 import { Dialog } from 'quasar';
 import ToolCallDisplay from './ToolCallDisplay.vue';
 import AgentPromptResult from './AgentPromptResult.vue';
-import AnimatedDots from 'src/components/Common/AnimatedDots.vue';
 
 const aiAgentStore = useAiAgentStore();
 const promptStore = usePromptStore();
@@ -353,8 +352,8 @@ watch(currentChatMessages, () => {
 
 <style scoped>
 .chat-history-container {
-  overflow-y: auto;
-  max-height: calc(100vh - 300px);
+  overflow-y: scroll;
+  max-height: calc(100vh - 180px);
 }
 
 .left-border {

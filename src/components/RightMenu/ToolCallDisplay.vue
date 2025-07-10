@@ -60,6 +60,8 @@
 <script setup>
 import { ref, computed } from 'vue';
 import { truncate } from 'src/common/utils/textUtils';
+import { useFileStore } from 'src/stores/file-store';
+import { usePromptStore } from 'src/stores/prompt-store';
 
 const props = defineProps({
   toolCall: {
@@ -71,6 +73,9 @@ const props = defineProps({
     default: null
   }
 });
+
+const fileStore = useFileStore();
+const promptStore = usePromptStore();
 
 const expanded = ref(false);
 const resultExpanded = ref(false);
@@ -91,25 +96,80 @@ const toolFriendlyNames = {
 const toolName = computed(() => {
   const technicalName = props.toolCall?.function?.name;
 
-  // Special handling for modifyParagraph to show specific action type
-  if (technicalName === 'modifyParagraph') {
-    try {
-      const args = JSON.parse(props.toolCall?.function?.arguments || '{}');
-      const action = args.action || 'modify'; // Default to 'modify' if no action specified
-      const position = args.position;
+  try {
+    const args = JSON.parse(props.toolCall?.function?.arguments || '{}');
 
-      switch (action) {
-        case 'add':
-          return position ? `Agent wants to: Add Paragraph (${position})` : 'Agent wants to: Add Paragraph';
-        case 'remove':
-          return 'Agent wants to: Remove Paragraph';
-        case 'modify':
-        default:
-          return 'Agent wants to: Modify Paragraph';
-      }
-    } catch (e) {
-      return 'Agent wants to: Modify Paragraph';
+    // Special handling for different tools to show specific details
+    switch (technicalName) {
+      case 'modifyParagraph':
+        const action = args.action || 'modify';
+        const position = args.position;
+        switch (action) {
+          case 'add':
+            return position ? `Agent wants to: Add Paragraph (${position})` : 'Agent wants to: Add Paragraph';
+          case 'remove':
+            return 'Agent wants to: Remove Paragraph';
+          case 'modify':
+          default:
+            return 'Agent wants to: Modify Paragraph';
+        }
+
+      case 'readFile':
+        const readType = args.readType || 'full';
+        const fileId = args.fileId;
+        if (fileId) {
+          const file = fileStore.getFile(fileId);
+          const fileTitle = file?.title || `${fileId.substring(0, 8)}...`;
+          return `Agent wants to: Read File - ${fileTitle} (${readType})`;
+        }
+        return `Agent wants to: Read File (${readType})`;
+
+      case 'search':
+        const searchQuery = args.searchQuery;
+        const contextType = args.contextType;
+        const searchType = args.searchType || 'all';
+        let searchDesc = `Agent wants to: Search`;
+        if (searchQuery) {
+          searchDesc += ` - "${searchQuery}"`;
+        }
+        if (contextType) {
+          searchDesc += ` in ${contextType}`;
+        }
+        if (searchType !== 'all') {
+          searchDesc += ` (${searchType})`;
+        }
+        return searchDesc;
+
+      case 'executeAIPrompt':
+        const promptId = args.promptId;
+        if (promptId) {
+          const prompt = promptStore.prompts.find(p => p.id === promptId);
+          const promptTitle = prompt?.title || promptId;
+          return `Agent wants to: Execute AI Prompt - ${promptTitle}`;
+        }
+        return 'Agent wants to: Execute AI Prompt';
+
+      case 'setFileSummary':
+        const summaryFileId = args.fileId;
+        if (summaryFileId) {
+          const file = fileStore.getFile(summaryFileId);
+          const fileTitle = file?.title || `${summaryFileId.substring(0, 8)}...`;
+          return `Agent wants to: Set File Summary - ${fileTitle}`;
+        }
+        return 'Agent wants to: Set File Summary (current file)';
+
+      case 'listProjectFiles':
+        const listContextType = args.contextType;
+        if (listContextType) {
+          return `Agent wants to: List Project Files - ${listContextType}`;
+        }
+        return 'Agent wants to: List Project Files';
+
+      default:
+        break;
     }
+  } catch (e) {
+    // If parsing fails, fall back to basic name
   }
 
   const baseName = toolFriendlyNames[technicalName] || technicalName || 'Unknown Tool';
