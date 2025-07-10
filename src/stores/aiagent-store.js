@@ -32,6 +32,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
       activeChat: null,    // Current active chat ID
       isAgentRunning: false // Flag to prevent multiple agent runs
     },
+    agentChatCurrentRequest: null, // Current request with abort controller for agent chat
   }),
   getters: {
     agentState: (state) => {
@@ -1648,6 +1649,13 @@ export const useAiAgentStore = defineStore('ai-agent', {
       }
 
       try {
+        // Check if agent execution was stopped
+        if (!this.agentChats.isAgentRunning) {
+          return {
+            error: "Agent execution was stopped"
+          };
+        }
+
         // Get prompt's pre-configured contexts for AI agents
         const contextTypes = [];
         const fileStore = useFileStore();
@@ -1656,15 +1664,17 @@ export const useAiAgentStore = defineStore('ai-agent', {
         // Add pre-configured contexts if available
         if (prompt.agentDefaultContextTypes && prompt.agentDefaultContextTypes.length > 0) {
           for (const contextId of prompt.agentDefaultContextTypes) {
-            debugger;
+            // Extract contextId from object if needed
+            const contextIdValue = typeof contextId === 'object' && contextId.value ? contextId.value : contextId;
+
             // Handle Variable contexts
-            if (contextId.startsWith('Variable ')) {
-              const variableName = contextId.replace('Variable ', '');
+            if (contextIdValue.startsWith('Variable ')) {
+              const variableName = contextIdValue.replace('Variable ', '');
               const variable = fileStore.variables.find(v => v.title === variableName);
               if (variable && variable.value) {
                 // Create context with correct contextType for prompt-store recognition
                 contextTypes.push({
-                  id: contextId,
+                  id: contextIdValue,
                   label: `Variable: ${variableName}`,
                   contextType: 'Variable',
                   parameters: variableName,
@@ -1674,13 +1684,13 @@ export const useAiAgentStore = defineStore('ai-agent', {
               }
             }
             // Handle Context Type Summary contexts
-            else if (contextId.startsWith('Context Type Summary ')) {
-              const contextTypeName = contextId.replace('Context Type Summary ', '');
+            else if (contextIdValue.startsWith('Context Type Summary ')) {
+              const contextTypeName = contextIdValue.replace('Context Type Summary ', '');
               const contextType = promptStore.contextTypes.find(ct => ct.label === contextTypeName);
               if (contextType) {
                 // Create context with correct contextType for prompt-store recognition
                 contextTypes.push({
-                  id: contextId,
+                  id: contextIdValue,
                   label: `${contextType.label} summaries`,
                   contextType: 'Context Type Summary',
                   parameters: contextTypeName,
@@ -1690,13 +1700,13 @@ export const useAiAgentStore = defineStore('ai-agent', {
               }
             }
             // Handle Context Type full content contexts
-            else if (contextId.startsWith('Context Type ')) {
-              const contextTypeName = contextId.replace('Context Type ', '');
+            else if (contextIdValue.startsWith('Context Type ')) {
+              const contextTypeName = contextIdValue.replace('Context Type ', '');
               const contextType = promptStore.contextTypes.find(ct => ct.label === contextTypeName);
               if (contextType) {
                 // Create context with correct contextType for prompt-store recognition
                 contextTypes.push({
-                  id: contextId,
+                  id: contextIdValue,
                   label: `${contextType.label} (full text)`,
                   contextType: 'Context Type',
                   parameters: contextTypeName,
@@ -1706,8 +1716,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
               }
             }
             // Handle Previous Characters contexts with parameters
-            else if (contextId.startsWith('Previous Text ')) {
-              const characterCount = contextId.replace('Previous Text ', '');
+            else if (contextIdValue.startsWith('Previous Text ')) {
+              const characterCount = contextIdValue.replace('Previous Text ', '');
               const previousContext = allPromptContexts.find(c => c.id === 'Previous Text');
               if (previousContext) {
                 // Create a copy with the parameter information
@@ -1722,7 +1732,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
             }
             // Handle standard contexts from allPromptContexts
             else {
-              const contextType = allPromptContexts.find(c => c.id === contextId);
+              const contextType = allPromptContexts.find(c => c.id === contextIdValue);
               if (contextType) {
                 contextTypes.push(contextType);
               }
@@ -1740,7 +1750,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
           clear: true,
           forceBypassMoreParameters: true,
           contextTypes: contextTypes,
-          silent: true
+          silent: true,
+          abortController: this.agentChatCurrentRequest?.abortController || new AbortController()
         };
 
         // Execute the prompt using internal streaming
@@ -1767,7 +1778,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
     },
     executeGetAllContextTypesTool() {
       const promptStore = usePromptStore();
-      
+
       if (!promptStore.contextTypes || promptStore.contextTypes.length === 0) {
         return {
           success: true,
@@ -1776,14 +1787,14 @@ export const useAiAgentStore = defineStore('ai-agent', {
       }
 
       let output = "AVAILABLE CONTEXT TYPES:\n\n";
-      
+
       for (let i = 0; i < promptStore.contextTypes.length; i++) {
         const contextType = promptStore.contextTypes[i];
         output += `${i + 1}. ${contextType.label}\n`;
         output += `   Color: ${contextType.color}\n`;
         output += `   Usage: Use "${contextType.label}" as contextType parameter in listProjectFiles and search tools\n\n`;
       }
-      
+
       output += "EXAMPLES:\n";
       output += `listProjectFiles({"contextType": "${promptStore.contextTypes[0]?.label || 'Manuscript'}"}) - List only ${promptStore.contextTypes[0]?.label || 'Manuscript'} files\n`;
       output += `search({"searchQuery": "keyword", "contextType": "${promptStore.contextTypes[1]?.label || 'Characters'}"}) - Search only in ${promptStore.contextTypes[1]?.label || 'Characters'} files`;
@@ -1909,6 +1920,9 @@ export const useAiAgentStore = defineStore('ai-agent', {
           abortController: new AbortController()
         };
 
+        // Store the request for abort capability
+        this.agentChatCurrentRequest = request;
+
         // Execute prompt
         const result = await promptStore.promptInternalSimple(request);
 
@@ -1939,6 +1953,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
         });
       } finally {
         this.updateAgentRunningState(false);
+        this.agentChatCurrentRequest = null;
       }
     },
 
@@ -1950,6 +1965,11 @@ export const useAiAgentStore = defineStore('ai-agent', {
       const toolResults = [];
 
       for (const toolCall of toolCalls) {
+        // Check if agent execution was stopped
+        if (!this.agentChats.isAgentRunning) {
+          break;
+        }
+
         const toolCallResult = {
           toolName: toolCall.function.name,
           arguments: JSON.parse(toolCall.function.arguments),
@@ -1992,7 +2012,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
       }
 
       // If we have tool results, make another call to get the AI's response
-      if (toolResults.length > 0) {
+      if (toolResults.length > 0 && this.agentChats.isAgentRunning) {
         try {
           // First, add tool results to permanent chat history
           for (const toolResult of toolResults) {
@@ -2022,6 +2042,9 @@ export const useAiAgentStore = defineStore('ai-agent', {
             contextTypes: [], // Chat agent will get context through tools
             abortController: new AbortController()
           };
+
+          // Update the stored request for abort capability
+          this.agentChatCurrentRequest = request;
 
           const result = await promptStore.promptInternalSimple(request);
 
@@ -2053,7 +2076,17 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
     stopAgentChatExecution() {
       this.updateAgentRunningState(false);
-      // Any cleanup needed
+
+      // Abort any ongoing request
+      this.agentChatCurrentRequest?.abortController?.abort();
+      this.agentChatCurrentRequest = null;
+
+      // Clear any pending confirmation widgets (if agent chat was waiting for user input)
+      if (this.currentConfirmationPromise) {
+        this.currentConfirmationPromise.resolve('stopped');
+        this.currentConfirmationPromise = null;
+        this.confirmationWidgetData = null;
+      }
     },
 
     async processChatAgentModification(toolResult, toolCallId) {
@@ -2117,12 +2150,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
         if (confirmationResult && confirmationResult.feedback) {
           return {
             success: true,
-            content: `User provided feedback on paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId}: "${confirmationResult.feedback}". The ${actionLabel} was not applied.`
+            content: `User REJECTED the modification of paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId} and so the ${actionLabel} was not applied. User also provided following feedback: "${confirmationResult.feedback}". RESPECT it. `
           };
         } else {
           return {
             success: true,
-            content: `${actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1)} of paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId} was skipped by user.`
+            content: `${actionLabel.charAt(0).toUpperCase() + actionLabel.slice(1)} of paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId} was REJECTED by user.`
           };
         }
       } else {
