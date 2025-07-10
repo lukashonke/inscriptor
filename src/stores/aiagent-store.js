@@ -2000,8 +2000,6 @@ export const useAiAgentStore = defineStore('ai-agent', {
             content = modificationResult.content;
           }
 
-          debugger;
-
           toolResults.push({
             role: 'function',
             name: toolCall.function.name,
