@@ -103,7 +103,7 @@
               <div class="batch-approval-message chat-assistant-message agent-awaiting-confirmation-simple">
                 <div class="chat-message-header">
                   <span class="chat-message-role">AI:</span>
-                  <span class="text-caption">wants to execute {{ aiAgentStore.pendingToolBatch.length }} tool(s)</span>
+                  <span class="text-caption">wants to use {{ aiAgentStore.pendingToolBatch.length }} tool(s)</span>
                 </div>
                 <div class="chat-message-content">
                   <!-- Tool List with Individual Checkboxes -->
@@ -111,8 +111,7 @@
                     <div
                       v-for="tool in aiAgentStore.pendingToolBatch"
                       :key="tool.id"
-                      class="tool-item q-pa-sm q-mb-xs rounded-borders"
-                    >
+                      class="tool-item q-pa-sm q-mb-xs rounded-borders"                 >
                       <div class="flex items-center">
                         <!-- Individual tool checkbox -->
                         <q-checkbox
@@ -123,8 +122,8 @@
                         >
                           <div class="flex items-center">
                             <q-icon :name="getToolIcon(tool.function.name)" class="q-mr-xs q-ml-sm" size="xs" />
-                            <span class="text-body2">{{ getToolFriendlyName(tool) }}</span>
-                            <span class="text-caption text-grey-7 q-ml-md">
+                            <span class="text-caption">{{ getToolFriendlyName(tool) }}</span>
+                            <span class="text-caption text-grey-7 q-ml-sm">
                               {{ getToolDescription(tool) }}
                             </span>
                           </div>
@@ -176,8 +175,9 @@
                       <div class="col-auto">
                         <q-btn
                           color="accent"
+                          style="width: 130px;"
                           @click="aiAgentStore.executeBatch"
-                          label="Execute Selected"
+                          :label="aiAgentStore.selectedTools.length === aiAgentStore.pendingToolBatch.length ? 'Allow All' : 'Allow Selected'"
                           size="sm"
                           :disable="aiAgentStore.selectedTools.length === 0"
                         />
@@ -266,7 +266,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch, nextTick } from 'vue';
 import { useAiAgentStore } from 'stores/aiagent-store';
 import { usePromptStore } from 'stores/prompt-store';
 import { useFileStore } from 'stores/file-store';
@@ -398,6 +398,14 @@ async function sendMessage() {
   inputText.value = '';
 
   await aiAgentStore.executeAgentPrompt(message, prompt);
+
+  // Scroll to bottom after sending message
+  setTimeout(() => {
+    const container = document.querySelector('.ai-panel.scroll');
+    if (container) {
+      container.scrollTop = container.scrollHeight;
+    }
+  }, 100);
 }
 
 function newChat() {
@@ -432,7 +440,7 @@ onMounted(() => {
 // Auto-scroll to bottom when new messages arrive
 watch(currentChatMessages, () => {
   setTimeout(() => {
-    const container = document.querySelector('.chat-history-container');
+    const container = document.querySelector('.ai-panel.scroll');
     if (container) {
       container.scrollTop = container.scrollHeight;
     }
@@ -443,7 +451,7 @@ watch(currentChatMessages, () => {
 watch(() => aiAgentStore.pendingToolBatch, () => {
   if (aiAgentStore.pendingToolBatch) {
     setTimeout(() => {
-      const container = document.querySelector('.chat-history-container');
+      const container = document.querySelector('.ai-panel.scroll');
       if (container) {
         container.scrollTop = container.scrollHeight;
       }

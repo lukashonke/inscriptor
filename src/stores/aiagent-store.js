@@ -34,19 +34,6 @@ export const useAiAgentStore = defineStore('ai-agent', {
     },
     agentChatCurrentRequest: null, // Current request with abort controller for agent chat
 
-    // Tool approval settings
-    toolApprovalSettings: {
-      readFile: true,           // Most tools auto-approved by default
-      search: true,
-      listProjectFiles: true,
-      getCurrentDocument: false,
-      getAvailableAIPrompts: false,
-      getAllContextTypes: false,
-      executeAIPrompt: true,     // High-impact tools require approval
-      modifyParagraph: false,     // Keep current behavior
-      setFileSummary: true
-    },
-
     // Batch approval state
     pendingToolBatch: null,      // Current tools awaiting approval
     selectedTools: [],           // Array of selected tool IDs for execution
@@ -1064,7 +1051,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
               properties: {
                 contextType: {
                   type: "string",
-                  description: "Optional filter to only show files of a specific context type (e.g., 'Manuscript', 'Characters', 'Places', 'Notes', 'Research')"
+                  description: "Optional filter to only show files of a specific context type (e.g., 'Manuscript', 'Characters', 'Places', 'Notes', 'Research') or use 'all' to show all files"
                 }
               },
               required: []
@@ -1153,7 +1140,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "search",
-            description: "Search through all project files using exact or fuzzy matching. Optionally filter by context type to focus search on specific content types.",
+            description: "Search through all project files using exact or fuzzy matching. Searches in all fields (title, content, and synopsis) by default for comprehensive results. Optionally filter by context type to focus search on specific content types.",
             parameters: {
               type: "object",
               properties: {
@@ -1347,7 +1334,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
       // Filter files by contextType if specified
       let filesToProcess = fileStore.files;
-      if (contextType) {
+      if (contextType && contextType !== 'all') {
         filesToProcess = fileStore.getContextFiles(contextType);
         if (filesToProcess.length === 0) {
           return {
@@ -1987,10 +1974,10 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
       // 1. Separate tools by approval requirement
       const needApproval = toolCalls.filter(tool =>
-        this.toolApprovalSettings[tool.function.name]
+        promptStore.toolApprovalSettings[tool.function.name]
       );
       const autoApprove = toolCalls.filter(tool =>
-        !this.toolApprovalSettings[tool.function.name]
+        !promptStore.toolApprovalSettings[tool.function.name]
       );
 
       const toolResults = [];
@@ -2181,13 +2168,6 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
     selectNone() {
       this.selectedTools = [];
-    },
-
-    // Update tool approval settings
-    updateToolApprovalSetting(toolName, requiresApproval) {
-      if (this.toolApprovalSettings.hasOwnProperty(toolName)) {
-        this.toolApprovalSettings[toolName] = requiresApproval;
-      }
     },
 
     stopAgentChatExecution() {

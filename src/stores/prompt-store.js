@@ -31,7 +31,6 @@ import {getCloudModelApiKey} from "src/common/utils/modelUtils";
 import Anthropic from "@anthropic-ai/sdk";
 import {chatTabId, getPromptTabId, promptTabId} from 'src/common/resources/tabs';
 import {usePromptAgentStore} from 'stores/promptagent-store';
-import {useLocalDataStore} from 'stores/localdata-store';
 import {url} from 'boot/axios';
 
 export const usePromptStore = defineStore('prompts', {
@@ -114,6 +113,8 @@ export const usePromptStore = defineStore('prompts', {
     modelPromptPacks: [],
 
     defaultCustomPromptInstructions: '',
+
+    toolApprovalSettings: {},
   }),
   getters: {
     selectionPrompts: (state) => state.prompts.filter(p => (p.promptType === "selection" || p.promptType === "general") && p.enabled),
@@ -625,7 +626,7 @@ export const usePromptStore = defineStore('prompts', {
         if (!fileStore.selectedFile) {
           return 'No file currently selected';
         }
-        
+
         const file = fileStore.selectedFile;
         const metadata = {
           title: file.title || 'Untitled',
@@ -636,7 +637,7 @@ export const usePromptStore = defineStore('prompts', {
           contextType: file.settings?.contextType?.label || '',
           icon: file.icon || 'mdi-file-outline'
         };
-        
+
         return JSON.stringify(metadata, null, 2);
       });
 
@@ -2946,6 +2947,7 @@ export const usePromptStore = defineStore('prompts', {
         hubPromptPacks: this.hubPromptPacks,
         modelPromptPacks: this.modelPromptPacks,
         defaultCustomPromptInstructions: this.defaultCustomPromptInstructions,
+        toolApprovalSettings: this.toolApprovalSettings,
       }
 
       return aiSettings;
@@ -3021,6 +3023,18 @@ export const usePromptStore = defineStore('prompts', {
         { label: 'Done', color: 'green' },
       ];
 
+      this.toolApprovalSettings = {
+        readFile: true,           // Most tools auto-approved by default
+        search: true,
+        listProjectFiles: true,
+        getCurrentDocument: false,
+        getAvailableAIPrompts: false,
+        getAllContextTypes: false,
+        executeAIPrompt: true,     // High-impact tools require approval
+        modifyParagraph: false,     // Keep current behavior
+        setFileSummary: true
+      };
+
       this.contextTypes = [];
       this.promptUserInputs = [];
       this.promptContext = [];
@@ -3068,6 +3082,10 @@ export const usePromptStore = defineStore('prompts', {
 
       if(aiSettings.defaultCustomPromptInstructions) {
         this.defaultCustomPromptInstructions = aiSettings.defaultCustomPromptInstructions;
+      }
+
+      if(aiSettings.toolApprovalSettings) {
+        this.toolApprovalSettings = JSON.parse(JSON.stringify(aiSettings.toolApprovalSettings));
       }
 
       if(aiSettings.modelPromptPacks) {

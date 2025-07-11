@@ -171,7 +171,6 @@
                         </div>
                       </div>
                     </q-card-section>
-
                   </q-card>
                 </q-card-section>
                 <q-card-actions class="q-mt-md">
@@ -180,11 +179,8 @@
               </q-card>
             </div>
           </q-expansion-item>
-
         </div>
-
         <div class="bordered">
-
           <q-expansion-item label="Project Agents" caption="Define agents that process paragraphs in your document to make improvements.">
             <div class="q-pa-md">
               <q-card flat>
@@ -204,8 +200,7 @@
                     </q-card-section>
                   </q-card>
                 </q-card-section>
-
-                <q-card-section>
+                <q-card-section v-if="promptStore.projectAgents && promptStore.projectAgents.length > 0">
                   <div v-for="agent in promptStore.projectAgents" :key="agent.id" class="q-mb-lg">
                     <q-card bordered>
                       <q-card-section class="q-pb-sm">
@@ -311,6 +306,38 @@
 
         </div>
 
+        <div class="bordered">
+          <q-expansion-item label="AI Chat Settings" caption="Configure which AI Chat tools require your approval before execution.">
+            <div class="q-px-md">
+              <q-card flat>
+                <q-card-section>
+                  <div class="text-body2 text-primary">Tool Approval Settings</div>
+                  <div class="text-caption text-grey q-mb-lg">Toggle which tools require approval before the AI can use them.</div>
+
+                  <div class="q-gutter-y-sm" style="max-width: 500px">
+                    <q-item dense v-for="tool in aiChatTools" :key="tool.name">
+                      <q-item-section avatar>
+                        <q-icon :name="tool.icon" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>{{ tool.label }}</q-item-label>
+                        <q-item-label caption>{{ tool.description }}</q-item-label>
+                      </q-item-section>
+                      <q-item-section side>
+                        <q-toggle
+                          :model-value="promptStore.toolApprovalSettings[tool.name]"
+                          @update:model-value="updateToolApproval(tool.name, $event)"
+                          color="primary"
+                        />
+                      </q-item-section>
+                    </q-item>
+                  </div>
+                </q-card-section>
+              </q-card>
+            </div>
+          </q-expansion-item>
+        </div>
+
       </div>
     </q-card-section>
   </q-card>
@@ -336,6 +363,57 @@ const agentTypes = [
 const availablePrompts = computed(() => {
   return promptStore.prompts.map(p => ({label: p.title + ' (' + p.modelId + ')', value: p.id}));
 });
+
+const aiChatTools = [
+  {
+    name: 'getCurrentDocument',
+    label: 'Get Current Document',
+    description: 'Reads the currently open document',
+    icon: 'mdi-file-document-outline'
+  },
+  {
+    name: 'listProjectFiles',
+    label: 'List Project Files',
+    description: 'Browse all files in your project',
+    icon: 'mdi-folder-outline'
+  },
+  {
+    name: 'readFile',
+    label: 'Read File',
+    description: 'Read content of specific files',
+    icon: 'mdi-file-eye-outline'
+  },
+  {
+    name: 'search',
+    label: 'Search Project',
+    description: 'Search through all project files',
+    icon: 'mdi-magnify'
+  },
+  {
+    name: 'getAvailableAIPrompts',
+    label: 'Get Available AI Prompts',
+    description: 'Lists AI prompts that can be executed',
+    icon: 'mdi-lightbulb-outline'
+  },
+  {
+    name: 'executeAIPrompt',
+    label: 'Execute AI Prompt',
+    description: 'Run AI prompts to generate content',
+    icon: 'mdi-play-circle-outline'
+  },
+  {
+    name: 'getAllContextTypes',
+    label: 'Get Context Types',
+    description: 'Lists available context types',
+    icon: 'mdi-shape-outline'
+  },
+  {
+    name: 'setFileSummary',
+    label: 'Set File Summary',
+    description: 'Update file synopsis/summary',
+    icon: 'mdi-file-edit-outline'
+  }
+];
 
 function addPromptAgent() {
   promptStore.addPromptAgent();
@@ -375,6 +453,10 @@ function moveProjectAgentDown(agent) {
 
 function updateProjectAgent(agent, args) {
   promptStore.updateProjectAgent(agent, args);
+}
+
+function updateToolApproval(toolName, requiresApproval) {
+  promptStore.toolApprovalSettings[toolName] = requiresApproval;
 }
 
 

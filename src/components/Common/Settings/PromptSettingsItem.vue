@@ -469,7 +469,7 @@
                           <HelpIcon :tooltip="$t('tooltips.parameters.hasResultsSeparator')"></HelpIcon>
                         </div>
                         <div class="col" />
-                        <div class="col-auto">
+                        <div class="col-auto" v-if="showHiddenInPromptSelector">
                           <q-checkbox v-model="hiddenInPromptSelector" dense label="Hidden in prompt selector" />
                           <HelpIcon :tooltip="$t('tooltips.parameters.hiddenInPromptSelector')"></HelpIcon>
                         </div>
@@ -508,7 +508,7 @@
 
                 </q-expansion-item>
 
-                <q-expansion-item label="Chat AI Agent Configuration" dense icon="mdi-robot-outline" v-if="showAdvancedSettings">
+                <q-expansion-item label="Chat AI Agent Configuration" dense icon="mdi-robot-outline" v-if="showAdvancedSettings && showAgentChatSettings">
                   <q-card>
                     <q-card-section class="q-pb-none">
                       <div class="text-caption text-grey">Configure how this prompt behaves when used by external prompt agents (like Claude).</div>
@@ -523,10 +523,7 @@
                         </div>
                       </div>
 
-                      {{agentDefaultContextTypes}}
-
                       <div v-if="canBeUsedByAgent" class="row q-gutter-x-sm">
-
                         <div class="col">
                           <SimplePromptContextSelector v-model="agentDefaultContextTypes" />
                         </div>
@@ -830,19 +827,19 @@ const models = computed(() => promptStore.models.map(tab => ({label: tab.name, v
 const showAdvancedSettings = computed(() => {
   const model = promptStore.getModel(props.prompt.modelId);
 
-  if(model.args?.inferenceEngine === 'translation') return false;
-
-  return true;
+  return model.args?.inferenceEngine !== 'translation';
 });
 
 const showPromptType = computed(() => {
-  const model = promptStore.getModel(props.prompt.modelId);
+  return props.prompt.promptType !== 'chat';
+});
 
-  //if(model.args?.inferenceEngine === 'translation') return false;
+const showAgentChatSettings = computed(() => {
+  return props.prompt.promptType !== 'chat';
+});
 
-  if(props.prompt.promptType === 'chat') return false;
-
-  return true;
+const showHiddenInPromptSelector = computed(() => {
+  return props.prompt.promptType !== 'chat';
 });
 
 const allowPromptCategorization = computed(() => {
@@ -850,9 +847,7 @@ const allowPromptCategorization = computed(() => {
 
   if(model.args?.inferenceEngine === 'translation') return false;
 
-  if(props.prompt.promptType === 'chat') return false;
-
-  return true;
+  return props.prompt.promptType !== 'chat';
 });
 
 const allowActions = computed(() => {
@@ -860,9 +855,7 @@ const allowActions = computed(() => {
 
   if(model.args?.inferenceEngine === 'translation') return false;
 
-  if(props.prompt.promptType === 'chat') return false;
-
-  return true;
+  return props.prompt.promptType !== 'chat';
 });
 
 const allowAgents = computed(() => {
@@ -870,9 +863,7 @@ const allowAgents = computed(() => {
 
   if(model.args?.inferenceEngine === 'translation') return false;
 
-  if(props.prompt.promptType === 'chat') return false;
-
-  return true;
+  return props.prompt.promptType !== 'chat';
 });
 
 const allowMultipleRuns = computed(() => {
@@ -880,9 +871,7 @@ const allowMultipleRuns = computed(() => {
 
   if(model.args?.inferenceEngine === 'translation') return false;
 
-  if(props.prompt.promptType === 'chat') return false;
-
-  return true;
+  return props.prompt.promptType !== 'chat';
 });
 
 const canChangeContextTypes = computed(() => {
@@ -890,25 +879,19 @@ const canChangeContextTypes = computed(() => {
 
   if(model.args?.inferenceEngine === 'translation') return false;
 
-  if(props.prompt.promptType === 'chat') return false;
-
-  return true;
+  return props.prompt.promptType !== 'chat';
 });
 
 const showPromptResultCount = computed(() => {
   const model = promptStore.getModel(props.prompt.modelId);
 
-  if(model.args?.inferenceEngine === 'translation') return false;
-
-  return true;
+  return model.args?.inferenceEngine !== 'translation';
 });
 
 const showUserPrompt= computed(() => {
   const model = promptStore.getModel(props.prompt.modelId);
 
-  if(model.args?.inferenceEngine === 'translation') return false;
-
-  return true;
+  return model.args?.inferenceEngine !== 'translation';
 });
 
 const showPromptToggles = computed(() => {
@@ -916,9 +899,7 @@ const showPromptToggles = computed(() => {
 
   if(model.args?.inferenceEngine === 'translation') return false;
 
-  if(props.prompt.promptType === 'chat') return false;
-
-  return true;
+  return props.prompt.promptType !== 'chat';
 });
 
 const showPromptUiStyle = computed(() => {
@@ -926,9 +907,7 @@ const showPromptUiStyle = computed(() => {
 
   if(model.args?.inferenceEngine === 'translation') return false;
 
-  if(props.prompt.promptType === 'chat') return false;
-
-  return true;
+  return props.prompt.promptType !== 'chat';
 });
 
 const title = computed({
