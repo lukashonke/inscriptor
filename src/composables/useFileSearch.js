@@ -41,7 +41,7 @@ export function useFileSearch() {
     if (results.length === 0) {
       return {
         success: true,
-        content: "No files found in the project to search."
+        content: "No results found."
       };
     }
 
@@ -78,7 +78,8 @@ export function useFileSearch() {
       keys: searchFields,
       threshold: threshold, // 0.0 for exact search, 0.3+ for fuzzy search
       includeScore: true,
-      includeMatches: true
+      includeMatches: true,
+      ignoreLocation: true // Search entire text, not just the first 60 characters
     });
 
     const fuseResults = fuse.search(query);

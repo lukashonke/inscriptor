@@ -1051,7 +1051,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
               properties: {
                 contextType: {
                   type: "string",
-                  description: "Optional filter to only show files of a specific context type (e.g., 'Manuscript', 'Characters', 'Places', 'Notes', 'Research') or use 'all' to show all files"
+                  description: "Optional filter to only show files of a specific context type (e.g., 'Manuscript', 'Characters', 'Places', 'Notes', 'Research'). If not provided or set to 'all', shows all files regardless of context type."
                 }
               },
               required: []
@@ -1140,7 +1140,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "search",
-            description: "Search through all project files using exact or fuzzy matching. Searches in all fields (title, content, and synopsis) by default for comprehensive results. Optionally filter by context type to focus search on specific content types.",
+            description: "Search through all project files using exact or fuzzy matching. By default, searches in all fields (title, content, and synopsis) across all context types for comprehensive results. Only provide optional parameters if you need to narrow the search scope.",
             parameters: {
               type: "object",
               properties: {
@@ -1150,13 +1150,13 @@ export const useAiAgentStore = defineStore('ai-agent', {
                 },
                 searchType: {
                   type: "string",
-                  description: "Type of content to search in",
+                  description: "Optional: Type of content to search in. Defaults to 'all' which searches across title, content, and synopsis. Only specify 'title', 'content', or 'synopsis' if you specifically need to limit the search to a single field.",
                   enum: ["title", "content", "synopsis", "all"],
                   default: "all"
                 },
                 contextType: {
                   type: "string",
-                  description: "Optional filter to only search files of a specific context type (e.g., 'Manuscript', 'Characters', 'Places', 'Notes', 'Research')"
+                  description: "Optional filter to only search files of a specific context type (e.g., 'Manuscript', 'Characters', 'Places', 'Notes', 'Research'). Leave empty/undefined to search across all context types. Do not use 'all' as a value."
                 },
                 fuzzySearch: {
                   type: "boolean",
@@ -1556,7 +1556,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
     executeSearchTool(args) {
       const {
         searchQuery,
-        searchType = 'all',
+        searchType,
         contextType,
         fuzzySearch = false,
         maxResults = 20,
