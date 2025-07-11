@@ -33,6 +33,24 @@ export const useAiAgentStore = defineStore('ai-agent', {
       isAgentRunning: false // Flag to prevent multiple agent runs
     },
     agentChatCurrentRequest: null, // Current request with abort controller for agent chat
+
+    // Tool approval settings
+    toolApprovalSettings: {
+      readFile: true,           // Most tools auto-approved by default
+      search: true,
+      listProjectFiles: true,
+      getCurrentDocument: false,
+      getAvailableAIPrompts: false,
+      getAllContextTypes: false,
+      executeAIPrompt: true,     // High-impact tools require approval
+      modifyParagraph: false,     // Keep current behavior
+      setFileSummary: true
+    },
+
+    // Batch approval state
+    pendingToolBatch: null,      // Current tools awaiting approval
+    selectedTools: [],           // Array of selected tool IDs for execution
+    batchApprovalResolve: null   // Promise resolver for batch approval
   }),
   getters: {
     agentState: (state) => {
@@ -1962,48 +1980,50 @@ export const useAiAgentStore = defineStore('ai-agent', {
       const chat = this.agentChats.chats.find(c => c.id === this.agentChats.activeChat);
       if (!chat) return;
 
+      // Add IDs to tools if they don't have them
+      toolCalls.forEach((tool, index) => {
+        tool.id = tool.id || `tool-${Date.now()}-${index}`;
+      });
+
+      // 1. Separate tools by approval requirement
+      const needApproval = toolCalls.filter(tool =>
+        this.toolApprovalSettings[tool.function.name]
+      );
+      const autoApprove = toolCalls.filter(tool =>
+        !this.toolApprovalSettings[tool.function.name]
+      );
+
       const toolResults = [];
 
-      for (const toolCall of toolCalls) {
-        // Check if agent execution was stopped
-        if (!this.agentChats.isAgentRunning) {
-          break;
+      // 2. Execute auto-approved tools immediately
+      for (const toolCall of autoApprove) {
+        if (!this.agentChats.isAgentRunning) break;
+
+        const toolResult = await this.executeToolCall(toolCall);
+        toolResults.push(toolResult);
+      }
+
+      // 3. Show approval UI for tools that need approval
+      if (needApproval.length > 0 && this.agentChats.isAgentRunning) {
+        const approvedTools = await this.showToolApproval(needApproval);
+
+        // Execute approved tools
+        for (const toolCall of approvedTools) {
+          if (!this.agentChats.isAgentRunning) break;
+
+          const toolResult = await this.executeToolCall(toolCall);
+          toolResults.push(toolResult);
         }
 
-        const toolCallResult = {
-          toolName: toolCall.function.name,
-          arguments: JSON.parse(toolCall.function.arguments),
-          toolCallId: toolCall.id
-        };
-
-        // Execute the tool - use chat agent tools for AgentChatTab
-        const toolResult = await this.executeChatAgentTool(toolCallResult);
-
-        if (toolResult.error) {
+        // Create rejection results for unapproved tools
+        const rejectedTools = needApproval.filter(tool =>
+          !approvedTools.some(approved => approved.id === tool.id)
+        );
+        for (const toolCall of rejectedTools) {
           toolResults.push({
             role: 'function',
             name: toolCall.function.name,
-            content: `Error: ${toolResult.error}`,
-            tool_call_id: toolCall.id
-          });
-        } else {
-          let content = '';
-
-          // Handle chat agent tool results
-          if (toolResult.content) {
-            content = toolResult.content;
-          } else if (toolResult.action === 'stop') {
-            content = `Stopped: ${toolResult.reasoning}`;
-          } else if (toolResult.action === 'modify' || toolResult.action === 'add' || toolResult.action === 'remove') {
-            // Show the confirmation widget and wait for user response
-            const modificationResult = await this.processChatAgentModification(toolResult, toolCall.id);
-            content = modificationResult.content;
-          }
-
-          toolResults.push({
-            role: 'function',
-            name: toolCall.function.name,
-            content: content,
+            content: 'Tool execution rejected by user',
             tool_call_id: toolCall.id
           });
         }
@@ -2072,6 +2092,104 @@ export const useAiAgentStore = defineStore('ai-agent', {
       return this.agentChats.chats.find(c => c.id === this.agentChats.activeChat);
     },
 
+    // Helper method to execute a single tool call
+    async executeToolCall(toolCall) {
+      const toolCallResult = {
+        toolName: toolCall.function.name,
+        arguments: JSON.parse(toolCall.function.arguments),
+        toolCallId: toolCall.id
+      };
+
+      // Execute the tool
+      const toolResult = await this.executeChatAgentTool(toolCallResult);
+
+      if (toolResult.error) {
+        return {
+          role: 'function',
+          name: toolCall.function.name,
+          content: `Error: ${toolResult.error}`,
+          tool_call_id: toolCall.id
+        };
+      } else {
+        let content = '';
+
+        // Handle chat agent tool results
+        if (toolResult.content) {
+          content = toolResult.content;
+        } else if (toolResult.action === 'stop') {
+          content = `Stopped: ${toolResult.reasoning}`;
+        } else if (toolResult.action === 'modify' || toolResult.action === 'add' || toolResult.action === 'remove') {
+          // Show the confirmation widget and wait for user response
+          const modificationResult = await this.processChatAgentModification(toolResult, toolCall.id);
+          content = modificationResult.content;
+        }
+
+        return {
+          role: 'function',
+          name: toolCall.function.name,
+          content: content,
+          tool_call_id: toolCall.id
+        };
+      }
+    },
+
+    // Batch approval methods
+    async showToolApproval(tools) {
+      return new Promise((resolve) => {
+        this.pendingToolBatch = tools;
+        this.selectedTools = tools.map(t => t.id); // Default: all selected
+        this.batchApprovalResolve = resolve;
+      });
+    },
+
+    executeBatch() {
+      if (this.batchApprovalResolve && this.pendingToolBatch) {
+        const approved = this.pendingToolBatch.filter(tool =>
+          this.selectedTools.includes(tool.id)
+        );
+        this.batchApprovalResolve(approved);
+        this.clearBatch();
+      }
+    },
+
+    cancelBatch() {
+      if (this.batchApprovalResolve) {
+        this.batchApprovalResolve([]);
+        this.clearBatch();
+      }
+    },
+
+    clearBatch() {
+      this.pendingToolBatch = null;
+      this.selectedTools = [];
+      this.batchApprovalResolve = null;
+    },
+
+    toggleTool(toolId) {
+      if (this.selectedTools.includes(toolId)) {
+        this.selectedTools = this.selectedTools.filter(id => id !== toolId);
+      } else {
+        this.selectedTools.push(toolId);
+      }
+    },
+
+    selectAll() {
+      if (this.pendingToolBatch) {
+        this.selectedTools = this.pendingToolBatch.map(t => t.id);
+      }
+    },
+
+    selectNone() {
+      this.selectedTools = [];
+    },
+
+    // Update tool approval settings
+    updateToolApprovalSetting(toolName, requiresApproval) {
+      if (this.toolApprovalSettings.hasOwnProperty(toolName)) {
+        this.toolApprovalSettings[toolName] = requiresApproval;
+      }
+    },
+
     stopAgentChatExecution() {
       this.updateAgentRunningState(false);
 
@@ -2093,6 +2211,11 @@ export const useAiAgentStore = defineStore('ai-agent', {
         this.currentConfirmationPromise.resolve('stopped');
         this.currentConfirmationPromise = null;
         this.confirmationWidgetData = null;
+      }
+
+      // Cancel any pending batch approval
+      if (this.batchApprovalResolve) {
+        this.cancelBatch();
       }
     },
 

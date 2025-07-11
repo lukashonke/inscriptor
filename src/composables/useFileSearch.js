@@ -11,7 +11,7 @@ export function useFileSearch() {
 
     // Filter files by context type if specified
     let sourceFiles = fileStore.files;
-    if (contextType) {
+    if (contextType && contextType !== 'all') {
       sourceFiles = fileStore.getContextFiles(contextType);
     }
 

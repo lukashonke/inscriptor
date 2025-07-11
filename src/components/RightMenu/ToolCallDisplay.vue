@@ -106,12 +106,12 @@ const toolName = computed(() => {
         const position = args.position;
         switch (action) {
           case 'add':
-            return position ? `Agent wants to: Add Paragraph (${position})` : 'Agent wants to: Add Paragraph';
+            return position ? `AI wants to: Add Paragraph (${position})` : 'AI wants to: Add Paragraph';
           case 'remove':
-            return 'Agent wants to: Remove Paragraph';
+            return 'AI wants to: Remove Paragraph';
           case 'modify':
           default:
-            return 'Agent wants to: Modify Paragraph';
+            return 'AI wants to: Modify Paragraph';
         }
 
       case 'readFile':
@@ -120,15 +120,15 @@ const toolName = computed(() => {
         if (fileId) {
           const file = fileStore.getFile(fileId);
           const fileTitle = file?.title || `${fileId.substring(0, 8)}...`;
-          return `Agent wants to: Read File - ${fileTitle} (${readType})`;
+          return `AI wants to: Read File - ${fileTitle} (${readType})`;
         }
-        return `Agent wants to: Read File (${readType})`;
+        return `AI wants to: Read File (${readType})`;
 
       case 'search':
         const searchQuery = args.searchQuery;
         const contextType = args.contextType;
         const searchType = args.searchType || 'all';
-        let searchDesc = `Agent wants to: Search`;
+        let searchDesc = `AI wants to: Search`;
         if (searchQuery) {
           searchDesc += ` - "${searchQuery}"`;
         }
@@ -145,25 +145,25 @@ const toolName = computed(() => {
         if (promptId) {
           const prompt = promptStore.prompts.find(p => p.id === promptId);
           const promptTitle = prompt?.title || promptId;
-          return `Agent wants to: Execute AI Prompt - ${promptTitle}`;
+          return `AI wants to: Execute AI Prompt - ${promptTitle}`;
         }
-        return 'Agent wants to: Execute AI Prompt';
+        return 'AI wants to: Execute AI Prompt';
 
       case 'setFileSummary':
         const summaryFileId = args.fileId;
         if (summaryFileId) {
           const file = fileStore.getFile(summaryFileId);
           const fileTitle = file?.title || `${summaryFileId.substring(0, 8)}...`;
-          return `Agent wants to: Set File Summary - ${fileTitle}`;
+          return `AI wants to: Set File Summary - ${fileTitle}`;
         }
-        return 'Agent wants to: Set File Summary (current file)';
+        return 'AI wants to: Set File Summary (current file)';
 
       case 'listProjectFiles':
         const listContextType = args.contextType;
         if (listContextType) {
-          return `Agent wants to: List Project Files - ${listContextType}`;
+          return `AI wants to: List Project Files - ${listContextType}`;
         }
-        return 'Agent wants to: List Project Files';
+        return 'AI wants to: List Project Files';
 
       default:
         break;
@@ -173,7 +173,7 @@ const toolName = computed(() => {
   }
 
   const baseName = toolFriendlyNames[technicalName] || technicalName || 'Unknown Tool';
-  return `Agent wants to: ${baseName}`;
+  return `AI wants to: ${baseName}`;
 });
 
 const toolIcon = computed(() => {
@@ -352,6 +352,15 @@ const resultStatusColor = computed(() => {
 <style scoped>
 .tool-call-display {
   width: 100%;
+  margin-right: auto;
+  background-color: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.87);
+  padding: 0px 4px;
+  border-radius: 8px;
+}
+
+body.body--dark .tool-call-display {
+  border-radius: 8px;
 }
 
 .tool-parameters {
@@ -382,18 +391,6 @@ body.body--dark .tool-parameters {
 }
 
 body.body--dark .tool-result {
-  background-color: #1a2332;
-}
-
-body.body--dark .bg-red-1 {
-  background-color: #2d1b1b;
-}
-
-body.body--dark .bg-green-1 {
-  background-color: #1b2d1b;
-}
-
-body.body--dark .bg-blue-1 {
   background-color: #1a2332;
 }
 </style>

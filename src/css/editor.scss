@@ -548,6 +548,11 @@
   animation: agent-pulse-purple 2s ease-in-out infinite;
 }
 
+.agent-awaiting-confirmation-simple {
+  background-color: rgba(78, 93, 212, 0.05);
+  animation: agent-pulse-purple 2s ease-in-out infinite;
+}
+
 .agent-awaiting-confirmation {
   position: relative;
   background-color: rgba(78, 93, 212, 0.05);
@@ -588,6 +593,10 @@
     background-color: rgba(100, 181, 246, 0.12);
     border-left-color: #4e5dd4;
     box-shadow: 0 0 8px rgba(100, 181, 246, 0.2);
+  }
+
+  .agent-awaiting-confirmation-simple {
+    background-color: rgba(100, 181, 246, 0.12);
   }
 
 }
