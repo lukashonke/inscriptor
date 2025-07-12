@@ -269,6 +269,12 @@
     color: #81c784 !important;
   }
 
+  .diff-removed {
+    color: rgba(229, 115, 115, 0.5) !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
+  }
+
   .cm-editor {
     background-color: rgba(255, 255, 255, 0.08) !important;
   }

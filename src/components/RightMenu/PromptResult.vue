@@ -544,7 +544,7 @@
   import PromptSelector from "components/Common/PromptSelector/PromptSelector.vue";
   import contenteditable from 'vue-contenteditable';
   import {useFileStore} from "stores/file-store";
-  import {useQuasar} from "quasar";
+  import {Notify, useQuasar} from "quasar";
   import {uploadImage} from "src/common/apiServices/imageGenService";
   import {useCurrentUser} from "vuefire";
   import {useLayoutStore} from "stores/layout-store";
@@ -780,8 +780,8 @@
       for(const part of props.promptResult.diff) {
 
         let value = part.value;
-        if(part.added) { text += '<span class="text-green-7">' + value + '</span>'; }
-        //else if(part.removed) { text += '<span class="text-negative">' + part.value + '</span>';}
+        if(part.added) { text += '<span class="diff-added">' + value + '</span>'; }
+        else if(part.removed && promptStore.diffsShowRemoved) { text += '<span class="diff-removed">' + value + '</span>';}
         else if(!part.added && !part.removed) { text += value;}
       }
 
@@ -1199,7 +1199,7 @@
       navigator.clipboard.writeText(replaceParameterEditorText(promptResultText.value));
     }
 
-    $q.notify({
+    Notify.create({
       message: 'Copied to clipboard',
       color: 'positive',
       position: 'top-right',
@@ -1222,7 +1222,7 @@
 
   async function copyToVariable(event, variable) {
     variable.value = replaceParameterEditorText(promptResultText.value);
-    $q.notify({
+    Notify.create({
       message: 'Copied to ' + variable.title,
       color: 'positive',
       position: 'top-right',

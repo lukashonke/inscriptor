@@ -221,7 +221,13 @@
   }
 
   .diff-added {
-    color: #2e7d32 !important;
+    color: #248728 !important;
+  }
+
+  .diff-removed {
+    color: rgba(152, 9, 0, 0.35) !important;
+    padding-left: 2px !important;
+    padding-right: 2px !important;
   }
 
   .cm-editor {

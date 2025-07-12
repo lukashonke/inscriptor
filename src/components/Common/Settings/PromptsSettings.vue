@@ -9,8 +9,8 @@
         <q-tab name="prompts" icon="mdi-creation-outline" label="Promps" />
         <q-tab name="models" icon="mdi-chip" label="Models" />
         <q-tab name="agents" icon="mdi-robot" label="Agents" />
-        <q-tab name="files" icon="mdi-file-outline" label="Files" />
         <q-tab name="apikeys" icon="mdi-cloud-outline" label="API Keys" />
+        <q-tab name="files" icon="mdi-tools" label="Other" />
       </q-tabs>
     </div>
     <div class="col">

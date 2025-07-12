@@ -115,6 +115,8 @@ export const usePromptStore = defineStore('prompts', {
     defaultCustomPromptInstructions: '',
 
     toolApprovalSettings: {},
+
+    diffsShowRemoved: false,
   }),
   getters: {
     selectionPrompts: (state) => state.prompts.filter(p => (p.promptType === "selection" || p.promptType === "general") && p.enabled),
@@ -2948,6 +2950,7 @@ export const usePromptStore = defineStore('prompts', {
         modelPromptPacks: this.modelPromptPacks,
         defaultCustomPromptInstructions: this.defaultCustomPromptInstructions,
         toolApprovalSettings: this.toolApprovalSettings,
+        diffsShowRemoved: this.diffsShowRemoved,
       }
 
       return aiSettings;
@@ -3035,6 +3038,8 @@ export const usePromptStore = defineStore('prompts', {
         setFileSummary: true
       };
 
+      this.diffsShowRemoved = false;
+
       this.contextTypes = [];
       this.promptUserInputs = [];
       this.promptContext = [];
@@ -3086,6 +3091,10 @@ export const usePromptStore = defineStore('prompts', {
 
       if(aiSettings.toolApprovalSettings) {
         this.toolApprovalSettings = JSON.parse(JSON.stringify(aiSettings.toolApprovalSettings));
+      }
+
+      if(aiSettings.diffsShowRemoved !== undefined) {
+        this.diffsShowRemoved = aiSettings.diffsShowRemoved;
       }
 
       if(aiSettings.modelPromptPacks) {

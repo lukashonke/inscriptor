@@ -91,6 +91,14 @@
           </div>
         </q-expansion-item>
       </div>
+
+      <div class="bordered">
+        <q-expansion-item label="Showing Differences" caption="Configure how differences are displayed." v-model="layoutStore.settingsShowingDifferencesOpened">
+          <div class="q-pa-sm">
+            <q-checkbox v-model="promptStore.diffsShowRemoved" label="Show deleted text when comparing versions" />
+          </div>
+        </q-expansion-item>
+      </div>
     </q-card-section>
   </q-card>
 
