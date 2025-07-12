@@ -90,6 +90,7 @@ export const useLayoutStore = defineStore('layout', {
     settingsPromptFoldersOpened: false,
     settingsFileTemplatesOpened: false,
     settingsDefaultFileSettingsOpened: false,
+    settingsShowingDifferencesOpened: false,
 
     addPromptDialogOpened: false,
     addPromptDialogStep: 1,
@@ -191,6 +192,7 @@ export const useLayoutStore = defineStore('layout', {
         this.settingsPromptFoldersOpened = false;
         this.settingsFileTemplatesOpened = false;
         this.settingsDefaultFileSettingsOpened = false;
+        this.settingsShowingDifferencesOpened = false;
       }
 
       this.settingsOpen = b;
