@@ -220,6 +220,7 @@
                     rows="4"
                     type="textarea"
                     lines
+                    autofocus
                     dense
                     ref="inputRef"
                     @keydown="onInputKey"
@@ -395,14 +396,14 @@ async function sendMessage() {
   }
 
   const message = inputText.value.trim();
-  inputText.value = '';
   
-  // Keep focus on input after sending
+  await aiAgentStore.executeAgentPrompt(message, prompt);
+  
+  // Clear input and restore focus after the async operation
+  inputText.value = '';
   nextTick(() => {
     inputRef.value?.focus();
   });
-
-  await aiAgentStore.executeAgentPrompt(message, prompt);
 
   // Scroll to bottom after sending message
   setTimeout(() => {
