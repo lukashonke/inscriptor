@@ -181,7 +181,7 @@
           </q-expansion-item>
         </div>
         <div class="bordered">
-          <q-expansion-item label="Project Agents" caption="Define agents that process paragraphs in your document to make improvements.">
+          <q-expansion-item label="Project Agents" caption="Define agents that process paragraphs in your document, one by one, to make improvements.">
             <div class="q-pa-md">
               <q-card flat>
                 <q-card-section class="q-pb-none">
