@@ -396,6 +396,11 @@ async function sendMessage() {
 
   const message = inputText.value.trim();
   inputText.value = '';
+  
+  // Keep focus on input after sending
+  nextTick(() => {
+    inputRef.value?.focus();
+  });
 
   await aiAgentStore.executeAgentPrompt(message, prompt);
 
