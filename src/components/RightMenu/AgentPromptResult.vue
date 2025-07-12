@@ -1,8 +1,9 @@
 <template>
-  <div v-if="!message && !isLoading"></div>
+  <div ref="componentRef">
+    <div v-if="!message && !isLoading"></div>
 
-  <!-- User messages -->
-  <div v-else-if="message && message.role === 'user'" class="row">
+    <!-- User messages -->
+    <div v-else-if="message && message.role === 'user'" class="row">
     <div class="chat-message chat-user-message q-mt-md fu">
       <div class="chat-message-header">
         <span class="chat-message-role">You:</span>
@@ -48,13 +49,15 @@
       </div>
     </div>
   </div>
+  </div>
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, onUpdated } from 'vue';
+import { computed, nextTick, onMounted, onUpdated, ref } from 'vue';
 import { useFileStore } from 'stores/file-store';
 import { useLayoutStore } from 'stores/layout-store';
-import { useQuasar } from 'quasar';
+import { useAiAgentStore } from 'stores/aiagent-store';
+import {Notify, useQuasar} from 'quasar';
 import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { markdownToHtml } from 'src/common/utils/textUtils';
 import AnimatedDots from 'src/components/Common/AnimatedDots.vue';
@@ -82,7 +85,8 @@ const props = defineProps({
 
 const fileStore = useFileStore();
 const layoutStore = useLayoutStore();
-const $q = useQuasar();
+const aiAgentStore = useAiAgentStore();
+const componentRef = ref(null);
 
 // Function to get tool result for a specific tool call
 function getToolResult(toolCall) {
@@ -104,7 +108,7 @@ async function copyBlockquoteToClipboard(blockquote) {
       await navigator.clipboard.writeText(textContent);
     }
 
-    $q.notify({
+    Notify.create({
       message: 'Copied to clipboard',
       color: 'positive',
       position: 'top-right',
@@ -112,7 +116,7 @@ async function copyBlockquoteToClipboard(blockquote) {
     });
   } catch (error) {
     console.error('Failed to copy to clipboard:', error);
-    $q.notify({
+    Notify.create({
       message: 'Failed to copy to clipboard',
       color: 'negative',
       position: 'top-right',
@@ -151,8 +155,52 @@ function addCopyButtonsToBlockquotes() {
   });
 }
 
+// Handle paste button clicks via event delegation
+function handlePasteClick(event) {
+  const pasteBtn = event.target.closest('.prose-paste-btn');
+  if (!pasteBtn) return;
+
+  event.stopPropagation();
+
+  const paragraphId = pasteBtn.dataset.paragraphId;
+  const proseBlock = pasteBtn.closest('.prose-block');
+  if (!proseBlock || !paragraphId) return;
+
+  let newContent = '';
+
+  // Check if we have a diff view
+  const diffContent = proseBlock.querySelector('.prose-diff-content');
+  if (diffContent) {
+    // Extract only non-removed text from diff
+    diffContent.childNodes.forEach(node => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        // Plain text node - include it
+        newContent += node.textContent;
+      } else if (node.nodeType === Node.ELEMENT_NODE && !node.classList.contains('diff-removed')) {
+        // Element node that's not removed - include it
+        newContent += node.textContent;
+      }
+      // Skip diff-removed elements
+    });
+  } else {
+    // No diff, just get the prose content
+    const proseContent = proseBlock.querySelector('.prose-content');
+    newContent = proseContent ? (proseContent.innerText || proseContent.textContent || '') : '';
+  }
+
+  // Call the store method to replace paragraph
+  aiAgentStore.replaceParagraphWithContent(paragraphId, newContent.trim());
+}
+
 // Add copy buttons when component mounts and updates
-onMounted(addCopyButtonsToBlockquotes);
+onMounted(() => {
+  addCopyButtonsToBlockquotes();
+  // Add event listener for paste buttons
+  if (componentRef.value) {
+    componentRef.value.addEventListener('click', handlePasteClick);
+  }
+});
+
 onUpdated(addCopyButtonsToBlockquotes);
 
 // Computed property for markdown styling classes
@@ -291,6 +339,77 @@ const writeClasses = computed(() => {
   margin-bottom: 0.5em;
 }
 
+/* Prose blocks styling (similar to blockquotes) */
+.chat-message-content :deep(.prose-block) {
+  position: relative;
+  margin: 0.5em 0;
+  padding: 0.5em 1em;
+  color: rgba(0, 0, 0, 0.75);
+  background: linear-gradient(135deg, #ffffff 80%, #ededf8 100%);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+.chat-message-content :deep(.prose-block .blockquote-copy-btn) {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7e7e8e;
+  padding: 0;
+}
+
+.chat-message-content :deep(.prose-block):hover .blockquote-copy-btn {
+  opacity: 1;
+}
+
+.chat-message-content :deep(.prose-block .blockquote-copy-btn):hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 1);
+  color: #7e7e8e;
+}
+
+/* Paste button styling */
+.chat-message-content :deep(.prose-block .prose-paste-btn) {
+  position: absolute;
+  top: 8px;
+  right: 42px; /* Position to the left of copy button */
+  width: 28px;
+  height: 28px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  color: #7e7e8e;
+}
+
+.chat-message-content :deep(.prose-block):hover .prose-paste-btn {
+  opacity: 1;
+}
+
+.chat-message-content :deep(.prose-block .prose-paste-btn):hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 1);
+}
+
 /* Dark mode markdown styles */
 body.body--dark .chat-message-content :deep(code) {
   background-color: rgba(255, 255, 255, 0.1);
@@ -317,6 +436,45 @@ body.body--dark .chat-message-content :deep(blockquote .blockquote-copy-btn) {
 body.body--dark .chat-message-content :deep(blockquote .blockquote-copy-btn):hover {
   background-color: rgba(0, 0, 0, 0.8);
   color: rgba(255, 255, 255, 1);
+}
+
+/* Dark mode prose blocks */
+body.body--dark .chat-message-content :deep(.prose-block) {
+  background: linear-gradient(135deg, rgba(107, 126, 214, 0.2) 80%, rgba(107, 126, 214, 0.3) 100%);
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 10px rgba(107, 126, 214, 0.1);
+}
+
+body.body--dark .chat-message-content :deep(.prose-block .blockquote-copy-btn) {
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+body.body--dark .chat-message-content :deep(.prose-block .blockquote-copy-btn):hover {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: rgba(255, 255, 255, 1);
+}
+
+/* Dark mode paste button */
+body.body--dark .chat-message-content :deep(.prose-block .prose-paste-btn) {
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #81c784; /* Light green for dark mode */
+}
+
+body.body--dark .chat-message-content :deep(.prose-block .prose-paste-btn):hover {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: #a5d6a7; /* Lighter green on hover */
+}
+
+/* Dark mode diff styling - simplified to match PromptResult.vue */
+body.body--dark .chat-message-content :deep(.prose-diff-content .diff-added) {
+  color: #81c784; /* Light green for dark mode */
+}
+
+body.body--dark .chat-message-content :deep(.prose-diff-content .diff-removed) {
+  color: rgba(229, 115, 115, 0.53); /* Light red for dark mode */
 }
 
 /* Dark mode overrides */

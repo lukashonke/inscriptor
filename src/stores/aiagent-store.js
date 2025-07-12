@@ -8,6 +8,7 @@ import {useFileStore} from 'stores/file-store';
 import { editorTextBetween} from 'src/common/utils/editorUtils';
 import {currentFilePromptContext, createDynamicContext, allPromptContexts} from 'src/common/resources/promptContexts';
 import { useFileSearch } from 'src/composables/useFileSearch';
+import {Notify, useQuasar} from 'quasar';
 
 export const useAiAgentStore = defineStore('ai-agent', {
   state: () => ({
@@ -980,6 +981,57 @@ export const useAiAgentStore = defineStore('ai-agent', {
       });
 
       return foundItem;
+    },
+    async replaceParagraphWithContent(nodeId, newContent) {
+      const editorStore = useEditorStore();
+      const editor = editorStore.editor;
+
+      if (!editor) {
+        Notify.create({
+          message: 'Editor not available',
+          color: 'negative',
+          position: 'top-right',
+          timeout: 2000
+        });
+        return false;
+      }
+
+      const targetNode = this.findParagraphByNodeId(nodeId);
+      if (!targetNode) {
+        Notify.create({
+          message: 'Paragraph not found',
+          color: 'negative',
+          position: 'top-right',
+          timeout: 2000
+        });
+        return false;
+      }
+
+      try {
+        // Replace paragraph content while preserving its ID
+        editor.chain()
+          .focus()
+          .command(({ tr, state }) => {
+            const newNode = state.schema.nodes.paragraph.create(
+              { id: targetNode.node.attrs.id }, // Preserve the paragraph ID
+              state.schema.text(newContent)
+            );
+            tr.replaceWith(targetNode.from, targetNode.to, newNode);
+            return true;
+          })
+          .run();
+
+        return true;
+      } catch (error) {
+        console.error('Error replacing paragraph:', error);
+        Notify.create({
+          message: 'Failed to replace paragraph',
+          color: 'negative',
+          position: 'top-right',
+          timeout: 2000
+        });
+        return false;
+      }
     },
     getIndependentAgentTools() {
       return [
