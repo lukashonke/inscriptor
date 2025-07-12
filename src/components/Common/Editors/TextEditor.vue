@@ -447,22 +447,6 @@
     />
   </bubble-menu>
 
-  <q-page-sticky position="bottom-left" :offset="[8, 8]" v-if="promptStore.hasStickyPrompts(fileStore.selectedFile)">
-    <q-fab
-      v-model="aiFab"
-      vertical-actions-align="left"
-      color="primary"
-      icon="mdi-creation-outline"
-      direction="up"
-    >
-      <template v-for="prompt in promptStore.getStickyPrompts(fileStore.selectedFile)" :key="prompt.id">
-        <q-fab-action @click="promptClick({prompt: prompt})" color="white" text-color="black" >
-          {{ prompt.title }}&nbsp;
-          <q-badge color="secondary" :label="promptStore.getModel(prompt.modelId)?.name" />
-        </q-fab-action>
-      </template>
-    </q-fab>
-  </q-page-sticky>
 
 </template>
 
@@ -650,7 +634,6 @@ function quickSelectionPromptKeydown(e) {
 }
 
 const showPrompts = ref(true);
-const aiFab = ref(false);
 const currentInsertPromptCategory = ref('');
 const currentSelectionPromptCategory = ref('');
 

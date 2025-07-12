@@ -43,7 +43,7 @@
 
                 <q-item clickable v-ripple>
                   <q-item-section side>
-                    <q-icon name="mdi-creation-outline" :color="pinColor(prompt)" size="xs" />
+                    <q-icon name="mdi-creation-outline" size="xs" />
                   </q-item-section>
                   <q-item-section>Prompt using model...</q-item-section>
                   <q-item-section side>
@@ -73,7 +73,7 @@
 
                 <q-item clickable v-ripple>
                   <q-item-section side>
-                    <q-icon name="mdi-creation-outline" :color="pinColor(prompt)" size="xs" />
+                    <q-icon name="mdi-creation-outline" size="xs" />
                   </q-item-section>
                   <q-item-section>Prompt with creativity...</q-item-section>
                   <q-item-section side>
@@ -144,7 +144,7 @@
 
                 <q-item clickable v-ripple>
                   <q-item-section side>
-                    <q-icon name="mdi-table-column" :color="pinColor(prompt)" size="xs" />
+                    <q-icon name="mdi-table-column" size="xs" />
                   </q-item-section>
                   <q-item-section>Move to Category</q-item-section>
                   <q-item-section side>
@@ -194,7 +194,7 @@
 
                 <q-item clickable v-ripple>
                   <q-item-section side>
-                    <q-icon name="mdi-folder-outline" :color="pinColor(prompt)" size="xs" />
+                    <q-icon name="mdi-folder-outline" size="xs" />
                   </q-item-section>
                   <q-item-section>Move to Folder</q-item-section>
                   <q-item-section side>
@@ -328,13 +328,13 @@ const menuButtonColor = computed(() => {
 });
 
 const boldness = computed(() => {
-  return isSticky.value ? 'text-weight-bold' : 'text-weight-normal';
+  return isSticky.value ? 'text-weight-normal' : 'text-weight-normal';
 });
 
 const isSticky = computed(() => fileStore.isStickyPrompt(props.prompt, fileStore.selectedFile));
 
 function pinColor(prompt) {
-  return fileStore.isStickyPrompt(prompt, fileStore.selectedFile) ? 'yellow' : 'grey-8';
+  return fileStore.isStickyPrompt(prompt, fileStore.selectedFile) ? 'orange' : 'grey-8';
 }
 
 const canBeSticky = computed(() => props.prompt.promptType === "general" || props.prompt.promptType === "selection" || props.prompt.promptType === "insert");
