@@ -1968,7 +1968,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
         // Create request with tools
         const request = {
           prompt: agentPrompt,
-          text: userMessage,
+          text: null,
           agentMessages: messages, // All messages from chat history
           agentMessagesOnly: true,
           tools: this.getChatAgentTools(),

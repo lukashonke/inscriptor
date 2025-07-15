@@ -446,7 +446,7 @@ export const usePromptStore = defineStore('prompts', {
         selectedText = request.text;
         inputIsText = true;
 
-        if(request.text.includes('$$$replaceUserPrompt$$$')) {
+        if(request.text && request.text.includes('$$$replaceUserPrompt$$$')) {
           request.text = request.text.replace('$$$replaceUserPrompt$$$', '');
           userPrompt = request.text;
         }
@@ -460,14 +460,7 @@ export const usePromptStore = defineStore('prompts', {
         }
       }
 
-      systemPrompt = systemPrompt.replace('$selection', selectedText ?? '');
-      userPrompt = userPrompt.replace('$selection', selectedText ?? '');
-      if(assistantPrompt) {
-        assistantPrompt = assistantPrompt.replace('$selection', selectedText ?? '');
-      }
-      if(userPrompt2) {
-        userPrompt2 = userPrompt2.replace('$selection', selectedText ?? '');
-      }
+      debugger;
 
       systemPrompt = systemPrompt.replace('$textOrSelection', selectedText ?? '');
       userPrompt = userPrompt.replace('$textOrSelection', selectedText ?? '');
@@ -487,13 +480,7 @@ export const usePromptStore = defineStore('prompts', {
         userPrompt2 = userPrompt2.replace('$chat', selectedText ?? '');
       }
 
-      if(request.agentMessages) {
-        for (const agentMessage of request.agentMessages) {
-          agentMessage.text = agentMessage.text.replace('$selection', selectedText ?? '');
-          agentMessage.text = agentMessage.text.replace('$textOrSelection', selectedText ?? '');
-          agentMessage.text = agentMessage.text.replace('$chat', selectedText ?? '');
-        }
-      }
+
 
       const editor = getEditor();
 
@@ -552,6 +539,29 @@ export const usePromptStore = defineStore('prompts', {
         }
 
         replaceDynamic(/\$textAround\((\d+)\)\((\d+)\)/g);
+      }
+
+      let selectedTextInEditor = selectedText;
+
+      if(!selectedTextInEditor) {
+        selectedTextInEditor = editorSelection;
+      }
+
+      systemPrompt = systemPrompt.replace('$selection', selectedTextInEditor ?? '');
+      userPrompt = userPrompt.replace('$selection', selectedTextInEditor ?? '');
+      if(assistantPrompt) {
+        assistantPrompt = assistantPrompt.replace('$selection', selectedTextInEditor ?? '');
+      }
+      if(userPrompt2) {
+        userPrompt2 = userPrompt2.replace('$selection', selectedTextInEditor ?? '');
+      }
+
+      if(request.agentMessages) {
+        for (const agentMessage of request.agentMessages) {
+          agentMessage.text = agentMessage.text.replace('$selection', selectedTextInEditor ?? '');
+          agentMessage.text = agentMessage.text.replace('$textOrSelection', selectedText ?? '');
+          agentMessage.text = agentMessage.text.replace('$chat', selectedText ?? '');
+        }
       }
 
       function replace(what, withWhat) {
