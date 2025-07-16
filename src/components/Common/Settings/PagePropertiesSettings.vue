@@ -1,6 +1,6 @@
 <template>
   <q-card flat>
-    <q-card-section class="q-gutter-y-sm">
+    <q-card-section class="q-gutter-y-sm no-padding">
       <div class="bordered">
         <q-expansion-item label="Prompts" caption="Predefine prompts for quick summarization, description generation, etc" v-model="layoutStore.settingsPredefinedPromptsOpened">
           <div class="q-py-sm q-gutter-y-md q-px-md">
@@ -88,6 +88,14 @@
         <q-expansion-item label="Default File Settings" caption="Default settings applied to all new files." v-model="layoutStore.settingsDefaultFileSettingsOpened">
           <div class="q-pa-md">
             <FileSettings :file="promptStore.defaultFileTemplate" />
+          </div>
+        </q-expansion-item>
+      </div>
+
+      <div class="bordered">
+        <q-expansion-item label="Showing Differences" caption="Configure how differences are displayed." v-model="layoutStore.settingsShowingDifferencesOpened">
+          <div class="q-pa-sm">
+            <q-checkbox v-model="promptStore.diffsShowRemoved" label="Show deleted text when comparing versions" />
           </div>
         </q-expansion-item>
       </div>

@@ -19,6 +19,24 @@
         </div>
       </div>
       <q-separator class=""/>
+      <div v-if="promptStore.getStickyPrompts(fileStore.selectedFile) && promptStore.getStickyPrompts(fileStore.selectedFile).length > 0" class="row">
+        <div class="col full-width">
+          <q-btn
+            size="12px"
+            no-caps
+            label="Pinned"
+            icon="mdi-pin"
+            :class="[
+              'bg-orange' + (currentPromptCategory === '-pinned-' ? '-1' : '-0'),
+               'text-orange-9'
+               ]"
+            class="full-width items-start"
+            unelevated
+            @click="currentPromptCategory = '-pinned-'">
+          </q-btn>
+        </div>
+      </div>
+      <q-separator class=""/>
       <div v-for="category in categories"
            :key="category.label" class="row">
         <div class="col full-width">
@@ -146,6 +164,18 @@
 
                 </q-list>
               </q-btn-dropdown>
+            </div>
+          </div>
+        </q-card-section>
+
+        <q-card-section v-if="currentPromptCategory === '-pinned-'" class="full-width q-pa-sm" id="promptSelectorPinnedPrompts">
+          <div class="q-pa-sm shadow-1">
+            <div class="q-mt-xs">
+              <template v-for="prompt in promptStore.getStickyPrompts(fileStore.selectedFile)" :key="prompt.id">
+                <div class="row text-caption full-width q-pb-xs">
+                  <PromptSelectorItem :prompt="prompt" @promptClick="promptClick" />
+                </div>
+              </template>
             </div>
           </div>
         </q-card-section>
