@@ -236,6 +236,7 @@
                               :options="availablePrompts"
                               emit-value
                               map-options
+                              options-dense
                               class="full-width"
                             />
                           </div>

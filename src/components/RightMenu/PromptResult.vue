@@ -1389,7 +1389,7 @@
 
 <style scoped>
   .prompt-actions{
-    z-index: 1000;
+    z-index: 5;
     height: 1.7rem;
   }
 

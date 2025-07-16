@@ -12,17 +12,14 @@
 
       <!-- Chat controls and pagination -->
       <div class="col-auto">
-        <div class="flex justify-center q-mb-md" v-if="maxChatsPage > 0">
+        <div class="flex items-center justify-center q-mb-md" v-if="maxChatsPage > 0">
           <div class="col-auto flex items-center" v-if="maxChatsPage > 0">
             <q-pagination :max="maxChatsPage" v-model="page" direction-links :boundary-links="false" />
           </div>
 
           <!-- Current file indicator -->
-          <div class="col flex items-center justify-center">
-            <div v-if="currentFile" class="file-indicator q-mb-sm">
-              <q-icon :name="currentFile.icon" class="text-primary q-mr-xs" size="xs" />
-              <span class="text-caption text-grey-7">{{ currentFile.title }} chat</span>
-            </div>
+          <div class="col flex items-center justify-center file-indicator" v-if="currentFile" >
+            <FileDetailItem :file="currentFile" hide-context-type />
           </div>
 
           <div class="col-auto flex items-center q-mr-sm">
@@ -274,6 +271,7 @@ import { useFileStore } from 'stores/file-store';
 import { Dialog } from 'quasar';
 import ToolCallDisplay from './ToolCallDisplay.vue';
 import AgentPromptResult from './AgentPromptResult.vue';
+import FileDetailItem from 'components/Common/Files/FileDetailItem.vue';
 
 const aiAgentStore = useAiAgentStore();
 const promptStore = usePromptStore();
@@ -396,9 +394,9 @@ async function sendMessage() {
   }
 
   const message = inputText.value.trim();
-  
+
   await aiAgentStore.executeAgentPrompt(message, prompt);
-  
+
   // Clear input and restore focus after the async operation
   inputText.value = '';
   nextTick(() => {

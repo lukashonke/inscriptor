@@ -4,7 +4,7 @@
       <q-card-section class="row items-center">
         <div class="text-h6">{{ prompt.title }} prompt preview</div>
         <q-space />
-        <q-btn icon="close" flat round dense v-close-popup />
+        <q-btn icon="close" flat round dense @click="closePreview" />
       </q-card-section>
 
       <q-separator />
@@ -546,6 +546,16 @@
     } else {
       await executeConfirmPrompt2(request);
     }
+  }
+
+  function closePreview() {
+    debugger;
+    const request = promptStore.currentPromptConfirmationRequest;
+    if(request) {
+      request.previewOnly = false;
+    }
+
+    promptPreviewShown.value = false;
   }
 
   async function previewPrompt() {

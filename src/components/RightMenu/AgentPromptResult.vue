@@ -19,7 +19,7 @@
       <div class="chat-message-header">
         <span class="chat-message-role">AI:</span>
       </div>
-      <div class="chat-message-content text-editor">
+      <div class="chat-message-content">
         <div v-if="message.content" :class="writeClasses" v-html="markdownToHtml(message.content)"></div>
       </div>
     </div>
@@ -31,8 +31,10 @@
       <div class="chat-message-header">
         <span class="chat-message-role">System:</span>
       </div>
-      <div class="chat-message-content text-editor text-red ">
-        {{ message.content }}
+      <div class="chat-message-content text-editor-non-indented text-red ">
+        <div class="tiptap">
+          {{ message.content }}
+        </div>
       </div>
     </div>
   </div>
@@ -213,12 +215,11 @@ const writeClasses = computed(() => {
     'write-medium': (fileStore.selectedFile?.settings?.fontSize ?? 'medium') === 'medium',
     'write-large': fileStore.selectedFile?.settings?.fontSize === 'large',
 
-    'text-editor': (fileStore.selectedFile?.settings?.editorType ?? 'regular') === 'regular',
-    'text-editor-condensed': fileStore.selectedFile?.settings?.editorType === 'condensed',
-    'text-editor-non-indented': fileStore.selectedFile?.settings?.editorType === 'non-indented',
+    'text-editor-non-indented': true,
 
     'prompt-text-editor': true,
     'prompt-results': true,
+    'tiptap': true,
   }
 });
 </script>

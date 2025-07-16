@@ -149,7 +149,7 @@
                           </q-item-section>
                           <q-item-section side class="flex items-center">
                             <div class="text-grey-8 q-gutter-xs flex items-center">
-                              <q-checkbox label="Run on Select" flat dense round :model-value="prompt.runOnSelection" @update:model-value="(val) => promptStore.updateAnalysisPrompt(prompt, {runOnSelection: val})"  >
+                              <q-checkbox label="Run from Context Menu" flat dense round :model-value="prompt.runOnSelection" @update:model-value="(val) => promptStore.updateAnalysisPrompt(prompt, {runOnSelection: val})"  >
                                 <q-tooltip :delay="500">
                                   Triggers automatically when you select a text
                                 </q-tooltip>
