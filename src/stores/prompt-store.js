@@ -460,8 +460,6 @@ export const usePromptStore = defineStore('prompts', {
         }
       }
 
-      debugger;
-
       systemPrompt = systemPrompt.replace('$textOrSelection', selectedText ?? '');
       userPrompt = userPrompt.replace('$textOrSelection', selectedText ?? '');
       if(assistantPrompt) {

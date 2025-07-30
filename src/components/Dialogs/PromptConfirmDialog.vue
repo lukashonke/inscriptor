@@ -549,7 +549,6 @@
   }
 
   function closePreview() {
-    debugger;
     const request = promptStore.currentPromptConfirmationRequest;
     if(request) {
       request.previewOnly = false;
