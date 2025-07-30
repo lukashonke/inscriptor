@@ -1085,10 +1085,21 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "getCurrentDocument",
-            description: "Get the current document content with paragraph IDs. Each paragraph is formatted as [nodeId]: content. Call this before making changes to the current file to ensure proper position.",
+            description: "Get the current document content with paragraph IDs and a list of all child files. Each paragraph is formatted as [nodeId]: content. Also shows the file hierarchy with metadata for all child files. Call this before making changes to the current file to ensure proper position.",
             parameters: {
               type: "object",
-              properties: {},
+              properties: {
+                includeChildFileSummaries: {
+                  type: "boolean",
+                  description: "Whether to include file summaries in the child files tree",
+                  default: false
+                },
+                maxSummaryLength: {
+                  type: "number",
+                  description: "Maximum length of summaries to display (characters)",
+                  default: 100
+                }
+              },
               required: []
             }
           }
@@ -1104,6 +1115,16 @@ export const useAiAgentStore = defineStore('ai-agent', {
                 contextType: {
                   type: "string",
                   description: "Optional filter to only show files of a specific context type (e.g., 'Manuscript', 'Characters', 'Places', 'Notes', 'Research'). If not provided or set to 'all', shows all files regardless of context type."
+                },
+                includeSummaries: {
+                  type: "boolean",
+                  description: "Whether to include file summaries in the file tree",
+                  default: false
+                },
+                maxSummaryLength: {
+                  type: "number",
+                  description: "Maximum length of summaries to display (characters)",
+                  default: 100
                 }
               },
               required: []
@@ -1114,7 +1135,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "readFile",
-            description: "Read the content of a specific file in the project. Can read full content or just synopsis. Use the file ID from listProjectFiles (shown as 'ID: abc123' in the brackets).",
+            description: "Read the content of a specific file in the project. Can read full content or just summary. Use the file ID from listProjectFiles (shown as 'ID: abc123' in the brackets). Also shows all child files with their metadata.",
             parameters: {
               type: "object",
               properties: {
@@ -1124,8 +1145,18 @@ export const useAiAgentStore = defineStore('ai-agent', {
                 },
                 readType: {
                   type: "string",
-                  description: "Type of read operation: 'full' for complete content or 'synopsis' for synopsis only",
-                  enum: ["full", "synopsis"]
+                  description: "Type of read operation: 'full' for complete content or 'summary' for summary only",
+                  enum: ["full", "summary"]
+                },
+                includeChildFileSummaries: {
+                  type: "boolean",
+                  description: "Whether to include file summaries in the child files tree",
+                  default: false
+                },
+                maxSummaryLength: {
+                  type: "number",
+                  description: "Maximum length of summaries to display (characters)",
+                  default: 100
                 }
               },
               required: ["fileId"]
@@ -1171,7 +1202,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "setFileSummary",
-            description: "Set the synopsis/summary for a file. If no fileId is provided, sets the summary for the current active file. Prefer this tool to appending summary paragraphs to the documents.",
+            description: "Set the summary for a file. If no fileId is provided, sets the summary for the current active file. Prefer this tool to appending summary paragraphs to the documents.",
             parameters: {
               type: "object",
               properties: {
@@ -1179,12 +1210,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
                   type: "string",
                   description: "The ID of the file to set the summary for. If not provided, uses the current active file."
                 },
-                synopsis: {
+                summary: {
                   type: "string",
-                  description: "The synopsis/summary content to set for the file"
+                  description: "The summary content to set for the file"
                 }
               },
-              required: ["synopsis"]
+              required: ["summary"]
             }
           }
         },
@@ -1192,7 +1223,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "search",
-            description: "Search through all project files using exact or fuzzy matching. By default, searches in all fields (title, content, and synopsis) across all context types for comprehensive results. Only provide optional parameters if you need to narrow the search scope.",
+            description: "Search through all project files using exact or fuzzy matching. By default, searches in all fields (title, content, and summary) across all context types for comprehensive results. Only provide optional parameters if you need to narrow the search scope.",
             parameters: {
               type: "object",
               properties: {
@@ -1202,8 +1233,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
                 },
                 searchType: {
                   type: "string",
-                  description: "Optional: Type of content to search in. Defaults to 'all' which searches across title, content, and synopsis. Only specify 'title', 'content', or 'synopsis' if you specifically need to limit the search to a single field.",
-                  enum: ["title", "content", "synopsis", "all"],
+                  description: "Optional: Type of content to search in. Defaults to 'all' which searches across title, content, and summary. Only specify 'title', 'content', or 'summary' if you specifically need to limit the search to a single field.",
+                  enum: ["title", "content", "summary", "all"],
                   default: "all"
                 },
                 contextType: {
@@ -1337,7 +1368,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
       switch (toolName) {
         case 'getCurrentDocument':
-          return this.executeGetCurrentDocumentTool();
+          return this.executeGetCurrentDocumentTool(args);
         case 'listProjectFiles':
           return this.executeListProjectFilesTool(args);
         case 'readFile':
@@ -1358,23 +1389,126 @@ export const useAiAgentStore = defineStore('ai-agent', {
           return { error: `Unknown tool: ${toolName}` };
       }
     },
-    executeGetCurrentDocumentTool() {
+    // Helper method to format file tree with all levels
+    formatFileTreeForAgent(files, fileStore, depth = 0, prefix = "", includeSummaries = false, maxSummaryLength = 100) {
+      let output = '';
+      
+      files.forEach((file, index) => {
+        const isLastFile = index === files.length - 1;
+        const connector = isLastFile ? "└── " : "├── ";
+        const childPrefix = prefix + (isLastFile ? "    " : "│   ");
+        
+        const metadata = [];
+        
+        output += prefix + connector + file.title + ` [ID: ${file.id}]`;
+        
+        if (file.labels && file.labels.length > 0) {
+          const labelNames = file.labels.map(label => typeof label === 'string' ? label : label.label).join(', ');
+          metadata.push(`Labels: ${labelNames}`);
+        }
+        
+        if (file.settings && file.settings.contextType && file.settings.contextType.label) {
+          metadata.push(`Context: ${file.settings.contextType.label}`);
+        }
+        
+        const wordCount = fileStore.getTextWords(file, true, false);
+        if (wordCount) {
+          metadata.push(`Content: ${wordCount}`);
+        }
+        
+        // Add summary word count if summary exists
+        if (file.synopsis && file.synopsis.trim()) {
+          const summaryWords = file.synopsis.trim().split(/\s+/).length;
+          metadata.push(`Summary: ${summaryWords} words`);
+        }
+        
+        if (file.children && file.children.length > 0) {
+          metadata.push(`${file.children.length} sub-files`);
+        }
+        
+        if (metadata.length > 0) {
+          output += ` (${metadata.join(', ')})`;
+        }
+        
+        output += '\n';
+        
+        // Add summary content if requested
+        if (includeSummaries && file.synopsis && file.synopsis.trim()) {
+          const summaryText = file.synopsis.trim();
+          const truncatedSummary = summaryText.length > maxSummaryLength 
+            ? summaryText.substring(0, maxSummaryLength) + '...' 
+            : summaryText;
+          output += prefix + (isLastFile && (!file.children || file.children.length === 0) ? '    ' : '│   ') + '📝 ' + truncatedSummary + '\n';
+        }
+        
+        // Recursively add children
+        if (file.children && file.children.length > 0) {
+          output += this.formatFileTreeForAgent(file.children, fileStore, depth + 1, childPrefix, includeSummaries, maxSummaryLength);
+        }
+      });
+      
+      return output;
+    },
+    executeGetCurrentDocumentTool(args) {
+      const { includeChildFileSummaries = false, maxSummaryLength = 100 } = args || {};
+      const fileStore = useFileStore();
+      const currentFile = fileStore.selectedFile;
+      
+      let output = '';
+      
+      // Add current file metadata
+      if (currentFile) {
+        output += `CURRENT FILE: ${currentFile.title}\n`;
+        output += `Path: ${fileStore.getFileNameWithPath(currentFile)}\n`;
+        
+        // Add file metadata
+        const metadata = [];
+        if (currentFile.labels && currentFile.labels.length > 0) {
+          const labelNames = currentFile.labels.map(label => typeof label === 'string' ? label : label.label).join(', ');
+          metadata.push(`Labels: ${labelNames}`);
+        }
+        
+        if (currentFile.settings && currentFile.settings.contextType && currentFile.settings.contextType.label) {
+          metadata.push(`Context: ${currentFile.settings.contextType.label}`);
+        }
+        
+        if (currentFile.state && currentFile.state.trim()) {
+          metadata.push(`State: ${currentFile.state}`);
+        }
+        
+        const wordCount = fileStore.getTextWords(currentFile, true, false);
+        if (wordCount) {
+          metadata.push(`Word Count: ${wordCount}`);
+        }
+        
+        if (metadata.length > 0) {
+          output += metadata.join(' | ') + '\n';
+        }
+        
+        output += '\nDOCUMENT CONTENT:\n';
+      }
+      
       const documentContent = this.generateFullFileWithNodeIds();
 
       if (!documentContent) {
-        return {
-          success: true,
-          content: "The document is empty."
-        };
+        output += "The document is empty.";
+      } else {
+        output += documentContent;
+      }
+      
+      // Add children files information after content
+      if (currentFile && currentFile.children && currentFile.children.length > 0) {
+        output += `\n\nCHILDREN FILES:\n`;
+        output += this.formatFileTreeForAgent(currentFile.children, fileStore, 0, "", includeChildFileSummaries, maxSummaryLength);
       }
 
       return {
         success: true,
-        content: documentContent
+        content: output
       };
     },
     executeListProjectFilesTool(args) {
-      const { contextType } = args || {};
+      const { contextType, includeSummaries = false, maxSummaryLength = 100 } = args || {};
       const fileStore = useFileStore();
 
       if (!fileStore.files || fileStore.files.length === 0) {
@@ -1399,82 +1533,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
       let output = "PROJECT FILES:\n";
       output += "Note: Use the ID values shown in brackets to read specific files with the readFile tool.\n\n";
 
-      const formatFileTree = (files, depth = 0, isLast = true, prefix = "") => {
-        let result = "";
-
-        for (let i = 0; i < files.length; i++) {
-          const file = files[i];
-          const isLastFile = i === files.length - 1;
-
-          // Create tree structure visual
-          const connector = isLastFile ? "└── " : "├── ";
-          const fullPrefix = prefix + connector;
-
-          // Format file title with metadata
-          let fileInfo = file.title;
-
-          // Add metadata in brackets
-          const metadata = [];
-
-          // Add file ID first - make it more prominent
-          metadata.push(`ID: ${file.id}`);
-
-          // Add labels if any
-          if (file.labels && file.labels.length > 0) {
-            const labelNames = file.labels.map(label => typeof label === 'string' ? label : label.label).join(', ');
-            metadata.push(`labels: ${labelNames}`);
-          }
-
-          // Add context type if set
-          if (file.settings && file.settings.contextType && file.settings.contextType.label) {
-            metadata.push(`context: ${file.settings.contextType.label}`);
-          }
-
-          // Add synopsis if available
-          /*if (file.synopsis && file.synopsis.trim()) {
-            const shortSynopsis = file.synopsis.length > 50 ? file.synopsis.substring(0, 50) + "..." : file.synopsis;
-            metadata.push(`synopsis: "${shortSynopsis}"`);
-          }*/
-
-          // Add state if set
-          if (file.state && file.state.trim()) {
-            metadata.push(`state: ${file.state}`);
-          }
-
-          // Add word count
-          const wordCount = fileStore.getTextWords(file, true, false);
-          if (wordCount) {
-            metadata.push(wordCount);
-          }
-
-          // Add icon if not default
-          if (file.icon && file.icon !== 'mdi-file-outline') {
-            metadata.push(`icon: ${file.icon}`);
-          }
-
-          // Add folder indicator
-          if (file.children && file.children.length > 0) {
-            metadata.push(`${file.children.length} items`);
-          }
-
-          // Format the line
-          if (metadata.length > 0) {
-            fileInfo += ` [${metadata.join('] [')}]`;
-          }
-
-          result += fullPrefix + fileInfo + "\n";
-
-          // Add children if any
-          if (file.children && file.children.length > 0) {
-            const childPrefix = prefix + (isLastFile ? "    " : "│   ");
-            result += formatFileTree(file.children, depth + 1, isLastFile, childPrefix);
-          }
-        }
-
-        return result;
-      };
-
-      output += formatFileTree(filesToProcess);
+      output += this.formatFileTreeForAgent(filesToProcess, fileStore, 0, "", includeSummaries, maxSummaryLength);
 
       // Add project summary
       const totalFiles = this.countAllFiles(filesToProcess);
@@ -1495,7 +1554,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
       };
     },
     executeReadFileTool(args) {
-      const { fileId, readType = 'full' } = args;
+      const { fileId, readType = 'full', includeChildFileSummaries = false, maxSummaryLength = 100 } = args;
 
       if (!fileId) {
         return { error: "fileId parameter is required" };
@@ -1551,12 +1610,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
       output += '\n';
 
-      if (readType === 'synopsis') {
-        output += 'SYNOPSIS:\n';
+      if (readType === 'summary') {
+        output += 'SUMMARY:\n';
         if (file.synopsis && file.synopsis.trim()) {
           output += file.synopsis;
         } else {
-          output += 'No synopsis available for this file.';
+          output += 'No summary available for this file.';
         }
       } else {
         // Default to full content
@@ -1571,53 +1630,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
       // Add children files information if available
       if (file.children && file.children.length > 0) {
         output += '\n\nCHILDREN FILES:\n';
-        output += `This file contains ${file.children.length} child file(s). You can read any of them using the readFile tool with their IDs:\n\n`;
-
-        // Format children files with metadata
-        file.children.forEach((child) => {
-          const childMetadata = [];
-
-          // Add child ID prominently
-          output += `- ${child.title} [ID: ${child.id}]\n`;
-
-          // Add child metadata
-          if (child.labels && child.labels.length > 0) {
-            const labelNames = child.labels.map(label => typeof label === 'string' ? label : label.label).join(', ');
-            childMetadata.push(`Labels: ${labelNames}`);
-          }
-
-          if (child.settings && child.settings.contextType && child.settings.contextType.label) {
-            childMetadata.push(`Context type: ${child.settings.contextType.label}`);
-          }
-
-          if (child.state && child.state.trim()) {
-            childMetadata.push(`State: ${child.state}`);
-          }
-
-          const childWordCount = fileStore.getTextWords(child, true, false);
-          if (childWordCount) {
-            childMetadata.push(`Word count: ${childWordCount}`);
-          }
-
-          if (child.children && child.children.length > 0) {
-            childMetadata.push(`Contains: ${child.children.length} children files`);
-          }
-
-          // Add synopsis preview if available
-          if (child.synopsis && child.synopsis.trim()) {
-            const shortSynopsis = child.synopsis.length > 80 ? child.synopsis.substring(0, 80) + "..." : child.synopsis;
-            childMetadata.push(`Synopsis snippet: "${shortSynopsis}"`);
-          }
-
-          // Output metadata if any
-          if (childMetadata.length > 0) {
-            output += `   ${childMetadata.join(' | ')}\n`;
-          }
-
-          output += '\n';
-        });
-
-        output += `To read any child file, use: readFile({"fileId": "<child_id>", "readType": "full" or "synopsis"})`;
+        output += this.formatFileTreeForAgent(file.children, fileStore, 0, "", includeChildFileSummaries, maxSummaryLength);
+        output += `\nTo read any child file, use: readFile({"fileId": "<child_id>", "readType": "full" or "summary"})`;
       }
 
       return {
@@ -1626,10 +1640,10 @@ export const useAiAgentStore = defineStore('ai-agent', {
       };
     },
     executeSetFileSummaryTool(args) {
-      const { fileId, synopsis } = args;
+      const { fileId, summary } = args;
 
-      if (!synopsis) {
-        return { error: "synopsis parameter is required" };
+      if (!summary) {
+        return { error: "summary parameter is required" };
       }
 
       const fileStore = useFileStore();
@@ -1649,12 +1663,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
         }
       }
 
-      // Use the file store method to set the synopsis
-      fileStore.setFileSummary(file, synopsis);
+      // Use the file store method to set the summary
+      fileStore.setFileSummary(file, summary);
 
       return {
         success: true,
-        content: `Successfully set synopsis for file "${file.title}". Synopsis: "${synopsis}"`
+        content: `Successfully set summary for file "${file.title}". Summary: "${summary}"`
       };
     },
     executeSearchTool(args) {
@@ -1671,8 +1685,11 @@ export const useAiAgentStore = defineStore('ai-agent', {
         return { error: "searchQuery parameter is required and cannot be empty" };
       }
 
+      // Map 'summary' to 'synopsis' for backward compatibility with searchFiles
+      const mappedSearchType = searchType === 'summary' ? 'synopsis' : searchType;
+
       const { searchFiles } = useFileSearch();
-      return searchFiles(searchQuery, searchType, fuzzySearch, maxResults, threshold, false, contextType);
+      return searchFiles(searchQuery, mappedSearchType, fuzzySearch, maxResults, threshold, false, contextType);
     },
     executeGetAvailableAIPromptsTool(args) {
       const promptStore = usePromptStore();
