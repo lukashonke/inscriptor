@@ -1568,6 +1568,58 @@ export const useAiAgentStore = defineStore('ai-agent', {
         }
       }
 
+      // Add children files information if available
+      if (file.children && file.children.length > 0) {
+        output += '\n\nCHILDREN FILES:\n';
+        output += `This file contains ${file.children.length} child file(s). You can read any of them using the readFile tool with their IDs:\n\n`;
+
+        // Format children files with metadata
+        file.children.forEach((child) => {
+          const childMetadata = [];
+
+          // Add child ID prominently
+          output += `- ${child.title} [ID: ${child.id}]\n`;
+
+          // Add child metadata
+          if (child.labels && child.labels.length > 0) {
+            const labelNames = child.labels.map(label => typeof label === 'string' ? label : label.label).join(', ');
+            childMetadata.push(`Labels: ${labelNames}`);
+          }
+
+          if (child.settings && child.settings.contextType && child.settings.contextType.label) {
+            childMetadata.push(`Context type: ${child.settings.contextType.label}`);
+          }
+
+          if (child.state && child.state.trim()) {
+            childMetadata.push(`State: ${child.state}`);
+          }
+
+          const childWordCount = fileStore.getTextWords(child, true, false);
+          if (childWordCount) {
+            childMetadata.push(`Word count: ${childWordCount}`);
+          }
+
+          if (child.children && child.children.length > 0) {
+            childMetadata.push(`Contains: ${child.children.length} children files`);
+          }
+
+          // Add synopsis preview if available
+          if (child.synopsis && child.synopsis.trim()) {
+            const shortSynopsis = child.synopsis.length > 80 ? child.synopsis.substring(0, 80) + "..." : child.synopsis;
+            childMetadata.push(`Synopsis snippet: "${shortSynopsis}"`);
+          }
+
+          // Output metadata if any
+          if (childMetadata.length > 0) {
+            output += `   ${childMetadata.join(' | ')}\n`;
+          }
+
+          output += '\n';
+        });
+
+        output += `To read any child file, use: readFile({"fileId": "<child_id>", "readType": "full" or "synopsis"})`;
+      }
+
       return {
         success: true,
         content: output
