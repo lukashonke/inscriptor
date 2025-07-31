@@ -31,19 +31,35 @@
               </div>
 
               <template  v-if="variable.title === 'WritingStyle'">
-                <div class="row justify-center q-mt-md q-mb-sm">
-                  <q-pagination
-                    v-model="current"
-                    :max="maxPages"
-                    direction-links
+                <div class="q-mt-md">
+                  <q-btn
+                    dense
+                    flat
+                    no-caps
+                    :icon="showWritingStyles ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+                    :label="showWritingStyles ? 'Hide Examples' : 'Show Examples'"
+                    @click="showWritingStyles = !showWritingStyles"
+                    color="primary"
                   />
                 </div>
 
-                <div class="row">
-                  <div v-for="writingStyle in writingStyles.slice((current - 1) * pageSize, current * pageSize)" :key="writingStyle" class="col-4 q-pa-sm">
-                    <WritingStyleSelectorItem  @writing-style-set="variable.value = writingStyle.value" :writingStyle="writingStyle" />
+                <q-slide-transition>
+                  <div v-if="showWritingStyles">
+                    <div class="row justify-center q-mt-md q-mb-sm">
+                      <q-pagination
+                        v-model="current"
+                        :max="maxPages"
+                        direction-links
+                      />
+                    </div>
+
+                    <div class="row">
+                      <div v-for="writingStyle in writingStyles.slice((current - 1) * pageSize, current * pageSize)" :key="writingStyle" class="col-4 q-pa-sm">
+                        <WritingStyleSelectorItem  @writing-style-set="variable.value = writingStyle.value" :writingStyle="writingStyle" />
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </q-slide-transition>
 
               </template>
 
@@ -73,6 +89,7 @@
   const maxPages = computed(() => Math.ceil(writingStyles.length / pageSize));
   const current = ref(1);
   const pageSize = 3;
+  const showWritingStyles = ref(false);
 
   const variableSettingsOpened = computed({
     get() {

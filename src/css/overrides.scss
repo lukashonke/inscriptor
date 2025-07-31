@@ -10,6 +10,10 @@
   border-radius: 6px;
 }
 
+.q-field--filled .q-field__control::after {
+  height: 0px !important;
+}
+
 .q-field--square {
   border-radius: 6px !important;
 }
@@ -32,6 +36,12 @@
 
 .q-item__section .q-icon {
   font-size: 20px
+}
+
+.q-hoverable:hover {
+  .q-focus-helper {
+    border-radius: 6px !important;
+  }
 }
 
 .q-list {

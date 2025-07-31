@@ -311,13 +311,14 @@
           />
 
           <q-menu v-if="!isAgentActive">
-            <q-list dense>
+            <q-list>
               <q-item v-for="agent in promptStore.projectAgents" :key="agent.id" clickable v-close-popup @click="runProjectAgent(agent)">
                 <q-item-section>
                   <q-item-label class="flex items-center text-caption">
-                    <q-icon :name="promptStore.getPromptById(agent.promptId)?.icon ?? 'mdi-robot-outline'" color="accent" size="xs" class="q-mr-sm" />
+                    <q-icon :name="(promptStore.getPromptById(agent.promptId)?.icon?.length > 0) ? promptStore.getPromptById(agent.promptId).icon : 'mdi-robot-outline'" :color="(promptStore.getPromptById(agent.promptId)?.color?.length > 0) ? promptStore.getPromptById(agent.promptId).color : undefined" size="15px" class="q-mr-sm" />
                     {{ agent.title }}
                   </q-item-label>
+                  <q-item-label caption>{{ agent.description }}</q-item-label>
                 </q-item-section>
               </q-item>
             </q-list>

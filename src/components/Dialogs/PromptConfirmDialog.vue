@@ -379,13 +379,36 @@
 
       <q-card-actions class="text-primary">
 
-        <div class="col-auto">
-          <q-select filled dense label="AI model" :options="models" v-model="model" option-label="name" option-value="id" options-dense />
+        <div class="col-auto" >
+          <q-btn flat dense label="Settings" no-caps icon="mdi-cog-outline">
+            <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" >
+              <q-card>
+                <q-card-section>
+                  <q-select filled dense label="AI model" :options="models" v-model="model" option-label="name" option-value="id" options-dense />
+                </q-card-section>
+                <q-card-section v-if="promptStore.promptAgents && promptStore.promptAgents.length > 0">
+                  <div class="text-caption flex items-center">
+                    Prompt Agents:
+                  </div>
+                  <q-list>
+                    <q-item v-for="agent in promptStore.promptAgents" :key="agent.id" @click="togglePromptAgent(agent)" dense clickable>
+                      <q-item-section side>
+                        <q-checkbox :model-value="isAgentSelected(agent)" @click="togglePromptAgent(agent)" :color="isAgentSelected(agent) ? 'accent' : ''" />
+                      </q-item-section>
+                      <q-item-section>{{ agent.title }}</q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-card-section>
+              </q-card>
+            </q-popup-proxy>
+          </q-btn>
         </div>
+
+
         <div class="col">
         </div>
         <div class="col-auto q-mr-md" v-if="!request.agent">
-          <q-btn flat label="Preview & Cost" color="secondary" @click="previewPrompt" class="float-left" :disable="!canConfirmPrompt"/>
+          <q-btn flat label="Preview & Cost" no-caps color="secondary" @click="previewPrompt" class="float-left" :disable="!canConfirmPrompt"/>
         </div>
         <div class="col-auto">
           <q-btn color="accent" :icon="request.agent ? 'mdi-robot-outline' : 'mdi-creation-outline'" :label="request.agent ? 'Run Agent' : 'Run Prompt'" v-close-popup @click="confirmPrompt(false)" class="float-right" :disable="!canConfirmPrompt" autofocus/>
@@ -401,6 +424,7 @@
   import {computed, ref} from "vue";
   import {convertHtmlToText, removeHtmlTags, tokenise, truncate} from "src/common/utils/textUtils";
   import {useFileStore} from "stores/file-store";
+  import {guid} from "src/common/utils/guidUtils";
   import CodeEditor from "components/Common/Editors/CodeEditor.vue";
   import {
     currentAndChildrenFilePromptContext,
@@ -529,6 +553,34 @@
 
     return true;
   });
+
+  function togglePromptAgent(agent) {
+    if (!prompt.value) return;
+
+    // Initialize agents array if it doesn't exist
+    if (!prompt.value.agents) {
+      prompt.value.agents = [];
+    }
+
+    // Check if agent is already in the array
+    const existingIndex = prompt.value.agents.findIndex(a => a.agentId === agent.id);
+
+    if (existingIndex !== -1) {
+      // Remove agent if it exists
+      prompt.value.agents.splice(existingIndex, 1);
+    } else {
+      // Add agent if it doesn't exist
+      prompt.value.agents.push({
+        id: guid(),
+        agentId: agent.id
+      });
+    }
+  }
+
+  function isAgentSelected(agent) {
+    if (!prompt.value?.agents) return false;
+    return prompt.value.agents.some(a => a.agentId === agent.id);
+  }
 
   async function confirmPrompt(forceInput) {
     if (!canConfirmPrompt.value) {

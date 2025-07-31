@@ -2493,6 +2493,10 @@ export const usePromptStore = defineStore('prompts', {
         agent.title = args.title;
       }
 
+      if(args.description !== undefined) {
+        agent.description = args.description;
+      }
+
       if(args.promptId !== undefined) {
         agent.promptId = args.promptId;
       }
@@ -2583,7 +2587,7 @@ export const usePromptStore = defineStore('prompts', {
       this.promptAgents.splice(index, 1);
       this.promptAgents.splice(index + 1, 0, agent);
     },
-    addPromptPromptAgent(prompt) {
+    addPromptPromptAgent(prompt, agentId = null) {
       if(!prompt) return;
 
       if(!prompt.agents) {

@@ -91,6 +91,24 @@ export async function importFromMarketplace(packId, category, skipDialog) {
 
         const promptStore = usePromptStore();
 
+        if(itemDetail.data.promptAgents && itemDetail.data.promptAgents.length > 0) {
+          for(const agent of itemDetail.data.promptAgents) {
+            const existingAgent = promptStore.promptAgents.find(a => a.id === agent.id);
+            if(!existingAgent) {
+              promptStore.addPromptAgent(agent);
+            }
+          }
+        }
+
+        if(itemDetail.data.projectAgents && itemDetail.data.projectAgents.length > 0) {
+          for(const agent of itemDetail.data.projectAgents) {
+            const existingAgent = promptStore.projectAgents.find(a => a.id === agent.id);
+            if(!existingAgent) {
+              promptStore.addProjectAgent(agent);
+            }
+          }
+        }
+
         if(itemDetail.data.settingsOverrides) {
           if(itemDetail.data.settingsOverrides.predefinedPrompts) {
             for(const prompt of itemDetail.data.settingsOverrides.predefinedPrompts) {

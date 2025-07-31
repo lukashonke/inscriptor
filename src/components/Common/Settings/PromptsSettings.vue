@@ -30,7 +30,11 @@
                 You can decide to use your own Cloud AI provider, which you will connect using API key. Refer to the documentation of the provider to get the API key. Using such API keys will not consume your Inscriptor AI credits.
               </div>
               <div class="q-mb-sm text-caption">
-                These tokens are stored only in your internet browser or Inscriptor desktop application, ensuring no data including your prompts leave your acomputer. If you access Inscriptor from another device, make sure the re-enter the tokens there as well.
+                These tokens are stored only in your internet browser or Inscriptor desktop application, ensuring no data including your prompts leave your computer. If you access Inscriptor from another device, make sure the re-enter the tokens there as well.
+              </div>
+              <div class="q-mb-sm text-caption">
+                <q-icon name="info" size="xs" class="q-mr-xs" />
+                Note: AI agents are not affected by these API key settings and will always use Inscriptor AI Cloud
               </div>
               </div>
             </div>
@@ -48,6 +52,12 @@
         </q-tab-panel>
 
         <q-tab-panel name="models" class="q-pt-xs">
+          <div class="q-mb-sm" v-if="!anyModelImported">
+            <div class="q-mb-sm bg-negative text-white q-pa-md rounded-borders full-width">
+              <span class="text-caption text-bold">You have not added any AI models yet. Visit Inscriptor Hub to get started!</span>
+            </div>
+          </div>
+
           <div v-for="model in models" :key="model.id">
             <ModelSettingsItem :model="model" />
           </div>
@@ -59,10 +69,9 @@
         </q-tab-panel>
 
         <q-tab-panel name="prompts" class="q-pt-xs">
-          <div class="q-ml-md" v-if="!anyModelImported">
-
-            <div class="q-mb-lg">
-              <span class="text-caption">No models available. Add a model first. </span>
+          <div class="q-mb-md" v-if="!anyModelImported">
+            <div class="q-mb-sm bg-negative text-white q-pa-md rounded-borders full-width">
+              <span class="text-caption text-bold">You have not added any AI models yet. Visit Inscriptor Hub to get started!</span>
             </div>
             <div>
               <q-btn color="primary" label="Inscriptor Hub" icon="mdi-storefront-outline" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
@@ -142,7 +151,15 @@
          </q-tab-panel>
 
         <q-tab-panel name="agents" class="q-pt-xs">
-          <AgentSettings />
+          <div class="q-mb-lg" v-if="!anyModelImported">
+            <div class="q-mb-sm bg-negative text-white q-pa-md rounded-borders full-width">
+              <span class="text-caption text-bold">You have not added any AI models yet. Visit Inscriptor Hub to get started!</span>
+            </div>
+            <div>
+              <q-btn color="primary" label="Inscriptor Hub" icon="mdi-storefront-outline" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
+            </div>
+          </div>
+          <AgentSettings v-else />
         </q-tab-panel>
 
       </q-tab-panels>
@@ -153,7 +170,7 @@
 
 <script setup>
   import {usePromptStore} from "stores/prompt-store";
-  import {computed, ref, watch} from "vue";
+  import {computed, ref, watch, onMounted} from "vue";
   import PromptSettingsItem from "components/Common/Settings/PromptSettingsItem.vue";
   import ModelSettingsItem from "components/Common/Settings/ModelSettingsItem.vue";
   import PagePropertiesSettings from "components/Common/Settings/PagePropertiesSettings.vue";
@@ -178,6 +195,9 @@
   const searchFilter = ref('');
   const selectedModel = ref(null);
   const selectedCategory = ref(null);
+  
+  // Stable filtered prompt IDs that only update when search filter changes
+  const stableFilteredPromptIds = ref(null);
 
   const modelOptions = computed(() => models.value.map(m => ({
     label: m.name,
@@ -191,6 +211,19 @@
       value: category
     }));
   });
+  
+  // Method to update stable filtered prompt IDs based on search filter
+  const updateStableFilteredPromptIds = () => {
+    if (searchFilter.value) {
+      const searchLower = searchFilter.value.toLowerCase();
+      const filtered = prompts.value.filter(prompt =>
+        prompt.title.toLowerCase().includes(searchLower)
+      );
+      stableFilteredPromptIds.value = new Set(filtered.map(p => p.id));
+    } else {
+      stableFilteredPromptIds.value = null;
+    }
+  };
 
   const filteredPrompts = computed(() => {
     let filtered = prompts.value;
@@ -205,12 +238,9 @@
       filtered = filtered.filter(prompt => prompt.category === selectedCategory.value);
     }
 
-    // Apply search filter
-    if (searchFilter.value) {
-      const searchLower = searchFilter.value.toLowerCase();
-      filtered = filtered.filter(prompt =>
-        prompt.title.toLowerCase().includes(searchLower)
-      );
+    // Apply search filter using stable prompt IDs
+    if (stableFilteredPromptIds.value) {
+      filtered = filtered.filter(prompt => stableFilteredPromptIds.value.has(prompt.id));
     }
 
     return filtered;
@@ -224,8 +254,14 @@
     return filteredPrompts.value.slice(start, end);
   });
 
-  // Reset to first page when filters change
-  watch([searchFilter, selectedModel, selectedCategory], () => {
+  // Watch for search filter changes to update stable filtered IDs
+  watch(searchFilter, () => {
+    updateStableFilteredPromptIds();
+    currentPage.value = 1;
+  });
+  
+  // Reset to first page when model or category filters change
+  watch([selectedModel, selectedCategory], () => {
     currentPage.value = 1;
   });
 
@@ -246,6 +282,13 @@
 
   const anyModelImported = computed(() => {
     return promptStore.models.length > 0
+  });
+  
+  // Initialize stable filtered IDs on mount if there's already a search filter
+  onMounted(() => {
+    if (searchFilter.value) {
+      updateStableFilteredPromptIds();
+    }
   });
 
 </script>

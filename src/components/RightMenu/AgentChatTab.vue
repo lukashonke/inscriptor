@@ -211,7 +211,7 @@
                 <div class="col q-ml-sm rounded-borders q-px-sm">
                   <q-input
                     v-model="inputText"
-                    :label="'Message AI...'"
+                    :label="currentModelName && currentPromptName ? `Message ${currentModelName} • ${currentPromptName}...` : 'Message AI...'"
                     borderless
                     class="full-width"
                     rows="4"
@@ -369,6 +369,17 @@ const promptForAgentChatId = computed({
   }
 });
 
+// Computed properties for displaying current model and prompt names
+const currentModelName = computed(() => {
+  const model = promptStore.getModel(promptStore.currentModelForAgentChatId);
+  return model?.name || null;
+});
+
+const currentPromptName = computed(() => {
+  const prompt = promptStore.prompts.find(p => p.id === promptStore.currentPromptForAgentChatId);
+  return prompt?.title || null;
+});
+
 
 // Methods
 async function onInputKey(e) {
@@ -438,6 +449,16 @@ onMounted(() => {
   // Create initial chat if none exists
   if (allChats.value.length === 0) {
     aiAgentStore.createAgentChat();
+  }
+
+  // Auto-select first model and prompt if none selected
+  if (!promptStore.currentModelForAgentChatId && promptStore.models.length > 0) {
+    const firstModel = promptStore.models[0];
+    modelForAgentChatId.value = {
+      label: firstModel.name,
+      value: firstModel.id
+    };
+    // The modelForAgentChatId setter will auto-select the first chat prompt
   }
 });
 
@@ -577,6 +598,7 @@ body.body--dark .help-text-area {
 
 body.body--dark .file-indicator {
 }
+
 
 .tool-call-container {
   max-width: 80%;

@@ -3,7 +3,7 @@
     <q-card-section class="q-gutter-y-sm no-padding">
       <div class="q-gutter-y-sm">
 
-        <div class="text-caption text-amber q-mb-md"><strong>⭐ Note:</strong> AI Agents require Inscriptor AI cloud credits.</div>
+        <div class="text-caption text-accent q-mb-md"><strong>⭐ Note:</strong> AI Agents require Inscriptor AI cloud credits.</div>
 
         <div class="bordered">
 
@@ -225,6 +225,14 @@
                               label="Agent Name"
                               :model-value="agent.title"
                               v-on:update:model-value="updateProjectAgent(agent, {title: $event})"
+                              class="full-width"
+                            />
+                            <q-input
+                              filled
+                              dense
+                              label="Agent Description"
+                              :model-value="agent.description"
+                              v-on:update:model-value="updateProjectAgent(agent, {description: $event})"
                               class="full-width"
                             />
                             <q-select
