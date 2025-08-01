@@ -94,7 +94,7 @@
           </div>
 
           <div class="col ellipsis" v-if="showPromptInfo">
-            <q-badge class="q-ml-md q-gutter-x-xs hoverable-btn-semi">
+            <q-badge class="q-ml-md q-gutter-x-xs hoverable-btn-semi ">
               <span>{{ promptResultTitle }}</span>
               <span v-if="promptResultModel?.length > 0"><q-icon name="mdi-chip"  />{{ promptResultModel }}</span>
               <span v-if="promptResultTemperature"><q-icon  name="mdi-thermometer-low" /> {{ promptResultTemperature }}</span>
@@ -107,7 +107,6 @@
               <span>{{ promptResult.title }}</span>
             </q-badge>
           </div>
-          <div class="col" v-else />
 
           <div class="col-auto" v-if="collapsed">
             <q-btn color="grey-7" flat unelevated size="sm" :icon="collapsed ? 'mdi-plus-square' : 'mdi-minus-box-outline'" @click="collapsed = !collapsed" class="hoverable-btn-semi">
@@ -352,8 +351,8 @@
         </q-btn>
       </div>
 
-      <div v-if="!isPrompting && allowRegenerate && collapsed === false && promptResult.prompt.promptType !== 'chat' && promptResult.prompt.promptStyle !== 'brainstorm-ui'" class="row prompt-actions overflow-hidden-y">
-        <div class="col-auto">
+      <div v-if="!isPrompting && collapsed === false && promptResult.prompt.promptType !== 'chat' && promptResult.prompt.promptStyle !== 'brainstorm-ui' && !isImageGenerationModel(model)" class="row prompt-actions overflow-hidden-y">
+        <div class="col-auto" v-if="allowRegenerate">
           <q-btn class="text-weight-bold hoverable-btn-semi" label="Reply" no-caps flat color="grey-7" unelevated size="sm" icon="mdi-reply-outline" @click.prevent="toggleReply()">
             <q-tooltip>Reply on this prompt to AI</q-tooltip>
           </q-btn>
@@ -369,6 +368,8 @@
             </q-tooltip>
           </q-btn>
           <template v-if="promptResult.followUpQuestions">
+            <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm" no-caps @click.prevent="removeFollowUpQuestions()" icon="mdi-close">
+            </q-btn>
             <template v-for="question in promptResult.followUpQuestions" :key="question.title">
               <q-btn class="col-auto text-weight-bold hoverable-btn-semi" :label="question.title" flat color="accent" unelevated size="sm" no-caps
                 @click.prevent="doPromptAction({type: 'Reply', typeParameter: question.followUp})">
@@ -377,9 +378,7 @@
                 </q-tooltip>
               </q-btn>
             </template>
-            <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm" no-caps
-              @click.prevent="removeFollowUpQuestions()" icon="mdi-close">
-            </q-btn>
+
           </template>
           <template v-else>
             <template v-for="(promptAction, index) in promptResult.prompt.actions ?? []" :key="index">
@@ -404,7 +403,7 @@
 
         <q-space />
 
-        <div class="col-auto">
+        <div class="col-auto" v-if="allowRegenerate">
           <q-btn v-if="!promptResult.prompt.enablePromptRuns" class="text-weight-bold float-right hoverable-btn-semi" flat color="grey-7"
             unelevated size="sm" icon="arrow_drop_down">
             <q-menu>
@@ -567,6 +566,7 @@
   import {Heading} from "@tiptap/extension-heading";
   import {Blockquote} from "@tiptap/extension-blockquote";
   import VueMermaidString from 'vue-mermaid-string'
+  import {isImageGenerationModel} from "src/common/helpers/modelHelper";
 
   const promptStore = usePromptStore();
   const fileStore = useFileStore();
@@ -1315,8 +1315,12 @@
     return retValue;
   });
 
+  const model = computed(() => {
+    return promptStore.getModel(props.promptResult.model?.id);
+  })
+
   const promptResultModel = computed(() => {
-    return truncate(promptStore.getModel(props.promptResult.model?.id)?.name, 12);
+    return truncate(promptStore.getModel(props.promptResult.model?.id)?.name, 30);
   });
 
   const promptResultTemperature = computed(() => {

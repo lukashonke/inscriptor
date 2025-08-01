@@ -26,13 +26,18 @@
               <q-icon :name="icon" />
             </div>
             <div class="col text-left q-ml-sm prompt-select-text">
+              <div class="float-left">
                 {{ truncate(prompt.title, 50) }}
+              </div>
+              <div class="float-right text-grey" style="font-size: 10px">
+                {{truncate(model.name, 30)}}
+                <q-tooltip v-if="model.name.length > 30">
+                  {{ model.name }}
+                </q-tooltip>
+              </div>
             </div>
             <q-tooltip  :delay="1000">
               {{ prompt.description }}
-              <!--<template v-if="prompt.guide">
-                <div>{{ prompt.guide }}</div>
-              </template>-->
             </q-tooltip>
           </q-btn>
         </div>
@@ -330,6 +335,10 @@ const menuButtonColor = computed(() => {
 const boldness = computed(() => {
   return isSticky.value ? 'text-weight-normal' : 'text-weight-normal';
 });
+
+const model = computed(() => {
+  return promptStore.getModel(props.prompt.modelId);
+})
 
 const isSticky = computed(() => fileStore.isStickyPrompt(props.prompt, fileStore.selectedFile));
 

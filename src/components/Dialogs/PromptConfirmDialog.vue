@@ -439,6 +439,7 @@
   import {onKeyStroke} from "@vueuse/core";
   import {getEditor, getEditorSelection} from "src/common/utils/editorUtils";
   import PromptContextSelector from 'components/Common/PromptSelector/PromptContextSelector.vue';
+  import {isImageGenerationModel} from "src/common/helpers/modelHelper";
 
   const promptStore = usePromptStore();
   const fileStore = useFileStore();
@@ -739,7 +740,7 @@
     let inputCost = modelData ? ((modelData.inputPrice * inputTokens / 1000000) + '+ credits for input') : 'N/A';
     let outputCost = modelData ? ((modelData.outputPrice / 1000) + ' output credits per 1000 tokens') : 'N/A';
 
-    if(model.value.type === 'client-dall-e') {
+    if(isImageGenerationModel(model.value)) {
       inputCost = modelData ? ((modelData.inputPrice) + '+ per image') : 'N/A';
       outputCost = '';
     }

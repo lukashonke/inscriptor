@@ -117,6 +117,7 @@ export const usePromptStore = defineStore('prompts', {
     toolApprovalSettings: {},
 
     diffsShowRemoved: false,
+    lastPromptUpdate: Date.now(),
   }),
   getters: {
     selectionPrompts: (state) => state.prompts.filter(p => (p.promptType === "selection" || p.promptType === "general") && p.enabled),
@@ -183,23 +184,27 @@ export const usePromptStore = defineStore('prompts', {
                 userPrompt = userPrompt.replace('$output.' + runResult.runName, runResult.result?.originalText ?? '');
               }
 
-              request.systemPrompt = systemPrompt;
-              request.userPrompt = userPrompt;
+              newRequest.systemPrompt = systemPrompt;
+              newRequest.userPrompt = userPrompt;
             }
 
             if ((request.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
               return null;
             }
 
-            const result = await this.promptInternalStreaming(request);
-
-            this.calculateDiffs(request, result);
-
-            if ((request.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
+            if ((newRequest.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
               return null;
             }
 
-            await promptAgentStore.runAgentsOnPromptResult(request, result);
+            const result = await this.promptInternalStreaming(newRequest);
+
+            this.calculateDiffs(newRequest, result);
+
+            if ((newRequest.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
+              return null;
+            }
+
+            await promptAgentStore.runAgentsOnPromptResult(newRequest, result);
 
             runResults.push({
               runName: run.name,
@@ -773,8 +778,6 @@ export const usePromptStore = defineStore('prompts', {
       } else {
         replace('$input', () => selectedText);
       }
-
-      //debugger;
 
       if(request.contextTypes && request.contextTypes.length > 0) {
         let context = '';
@@ -2079,6 +2082,7 @@ export const usePromptStore = defineStore('prompts', {
 
           const request = {
             prompt: promptToExecute,
+            clear: false,
             text: replaceParameterEditorText(promptResult.originalText ?? promptResult.text)
           }
 
@@ -2215,6 +2219,9 @@ export const usePromptStore = defineStore('prompts', {
 
       // insert new prompt at index
       this.prompts.splice(index, 0, newPrompt);
+
+      // Update timestamp to trigger filter refresh
+      this.lastPromptUpdate = Date.now();
     },
     pushPromptOrder(prompt, addIndex) {
       let index = this.prompts.indexOf(prompt);

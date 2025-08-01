@@ -56,15 +56,15 @@
               <div class="col">
                 <div class="row">
                   <div class="col-2">
-                    <span v-if="model.type === 'client-dall-e'">Generate 1 image</span>
+                    <span v-if="isImageGenerationModel(model)">Generate 1 image</span>
                     <span v-else>Input Cost / 1M tokens</span>
                   </div>
                   <div class="col">
-                    <span>{{ inputPrice }} credits</span> <HelpIcon v-if="model.type !== 'client-dall-e'" tooltip="How many credits does it cost to send 1 million tokens to the AI model."></HelpIcon>
+                    <span>{{ inputPrice }} credits</span> <HelpIcon v-if="!isImageGenerationModel(model)" tooltip="How many credits does it cost to send 1 million tokens to the AI model."></HelpIcon>
                   </div>
                 </div>
 
-                <div class="row" v-if="model.type !== 'client-dall-e'">
+                <div class="row" v-if="!isImageGenerationModel(model)">
                   <div class="col-2">
                     <span>Output Cost / 1M tokens </span>
                   </div>
@@ -76,7 +76,7 @@
               </div>
             </div>
 
-            <div class="row bordered q-pa-sm" v-if="model.type !== 'client-dall-e'">
+            <div class="row bordered q-pa-sm" v-if="!isImageGenerationModel(model)">
               <div class="col">
                 <div class="row">
                   <div class="col-2">
@@ -138,7 +138,7 @@
               </div>
             </div>
 
-            <div class="row" v-if="model.type !== 'client-dall-e'">
+            <div class="row" v-if="!isImageGenerationModel(model)">
               <div class="col">
                 <CodeEditor v-model="defaultSystemPrompt" :parameters="[]" label="Default System Prompt" />
               </div>
@@ -278,6 +278,7 @@ import {formatNumber} from "src/common/utils/textUtils";
 import CodeEditor from "components/Common/Editors/CodeEditor.vue";
 import {getCloudModelApiKey} from "src/common/utils/modelUtils";
 import {useCurrentUser} from "vuefire";
+import {isImageGenerationModel} from "src/common/helpers/modelHelper";
 
 const promptStore = usePromptStore();
 const layoutStore = useLayoutStore();

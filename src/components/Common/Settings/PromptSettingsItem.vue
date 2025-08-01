@@ -67,7 +67,11 @@
 
         <template v-if="!startExpanded">
           <div class="col-auto row q-ml-sm"><q-btn icon="mdi-delete-outline" color="red" flat @click="promptStore.removePrompt(prompt)" label="" class="float-right" dense/></div>
-          <div class="col-auto row q-ml-sm"><q-btn icon="mdi-content-copy" color="primary" flat @click="promptStore.clonePrompt(prompt)" label="" class="float-right" dense/></div>
+          <div class="col-auto row q-ml-sm">
+            <q-btn icon="mdi-content-copy" color="primary" flat @click="promptStore.clonePrompt(prompt)" label="" class="float-right" dense>
+              <q-tooltip :delay="500">Clone</q-tooltip>
+            </q-btn>
+          </div>
 
           <div class="col-auto row q-ml-sm">
             <q-btn icon="mdi-arrow-up-thin" color="primary" flat @click="promptStore.pushPromptOrder(prompt, -1)" label="" class="float-right" dense/>
@@ -746,6 +750,7 @@ import {
   currentAndChildrenFileSummaryPromptContext
 } from "src/common/resources/promptContexts";
 import SimplePromptContextSelector from 'components/Common/Settings/SimplePromptContextSelector.vue';
+import {isImageGenerationModel} from "src/common/helpers/modelHelper";
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
@@ -784,6 +789,8 @@ const actionTypes = [
   { label: "Reply", value: "Reply" },
   { label: "Save to Variable", value: "Save to Variable" },
 ];
+
+const model = computed(() => promptStore.getModel(props.prompt.modelId));
 
 const availableAgents = computed(() => {
   return promptStore.promptAgents.map(a => ({label: a.title + ' (' + a.type + ')', value: a.id}));
@@ -835,7 +842,7 @@ const showPromptType = computed(() => {
 });
 
 const showAgentChatSettings = computed(() => {
-  return props.prompt.promptType !== 'chat';
+  return props.prompt.promptType !== 'chat' && !isImageGenerationModel(model);
 });
 
 const showHiddenInPromptSelector = computed(() => {
@@ -863,7 +870,7 @@ const allowAgents = computed(() => {
 
   if(model.args?.inferenceEngine === 'translation') return false;
 
-  return props.prompt.promptType !== 'chat';
+  return props.prompt.promptType !== 'chat' && !isImageGenerationModel(model);
 });
 
 const allowMultipleRuns = computed(() => {
@@ -997,8 +1004,6 @@ const modelId = computed({
     promptStore.updatePrompt(props.prompt, {modelId: value});
   }
 });
-
-const model = computed(() => promptStore.getModel(props.prompt.modelId));
 
 const userPrompt = computed({
   get: () => props.prompt.userPrompt,

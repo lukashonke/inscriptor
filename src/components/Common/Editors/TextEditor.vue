@@ -1058,7 +1058,7 @@ function getAutocompleteResult(node) {
 }
 
 function insertFromQuickCommand(type) {
-  replaceOrInsertWord(quickCommandTemporaryResult.value)
+  replaceOrInsertWord(markdownToHtml(quickCommandTemporaryResult.value))
 
   quickCommandTemporaryResult.value = '';
 }
@@ -1077,7 +1077,7 @@ function replacePromptResult(result) {
 }
 
 function insertQuickPromptResult(result) {
-  replaceOrInsertWord(result.originalText);
+  replaceOrInsertWord(markdownToHtml(result.originalText));
 }
 
 async function triggerQuickPrompt(type, command) {

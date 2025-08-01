@@ -188,6 +188,7 @@
   const prompts = computed(() => promptStore.prompts);
   const tabs = computed(() => promptStore.tabs);
   const models = computed(() => promptStore.models);
+  const lastPromptUpdate = computed(() => promptStore.lastPromptUpdate);
 
   // Pagination
   const currentPage = ref(1);
@@ -263,6 +264,13 @@
   // Reset to first page when model or category filters change
   watch([selectedModel, selectedCategory], () => {
     currentPage.value = 1;
+  });
+
+  // Refresh filters when prompts are updated (e.g., after cloning)
+  watch(lastPromptUpdate, () => {
+    if (searchFilter.value) {
+      updateStableFilteredPromptIds();
+    }
   });
 
   const promptType = ref('general');
