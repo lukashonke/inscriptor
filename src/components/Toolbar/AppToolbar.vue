@@ -18,8 +18,6 @@
             <q-space />
           </q-btn>
         </div>
-
-
       </div>
       <div class="col-6 col-md-7 col-lg-5 row items-center justify-end no-wrap">
 
@@ -36,6 +34,42 @@
           <q-tooltip>
             You currently have no AI credits left. It will not be possible to trigger AI on cloud. You can get more credits by clicking on this button.
           </q-tooltip>
+        </q-btn>
+
+        <q-btn
+          v-if="hints.length > 0"
+          dense
+          no-caps
+          square
+          :color="hints.length === 1 ? hints[0].color : 'primary'"
+          :icon="hints.length === 1 ? hints[0].icon : 'mdi-bell'"
+          class="q-mr-md"
+        >
+          {{ hints.length === 1 ? hints[0].message : `${hints.length} hints` }}
+          <q-popup-proxy>
+            <q-card>
+              <q-card-section class="q-px-none">
+                <q-list>
+                  <q-item
+                    v-for="hint in hints"
+                    :key="hint.id"
+                    clickable
+                    v-close-popup
+                    @click="hint.action"
+                  >
+                    <q-item-section avatar>
+                      <q-icon :name="hint.icon" :color="hint.color" />
+                    </q-item-section>
+                    <q-item-section>
+                      <q-item-label>{{ hint.message }}</q-item-label>
+                      <q-item-label caption>{{ hint.tooltip }}</q-item-label>
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+
+              </q-card-section>
+            </q-card>
+          </q-popup-proxy>
         </q-btn>
 
         <q-btn flat icon="mdi-message-fast-outline" no-caps @click="layoutStore.feedbackWindowOpened = true" label="Feedback">
@@ -142,14 +176,13 @@ import {useCurrentUser, useFirebaseAuth} from "vuefire";
 import {useQuasar} from "quasar";
 
 const layoutStore = useLayoutStore();
+const fileStore = useFileStore();
 const $q = useQuasar();
 
 let appWindow = null;
 if(layoutStore.runsInDesktopApp()) {
   appWindow = getCurrentWebviewWindow();
 }
-
-const fileStore = useFileStore();
 
 const currentUser = computed(() => useCurrentUser()?.value?.email ?? 'Guest');
 const auth = useFirebaseAuth();
@@ -187,6 +220,26 @@ const roadmapUrl = computed(() => {
   }
   return null;
 })
+
+const hints = computed(() => {
+  const hintsList = [];
+
+  // WritingStyle hint
+  const writingStyle = fileStore.variables.find(v => v.title === 'WritingStyle');
+  if (writingStyle && writingStyle.value && writingStyle.value.length < 50) {
+    hintsList.push({
+      id: 'writing-style-brief',
+      type: 'tip',
+      message: 'Writing style description too brief',
+      icon: 'mdi-lightbulb-outline',
+      color: 'warning',
+      tooltip: 'Your $WritingStyle is less than 50 characters. Click to add more detail for better & more personalised AI results.',
+      action: () => layoutStore.variableSettingsOpen = true
+    });
+  }
+
+  return hintsList;
+});
 
 </script>
 
