@@ -285,6 +285,7 @@ const props = defineProps({
 const emit = defineEmits(['promptClick'])
 
 function promptClick(promptClickData) {
+  debugger;
   emit('promptClick', promptClickData);
 }
 
@@ -384,6 +385,8 @@ function groupPromptsByFolder(prompts) {
   const usedFolders = [];
 
   //TODO kdyz nema folder, pridej normalne do listu
+
+  //TODO stopped working
 
   for(const prompt of prompts) {
     if(prompt.folder?.length > 0) {
