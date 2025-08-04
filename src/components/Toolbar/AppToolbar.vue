@@ -37,7 +37,6 @@
         </q-btn>
 
         <q-btn
-          v-if="hints.length > 0"
           dense
           no-caps
           square
@@ -53,18 +52,38 @@
                   <q-item
                     v-for="hint in hints"
                     :key="hint.id"
-                    clickable
-                    v-close-popup
-                    @click="hint.action"
                   >
                     <q-item-section avatar>
                       <q-icon :name="hint.icon" :color="hint.color" />
                     </q-item-section>
-                    <q-item-section>
+                    <q-item-section clickable v-close-popup @click="hint.action">
                       <q-item-label>{{ hint.message }}</q-item-label>
                       <q-item-label caption>{{ hint.tooltip }}</q-item-label>
                     </q-item-section>
+                    <q-item-section side>
+                      <q-btn
+                        flat
+                        dense
+                        round
+                        icon="mdi-close"
+                        size="sm"
+                        @click="dismissHint(hint.id)"
+                      />
+                    </q-item-section>
                   </q-item>
+
+                  <!-- Reset dismissed hints option -->
+                  <template v-if="dismissedHints.length > 0">
+                    <q-separator />
+                    <q-item clickable v-close-popup @click="resetDismissedHints">
+                      <q-item-section avatar>
+                        <q-icon name="mdi-refresh" color="grey" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>Reset dismissed hints ({{ dismissedHints.length }})</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
                 </q-list>
 
               </q-card-section>
@@ -174,10 +193,14 @@ import {computed} from "vue";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import {useCurrentUser, useFirebaseAuth} from "vuefire";
 import {useQuasar} from "quasar";
+import { useStorage } from '@vueuse/core';
 
 const layoutStore = useLayoutStore();
 const fileStore = useFileStore();
 const $q = useQuasar();
+
+// Dismissed hints storage
+const dismissedHints = useStorage('dismissed-hints', []);
 
 let appWindow = null;
 if(layoutStore.runsInDesktopApp()) {
@@ -221,21 +244,35 @@ const roadmapUrl = computed(() => {
   return null;
 })
 
+// Hint management functions
+const dismissHint = (hintId) => {
+  if (!dismissedHints.value.includes(hintId)) {
+    dismissedHints.value.push(hintId);
+  }
+};
+
+const resetDismissedHints = () => {
+  dismissedHints.value = [];
+};
+
 const hints = computed(() => {
   const hintsList = [];
 
   // WritingStyle hint
   const writingStyle = fileStore.variables.find(v => v.title === 'WritingStyle');
   if (writingStyle && writingStyle.value && writingStyle.value.length < 50) {
-    hintsList.push({
-      id: 'writing-style-brief',
-      type: 'tip',
-      message: 'Writing style description too brief',
-      icon: 'mdi-lightbulb-outline',
-      color: 'warning',
-      tooltip: 'Your $WritingStyle is less than 50 characters. Click to add more detail for better & more personalised AI results.',
-      action: () => layoutStore.variableSettingsOpen = true
-    });
+    const hintId = 'writing-style-brief';
+    if (!dismissedHints.value.includes(hintId)) {
+      hintsList.push({
+        id: hintId,
+        type: 'tip',
+        message: 'Writing style description too brief',
+        icon: 'mdi-lightbulb-outline',
+        color: 'warning',
+        tooltip: 'Your $WritingStyle is less than 50 characters. Click to add more detail for better & more personalised AI results.',
+        action: () => layoutStore.variableSettingsOpen = true
+      });
+    }
   }
 
   return hintsList;
