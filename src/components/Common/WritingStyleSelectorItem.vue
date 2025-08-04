@@ -17,7 +17,6 @@
       <div class="q-mt-sm">
         <q-btn
           dense
-          flat
           no-caps
           :icon="showExamples ? 'mdi-chevron-up' : 'mdi-chevron-down'"
           :label="showExamples ? 'Hide Examples' : 'Show Examples'"
@@ -29,14 +28,14 @@
     </q-card-section>
     <q-slide-transition>
       <q-card-section v-if="showExamples" class="q-pt-none">
-        <div class="scroll" style="font-size: 0.8rem; max-height: 200px; background-color: rgba(0, 0, 0, 0.02); padding: 12px; border-radius: 4px;" v-html="newLineToBr(writingStyle.value)"></div>
+        <div class="scroll writing-style-md" style="font-size: 0.8rem; max-height: 300px; background-color: rgba(0, 0, 0, 0.02); padding: 12px; border-radius: 4px;" v-html="markdownToHtml(writingStyle.value)"></div>
       </q-card-section>
     </q-slide-transition>
   </q-card>
 </template>
 
 <script setup>
-  import {newLineToBr} from "src/common/utils/textUtils";
+import {markdownToHtml, newLineToBr} from "src/common/utils/textUtils";
   import {ref} from "vue";
 
   const props = defineProps({
@@ -44,7 +43,7 @@
   });
 
   const emit = defineEmits(['writingStyleSet']);
-  
+
   const showExamples = ref(false);
 
   function onClick() {
@@ -55,5 +54,86 @@
 <style scoped>
 body.body--dark .scroll {
   background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.writing-style-md {
+  h1 {
+    font-size: 1em !important;
+    font-weight: bold;
+    line-height: 1.1;
+    margin-bottom: 0px;
+    margin-top: 0px;
+  }
+
+  hr {
+    display: block;
+    height: 1px;
+    border: 0;
+    border-top: 1px solid #ccc;
+  }
+
+  h2 {
+    font-size: 1em;
+    font-weight: bold;
+    line-height: 1.1;
+    margin-bottom: 0px;
+    margin-top: 0px;
+  }
+
+  h3 {
+    font-size: 1.0em;
+    font-weight: bold;
+    line-height: 1.1;
+    margin-bottom: 0px;
+    margin-top: 0px;
+  }
+
+  h4 {
+    font-size: 1.0em;
+    font-weight: bold;
+    line-height: 1.1;
+    margin-bottom: 0px;
+    margin-top: 0px;
+  }
+
+  h5 {
+    font-size: 1.0em;
+    font-weight: bold;
+    line-height: 1.1;
+    margin-bottom: 0px;
+    margin-top: 0px;
+  }
+
+  h6 {
+    font-size: 1.0em;
+    font-weight: bold;
+    line-height: 1.1;
+    margin-bottom: 0px;
+    margin-top: 0px;
+  }
+
+  ul,
+  ol {
+    margin-top: 0px;
+    padding: 0 1.5rem;
+
+    p {
+      margin: 0 0 0 0;
+    }
+  }
+
+  pre {
+    background: #ddd;
+    color: #353535;
+    padding: 0.75rem 1rem;
+    border-radius: 0.5rem;
+
+    code {
+      color: inherit;
+      padding: 0;
+      background: none;
+      font-size: 0.8rem;
+    }
+  }
 }
 </style>

@@ -37,30 +37,33 @@
         </q-btn>
 
         <q-btn
-          dense
           no-caps
           square
-          :color="hints.length === 1 ? hints[0].color : 'primary'"
-          :icon="hints.length === 1 ? hints[0].icon : 'mdi-bell'"
+          :color="hints.length === 1 ? hints[0].color : (hints.length === 0 ? undefined : 'primary')"
           class="q-mr-md"
         >
-          {{ hints.length === 1 ? hints[0].message : `${hints.length} hints` }}
+          <q-icon :name="hints.length === 1 ? hints[0].icon : 'mdi-message-badge'" class="q-mr-sm" />
+          {{ hints.length === 1 ? hints[0].message : `${hints.length} messages` }}
           <q-popup-proxy>
             <q-card>
-              <q-card-section class="q-px-none">
+              <q-card-section class="q-pa-sm">
                 <q-list>
                   <q-item
+                    clickable
                     v-for="hint in hints"
                     :key="hint.id"
                   >
                     <q-item-section avatar>
                       <q-icon :name="hint.icon" :color="hint.color" />
                     </q-item-section>
-                    <q-item-section clickable v-close-popup @click="hint.action">
-                      <q-item-label>{{ hint.message }}</q-item-label>
+                    <q-item-section clickable v-close-popup="hint.type !== 'news'" @click="hint.type === 'news' ? openNewsDetail(hint) : hint.action()" :class="hint.type === 'news' ? 'cursor-pointer' : ''">
+                      <q-item-label>
+                        <span v-if="hint.type === 'tip'" >Tip:</span>
+                        {{ hint.message }}
+                      </q-item-label>
                       <q-item-label caption>{{ hint.tooltip }}</q-item-label>
                     </q-item-section>
-                    <q-item-section side>
+                    <q-item-section side v-if="hint.dismissible !== false">
                       <q-btn
                         flat
                         dense
@@ -73,19 +76,10 @@
                   </q-item>
 
                   <!-- Reset dismissed hints option -->
-                  <template v-if="dismissedHints.length > 0">
-                    <q-separator />
-                    <q-item clickable v-close-popup @click="resetDismissedHints">
-                      <q-item-section avatar>
-                        <q-icon name="mdi-refresh" color="grey" />
-                      </q-item-section>
-                      <q-item-section>
-                        <q-item-label>Reset dismissed hints ({{ dismissedHints.length }})</q-item-label>
-                      </q-item-section>
-                    </q-item>
-                  </template>
+                  <div v-if="dismissedHints.length > 0" class="full-width flex justify-end">
+                    <q-btn flat class="text-grey text-caption" @click="resetDismissedHints" no-caps :label="'Reset dismissed (' + dismissedHints.length + ')'" />
+                  </div>
                 </q-list>
-
               </q-card-section>
             </q-card>
           </q-popup-proxy>
@@ -184,16 +178,44 @@
     </div>
 
   </q-bar>
+
+  <!-- News Detail Dialog -->
+  <q-dialog v-model="newsDetailDialog">
+    <q-card style="width: 700px; max-width: 90vw;">
+      <q-card-section class="row items-center">
+        <div class="col">
+          <div class="text-h6">{{ selectedNews?.message }}</div>
+          <div class="text-subtitle2 text-grey">{{ selectedNews?.tooltip }}</div>
+        </div>
+        <div class="col-auto">
+          <q-btn icon="close" flat round dense v-close-popup />
+        </div>
+      </q-card-section>
+
+      <q-separator />
+
+      <q-card-section class="q-pt-md prompt-results">
+        <div v-html="selectedNews?.content" class="news-content"></div>
+      </q-card-section>
+
+      <q-card-actions align="right">
+        <q-btn flat label="Close" color="primary" no-caps v-close-popup />
+      </q-card-actions>
+    </q-card>
+  </q-dialog>
 </template>
 
 <script setup>
 import {useFileStore} from "stores/file-store";
 import {useLayoutStore} from "stores/layout-store";
-import {computed} from "vue";
+import {computed, ref, onMounted} from "vue";
 import { getCurrentWebviewWindow } from "@tauri-apps/api/webviewWindow";
 import {useCurrentUser, useFirebaseAuth} from "vuefire";
 import {useQuasar} from "quasar";
 import { useStorage } from '@vueuse/core';
+import { directusClient } from 'boot/directus';
+import { readItems } from '@directus/sdk';
+import { markdownToHtml } from 'src/common/utils/textUtils';
 
 const layoutStore = useLayoutStore();
 const fileStore = useFileStore();
@@ -201,6 +223,24 @@ const $q = useQuasar();
 
 // Dismissed hints storage
 const dismissedHints = useStorage('dismissed-hints', []);
+
+// News data management
+const news = ref([]);
+const newsDetailDialog = ref(false);
+const selectedNews = ref(null);
+
+const fetchNews = async () => {
+  try {
+    const result = await directusClient.request(
+      readItems('News', {
+        limit: 5
+      })
+    );
+    news.value = result || [];
+  } catch (error) {
+    console.warn('Failed to fetch news:', error);
+  }
+};
 
 let appWindow = null;
 if(layoutStore.runsInDesktopApp()) {
@@ -255,27 +295,52 @@ const resetDismissedHints = () => {
   dismissedHints.value = [];
 };
 
+const openNewsDetail = (hint) => {
+  selectedNews.value = hint;
+  newsDetailDialog.value = true;
+};
+
 const hints = computed(() => {
   const hintsList = [];
 
-  // WritingStyle hint
-  const writingStyle = fileStore.variables.find(v => v.title === 'WritingStyle');
-  if (writingStyle && writingStyle.value && writingStyle.value.length < 50) {
-    const hintId = 'writing-style-brief';
+  // Add news items first (higher priority)
+  for (const newsItem of news.value) {
+    const hintId = `news-${newsItem.id}`;
     if (!dismissedHints.value.includes(hintId)) {
       hintsList.push({
         id: hintId,
-        type: 'tip',
-        message: 'Writing style description too brief',
-        icon: 'mdi-lightbulb-outline',
-        color: 'warning',
-        tooltip: 'Your $WritingStyle is less than 50 characters. Click to add more detail for better & more personalised AI results.',
-        action: () => layoutStore.variableSettingsOpen = true
+        type: 'news',
+        message: newsItem.title,
+        icon: 'mdi-newspaper',
+        color: 'info',
+        tooltip: newsItem.subtitle,
+        content: markdownToHtml(newsItem.content || ''),
+        dismissible: true,
+        action: () => {} // No action needed for news
       });
     }
   }
 
+  // WritingStyle hint
+  const writingStyle = fileStore.variables.find(v => v.title === 'WritingStyle');
+  if (writingStyle && writingStyle.value && writingStyle.value.length < 50) {
+    hintsList.push({
+      id: 'writing-style-brief',
+      type: 'tip',
+      message: 'Writing style description too brief',
+      icon: 'mdi-lightbulb-outline',
+      color: 'warning',
+      tooltip: 'Your $WritingStyle is less than 50 characters. Click to add more detail for better & more personalised AI results.',
+      dismissible: false,
+      action: () => layoutStore.variableSettingsOpen = true
+    });
+  }
+
   return hintsList;
+});
+
+onMounted(() => {
+  fetchNews();
 });
 
 </script>

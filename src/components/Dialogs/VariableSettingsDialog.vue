@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="variableSettingsOpened" full-height>
-    <q-card style="max-width: 90vw; width: 1200px">
+    <q-card style="max-width: 90vw; width: 1600px">
       <q-card-section class="row">
         <span class="text-h6">Variables</span>
         <HelpIcon tooltip="You can reference parameters anywhere by writing their name, prefixed with $. Eg: $ParameterName." />
@@ -34,7 +34,6 @@
                 <div class="q-mt-md">
                   <q-btn
                     dense
-                    flat
                     no-caps
                     :icon="showWritingStyles ? 'mdi-chevron-up' : 'mdi-chevron-down'"
                     :label="showWritingStyles ? 'Hide Examples' : 'Show Examples'"
