@@ -248,7 +248,7 @@
               </div>
 
               <div class="col">
-                <q-card class="shadow-16 bg-accent" :class="{'primary-highlight': userData.subscriptionLevel === 1}" style="max-width: 330px;  min-height: 510px;">
+                <q-card class="shadow-16" :class="{'primary-highlight': userData.subscriptionLevel === 1}" style="max-width: 330px;  min-height: 510px;">
                   <q-card-section class="bg-accent text-white">
                     <div class="flex items-center">
                       <q-icon name="mdi-crown-outline" class="q-mr-xs q-pt-xs" color="amber" size="sm" />
@@ -276,7 +276,7 @@
                     </div>
 
                   </q-card-section>
-                  <q-list class="q-py-sm bg-accent text-white">
+                  <q-list class="q-py-sm bg-accent-lighter text-white">
                     <q-item clickable>
                       <q-item-section avatar>
                         <q-icon name="mdi-check" />
@@ -333,7 +333,7 @@
 
                   </q-list>
                   <q-card-actions v-if="userData.subscriptionLevel === 0" class="bg-accent">
-                    <q-btn color="accent" class="full-width" @click="buyPremium(yearly ? 'SubscriptionPremiumYearly' : 'SubscriptionPremium')">Subscribe</q-btn>
+                    <q-btn flat color="white" class="full-width" @click="buyPremium(yearly ? 'SubscriptionPremiumYearly' : 'SubscriptionPremium')">Subscribe</q-btn>
                   </q-card-actions>
                   <q-card-actions v-else-if="!hasFreePremium"  class="bg-accent text-white">
                     <q-btn flat unelevated class="full-width" icon="mdi-check" label="Subscribed"></q-btn>

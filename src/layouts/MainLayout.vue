@@ -339,7 +339,7 @@ async function quickSave(force = false) {
 
     //await promptStore.onSettingsChange(); // TODO trigger on change, not always
 
-    if(fileStore.canSave()) {
+    if(fileStore.canSave() && fileStore.canQuickSave()) {
       // offline file sync if not synced on cloud
       if(fileStore.projectId) {
         if(fileStore.projectSettings?.syncToCloud === false) {

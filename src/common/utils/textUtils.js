@@ -142,7 +142,7 @@ export function replaceParameterEditorText(text) {
 }
 
 export function newLineToBr(text) {
-  return text.replace(/\n/g, '<br><br>');
+  return text.replace(/\n/g, '<br>');
 }
 
 export function formatNumber (num, digits = 2) {

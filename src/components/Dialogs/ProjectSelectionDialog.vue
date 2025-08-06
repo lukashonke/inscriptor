@@ -71,7 +71,7 @@
           <q-item v-if="projects.length === 0 && !user.isAnonymous">
             <q-item-section class="text-center">
               <q-item-label class="">
-                <q-chip clickable @click="creatingNewProject = true" icon="mdi-plus">No projects yet. Create a project to get started</q-chip>
+                <q-chip clickable @click="creatingNewProject = true" icon="mdi-plus">Create a project to get started</q-chip>
               </q-item-label>
             </q-item-section>
           </q-item>
@@ -153,11 +153,7 @@
         </div>
       </q-card-actions>
 
-      <ProjectCreator v-if="creatingNewProject" :default-project-type="projectType"/>
-      <q-separator />
-      <q-card-actions v-if="creatingNewProject">
-        <q-btn icon="mdi-arrow-left-thin" flat color="primary" @click="creatingNewProject = false">Back</q-btn>
-      </q-card-actions>
+      <ProjectCreator v-if="creatingNewProject" :default-project-type="projectType" @close="creatingNewProject = false"/>
     </q-card>
   </q-dialog>
 </template>

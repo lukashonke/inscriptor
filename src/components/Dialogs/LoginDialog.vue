@@ -48,7 +48,7 @@
           <div class="col" />
         </q-card-section>
 
-        <q-card-section class="row ">
+        <q-card-section class="row " v-if="layoutStore.runsInDesktopApp()">
           <div class="col" />
           <div class="col-auto">
             <q-btn outline @click="loginAnonymously">

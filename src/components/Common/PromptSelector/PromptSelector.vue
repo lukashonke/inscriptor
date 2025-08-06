@@ -385,6 +385,8 @@ function groupPromptsByFolder(prompts) {
 
   //TODO kdyz nema folder, pridej normalne do listu
 
+  //TODO stopped working
+
   for(const prompt of prompts) {
     if(prompt.folder?.length > 0) {
       const folder = allFolders.find(f => f.label === prompt.folder);

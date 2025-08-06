@@ -174,8 +174,8 @@
   "variables": [
     {
       "title": "WritingStyle",
-      "value": "Write in English language.",
-      "description": "Define how you want the AI to write. Specify language, tone, stylem, tense, etc. Be as precise as possible.",
+      "value": "The user's preferred writing style has not been specified yet.",
+      "description": "Describe the style of writing you prefer. Be as specific as possible. A well described writing style will result in much more personalised AI generated text. See examples.",
       "undeletable": true
     }
   ],

@@ -230,7 +230,6 @@
             </q-btn>
           </div>
 
-
           <template v-if="promptResult.prompt.promptStyle === 'brainstorm'">
             <template v-if="promptBrainstormValueTree != null && promptBrainstormValueTree.length> 0">
               <q-card v-for="(idea, index) in promptBrainstormValueTree" :key="index" flat class="no-margin bg-transparent">
@@ -239,17 +238,17 @@
                     <q-btn @click="promptBrainstormValueTree.splice(index, 1)" flat size="sm" class="float-right" icon="mdi-close" color="negative" dense />
                     <span v-html="markdownToHtml(idea.text)"></span>
 
-                    <div class="full-width flex q-my-xs prompt-brainstorm-actions">
+                    <div class="full-width flex q-mb-sm prompt-brainstorm-actions">
                       <template v-if="!idea.loading">
                         <q-btn flat padding="xs xs" no-caps color="primary" size="sm" icon="mdi-creation-outline" label="Expand" @click="promptTreeRespond(idea, 'Create ideas that are building on this idea')" class="q-mr-md"/>
                         <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Similar" @click="promptTreeRespond(idea, 'Create ideas similar to this idea')"  class="q-mr-md"/>
                         <template v-if="idea.customReplyEnabled">
                           <q-input v-model="idea.customReply" filled dense autofocus autogrow/>
-                          <q-btn flat padding="xs sm" no-caps color="primary" icon="mdi-reply-outline" size="sm" @click="idea.customReplyEnabled = false; promptTreeRespond(idea, 'Perform this custom instruction - \'' + idea.customReply + '\'')" class="q-mr-sm"/>
-                          <q-btn flat padding="xs sm" no-caps color="primary" icon="mdi-close" size="sm" @click="idea.customReplyEnabled = false"  class="q-mr-sm"/>
+                          <q-btn flat padding="xs sm" no-caps color="primary" icon="mdi-reply-outline" size="sm" @click="idea.customReplyEnabled = false; promptTreeRespond(idea, 'Perform this custom instruction - \'' + idea.customReply + '\'')" class="q-ml-xs"/>
+                          <q-btn flat padding="xs sm" no-caps color="primary" icon="mdi-close" size="sm" @click="idea.customReplyEnabled = false" class="q-ml-xs"/>
                         </template>
                         <template v-else>
-                          <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply" @click="idea.customReplyEnabled = true"  class="q-mr-sm"/>
+                          <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply..." @click="idea.customReplyEnabled = true"  class="q-mr-sm"/>
                         </template>
 
                       </template>
@@ -261,24 +260,23 @@
                           <q-btn @click="idea.children.splice(i, 1)" flat size="sm" class="float-right" icon="mdi-close" color="negative" dense />
                           <span v-html="markdownToHtml(child.text)" class=""></span>
 
-
-                          <div class="full-width flex q-my-xs prompt-brainstorm-actions">
+                          <div class="full-width flex q-mb-sm prompt-brainstorm-actions">
                             <template v-if="!child.loading">
                               <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Expand" @click="promptTreeRespond(child, 'Create ideas that are expanding on this idea')"  class="q-mr-sm"/>
                               <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Similar" @click="promptTreeRespond(child, 'Create ideas similar to this idea')"  class="q-mr-sm"/>
                               <template v-if="child.customReplyEnabled">
                                 <q-input v-model="child.customReply" filled dense autofocus autogrow/>
-                                <q-btn flat padding="xs sm" no-caps color="primary" icon="mdi-reply-outline" size="sm" @click="child.customReplyEnabled = false; promptTreeRespond(child, 'Perform this custom instruction - \'' + child.customReply + '\'')" class="q-mr-sm"/>
-                                <q-btn flat padding="xs sm" no-caps color="primary" icon="mdi-close" size="sm" @click="child.customReplyEnabled = false"  class="q-mr-sm"/>
+                                <q-btn flat padding="xs sm" no-caps color="primary" icon="mdi-reply-outline" size="sm" @click="child.customReplyEnabled = false; promptTreeRespond(child, 'Perform this custom instruction - \'' + child.customReply + '\'')" class="q-ml-xs"/>
+                                <q-btn flat padding="xs sm" no-caps color="primary" icon="mdi-close" size="sm" @click="child.customReplyEnabled = false"  class="q-ml-xs"/>
                               </template>
                               <template v-else>
-                                <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply" @click="child.customReplyEnabled = true"  class="q-mr-sm"/>
+                                <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply..." @click="child.customReplyEnabled = true"  class="q-mr-sm"/>
                               </template>
                             </template>
                           </div>
                           <div v-if="child.loading">
                             <q-spinner-grid class="q-mt-sm q-mb-md" />
-                            <div v-html="formatPendingBrainstormingPrompt(child.progressText, promptResult.prompt.resultsSeparator ?? '&lt;split/&gt;')" class="q-pa-md rounded-borders bg-blue-grey-1" />
+                            <div v-html="formatPendingBrainstormingPrompt(child.progressText, promptResult.prompt.resultsSeparator ?? '<split/>')" class="q-pa-md rounded-borders bg-blue-grey-1" />
                           </div>
 
                           <q-card v-if="child.children && child.children.length > 0" bordered flat class="q-mt-md bg-blue-grey-1 q-mb-md">
@@ -298,15 +296,16 @@
                   </div>
                   <div v-if="idea.loading">
                     <q-spinner-grid class="q-mt-sm q-mb-md" />
-                    <div v-html="formatPendingBrainstormingPrompt(idea.progressText, promptResult.prompt.resultsSeparator ?? '&lt;split/&gt;')" class="q-pa-md bordered rounded-borders bg-grey-1" />
+                    <div v-html="formatPendingBrainstormingPrompt(idea.progressText, promptResult.prompt.resultsSeparator ?? '<split/>')" class="q-pa-md bordered rounded-borders bg-grey-1" />
                   </div>
                 </q-card-section>
               </q-card>
             </template>
             <template v-else>
-              <div v-html="formatPendingBrainstormingPrompt(promptResultText, promptResult.prompt.resultsSeparator ?? '&lt;split/&gt;')" />
+              <div v-html="formatPendingBrainstormingPrompt(props.promptResult.originalText, promptResult.prompt.resultsSeparator ?? '<split/>')" />
             </template>
           </template>
+
           <template v-else-if="promptResult.prompt.promptStyle === 'mermaid'">
             <vue-mermaid-string :value="promptResult.text" :options="{ securityLevel: 'loose' }"/>
           </template>
@@ -351,7 +350,7 @@
         </q-btn>
       </div>
 
-      <div v-if="!isPrompting && collapsed === false && promptResult.prompt.promptType !== 'chat' && promptResult.prompt.promptStyle !== 'brainstorm-ui' && !isImageGenerationModel(model)" class="row prompt-actions overflow-hidden-y">
+      <div v-if="!isPrompting && !isSelectionAnalysis && collapsed === false && promptResult.prompt.promptType !== 'chat' && promptResult.prompt.promptStyle !== 'brainstorm-ui' && !isImageGenerationModel(model)" class="row prompt-actions overflow-hidden-y">
         <div class="col-auto" v-if="allowRegenerate">
           <q-btn class="text-weight-bold hoverable-btn-semi" label="Reply" no-caps flat color="grey-7" unelevated size="sm" icon="mdi-reply-outline" @click.prevent="toggleReply()">
             <q-tooltip>Reply on this prompt to AI</q-tooltip>
@@ -614,6 +613,10 @@
     hasCopy: {
       type: Boolean,
       default: true,
+    },
+    isSelectionAnalysis: {
+      type: Boolean,
+      default: false,
     }
   });
 
@@ -753,7 +756,7 @@
 
   function formatPendingBrainstormingPrompt(text, separator) {
     //TODO take separator from prompt, encode it
-    return text.replaceAll(separator, '<br><br>').replaceAll('\n', '<br>').replaceAll('<br><br>', '<br>').replaceAll('<br><br>', '<br>');
+    return markdownToHtml(text.replaceAll(separator, '\n')).replaceAll('<br><br>', '<br>').replaceAll('<br><br>', '<br>');
   }
 
   const promptResultText = computed({

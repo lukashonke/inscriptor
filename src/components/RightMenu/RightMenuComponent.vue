@@ -125,15 +125,18 @@
           <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length > 0">
             <div class="row">
               <div class="col-auto flex items-center q-pr-md">
-                <q-btn @click="promptStore.promptSelectionAnalysisPrompts" icon="mdi-chart-timeline-variant-shimmer" color="accent" label="Analyze" no-caps :loading="promptStore.selectionAnalysisRunning"/>
+                <q-btn @click="promptStore.promptSelectionAnalysisPrompts" icon="mdi-chart-timeline-variant-shimmer" color="accent" :label="analyseLabel" no-caps :loading="promptStore.selectionAnalysisRunning" v-if="canAnalyse" style="min-width: 220px;"/>
+                <span v-else class="text-grey-8">
+                  No text selected, please select text to analyse.
+                </span>
               </div>
               <div class="col justify-end flex">
-                <q-btn :label="promptStore.analysisPromptsSettings.prompts.length + ' prompts active'" flat color="accent"  icon-right="mdi-chevron-down">
+                <q-btn :label="analysisPrompts.length + ' prompts active'" flat color="accent"  icon-right="mdi-chevron-down" no-caps>
                   <q-popup-proxy>
                     <q-card style="width: 600px">
 
-                      <q-list v-if="promptStore.analysisPromptsSettings.prompts" dense class="full-width q-mb-sm">
-                        <q-item v-for="(prompt, i) in promptStore.analysisPromptsSettings.prompts" :key="i" dense class="full-width">
+                      <q-list v-if="analysisPrompts" dense class="full-width q-mb-sm">
+                        <q-item v-for="(prompt, i) in analysisPrompts" :key="i" dense class="full-width">
                           <q-item-section side>
                             <div class="text-grey-8 q-gutter-xs flex items-center">
                               <q-toggle dense :model-value="prompt.enabled" @update:model-value="(val) => promptStore.updateAnalysisPrompt(prompt, {enabled: val})" color="accent" />
@@ -187,7 +190,7 @@
                     enter-active-class="animated fadeInDown slower"
                     leave-active-class="animated fadeOut delay-1s"
                   >
-                    <PromptResult :promptResult="promptResult"/>
+                    <PromptResult :promptResult="promptResult" is-selection-analysis/>
 
                   </transition>
                 </div>
@@ -198,12 +201,12 @@
             <q-btn outline @click="promptStore.promptSelectionAnalysisPrompts" icon="mdi-sync" class="q-mt-md" color="green" size="sm"/>
           </q-card-section>
 
-          <q-card-section v-else-if="promptStore.analysisPromptsSettings.prompts.length > 0 && selectionPromptResults?.length === 0" class="text-center">
-            <div class="">Analysis is active using {{ promptStore.analysisPromptsSettings.prompts.length }} prompt(s)</div>
+          <q-card-section v-else-if="analysisPrompts.length > 0 && selectionPromptResults?.length === 0" class="text-center">
+            <div class="">Analysis is active using {{ analysisPrompts.length }} prompt(s)</div>
             <div>Click 'Analyze' or press CTRL+space to start.</div>
           </q-card-section>
 
-          <q-card-section v-else-if="promptStore.analysisPromptsSettings.prompts.length === 0" class="text-center">
+          <q-card-section v-else-if="analysisPrompts.length === 0" class="text-center">
             <div>You have not selected any analysis prompts, so no analysis will be performed.</div>
           </q-card-section>
 
@@ -234,6 +237,7 @@
   import {useElementHover} from "@vueuse/core";
   import {chatTabId, promptTabId, agentChatTabId} from 'src/common/resources/tabs';
   import AgentChatTab from 'components/RightMenu/AgentChatTab.vue';
+  import {getSelectedText} from 'src/common/utils/editorUtils';
 
   const promptStore = usePromptStore();
   const fileStore = useFileStore();
@@ -356,6 +360,37 @@
   const selectionPromptResults = computed(() => {
     return promptStore.selectionPromptResults ?? [];
   });
+
+  const analysisPrompts = computed(() => {
+    return (promptStore.analysisPromptsSettings.prompts ?? []).filter(p => promptStore.getPromptById(p.promptId));
+  })
+
+  const analyseLabel = computed(() => {
+    const selectedText = getSelectedText();
+    if(!selectedText || selectedText.trim().length === 0) {
+      return 'Analyse';
+    }
+
+    const wordCount = selectedText.trim().split(/\s+/).filter(word => word.length > 0).length;
+
+    if (wordCount > 0) {
+      return `Analyse (${wordCount} ${wordCount === 1 ? 'word' : 'words'})`;
+    }
+
+    return 'Analyse';
+  });
+
+  const canAnalyse = computed( () =>  {
+    const selectedText = getSelectedText();
+    if(!selectedText || selectedText.trim().length === 0) {
+      return false;
+    }
+
+    // Check if there's actual text selected (not just whitespace)
+    const wordCount = selectedText.trim().split(/\s+/).filter(word => word.length > 0).length;
+
+    return wordCount > 0;
+  })
 
   const writeClasses = computed(() => {
     return {

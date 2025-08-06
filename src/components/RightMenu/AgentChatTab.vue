@@ -67,6 +67,34 @@
 
       <!-- Chat messages -->
       <div class="col">
+        <template v-if="!currentChatMessages || currentChatMessages.length === 0">
+          <div class="q-gutter-y-sm q-ml-xs chat-history-container justify-center q-mt-xl" style="margin-bottom: 100px;">
+            <div class="row full-width justify-center" style="">
+              <q-card flat bordered class="col-auto" style="min-width: 600px; max-width: 600px;">
+                <q-card-section class="q-gutter-y-xs">
+                  <div class="row text-caption">
+                    Prompt for this chat:
+                  </div>
+                  <div class="row">
+                    <div class="col">
+                      <q-select v-model="promptForAgentChatId" filled dense :options="mergedPrompts" >
+                        <template v-slot:option="scope">
+                          <q-item v-bind="scope.itemProps">
+                            <q-item-section>
+                              <q-item-label>{{ scope.opt.label }}</q-item-label>
+                              <q-item-label caption v-if="scope.opt.description?.length > 0 ?? false">{{ scope.opt.description }}</q-item-label>
+                            </q-item-section>
+                          </q-item>
+                        </template>
+                      </q-select>
+                    </div>
+                  </div>
+                </q-card-section>
+              </q-card>
+            </div>
+          </div>
+        </template>
+
         <div class="q-gutter-y-sm q-ml-xs chat-history-container" style="margin-bottom: 100px;">
           <div class="chat-messages-container-unhinged">
             <div v-for="message in currentChatMessages" :key="message.id" class="full-width">
@@ -244,11 +272,17 @@
               <q-slide-transition>
                 <q-card-section v-if="settingsOpen" class="q-gutter-y-xs">
                   <div class="row">
-                    <div class="col q-mr-xs">
-                      <q-select v-model="modelForAgentChatId" filled dense options-dense label="Model used for AI" :options="models" />
-                    </div>
-                    <div class="col q-ml-xs">
-                      <q-select v-model="promptForAgentChatId" filled dense options-dense label="Prompt used for AI" :options="prompts" />
+                    <div class="col">
+                      <q-select v-model="promptForAgentChatId" filled dense label="Select AI Prompt" :options="mergedPrompts" >
+                        <template v-slot:option="scope">
+                          <q-item v-bind="scope.itemProps">
+                            <q-item-section>
+                              <q-item-label>{{ scope.opt.label }}</q-item-label>
+                              <q-item-label caption v-if="scope.opt.description?.length > 0 ?? false">{{ scope.opt.description }}</q-item-label>
+                            </q-item-section>
+                          </q-item>
+                        </template>
+                      </q-select>
                     </div>
                   </div>
                 </q-card-section>
@@ -272,6 +306,7 @@ import { Dialog } from 'quasar';
 import ToolCallDisplay from './ToolCallDisplay.vue';
 import AgentPromptResult from './AgentPromptResult.vue';
 import FileDetailItem from 'components/Common/Files/FileDetailItem.vue';
+import {isImageGenerationModel} from 'src/common/helpers/modelHelper';
 
 const aiAgentStore = useAiAgentStore();
 const promptStore = usePromptStore();
@@ -330,7 +365,7 @@ const page = computed({
 });
 
 // Model and prompt selection
-const models = computed(() => promptStore.models.map(tab => ({label: tab.name, value: tab.id})));
+const models = computed(() => promptStore.models.filter(m => !isImageGenerationModel(m)).map(tab => ({label: tab.name, value: tab.id})));
 
 const modelForAgentChatId = computed({
   get: () => {
@@ -352,8 +387,27 @@ const modelForAgentChatId = computed({
   }
 });
 
-const prompts = computed(() => promptStore.prompts.filter(p => p.modelId === promptStore.currentModelForAgentChatId && p.promptType === 'chat')
-  .map(prompt => ({label: prompt.title, value: prompt.id})));
+// Merged prompts from all models
+const mergedPrompts = computed(() => {
+  const allChatPrompts = [];
+
+  promptStore.models
+    .filter(m => !isImageGenerationModel(m))
+    .forEach(model => {
+      const modelPrompts = promptStore.prompts
+        .filter(p => p.modelId === model.id && p.promptType === 'chat')
+        .map(prompt => ({
+          label: `${prompt.title} (${model.name})`,
+          value: prompt.id,
+          modelId: model.id,
+          modelName: model.name,
+          description: prompt.description
+        }));
+      allChatPrompts.push(...modelPrompts);
+    });
+
+  return allChatPrompts;
+});
 
 const promptForAgentChatId = computed({
   get: () => {
@@ -365,7 +419,11 @@ const promptForAgentChatId = computed({
     };
   },
   set: (value) => {
-    promptStore.currentPromptForAgentChatId = value.value;
+    const selectedPrompt = mergedPrompts.value.find(p => p.value === value.value);
+    if (selectedPrompt) {
+      promptStore.currentModelForAgentChatId = selectedPrompt.modelId;
+      promptStore.currentPromptForAgentChatId = value.value;
+    }
   }
 });
 
@@ -449,6 +507,16 @@ onMounted(() => {
   // Create initial chat if none exists
   if (allChats.value.length === 0) {
     aiAgentStore.createAgentChat();
+  }
+
+  if (promptStore.currentModelForAgentChatId && !promptStore.getModel(promptStore.currentModelForAgentChatId)) {
+    promptStore.currentModelForAgentChatId = null;
+    promptStore.currentPromptForAgentChatId = null;
+  }
+
+  if (promptStore.currentPromptForAgentChatId && !promptStore.getPromptById(promptStore.currentPromptForAgentChatId)) {
+    promptStore.currentModelForAgentChatId = null;
+    promptStore.currentPromptForAgentChatId = null;
   }
 
   // Auto-select first model and prompt if none selected
