@@ -1,6 +1,6 @@
 <template>
   <q-card-section class="row items-center">
-    <div class="text-h6">Create New Project</div>
+    <div class="text-h6">New Project</div>
     <q-space />
     <q-btn icon="mdi-close" flat @click="$emit('close')" no-caps></q-btn>
   </q-card-section>
@@ -83,21 +83,10 @@
         :done="currentStep > 2"
       >
         <div class="text-subtitle2 q-mb-md text-primary">
-          Choose your writing style (optional)
+          <div>Choose your Writing Style (optional)</div>
+          <div class="text-caption">Writing style description will be fed into AI prompts to make it generate text that closely follows your style.</div>
         </div>
-        <div class="q-mb-md">
-          <q-input
-            dense
-            filled
-            outlined
-            type="textarea"
-            flat
-            v-model="writingStyleValue"
-            label="Writing Style description"
-            hint="Writing style description will be fed into AI prompts to make it generate text that suits your style. See the examples."
-          />
-        </div>
-        <div class="row q-mt-lg q-mb-sm">
+        <div class="row q-mb-sm">
           <div
             v-for="writingStyle in writingStyles.slice((current - 1) * pageSize, current * pageSize)"
             :key="writingStyle"
@@ -110,13 +99,64 @@
             />
           </div>
         </div>
-        <div class="row justify-center q-mt-md q-mb-lg">
+        <div class="row justify-center q-mb-lg">
           <q-pagination
             v-model="current"
             :max="maxPages"
+            :max-pages="3"
             direction-links
           />
         </div>
+
+        <div class="q-mb-md" v-if="showCustomInput">
+          <q-input
+            dense
+            filled
+            outlined
+            type="textarea"
+            flat
+            input-style="height: 220px;"
+            v-model="writingStyleValue"
+          />
+        </div>
+        <div class="row" v-if="showCustomInput">
+          <q-btn
+            flat
+            color="primary"
+            class="full-width"
+            icon="mdi-close"
+            @click="toggleWritingStyleMode"
+            no-caps
+          />
+        </div>
+        <template v-else>
+          <div class="row justify-center scroll-y q-px-md q-py-md rounded-borders" style="height: 250px;" v-if="writingStyleValue">
+            <div class="prompt-results" v-html="markdownToHtml(writingStyleValue)" />
+          </div>
+          <div class="row" v-if="writingStyleValue">
+            <q-btn
+              flat
+              color="primary"
+              class="full-width"
+              :icon="showCustomInput ? 'mdi-chevron-up' : 'mdi-pencil-outline'"
+              :label="showCustomInput ? 'Hide Custom Input' : 'Customize'"
+              @click="toggleWritingStyleMode"
+              no-caps
+            />
+          </div>
+          <div v-if="!writingStyleValue" style="height: 250px;" class="flex justify-center">
+            <q-btn
+              flat
+              color="primary"
+              class="full-width"
+              icon="mdi-pencil-outline"
+              label="Create Custom Style"
+              @click="toggleWritingStyleMode"
+              no-caps
+            />
+          </div>
+
+        </template>
       </q-step>
 
       <q-step
@@ -176,7 +216,7 @@ import {Notify} from "quasar";
 import {writingStyles} from "assets/writingStyles/writingStyleList";
 import WritingStyleSelectorItem from "components/Common/WritingStyleSelectorItem.vue";
 import {guid} from "src/common/utils/guidUtils";
-import {hasFlag} from "src/common/utils/textUtils";
+import {hasFlag, markdownToHtml} from "src/common/utils/textUtils";
 
 const layoutStore = useLayoutStore();
 const promptStore = usePromptStore();
@@ -196,8 +236,9 @@ const newProjectType = ref('story');
 const syncToCloud = ref(user.value.isAnonymous ? false : props.defaultProjectType === 'cloud');
 const importRecommendedPrompts = ref(true);
 const writingStyleValue = ref('');
+const showCustomInput = ref(false);
 
-const currentStep = ref(1);
+const currentStep = ref(3);
 
 const maxPages = computed(() => Math.ceil(writingStyles.length / pageSize));
 const current = ref(1);
@@ -224,6 +265,10 @@ function nextDisabled() {
     default:
       return false;
   }
+}
+
+function toggleWritingStyleMode() {
+  showCustomInput.value = !showCustomInput.value;
 }
 
 const projectTemplates = [
