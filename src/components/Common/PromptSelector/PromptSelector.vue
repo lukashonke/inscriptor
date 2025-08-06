@@ -285,7 +285,6 @@ const props = defineProps({
 const emit = defineEmits(['promptClick'])
 
 function promptClick(promptClickData) {
-  debugger;
   emit('promptClick', promptClickData);
 }
 

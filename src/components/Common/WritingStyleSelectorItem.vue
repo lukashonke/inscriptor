@@ -1,5 +1,5 @@
 <template>
-  <q-card class="">
+  <q-card class="" bordered flat>
     <q-card-section class="row">
       <div class="col row items-center">
         <div class="text-weight-bold" style="font-size: 0.9rem">{{ writingStyle.name }}</div>
@@ -28,7 +28,7 @@
     </q-card-section>
     <q-slide-transition>
       <q-card-section v-if="showExamples" class="q-pt-none">
-        <div class="scroll writing-style-md" style="font-size: 0.8rem; max-height: 300px; background-color: rgba(0, 0, 0, 0.02); padding: 12px; border-radius: 4px;" v-html="markdownToHtml(writingStyle.value)"></div>
+        <div class="scroll writing-style-md" style="font-size: 0.8rem; max-height: 300px; background-color: rgba(0, 0, 0, 0.06); padding: 12px; border-radius: 4px;" v-html="markdownToHtml(writingStyle.value)"></div>
       </q-card-section>
     </q-slide-transition>
   </q-card>

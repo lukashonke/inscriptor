@@ -317,15 +317,15 @@ const icon = computed(() => {
 const emit = defineEmits(['promptClick'])
 
 function promptClick(prompt) {
-  emit('promptClick', { prompt: prompt });
+  emit('promptClick', { prompt: prompt?.prompt ?? prompt });
 }
 
 function promptUsingModel(prompt, model) {
-  emit('promptClick', { prompt: prompt, forceModelId: model.id });
+  emit('promptClick', { prompt: prompt?.prompt ?? prompt, forceModelId: model.id });
 }
 
 function promptWithTemperature(prompt, temperature) {
-  emit('promptClick', { prompt: prompt, forceTemperature: temperature });
+  emit('promptClick', { prompt: prompt?.prompt ?? prompt, forceTemperature: temperature });
 }
 
 const menuButtonColor = computed(() => {

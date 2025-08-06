@@ -185,7 +185,11 @@
       <q-card-section class="row items-center">
         <div class="col">
           <div class="text-h6">{{ selectedNews?.message }}</div>
-          <div class="text-subtitle2 text-grey">{{ selectedNews?.tooltip }}</div>
+          <div class="text-subtitle2 text-grey">
+            {{ selectedNews?.originalData?.subtitle }}
+            <span v-if="selectedNews?.originalData?.subtitle && selectedNews?.originalData?.date_created"> • </span>
+            <span v-if="selectedNews?.originalData?.date_created">{{ formatDate(selectedNews.originalData.date_created) }}</span>
+          </div>
         </div>
         <div class="col-auto">
           <q-btn icon="close" flat round dense v-close-popup />
@@ -296,8 +300,22 @@ const resetDismissedHints = () => {
 };
 
 const openNewsDetail = (hint) => {
-  selectedNews.value = hint;
+  // Find the original news item to get access to date_created
+  const originalNewsItem = news.value.find(item => `news-${item.id}` === hint.id);
+  selectedNews.value = {
+    ...hint,
+    originalData: originalNewsItem
+  };
   newsDetailDialog.value = true;
+};
+
+const formatDate = (dateString) => {
+  if (!dateString) return '';
+  try {
+    return new Date(dateString).toLocaleString();
+  } catch (error) {
+    return '';
+  }
 };
 
 const hints = computed(() => {
@@ -307,13 +325,18 @@ const hints = computed(() => {
   for (const newsItem of news.value) {
     const hintId = `news-${newsItem.id}`;
     if (!dismissedHints.value.includes(hintId)) {
+      const formattedDate = formatDate(newsItem.date_created);
+      const tooltip = formattedDate
+        ? `${newsItem.subtitle || ''} ${newsItem.subtitle ? '• ' : ''}${formattedDate}`.trim()
+        : newsItem.subtitle;
+
       hintsList.push({
         id: hintId,
         type: 'news',
         message: newsItem.title,
         icon: 'mdi-newspaper',
         color: 'info',
-        tooltip: newsItem.subtitle,
+        tooltip: tooltip,
         content: markdownToHtml(newsItem.content || ''),
         dismissible: true,
         action: () => {} // No action needed for news
@@ -323,14 +346,14 @@ const hints = computed(() => {
 
   // WritingStyle hint
   const writingStyle = fileStore.variables.find(v => v.title === 'WritingStyle');
-  if (writingStyle && writingStyle.value && writingStyle.value.length < 50) {
+  if (writingStyle && writingStyle.value && writingStyle.value.length < 100) {
     hintsList.push({
       id: 'writing-style-brief',
       type: 'tip',
       message: 'Writing style description too brief',
       icon: 'mdi-lightbulb-outline',
       color: 'warning',
-      tooltip: 'Your $WritingStyle is less than 50 characters. Click to add more detail for better & more personalised AI results.',
+      tooltip: 'Your $WritingStyle is less than 100 characters. Click to add more detail for better & more personalised AI results.',
       dismissible: false,
       action: () => layoutStore.variableSettingsOpen = true
     });

@@ -504,8 +504,6 @@ function removeAllChats() {
 
 // Initialize on mount
 onMounted(() => {
-  debugger;
-
   // Create initial chat if none exists
   if (allChats.value.length === 0) {
     aiAgentStore.createAgentChat();
