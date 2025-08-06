@@ -668,7 +668,6 @@ export const useFileStore = defineStore('files', {
       await pingProject(user, this.projectId);
     },
     async syncProjectToCloud(force) {
-      debugger;
       if(!this.canSave()) {
         return;
       }
