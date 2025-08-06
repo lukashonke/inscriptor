@@ -1,25 +1,26 @@
 <template>
-  <q-card class="" bordered flat>
+  <q-card class="inscriptor-shadow-1">
     <q-card-section class="row">
-      <div class="col row items-center">
+      <div class="col row items-center" style="height: 40px">
         <div class="text-weight-bold" style="font-size: 0.9rem">{{ writingStyle.name }}</div>
       </div>
-      <div class="col-auto">
-        <q-btn no-caps color="primary" @click="onClick" padding="2px 8px" >
-          <q-icon name="mdi-plus" size="16px" class="q-mr-xs" />
-          Use
+      <div class="col-auto q-ml-xs flex items-center">
+        <q-btn no-caps :color="isCurrentStyle ? 'accent' : 'primary'" :class="{'bg-accent text-white': isCurrentStyle}" @click="onClick" padding="2px 8px" style="height: 30px; width: 70px;">
+          <q-icon :name="buttonIcon" size="16px" :class="buttonText ? 'q-pr-sm' : ''" />
+          {{ buttonText }}
         </q-btn>
       </div>
     </q-card-section>
     <q-separator />
     <q-card-section>
-      <div class="text-italic" style="font-size: 0.8rem">{{ writingStyle.usageTips }}</div>
-      <div class="q-mt-sm">
+      <div class="text-italic scroll-y" style="font-size: 0.8rem; height: 60px;">{{ writingStyle.usageTips }}</div>
+      <div class="q-mt-md">
         <q-btn
           dense
+          flat
           no-caps
           :icon="showExamples ? 'mdi-chevron-up' : 'mdi-chevron-down'"
-          :label="showExamples ? 'Hide Examples' : 'Show Examples'"
+          :label="showExamples ? 'Hide' : 'Expand'"
           @click="showExamples = !showExamples"
           color="primary"
           size="sm"
@@ -36,15 +37,29 @@
 
 <script setup>
 import {markdownToHtml, newLineToBr} from "src/common/utils/textUtils";
-  import {ref} from "vue";
+  import {ref, computed} from "vue";
 
   const props = defineProps({
     writingStyle: Object,
+    currentValue: String,
   });
 
   const emit = defineEmits(['writingStyleSet']);
 
   const showExamples = ref(false);
+
+  // Computed properties for dynamic button appearance
+  const isCurrentStyle = computed(() => {
+    return props.writingStyle.value === props.currentValue;
+  });
+
+  const buttonText = computed(() => {
+    return isCurrentStyle.value ? '' : 'Use';
+  });
+
+  const buttonIcon = computed(() => {
+    return isCurrentStyle.value ? 'mdi-check' : 'mdi-plus';
+  });
 
   function onClick() {
     emit('writingStyleSet', props.writingStyle.value);

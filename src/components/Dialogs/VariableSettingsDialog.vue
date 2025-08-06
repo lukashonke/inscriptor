@@ -2,12 +2,11 @@
   <q-dialog v-model="variableSettingsOpened" full-height>
     <q-card style="max-width: 90vw; width: 1600px">
       <q-card-section class="row">
-        <span class="text-h6">Variables</span>
+        <span class="text-h6">Project Variables</span>
         <HelpIcon tooltip="You can reference parameters anywhere by writing their name, prefixed with $. Eg: $ParameterName." />
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
-      <q-separator />
       <q-card-section class="q-gutter-y-sm">
         <q-card v-for="(variable, index) in fileStore.variables" :key="index" >
 
@@ -55,7 +54,7 @@
 
                     <div class="row">
                       <div v-for="writingStyle in writingStyles.slice((current - 1) * pageSize, current * pageSize)" :key="writingStyle" class="col-4 q-pa-sm">
-                        <WritingStyleSelectorItem  @writing-style-set="variable.value = writingStyle.value" :writingStyle="writingStyle" />
+                        <WritingStyleSelectorItem  @writing-style-set="variable.value = writingStyle.value" :writingStyle="writingStyle" :currentValue="variable.value" />
                       </div>
                     </div>
                   </div>

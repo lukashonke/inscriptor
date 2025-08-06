@@ -153,11 +153,7 @@
         </div>
       </q-card-actions>
 
-      <ProjectCreator v-if="creatingNewProject" :default-project-type="projectType"/>
-      <q-separator />
-      <q-card-actions v-if="creatingNewProject">
-        <q-btn icon="mdi-arrow-left-thin" flat color="primary" @click="creatingNewProject = false">Back</q-btn>
-      </q-card-actions>
+      <ProjectCreator v-if="creatingNewProject" :default-project-type="projectType" @close="creatingNewProject = false"/>
     </q-card>
   </q-dialog>
 </template>

@@ -33,8 +33,7 @@ Outside, the city hummed with its usual energy, oblivious to the small revolutio
   {
     name: "📚 Literary Fiction Style",
     usageTips: "Use this style for character-driven narratives in literary magazines and serious contemporary literature.",
-    value: `
-**Narrative Voice and Tone**: Introspective and layered, with emphasis on psychological depth and emotional nuance. The voice should be sophisticated yet intimate, inviting readers into the interior lives of characters. Explores the human condition through subtle observations and metaphorical language.
+    value: `**Narrative Voice and Tone**: Introspective and layered, with emphasis on psychological depth and emotional nuance. The voice should be sophisticated yet intimate, inviting readers into the interior lives of characters. Explores the human condition through subtle observations and metaphorical language.
 
 **Sentence Structure and Pacing**: Complex, varied sentence structures with lengths ranging from 5 to 40+ words. Uses rhythm and cadence as storytelling tools. Deliberately paced to mirror emotional states—long, flowing sentences for contemplation; short, fragmented ones for tension or revelation.
 
@@ -67,8 +66,7 @@ The photograph remained between them, a bridge and a chasm both.
   {
     name: "⚡ Commercial Thriller Style",
     usageTips: "Use this style for fast-paced thrillers, suspense novels, action-adventure, and page-turner fiction.",
-    value: `
-**Narrative Voice and Tone**: Urgent and propulsive, creating immediate tension and maintaining relentless forward momentum. The voice should be confident and direct, pulling readers through the story with cinematic intensity. Every paragraph earns its place by advancing plot or ratcheting tension.
+    value: `**Narrative Voice and Tone**: Urgent and propulsive, creating immediate tension and maintaining relentless forward momentum. The voice should be confident and direct, pulling readers through the story with cinematic intensity. Every paragraph earns its place by advancing plot or ratcheting tension.
 
 **Sentence Structure and Pacing**: Short, punchy sentences dominate (8-15 words average), with occasional longer sentences for variety. Paragraphs are brief—often just one or two sentences. Chapters end on cliffhangers. White space is used strategically to increase reading speed.
 
@@ -116,8 +114,7 @@ Chen was waiting in the situation room, satellite feeds covering every wall. "Fo
   {
     name: "🎭 Young Adult Contemporary Style",
     usageTips: "Use this style for YA fiction, teen romance, and contemporary young adult novels.",
-    value: `
-**Narrative Voice and Tone**: Authentic, immediate, and emotionally honest, capturing the intensity of teenage experience without condescension. The voice should feel genuinely young while tackling serious themes. Often uses first-person present tense for immediacy and connection.
+    value: `**Narrative Voice and Tone**: Authentic, immediate, and emotionally honest, capturing the intensity of teenage experience without condescension. The voice should feel genuinely young while tackling serious themes. Often uses first-person present tense for immediacy and connection.
 
 **Sentence Structure and Pacing**: Conversational rhythm with varied sentence lengths (10-25 words average). Fragments used for emphasis and emotional punch. Quick pacing with short chapters that end on emotional beats rather than cliffhangers.
 
@@ -162,8 +159,7 @@ A story where I figure out who I really am when everything I thought mattered fa
   {
     name: "🕵️ Hard-Boiled Mystery Style",
     usageTips: "Use this style for noir fiction, detective novels, crime fiction, and gritty mysteries.",
-    value: `
-**Narrative Voice and Tone**: Cynical, world-weary, yet somehow still idealistic beneath the armor. First-person narration with a distinctive, jaded voice that's seen too much but can't stop looking. Dark humor as a defense mechanism. The city is always a character.
+    value: `**Narrative Voice and Tone**: Cynical, world-weary, yet somehow still idealistic beneath the armor. First-person narration with a distinctive, jaded voice that's seen too much but can't stop looking. Dark humor as a defense mechanism. The city is always a character.
 
 **Sentence Structure and Pacing**: Terse, rhythmic sentences that hit like punches (10-20 words average). Occasional longer sentences for atmosphere or reflection. Paragraphs are lean. Uses repetition and parallel structure for emphasis and rhythm.
 
@@ -222,8 +218,7 @@ Nathan Cross was either very lost or very dead. In this town, sometimes they wer
   {
     name: "🚀 Science Fiction Technical Style",
     usageTips: "Use this style for hard science fiction, space opera, and scientifically grounded speculative fiction.",
-    value: `
-**Narrative Voice and Tone**: Precise and analytical while maintaining human warmth. The voice balances technical accuracy with emotional truth, never letting the science overshadow the human story. Sense of wonder tempered by scientific plausibility.
+    value: `**Narrative Voice and Tone**: Precise and analytical while maintaining human warmth. The voice balances technical accuracy with emotional truth, never letting the science overshadow the human story. Sense of wonder tempered by scientific plausibility.
 
 **Sentence Structure and Pacing**: Medium to long sentences (20-30 words average) with technical concepts integrated smoothly. Information revealed through action and dialogue rather than info-dumps. Pacing varies—slower for concept introduction, faster for action sequences.
 
@@ -268,8 +263,7 @@ Sarah opened a secure channel to Mission Control. "Houston, this is Horizon Stat
   {
     name: "💕 Romantic Comedy Style",
     usageTips: "Use this style for romantic comedies, contemporary romance, and feel-good love stories.",
-    value: `
-**Narrative Voice and Tone**: Witty, warm, and self-aware with a light touch even when dealing with deeper emotions. The voice should sparkle with humor while maintaining genuine emotional stakes. Often uses direct address or humorous observations about life and love.
+    value: `**Narrative Voice and Tone**: Witty, warm, and self-aware with a light touch even when dealing with deeper emotions. The voice should sparkle with humor while maintaining genuine emotional stakes. Often uses direct address or humorous observations about life and love.
 
 **Sentence Structure and Pacing**: Snappy pacing with varied sentence lengths (12-25 words average). Comedic timing through paragraph breaks and punchy one-liners. Builds to comedic and romantic peaks with careful rhythm. Uses callbacks and running gags for continuity.
 
@@ -337,8 +331,7 @@ But the game wasn't over yet.
   {
     name: "👻 Horror/Suspense Style",
     usageTips: "Use this style for horror novels, psychological thrillers, and supernatural fiction.",
-    value: `
-**Narrative Voice and Tone**: Atmospheric and unsettling, building dread through what's not shown as much as what is. The voice should create unease through subtle wrongness and growing tension. Reliability of narrator may be questioned as story progresses.
+    value: `**Narrative Voice and Tone**: Atmospheric and unsettling, building dread through what's not shown as much as what is. The voice should create unease through subtle wrongness and growing tension. Reliability of narrator may be questioned as story progresses.
 
 **Sentence Structure and Pacing**: Varies dramatically—long, creeping sentences for building tension, short fragments for shocks. Paragraphs shrink during intense scenes. Uses white space and section breaks to control reader breathing. Rhythm mimics heartbeat—slow, then racing.
 
@@ -405,8 +398,7 @@ The children in apartment 3B started laughing again on Thursday.
   {
     name: "🏛️ Historical Fiction Style",
     usageTips: "Use this style for historical novels, period dramas, and authentic time-period stories.",
-    value: `
-**Narrative Voice and Tone**: Immersive and authentic to the period while remaining accessible to modern readers. The voice should transport without alienating, using period-appropriate sensibilities filtered through contemporary storytelling techniques. Rich with historical detail that serves story rather than overwhelming it.
+    value: `**Narrative Voice and Tone**: Immersive and authentic to the period while remaining accessible to modern readers. The voice should transport without alienating, using period-appropriate sensibilities filtered through contemporary storytelling techniques. Rich with historical detail that serves story rather than overwhelming it.
 
 **Sentence Structure and Pacing**: Slightly more formal structure reflecting historical periods (20-30 words average). Pacing allows for historical context without becoming textbook-like. Uses period-appropriate rhythms while maintaining modern readability. Descriptive passages paint era without halting narrative.
 
@@ -459,8 +451,7 @@ But Shanghai, she'd heard, had need of English governesses who weren't afraid of
   {
     name: "⚔️ Epic Fantasy Style",
     usageTips: "Use this style for epic fantasy, high fantasy, and grand fantasy narratives with complex world-building.",
-    value: `
-**Narrative Voice and Tone**: Grand and immersive, with a sense of mythic weight and historical significance. The voice should balance accessibility with the formal cadences of epic storytelling. Multiple POVs weave together to create a tapestry of perspectives across a vast world.
+    value: `**Narrative Voice and Tone**: Grand and immersive, with a sense of mythic weight and historical significance. The voice should balance accessibility with the formal cadences of epic storytelling. Multiple POVs weave together to create a tapestry of perspectives across a vast world.
 
 **Sentence Structure and Pacing**: Varied lengths (15-30 words average) with longer sentences for world-building and description. Pacing builds slowly, allowing readers to absorb complex worldbuilding. Action scenes shift to shorter, punchier sentences. Uses parallel structure for prophecies and formal speech.
 
@@ -748,8 +739,7 @@ By Day 7, I'd made progress. I was now waking up at 9:59 AM instead of 10. Rome 
   {
     name: "🪶 Minimalist Style",
     usageTips: "Use this style for literary short stories, experimental fiction, and artistic prose that conveys deep emotion through simplicity.",
-    value: `
-**Narrative Voice and Tone**: Stripped down to essentials, where every word carries weight. The voice trusts readers to fill gaps with their own experience. Emotions conveyed through action and implication rather than exposition. Silence speaks as loudly as words.
+    value: `**Narrative Voice and Tone**: Stripped down to essentials, where every word carries weight. The voice trusts readers to fill gaps with their own experience. Emotions conveyed through action and implication rather than exposition. Silence speaks as loudly as words.
 
 **Sentence Structure and Pacing**: Short, declarative sentences (8-15 words average). Subject-verb-object construction dominates. Paragraphs rarely exceed three sentences. White space as narrative tool. Repetition used sparingly but with purpose.
 
@@ -824,8 +814,7 @@ The phone rang. Neither of them moved to answer it.
   {
     name: "🖋️ Sophisticated/Literary Style",
     usageTips: "Use this style for literary journals, experimental literature, and high art writing with complex themes.",
-    value: `
-**Narrative Voice and Tone:** Introspective, elegant, and layered with meaning. Multiple levels of interpretation. Self-conscious about language and form. Often philosophical or meditative. Comfortable with ambiguity and contradiction.
+    value: `**Narrative Voice and Tone:** Introspective, elegant, and layered with meaning. Multiple levels of interpretation. Self-conscious about language and form. Often philosophical or meditative. Comfortable with ambiguity and contradiction.
 
 **Sentence Structure and Pacing:** Complex architecture with subordinate clauses and parenthetical asides. Sentences as carefully constructed as poetry. Rhythm and sound as important as meaning. Deliberately slow to encourage contemplation.
 
@@ -858,8 +847,7 @@ Time, in this room, had taken on the quality of amber - golden, viscous, preserv
   {
     name: "🎓 Academic/Scholarly Style",
     usageTips: "Use this style for research papers, academic journals, dissertations, and scholarly publications.",
-    value: `
-**Narrative Voice and Tone:** Formal, analytical, and objective. Third-person perspective maintaining scholarly distance. Cautious about claims - uses hedging language appropriately. Authority established through evidence, not assertion.
+    value: `**Narrative Voice and Tone:** Formal, analytical, and objective. Third-person perspective maintaining scholarly distance. Cautious about claims - uses hedging language appropriately. Authority established through evidence, not assertion.
 
 **Sentence Structure and Pacing:** Complex sentences with multiple subordinate clauses. Careful logical progression. Topic sentences followed by evidence and analysis. Transitional phrases linking ideas. Methodical pacing.
 
