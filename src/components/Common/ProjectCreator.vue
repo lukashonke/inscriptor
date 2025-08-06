@@ -87,25 +87,44 @@
           <div class="text-caption">Writing style description will be fed into AI prompts to make it generate text that closely follows your style.</div>
         </div>
         <div class="row q-mb-sm">
-          <div
-            v-for="writingStyle in writingStyles.slice((current - 1) * pageSize, current * pageSize)"
-            :key="writingStyle"
-            class="col-4 q-pa-sm"
+          <q-carousel
+            v-model="slide"
+            class="q-px-none"
+            transition-prev="slide-right"
+            transition-next="slide-left"
+            swipeable
+            animated
+            control-color="primary"
+            arrows
+            height="auto"
           >
-            <WritingStyleSelectorItem
-              @writing-style-set="writingStyleValue = writingStyle.value"
-              :writingStyle="writingStyle"
-              :currentValue="writingStyleValue"
-            />
-          </div>
-        </div>
-        <div class="row justify-center q-mb-lg">
-          <q-pagination
-            v-model="current"
-            :max="maxPages"
-            :max-pages="3"
-            direction-links
-          />
+            <q-carousel-slide
+              v-for="(slideStyles, slideIndex) in writingStyleSlides"
+              :key="slideIndex"
+              :name="slideIndex"
+              class="column no-wrap q-px-xl"
+            >
+              <div class="row q-gutter-md q-pa-md">
+                <div
+                  v-for="writingStyle in slideStyles"
+                  :key="writingStyle.name"
+                  class="col"
+                >
+                  <WritingStyleSelectorItem
+                    @writing-style-set="writingStyleValue = writingStyle.value; writingStyleName = writingStyle.name"
+                    :writingStyle="writingStyle"
+                    :currentValue="writingStyleValue"
+                  />
+                </div>
+                <!-- Fill remaining slots if less than 3 styles in slide -->
+                <div
+                  v-for="n in (pageSize - slideStyles.length)"
+                  :key="`empty-${n}`"
+                  class="col"
+                ></div>
+              </div>
+            </q-carousel-slide>
+          </q-carousel>
         </div>
 
         <div class="q-mb-md" v-if="showCustomInput">
@@ -130,10 +149,11 @@
           />
         </div>
         <template v-else>
-          <div class="row justify-center scroll-y q-px-md q-py-md rounded-borders" style="height: 250px;" v-if="writingStyleValue">
+          <div class="row justify-center scroll-y q-px-xl q-py-md rounded-borders bordered gradient-variation-2" style="height: 250px;" v-if="writingStyleValue">
+            <div class="full-width text-caption q-mb-sm text-primary">{{  writingStyleName }}:</div>
             <div class="prompt-results" v-html="markdownToHtml(writingStyleValue)" />
           </div>
-          <div class="row" v-if="writingStyleValue">
+          <div class="row q-mt-md" v-if="writingStyleValue">
             <q-btn
               flat
               color="primary"
@@ -235,13 +255,13 @@ const newProjectName = ref('');
 const newProjectType = ref('story');
 const syncToCloud = ref(user.value.isAnonymous ? false : props.defaultProjectType === 'cloud');
 const importRecommendedPrompts = ref(true);
+const writingStyleName = ref('Default (Neutral) Style');
 const writingStyleValue = ref('');
 const showCustomInput = ref(false);
 
-const currentStep = ref(3);
+const currentStep = ref(1);
 
-const maxPages = computed(() => Math.ceil(writingStyles.length / pageSize));
-const current = ref(1);
+const slide = ref(0);
 const pageSize = 3;
 
 const creatingProject = ref(false);
@@ -249,6 +269,15 @@ const creatingProject = ref(false);
 // Computed properties for stepper
 const isLastStep = computed(() => {
   return currentStep.value === 4;
+});
+
+// Computed property to group writing styles into slides of 3
+const writingStyleSlides = computed(() => {
+  const slides = [];
+  for (let i = 0; i < writingStyles.length; i += pageSize) {
+    slides.push(writingStyles.slice(i, i + pageSize));
+  }
+  return slides;
 });
 
 // Validation functions
