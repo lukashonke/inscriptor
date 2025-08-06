@@ -51,6 +51,8 @@ export const useFileStore = defineStore('files', {
 
 
     exiting: false,
+    saving: false,
+    creatingNewProject: false,
 
     currentLocalProjectDataFile: null,
     recentProjectDataFiles: [],
@@ -666,6 +668,7 @@ export const useFileStore = defineStore('files', {
       await pingProject(user, this.projectId);
     },
     async syncProjectToCloud(force) {
+      debugger;
       if(!this.canSave()) {
         return;
       }
@@ -973,6 +976,15 @@ export const useFileStore = defineStore('files', {
     },
     canSave() {
       return this.exiting === false;
+    },
+    canQuickSave() {
+      return !this.saving && !this.creatingNewProject;
+    },
+    setSaving(set) {
+      this.saving = set;
+    },
+    setCreatingNewProject(set) {
+      this.creatingNewProject = set;
     },
     async loadDataFile(file) {
       const fileStore = useFileStore();

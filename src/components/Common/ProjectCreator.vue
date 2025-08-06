@@ -1,6 +1,6 @@
 <template>
   <q-card-section class="row items-center">
-    <div class="text-h6">Create Project</div>
+    <div class="text-h6">New Project</div>
     <q-space />
   </q-card-section>
   <q-separator />
@@ -8,7 +8,7 @@
 
     <div class="row q-gutter-x-md">
       <div class="col">
-        <q-input autofocus outlined flat v-model="newProjectName" label="New Project Name" />
+        <q-input autofocus outlined flat v-model="newProjectName" label="Enter project name..." />
       </div>
       <div class="col-auto flex items-center">
         <q-btn flat dense icon="mdi-cog" @click="settingsExpanded = !settingsExpanded" />
@@ -216,43 +216,53 @@ async function confirmNewProject() {
 
     await saveCurrentProject();
 
-    await fileStore.loadProject(blankProject, true, null, importRecommendedPrompts.value, writingStyleValue.value.length > 0);
+    try {
+      fileStore.setCreatingNewProject(true);
 
-    if (syncToCloud.value) {
-      await fileStore.saveProjectToCloud();
-    } else {
-      const filePath = await fileStore.saveProjectDataToLocalFile();
-      fileStore.currentLocalProjectDataFile = filePath;
-      fileStore.addRecentProjectDataFile(filePath);
-    }
+      await fileStore.loadProject(blankProject, true, null, importRecommendedPrompts.value, writingStyleValue.value.length > 0);
 
-    layoutStore.projectSelectionDialogOpen = false;
-
-    const data = await layoutStore.loadUserData();
-    if(!user.value.isAnonymous && data) {
-      if(!hasFlag(data.state, 2)) {
-        // no first project yet
-        layoutStore.newUserWelcomeDialogStep = 0;
-        layoutStore.newUserWelcomeDialog = true;
-
-        await setUserState(await user.value.getIdToken(), { projectCreated: true })
+      if (syncToCloud.value) {
+        await fileStore.saveProjectToCloud();
+      } else {
+        const filePath = await fileStore.saveProjectDataToLocalFile();
+        fileStore.currentLocalProjectDataFile = filePath;
+        fileStore.addRecentProjectDataFile(filePath);
       }
-    }
 
+      layoutStore.projectSelectionDialogOpen = false;
+
+      const data = await layoutStore.loadUserData();
+      if(!user.value.isAnonymous && data) {
+        if(!hasFlag(data.state, 2)) {
+          // no first project yet
+          layoutStore.newUserWelcomeDialogStep = 0;
+          layoutStore.newUserWelcomeDialog = true;
+
+          await setUserState(await user.value.getIdToken(), { projectCreated: true })
+        }
+      }
+    } finally {
+      fileStore.setCreatingNewProject(false);
+    }
   } finally {
     creatingProject.value = false;
   }
 }
 
 async function saveCurrentProject() {
-  if(fileStore.projectId && fileStore.canSave()) {
+  try {
+    fileStore.setSaving(true);
 
-    // offline file sync if not synced on cloud
-    if(fileStore.projectSettings?.syncToCloud === false) {
-      await fileStore.saveProjectDataToLocalFile();
-    } else {
-      await fileStore.syncProjectToCloud(true);
+    if(fileStore.projectId && fileStore.canSave()) {
+      // offline file sync if not synced on cloud
+      if(fileStore.projectSettings?.syncToCloud === false) {
+        await fileStore.saveProjectDataToLocalFile();
+      } else {
+        await fileStore.syncProjectToCloud(true);
+      }
     }
+  } finally {
+    fileStore.setSaving(false);
   }
 }
 
