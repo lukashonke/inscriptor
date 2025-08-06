@@ -149,7 +149,7 @@
           />
         </div>
         <template v-else>
-          <div class="row justify-center scroll-y q-px-xl q-py-md rounded-borders bordered gradient-variation-2" style="height: 250px;" v-if="writingStyleValue">
+          <div class="row justify-center scroll-y q-px-xl q-py-md rounded-borders" style="height: 250px;" v-if="writingStyleValue">
             <div class="full-width text-caption q-mb-sm text-primary">{{  writingStyleName }}:</div>
             <div class="prompt-results" v-html="markdownToHtml(writingStyleValue)" />
           </div>

@@ -57,7 +57,7 @@
           </div>
 
           <div class="text-white  text-h6" v-if="step === 8">
-            <div>Never mind, we still gave you <span class="text-accent">10 free AI credits</span> to get started!</div>
+            <div>Never mind, we still gave you <span class="text-accent">100 free AI credits</span> to get started!</div>
 
             <div class="flex q-gutter-x-md justify-end q-mt-md">
               <q-btn no-caps label="OK!" color="accent" @click="step = 9; scheduleStep(10)" />

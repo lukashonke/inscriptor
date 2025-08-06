@@ -39,6 +39,7 @@
         <q-btn
           no-caps
           square
+          :flat="hints.length === 0"
           :color="hints.length === 1 ? hints[0].color : (hints.length === 0 ? undefined : 'primary')"
           class="q-mr-md"
         >
@@ -96,7 +97,7 @@
           icon="mdi-account-outline"
           class="sm-hide xs-hide"
           no-caps
-          label="user@email.com"
+          :label="currentUser"
           :loading="userSyncing"
           v-if="currentUser">
           <q-item clickable v-ripple @click="layoutStore.showUserDialog" dense v-if="currentUser !== 'Guest'">

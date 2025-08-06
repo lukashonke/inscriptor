@@ -71,7 +71,7 @@
           <q-item v-if="projects.length === 0 && !user.isAnonymous">
             <q-item-section class="text-center">
               <q-item-label class="">
-                <q-chip clickable @click="creatingNewProject = true" icon="mdi-plus">No projects yet. Create a project to get started</q-chip>
+                <q-chip clickable @click="creatingNewProject = true" icon="mdi-plus">Create a project to get started</q-chip>
               </q-item-label>
             </q-item-section>
           </q-item>
