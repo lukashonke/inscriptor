@@ -1069,5 +1069,323 @@ We recommend implementing an integrated cloud-based platform that consolidates c
 The total investment requirement is $750,000, distributed across infrastructure ($400,000), software licensing ($200,000), and implementation services ($150,000). Conservative projections indicate cost savings of $300,000 annually beginning in Year 2, resulting in net positive ROI of $450,000 over the three-year analysis period.
 
 =====`
+  },
+  {
+    name: "📝 Contemporary Fiction Style",
+    usageTips: "Use this style for modern realistic stories, slice-of-life narratives, and contemporary settings across any genre.",
+    types: ['fiction'],
+    tags: ['universal', 'cross-genre', 'literary'],
+    value: `**Narrative Voice and Tone**: Modern and accessible, capturing the rhythms of contemporary life. The voice should feel immediate and relatable while maintaining literary quality. Often employs close third-person or authentic first-person narration that reflects current cultural awareness and social dynamics.
+
+**Sentence Structure and Pacing**: Natural flow with varied sentence lengths that mirror real conversation and thought patterns. Pacing reflects modern life—quick dialogue exchanges, longer contemplative passages, and rhythms that feel familiar to contemporary readers.
+
+**Language and Vocabulary**: Contemporary vernacular mixed with precise, evocative language. Includes current cultural references, technology, and social issues woven naturally into narrative. Avoids dated expressions while maintaining timeless emotional truth.
+
+**Dialogue Style**: Authentic modern conversations that reveal character relationships and social dynamics. Characters speak in ways that reflect their generation, background, and social context. Natural interruptions, overlapping thoughts, and realistic speech patterns.
+
+**Theme and Motives**: Explores contemporary issues through personal stories—identity in the digital age, modern relationships, work-life balance, social change, cultural diversity. Universal human experiences viewed through a current lens.
+
+=====
+
+Example snippets:
+
+Maya's phone buzzed for the seventh time during dinner, but she ignored it, focusing instead on her grandmother's hands as they broke apart the warm naan.
+
+"Your generation," Nani said, not looking up from the plate, "always so busy talking to people who aren't here."
+
+"I'm here now," Maya said, though she could feel the phantom vibration of another notification against her thigh.
+
+"Are you?" Her grandmother's eyes held that particular blend of wisdom and mischief that had terrified and delighted Maya since childhood. "Because your mind keeps jumping like a cricket in a jar."
+
+Maya set her phone face-down on the table, the small gesture feeling bigger than it should. Outside, Mumbai's evening traffic created its familiar symphony, but in this small kitchen, time moved differently. Here, stories were still told rather than streamed, and the most important conversations happened over food that took hours to prepare.
+
+"Tell me about the boy again," Nani said, spooning more curry onto Maya's plate. "The one who makes you smile at your phone like that."
+
+And despite everything—the notifications, the deadlines, the constant ping of a world demanding attention—Maya found herself settling into the rhythm of her grandmother's questions, the ancient art of sharing life over a shared meal.
+
+=====`
+  },
+  {
+    name: "🎭 Character-Driven Style",
+    usageTips: "Use this style when internal conflict and character development are the primary focus of your story across any genre.",
+    types: ['fiction'],
+    tags: ['character-focused', 'literary', 'cross-genre'],
+    value: `**Narrative Voice and Tone**: Intimate and psychologically astute, diving deep into character motivation and internal landscape. The voice creates close emotional connection with readers through authentic exploration of human complexity and growth.
+
+**Sentence Structure and Pacing**: Follows the rhythms of thought and emotion rather than external action. Uses longer, more complex sentences for internal exploration and shorter ones for moments of realization or decision. Pacing allows for deep character development.
+
+**Language and Vocabulary**: Rich in psychological detail and emotional nuance. Precise vocabulary for distinguishing between subtle feelings and motivations. Metaphors often drawn from the character's personal experience and worldview.
+
+**Dialogue Style**: Reveals character through subtext, speech patterns, and what remains unspoken. Conversations show relationship dynamics and internal conflicts. Characters often struggle to express their deeper truths directly.
+
+**Theme and Motives**: Focuses on character transformation, self-discovery, relationships, and personal growth. How characters change through challenges and choices. The complexity of human motivation and the journey toward self-understanding.
+
+=====
+
+Example snippets:
+
+Sarah had always thought of herself as the kind of person who made decisions quickly, but here she sat for the third morning in a row, staring at the resignation letter on her laptop screen, her finger hovering over the send button like a hummingbird afraid to land.
+
+The cursor blinked at her—impatient, expectant, mocking. Such a small thing, that blinking line, yet it represented everything she was too afraid to become and too tired to keep avoiding.
+
+Her reflection in the computer screen showed a woman she barely recognized: dark circles under eyes that had once sparkled with ambition, shoulders curved inward as if protecting something precious and fragile. When had she started looking so defeated?
+
+The email from her college roommate still sat in her inbox, full of excited updates about the nonprofit she'd started in Guatemala. "Remember when we used to stay up all night talking about changing the world?" Jessica had written. "I finally figured out how to start."
+
+Sarah touched the screen where her reflection met her friend's words. She did remember. She remembered the girl who had believed her dreams were not just possible but inevitable. The girl who had never imagined she'd spend her days managing someone else's vision while her own slowly suffocated in a cubicle.
+
+Her phone rang—her boss, no doubt wondering where the quarterly reports were. Sarah let it go to voicemail and finally, before she could change her mind again, clicked send.
+
+The resignation letter disappeared into the digital ether, and Sarah realized she was holding her breath. Not from fear, but from something she hadn't felt in years: anticipation.
+
+=====`
+  },
+  {
+    name: "⚡ Plot-Driven Style",
+    usageTips: "Use this style for action-oriented stories, adventures, and fast-paced narratives across any genre.",
+    types: ['fiction'],
+    tags: ['plot-focused', 'commercial', 'cross-genre'],
+    value: `**Narrative Voice and Tone**: Energetic and forward-moving, maintaining momentum and reader engagement. The voice should create urgency and excitement while clearly conveying action sequences and plot developments. Confident and dynamic storytelling.
+
+**Sentence Structure and Pacing**: Varies strategically—short, punchy sentences for action and tension, longer ones for necessary exposition. Quick pacing with frequent scene breaks and cliffhangers. Structure serves the plot's forward momentum.
+
+**Language and Vocabulary**: Clear, concrete language emphasizing action and movement. Strong verbs drive every sentence. Sensory details focus on immediate experience rather than lengthy description. Precise terminology for action sequences.
+
+**Dialogue Style**: Purposeful exchanges that advance plot and reveal information efficiently. Characters speak naturally but conversations move story forward. Quick banter, urgent exchanges, and dialogue that builds tension.
+
+**Theme and Motives**: External conflict drives internal growth. Themes emerge through action and consequence rather than introspection. Character development happens through choices made under pressure and responses to challenges.
+
+=====
+
+Example snippets:
+
+The explosion threw Elena twenty feet into the fountain, and she had exactly thirty seconds before Kozlov's men surrounded the plaza.
+
+She surfaced, spitting chlorinated water and checking her earpiece. Static. The comm was dead, which meant Mikhail was either compromised or worse. No time to find out which.
+
+Elena hauled herself over the fountain's edge, glass from the embassy windows crunching under her boots. The briefcase—where was the briefcase? There, half-buried under debris from the blast, its titanium shell scratched but intact.
+
+Footsteps. Multiple sets, moving fast.
+
+She grabbed the case and sprinted toward the motorcycle she'd stashed behind the cathedral. The key turned on the first try—finally, something was going right. The engine roared to life just as the first shots rang out, bullets sparking off the stone walls around her.
+
+Elena gunned it down the narrow alley, leaning hard into the turn onto Via Roma. In her mirror, she counted four vehicles giving chase. Kozlov wasn't taking any chances.
+
+Her phone buzzed against her ribs—a text from a blocked number: "Bridge. Five minutes. Come alone."
+
+Elena checked her watch. The rendezvous was across the city, and she had half the Russian mob breathing down her neck. She downshifted and took the next corner at sixty kilometers per hour.
+
+Five minutes. She'd make it in four.
+
+=====`
+  },
+  {
+    name: "💭 Introspective/Reflective Style",
+    usageTips: "Use this style for thoughtful narratives, coming-of-age stories, and philosophical fiction across any genre.",
+    types: ['fiction'],
+    tags: ['character-focused', 'literary', 'universal'],
+    value: `**Narrative Voice and Tone**: Contemplative and thoughtful, inviting readers into deeper consideration of life's complexities. The voice should be patient with ambiguity and comfortable exploring philosophical questions through personal experience.
+
+**Sentence Structure and Pacing**: Leisurely pacing that allows for meditation and reflection. Longer, more complex sentences that mirror the meandering nature of deep thought. Builds meaning through accumulation of insight rather than dramatic action.
+
+**Language and Vocabulary**: Sophisticated and nuanced, with attention to the subtle shadings of meaning and emotion. Rich in metaphor and symbolism. Vocabulary that can express complex ideas and delicate emotional distinctions.
+
+**Dialogue Style**: Conversations often touch on deeper meanings and life questions. Characters may speak indirectly, using stories or examples to convey larger truths. Silences and pauses carry significant weight.
+
+**Theme and Motives**: Explores fundamental questions about existence, meaning, identity, and human nature. How characters understand themselves and their place in the world. The search for truth and understanding through personal experience.
+
+=====
+
+Example snippets:
+
+There's something about airports that makes you acutely aware of time—not the mechanical time of clocks and schedules, but the deeper current that carries all of us forward whether we're ready or not.
+
+I sat in Terminal C, watching strangers navigate their own small dramas of departure and arrival, and wondered when I had become the kind of person who observed life rather than lived it. The businessman arguing into his phone about quarterly projections, the young mother trying to comfort a crying toddler, the elderly couple holding hands as they waited for their final boarding call—each of them was writing the story of their life, making choices that would ripple forward in ways they couldn't possibly imagine.
+
+My own ticket felt heavy in my pocket. Flight 447 to Portland, departing in two hours. After that, a new job, a new apartment, a chance to become someone different from who I'd been for the past thirty-five years. But here's what nobody tells you about reinventing yourself: you can change your geography, your career, even your daily habits, but you still wake up every morning inside the same consciousness, carrying the same collection of joys and wounds that have always defined you.
+
+The boarding announcement echoed through the terminal, and I watched the usual choreography of gathering belongings and forming lines. Soon, that would be me, stepping onto a plane that would carry me toward a future I had chosen but couldn't fully envision.
+
+Maybe that was the point. Maybe the courage wasn't in having a perfect plan, but in accepting that some questions could only be answered by moving forward into the uncertainty, trusting that the person you are becoming will be equal to whatever you discover along the way.
+
+=====`
+  },
+  {
+    name: "🌟 Uplifting/Feel-Good Style",
+    usageTips: "Use this style for positive, heartwarming tales and hopeful narratives that inspire readers across any genre.",
+    types: ['fiction'],
+    tags: ['universal', 'commercial', 'cross-genre'],
+    value: `**Narrative Voice and Tone**: Warm, optimistic, and emotionally generous. The voice should find hope and beauty even in difficult situations, celebrating human resilience and the possibility of positive change. Genuine warmth without naive simplicity.
+
+**Sentence Structure and Pacing**: Comfortable, flowing pacing that allows readers to savor positive moments. Builds toward satisfying resolutions and emotional payoffs. Structure supports character growth and relationship development.
+
+**Language and Vocabulary**: Rich in positive imagery and uplifting metaphors. Language that emphasizes possibility, growth, and connection. Warm sensory details that create comfort and joy. Avoids cynicism while remaining authentic.
+
+**Dialogue Style**: Conversations reveal kindness, wisdom, and human connection. Characters support each other through words and actions. Humor that brings people together rather than divides. Dialogue shows people at their best.
+
+**Theme and Motives**: Hope triumphing over adversity, the power of kindness and community, personal growth and second chances, love in its many forms. How people help each other heal and grow. The belief that positive change is always possible.
+
+=====
+
+Example snippets:
+
+The community garden had started as Mrs. Chen's crazy idea, but three months later, it had become the heart of Maple Street in ways no one had expected.
+
+Tom knelt between the tomato plants, showing eight-year-old Marcus how to tie the vines to their stakes. Six months ago, Tom had been laid off from the factory where he'd worked for fifteen years. He'd spent weeks sitting on his porch, watching the neighborhood kids walk by, wondering what he was supposed to do with all this unexpected time.
+
+"Like this, Mr. Tom?" Marcus held up a vine he'd secured with careful loops of green twine.
+
+"Perfect," Tom said, and meant it. The boy had gentle hands for gardening, a patience that seemed unusual for his age. "You've got the touch."
+
+Marcus beamed, dirt streaking his cheek where he'd wiped away sweat. His grandmother had started bringing him to the garden after school, partly to keep him busy while she worked her evening shift at the hospital, but mostly because she believed children should know where food comes from.
+
+At the far end of the plot, Mrs. Chen was explaining companion planting to a group of teenagers from the high school, her English mixed with enthusiastic gestures and the occasional Chinese phrase that somehow made perfect sense anyway. The teenagers—kids who supposedly only cared about video games and social media—listened intently as she described how marigolds could protect vegetables from pests.
+
+"Community," Mrs. Chen had said when she first proposed the garden, "grows best when people have something to tend together."
+
+Tom watched Marcus carefully position another tie around the tomato vine and realized she had been right about more than just plants. They were all growing something here—not just vegetables, but connections, purpose, the quiet satisfaction of nurturing something valuable together.
+
+=====`
+  },
+  {
+    name: "🌙 Atmospheric/Mood Style",
+    usageTips: "Use this style when setting, mood, and atmosphere are crucial elements of your story across any genre.",
+    types: ['fiction'],
+    tags: ['atmosphere-focused', 'literary', 'cross-genre'],
+    value: `**Narrative Voice and Tone**: Evocative and immersive, creating a strong sense of place and mood. The voice should paint vivid pictures with words, making readers feel they are experiencing the setting directly. Rich in sensory detail and emotional atmosphere.
+
+**Sentence Structure and Pacing**: Varies to match the mood being created—longer, flowing sentences for dreamy or contemplative atmospheres, shorter ones for tension or urgency. Pacing allows readers to fully absorb the environmental details and emotional tone.
+
+**Language and Vocabulary**: Rich in sensory language and descriptive detail. Careful word choice to evoke specific moods and feelings. Metaphors and similes that connect setting to emotion. Vocabulary that creates atmosphere through sound and rhythm as well as meaning.
+
+**Dialogue Style**: Characters speak in ways that reflect and enhance the story's atmosphere. Dialogue may be sparse, allowing setting and mood to dominate, or it may echo the environmental tone through rhythm and word choice.
+
+**Theme and Motives**: How environment shapes character and emotion. The relationship between internal and external landscapes. Setting as a reflection of psychological states. The power of place to influence story and meaning.
+
+=====
+
+Example snippets:
+
+The lighthouse keeper's cottage sat at the edge of the world, where the Atlantic rolled endlessly against granite cliffs that had been carved by centuries of salt and storm.
+
+Eleanor arrived on a Tuesday morning when the fog hung so thick she could barely see the worn path beneath her feet. The cottage emerged from the gray like a memory half-forgotten—weathered shingles silvered by decades of ocean air, windows that reflected nothing but mist, a door painted red as fresh blood against the monochrome landscape.
+
+Inside, the air held the scent of old wood and brine, of books left too long in humid salt air. The floorboards creaked with each step, a language of their own that spoke of solitude and endurance. Through the kitchen window, she could just make out the lighthouse itself, its white tower disappearing into the fog like a giant's finger pointing toward heaven.
+
+The real estate agent had warned her about the isolation. "Six months of winter," he'd said, "when sometimes you don't see another soul for weeks." But Eleanor had come here precisely for that silence, for the way the ocean's constant whisper could drown out all the voices in her head.
+
+She set her single suitcase on the bed and opened the window, letting the fog drift into the room like curious spirits. Somewhere in the gray, a fog horn sounded—deep, mournful, eternal. It was the sound of ships finding their way home, of safety in darkness, of light that persisted even when no one could see it.
+
+Eleanor smiled for the first time in months. This was exactly what she had been looking for: a place where the weather could match her mood, where solitude was not just accepted but necessary, where she could finally stop pretending to be anything other than what she was—someone who needed to disappear for a while into the gray space between sea and sky.
+
+=====`
+  },
+  {
+    name: "💬 Dialogue-Heavy Style",
+    usageTips: "Use this style for character interaction-focused stories and ensemble pieces driven by conversation across any genre.",
+    types: ['fiction'],
+    tags: ['character-focused', 'commercial', 'cross-genre'],
+    value: `**Narrative Voice and Tone**: Observational and character-focused, letting dialogue carry the primary storytelling burden. The narrative voice provides just enough context and description to support the conversations while staying out of the way.
+
+**Sentence Structure and Pacing**: Quick, dynamic pacing driven by conversational rhythm. Short paragraphs and frequent dialogue breaks. Minimal but effective description between exchanges. Structure follows the natural flow of conversation.
+
+**Language and Vocabulary**: Natural, realistic dialogue that reveals character through speech patterns, word choices, and verbal habits. Each character has a distinct voice. Dialogue tags used sparingly, letting conversation speak for itself.
+
+**Dialogue Style**: Extensive, realistic exchanges that advance plot and develop character simultaneously. Conversations have subtext and multiple layers. Characters speak authentically for their backgrounds and personalities. Overlapping conversations and interrupted thoughts.
+
+**Theme and Motives**: Relationships and character dynamics explored through interaction. How people communicate, misunderstand, connect, and conflict. The spaces between what people say and what they mean. Human connection through conversation.
+
+=====
+
+Example snippets:
+
+"You're wearing the blue tie," Janet said, not looking up from her coffee.
+
+"It's navy."
+
+"Same thing."
+
+David adjusted the knot, catching his reflection in the kitchen window. "The interview's at ten. I should leave soon."
+
+"Mmm." Janet turned a page of her magazine. "Traffic will be terrible on the bridge."
+
+"I'm taking the tunnel."
+
+"The tunnel's worse."
+
+He poured coffee into his travel mug, the silence stretching between them like a bridge neither wanted to cross first.
+
+"Jan."
+
+"What?"
+
+"Look at me."
+
+She finally raised her eyes. "You look fine. You always look fine."
+
+"That's not what I meant."
+
+"I know what you meant."
+
+David sat down across from her, the want ads spread between them like a map of all the places he might go without her. "We should talk about—"
+
+"About what? About how you're taking a job in Chicago? About how we've been married twenty-two years and you're just now telling me you're 'not fulfilled'?" Her fingers made air quotes, and he realized she'd been practicing this conversation in her head for weeks.
+
+"It's not about fulfillment."
+
+"No? What's it about then?"
+
+"It's about..." He stopped, looking for words that wouldn't sound like betrayal. "It's about waking up."
+
+"I see. And I'm what—the dream you want to wake up from?"
+
+"Janet, come on."
+
+"No, you come on, David. Don't pretty it up with metaphors. If you want to leave, then leave. But don't make it about self-actualization or whatever midlife crisis bullshit you're selling yourself."
+
+He reached for her hand. She pulled it away.
+
+"The kids will want to know why," she said.
+
+"We'll figure out what to tell them."
+
+"We." Janet laughed, but there was no humor in it. "There is no we in this decision, is there?"
+
+=====`
+  },
+  {
+    name: "📖 Classic Storytelling Style",
+    usageTips: "Use this style for traditional narrative structure with timeless, accessible storytelling across any genre.",
+    types: ['fiction'],
+    tags: ['universal', 'commercial', 'storytelling'],
+    value: `**Narrative Voice and Tone**: Clear, authoritative, and engaging, drawing on established storytelling traditions. The voice should be accessible to all readers while maintaining literary quality. Comfortable with omniscient or limited third-person perspective.
+
+**Sentence Structure and Pacing**: Balanced pacing with clear three-act structure. Varied sentence lengths that serve story rhythm. Builds tension toward climax with satisfying resolution. Uses traditional techniques like foreshadowing and dramatic irony.
+
+**Language and Vocabulary**: Accessible yet elegant language that serves the story without drawing attention to itself. Clear, precise word choice. Timeless quality that doesn't feel dated or overly trendy. Rich but not overwrought description.
+
+**Dialogue Style**: Natural conversations that reveal character and advance plot. Dialogue that feels authentic to character and time period. Clear attribution and realistic speech patterns. Conversations serve multiple story functions.
+
+**Theme and Motives**: Universal themes that resonate across cultures and time periods. Clear story arc with character growth and change. Moral and emotional clarity without being heavy-handed. Stories that feel both familiar and fresh.
+
+=====
+
+Example snippets:
+
+The letter that changed Thomas Hartwell's life arrived on a Tuesday morning in March, delivered by a postman who had no idea he was carrying someone's destiny in his worn leather bag.
+
+Thomas was at his kitchen table, reviewing his lesson plans for the day, when the envelope slid through his mail slot and landed with the soft whisper that only important correspondence makes. The return address bore the seal of Blackwood Academy—a school so prestigious that Thomas had never seriously imagined they would respond to his application.
+
+He set down his coffee and picked up the letter with hands that trembled slightly. In his fifteen years of teaching at the local high school, Thomas had watched too many bright students leave town for opportunities their hometown couldn't provide. He had begun to wonder if he, too, was meant for something beyond the familiar boundaries of Millfield.
+
+The letter was brief but cordial. The headmaster, Dr. Elizabeth Thornfield, requested his presence for an interview the following week. They were seeking, she wrote, "an educator who understands that true learning happens when we challenge our students to exceed their own expectations."
+
+Thomas read the letter three times, each reading making the opportunity feel more real and more terrifying. Taking the position would mean leaving behind everything he had known—his students, his small apartment above the bookstore, the Friday night dinners with his sister and her family. But it would also mean stepping into the life he had always imagined for himself, the one that existed in the quiet hours before dawn when he planned lessons he dreamed of teaching.
+
+He folded the letter carefully and placed it next to his lesson plans. Today, he would teach Shakespeare to a classroom of teenagers who thought they had no use for poetry. Tomorrow, he would begin to consider whether the man who wrote those lesson plans was ready to become the teacher he had always wanted to be.
+
+Outside his window, spring was beginning to show itself in the tentative green of new leaves, and Thomas thought that perhaps change, like the seasons, came not all at once but in small, inevitable moments that accumulated into transformation.
+
+=====`
   }
 ]

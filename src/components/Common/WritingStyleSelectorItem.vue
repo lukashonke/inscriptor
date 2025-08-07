@@ -14,6 +14,22 @@
     <q-separator />
     <q-card-section>
       <div class="text-italic scroll-y" style="font-size: 0.8rem; height: 60px;">{{ writingStyle.usageTips }}</div>
+      
+      <!-- Tags Display -->
+      <div v-if="writingStyle.tags && writingStyle.tags.length > 0" class="q-mt-sm">
+        <q-chip
+          v-for="tag in writingStyle.tags"
+          :key="tag"
+          :color="getTagColor(tag)"
+          text-color="white"
+          size="xs"
+          dense
+          class="q-mr-xs q-mb-xs"
+        >
+          {{ formatTagName(tag) }}
+        </q-chip>
+      </div>
+      
       <div class="q-mt-md">
         <q-btn
           dense
@@ -37,7 +53,8 @@
 
 <script setup>
 import {markdownToHtml, newLineToBr} from "src/common/utils/textUtils";
-  import {ref, computed} from "vue";
+import {ref, computed} from "vue";
+import {formatTagName, getTagColor} from "src/common/helpers/writingStyleTagsHelper";
 
   const props = defineProps({
     writingStyle: Object,
