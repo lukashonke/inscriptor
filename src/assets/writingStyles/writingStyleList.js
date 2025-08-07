@@ -2,6 +2,8 @@ export const writingStyles = [
   {
     name: "✏️ Default (Neutral) Style",
     usageTips: "Use this style for clear, versatile writing across business, general fiction, articles, and everyday communication.",
+    types: ['fiction', 'nonfiction'],
+    tags: ['universal', 'cross-genre', 'commercial'],
     value: `**Narrative Voice and Tone**: Balanced, clear, and versatile, suitable for a general audience. The voice should be relatable without being overly casual or overly formal. Maintains reader engagement through clarity rather than stylistic flourishes.
 
 **Sentence Structure and Pacing**: Moderate sentence length (15-20 words average) with a steady, natural flow. Mix short punchy sentences for impact with longer ones for explanation. Vary rhythm to avoid monotony.
@@ -33,6 +35,8 @@ Outside, the city hummed with its usual energy, oblivious to the small revolutio
   {
     name: "📚 Literary Fiction Style",
     usageTips: "Use this style for character-driven narratives in literary magazines and serious contemporary literature.",
+    types: ['fiction'],
+    tags: ['genre-defining', 'character-focused', 'literary'],
     value: `**Narrative Voice and Tone**: Introspective and layered, with emphasis on psychological depth and emotional nuance. The voice should be sophisticated yet intimate, inviting readers into the interior lives of characters. Explores the human condition through subtle observations and metaphorical language.
 
 **Sentence Structure and Pacing**: Complex, varied sentence structures with lengths ranging from 5 to 40+ words. Uses rhythm and cadence as storytelling tools. Deliberately paced to mirror emotional states—long, flowing sentences for contemplation; short, fragmented ones for tension or revelation.
@@ -66,6 +70,8 @@ The photograph remained between them, a bridge and a chasm both.
   {
     name: "⚡ Commercial Thriller Style",
     usageTips: "Use this style for fast-paced thrillers, suspense novels, action-adventure, and page-turner fiction.",
+    types: ['fiction'],
+    tags: ['genre-defining', 'plot-focused', 'commercial'],
     value: `**Narrative Voice and Tone**: Urgent and propulsive, creating immediate tension and maintaining relentless forward momentum. The voice should be confident and direct, pulling readers through the story with cinematic intensity. Every paragraph earns its place by advancing plot or ratcheting tension.
 
 **Sentence Structure and Pacing**: Short, punchy sentences dominate (8-15 words average), with occasional longer sentences for variety. Paragraphs are brief—often just one or two sentences. Chapters end on cliffhangers. White space is used strategically to increase reading speed.
@@ -114,6 +120,8 @@ Chen was waiting in the situation room, satellite feeds covering every wall. "Fo
   {
     name: "🎭 Young Adult Contemporary Style",
     usageTips: "Use this style for YA fiction, teen romance, and contemporary young adult novels.",
+    types: ['fiction'],
+    tags: ['genre-defining', 'character-focused', 'commercial'],
     value: `**Narrative Voice and Tone**: Authentic, immediate, and emotionally honest, capturing the intensity of teenage experience without condescension. The voice should feel genuinely young while tackling serious themes. Often uses first-person present tense for immediacy and connection.
 
 **Sentence Structure and Pacing**: Conversational rhythm with varied sentence lengths (10-25 words average). Fragments used for emphasis and emotional punch. Quick pacing with short chapters that end on emotional beats rather than cliffhangers.
@@ -159,6 +167,8 @@ A story where I figure out who I really am when everything I thought mattered fa
   {
     name: "🕵️ Hard-Boiled Mystery Style",
     usageTips: "Use this style for noir fiction, detective novels, crime fiction, and gritty mysteries.",
+    types: ['fiction'],
+    tags: ['genre-defining', 'atmosphere-focused', 'literary'],
     value: `**Narrative Voice and Tone**: Cynical, world-weary, yet somehow still idealistic beneath the armor. First-person narration with a distinctive, jaded voice that's seen too much but can't stop looking. Dark humor as a defense mechanism. The city is always a character.
 
 **Sentence Structure and Pacing**: Terse, rhythmic sentences that hit like punches (10-20 words average). Occasional longer sentences for atmosphere or reflection. Paragraphs are lean. Uses repetition and parallel structure for emphasis and rhythm.
@@ -218,6 +228,8 @@ Nathan Cross was either very lost or very dead. In this town, sometimes they wer
   {
     name: "🚀 Science Fiction Technical Style",
     usageTips: "Use this style for hard science fiction, space opera, and scientifically grounded speculative fiction.",
+    types: ['fiction'],
+    tags: ['genre-defining', 'plot-focused', 'literary'],
     value: `**Narrative Voice and Tone**: Precise and analytical while maintaining human warmth. The voice balances technical accuracy with emotional truth, never letting the science overshadow the human story. Sense of wonder tempered by scientific plausibility.
 
 **Sentence Structure and Pacing**: Medium to long sentences (20-30 words average) with technical concepts integrated smoothly. Information revealed through action and dialogue rather than info-dumps. Pacing varies—slower for concept introduction, faster for action sequences.
@@ -263,6 +275,8 @@ Sarah opened a secure channel to Mission Control. "Houston, this is Horizon Stat
   {
     name: "💕 Romantic Comedy Style",
     usageTips: "Use this style for romantic comedies, contemporary romance, and feel-good love stories.",
+    types: ['fiction'],
+    tags: ['genre-defining', 'character-focused', 'commercial'],
     value: `**Narrative Voice and Tone**: Witty, warm, and self-aware with a light touch even when dealing with deeper emotions. The voice should sparkle with humor while maintaining genuine emotional stakes. Often uses direct address or humorous observations about life and love.
 
 **Sentence Structure and Pacing**: Snappy pacing with varied sentence lengths (12-25 words average). Comedic timing through paragraph breaks and punchy one-liners. Builds to comedic and romantic peaks with careful rhythm. Uses callbacks and running gags for continuity.
@@ -331,6 +345,8 @@ But the game wasn't over yet.
   {
     name: "👻 Horror/Suspense Style",
     usageTips: "Use this style for horror novels, psychological thrillers, and supernatural fiction.",
+    types: ['fiction'],
+    tags: ['genre-defining', 'atmosphere-focused', 'commercial'],
     value: `**Narrative Voice and Tone**: Atmospheric and unsettling, building dread through what's not shown as much as what is. The voice should create unease through subtle wrongness and growing tension. Reliability of narrator may be questioned as story progresses.
 
 **Sentence Structure and Pacing**: Varies dramatically—long, creeping sentences for building tension, short fragments for shocks. Paragraphs shrink during intense scenes. Uses white space and section breaks to control reader breathing. Rhythm mimics heartbeat—slow, then racing.
@@ -398,6 +414,8 @@ The children in apartment 3B started laughing again on Thursday.
   {
     name: "🏛️ Historical Fiction Style",
     usageTips: "Use this style for historical novels, period dramas, and authentic time-period stories.",
+    types: ['fiction'],
+    tags: ['genre-defining', 'atmosphere-focused', 'literary'],
     value: `**Narrative Voice and Tone**: Immersive and authentic to the period while remaining accessible to modern readers. The voice should transport without alienating, using period-appropriate sensibilities filtered through contemporary storytelling techniques. Rich with historical detail that serves story rather than overwhelming it.
 
 **Sentence Structure and Pacing**: Slightly more formal structure reflecting historical periods (20-30 words average). Pacing allows for historical context without becoming textbook-like. Uses period-appropriate rhythms while maintaining modern readability. Descriptive passages paint era without halting narrative.
@@ -451,6 +469,8 @@ But Shanghai, she'd heard, had need of English governesses who weren't afraid of
   {
     name: "⚔️ Epic Fantasy Style",
     usageTips: "Use this style for epic fantasy, high fantasy, and grand fantasy narratives with complex world-building.",
+    types: ['fiction'],
+    tags: ['genre-defining', 'plot-focused', 'literary'],
     value: `**Narrative Voice and Tone**: Grand and immersive, with a sense of mythic weight and historical significance. The voice should balance accessibility with the formal cadences of epic storytelling. Multiple POVs weave together to create a tapestry of perspectives across a vast world.
 
 **Sentence Structure and Pacing**: Varied lengths (15-30 words average) with longer sentences for world-building and description. Pacing builds slowly, allowing readers to absorb complex worldbuilding. Action scenes shift to shorter, punchier sentences. Uses parallel structure for prophecies and formal speech.
@@ -502,6 +522,8 @@ As if in answer, the runestone at his throat began to burn.
   {
     name: "📖 Narrative Style",
     usageTips: "Use this style for storytelling across general fiction, memoirs, short stories, and creative non-fiction.",
+    types: ['fiction', 'nonfiction'],
+    tags: ['cross-genre', 'universal', 'storytelling'],
     value: `**Narrative Voice and Tone**: Engaging and storytelling, adaptable to first-person or third-person perspectives. Creates intimacy with reader through carefully chosen perspective. First-person provides immediacy and personal connection; third-person offers flexibility and broader scope. Voice should draw readers into the story world from the first sentence.
 
 **Sentence Structure and Pacing**: Balanced pacing that mirrors story tension, mixing descriptive passages with action-driven sentences. Use longer sentences for scene-setting and reflection, shorter ones for action and tension. Vary paragraph length to control reading speed - single-line paragraphs for dramatic effect.
@@ -535,6 +557,8 @@ As she stumbled past him into the warmth of the lighthouse, Thomas couldn't shak
   {
     name: "💬 Simple/Conversational Style",
     usageTips: "Use this style for friendly, accessible communication in blogs, social media, emails, and casual non-fiction.",
+    types: ['fiction', 'nonfiction'],
+    tags: ['universal', 'cross-genre', 'casual'],
     value: `**Narrative Voice and Tone**: Friendly, informal, and approachable, as if talking to a friend over coffee. Uses "you" to address reader directly. Feels like a natural conversation rather than formal writing. Warm and encouraging without being condescending.
 
 **Sentence Structure and Pacing**: Short to medium sentences (10-15 words average) with a steady, easy flow. Lots of sentence variety to maintain conversational rhythm. Frequent paragraph breaks to avoid text walls. Uses contractions naturally (it's, you're, don't).
@@ -566,6 +590,8 @@ Six months later? Jake's running three times a week and actually enjoying it. Al
   {
     name: "🎨 Descriptive Style",
     usageTips: "Use this style for travel writing, product descriptions, and creating vivid atmospheric scenes in fiction.",
+    types: ['fiction', 'nonfiction'],
+    tags: ['cross-genre', 'atmosphere-focused', 'literary'],
     value: `**Narrative Voice and Tone**: Vivid and immersive, painting pictures with words. Often emotional and evocative, appealing to all five senses. Creates atmosphere and mood through detailed observation. The narrator becomes a camera with feelings.
 
 **Sentence Structure and Pacing**: Long, flowing sentences that mirror the sweep of observation. Complex sentence structures with multiple clauses. Pacing deliberately slowed to allow readers to savor details. Uses semicolons and dashes for connected thoughts.
@@ -595,6 +621,8 @@ But he was already turning away, his footsteps crushing the gravel path with a f
   {
     name: "🗣️ Persuasive Style",
     usageTips: "Use this style for marketing copy, opinion pieces, political writing, and content designed to inspire action.",
+    types: ['nonfiction'],
+    tags: ['cross-genre', 'promotional', 'commercial'],
     value: `**Narrative Voice and Tone**: Confident, passionate, and authoritative without being preachy. Builds trust through expertise and empathy. Uses inclusive language ("we" and "us") to create solidarity. Balances emotional appeal with logical reasoning.
 
 **Sentence Structure and Pacing**: Strategic variety - short, punchy sentences for key points, longer ones for evidence. Rhetorical questions to engage readers. Building momentum toward call to action. Uses repetition and parallel structure for emphasis.
@@ -632,6 +660,8 @@ Join us. Not tomorrow. Not next week. Now. Because the cost of waiting isn't jus
   {
     name: "📚 Expository Style",
     usageTips: "Use this style for clear explanations in textbooks, how-to guides, technical documentation, and educational content.",
+    types: ['nonfiction'],
+    tags: ['cross-genre', 'educational', 'formal'],
     value: `**Narrative Voice and Tone**: Neutral, instructional, and objective. Teacher-like but not condescending. Focuses on clarity above all else. Maintains professional distance while remaining engaging. Anticipates reader questions and addresses them systematically.
 
 **Sentence Structure and Pacing**: Logical progression from simple to complex. Topic sentences lead each paragraph. Moderate-length sentences (15-25 words) for optimal comprehension. Clear transitions between ideas (first, next, therefore, however).
@@ -665,6 +695,8 @@ This process has practical applications across numerous fields. In healthcare, m
   {
     name: "📰 Journalistic Style",
     usageTips: "Use this style for news articles, press releases, reports, and objective informational content.",
+    types: ['nonfiction'],
+    tags: ['genre-defining', 'formal', 'commercial'],
     value: `**Narrative Voice and Tone**: Direct, factual, and impartial. Objective observer reporting facts without personal opinion. Maintains professional distance from subjects. Authority comes from accuracy and sourcing, not personal perspective.
 
 **Sentence Structure and Pacing**: Short, declarative sentences prioritizing clarity. Lead sentences contain who, what, when, where, why. Inverted pyramid structure - most important information first. One idea per sentence for easy scanning.
@@ -702,6 +734,8 @@ Construction could begin as early as next spring, according to city planning off
   {
     name: "😂 Humorous/Lighthearted Style",
     usageTips: "Use this style for comedy writing, humorous essays, social media content, and light entertainment.",
+    types: ['fiction', 'nonfiction'],
+    tags: ['cross-genre', 'universal', 'casual'],
     value: `**Narrative Voice and Tone**: Witty, playful, and self-aware. Often breaks the fourth wall or acknowledges absurdity. Confident enough to be silly. Finds humor in everyday situations. Never mean-spirited, always inclusive.
 
 **Sentence Structure and Pacing**: Quick and punchy for comedic timing. Varies rhythm for setup and punchline. Short sentences for zingers, longer ones for elaborate setups. Strategic use of fragments. Paragraph breaks for comic beats.
@@ -739,6 +773,8 @@ By Day 7, I'd made progress. I was now waking up at 9:59 AM instead of 10. Rome 
   {
     name: "🪶 Minimalist Style",
     usageTips: "Use this style for literary short stories, experimental fiction, and artistic prose that conveys deep emotion through simplicity.",
+    types: ['fiction', 'nonfiction'],
+    tags: ['cross-genre', 'literary', 'character-focused'],
     value: `**Narrative Voice and Tone**: Stripped down to essentials, where every word carries weight. The voice trusts readers to fill gaps with their own experience. Emotions conveyed through action and implication rather than exposition. Silence speaks as loudly as words.
 
 **Sentence Structure and Pacing**: Short, declarative sentences (8-15 words average). Subject-verb-object construction dominates. Paragraphs rarely exceed three sentences. White space as narrative tool. Repetition used sparingly but with purpose.
@@ -814,6 +850,8 @@ The phone rang. Neither of them moved to answer it.
   {
     name: "🖋️ Sophisticated/Literary Style",
     usageTips: "Use this style for literary journals, experimental literature, and high art writing with complex themes.",
+    types: ['fiction', 'nonfiction'],
+    tags: ['cross-genre', 'literary', 'formal'],
     value: `**Narrative Voice and Tone:** Introspective, elegant, and layered with meaning. Multiple levels of interpretation. Self-conscious about language and form. Often philosophical or meditative. Comfortable with ambiguity and contradiction.
 
 **Sentence Structure and Pacing:** Complex architecture with subordinate clauses and parenthetical asides. Sentences as carefully constructed as poetry. Rhythm and sound as important as meaning. Deliberately slow to encourage contemplation.
@@ -847,6 +885,8 @@ Time, in this room, had taken on the quality of amber - golden, viscous, preserv
   {
     name: "🎓 Academic/Scholarly Style",
     usageTips: "Use this style for research papers, academic journals, dissertations, and scholarly publications.",
+    types: ['nonfiction'],
+    tags: ['genre-defining', 'educational', 'formal'],
     value: `**Narrative Voice and Tone:** Formal, analytical, and objective. Third-person perspective maintaining scholarly distance. Cautious about claims - uses hedging language appropriately. Authority established through evidence, not assertion.
 
 **Sentence Structure and Pacing:** Complex sentences with multiple subordinate clauses. Careful logical progression. Topic sentences followed by evidence and analysis. Transitional phrases linking ideas. Methodical pacing.
@@ -870,6 +910,163 @@ Notably, participants who engaged primarily in content creation (defined as post
 Furthermore, qualitative analysis revealed three emergent themes: (1) the paradox of connection and isolation, (2) performance of identity versus authentic self-expression, and (3) temporal factors in self-esteem fluctuation. As one participant articulated: "It's not about how much time I spend online, but what I'm doing there and why" (Participant 284, age 16).
 
 These findings necessitate a reconceptualization of digital wellness interventions. Rather than focusing solely on screen time reduction, practitioners might consider encouraging creative engagement and critical media literacy. Future research should investigate the longitudinal effects of such interventions.
+
+=====`
+  },
+  {
+    name: "📱 Digital Content Style",
+    usageTips: "Use this style for web content, blog posts, social media, newsletters, and online articles that need to be engaging and scannable.",
+    types: ['nonfiction'],
+    tags: ['cross-genre', 'promotional', 'casual'],
+    value: `**Content Structure and Format**: Scannable, mobile-friendly content with clear headers, bullet points, and short paragraphs. Optimized for digital reading patterns—F-pattern scanning, with key information front-loaded.
+
+**Sentence Structure and Pacing**: Short, punchy sentences (10-15 words average) mixed with occasional longer ones for variety. Paragraphs rarely exceed 3-4 lines on mobile. Uses white space strategically to reduce cognitive load.
+
+**Language and Vocabulary**: Clear, accessible language avoiding jargon unless audience-appropriate. SEO-conscious without keyword stuffing. Action-oriented verbs and concrete nouns. Conversational tone that builds connection.
+
+**Engagement Techniques**: Hook readers immediately with compelling openings. Use questions, statistics, and relatable scenarios. Include clear CTAs. Break up text with visuals, lists, and formatting. Make content shareable and memorable.
+
+**Tone and Voice**: Friendly, informative, and value-focused. Speaks directly to reader's needs and pain points. Balances authority with approachability. Maintains brand consistency while being human.
+
+=====
+
+Example snippets:
+
+**The 5-Minute Rule That Changed Everything**
+
+Procrastination killing your productivity? Here's a simple hack that actually works.
+
+Set a timer for 5 minutes. That's it.
+
+Pick the task you've been avoiding most. Maybe it's that email response, the budget spreadsheet, or cleaning your desk. Doesn't matter how big it is. Just commit to 5 minutes.
+
+Here's the magic: You'll either finish the task (surprise!) or build enough momentum to keep going. Our brains hate stopping once we've started. It's called the Zeigarnik effect, and you can use it to your advantage.
+
+**Why it works:**
+• Removes the mental barrier of "this will take forever"
+• Creates immediate action instead of endless planning
+• Builds confidence through small wins
+• Makes overwhelming tasks feel manageable
+
+Try it right now. Seriously. Set that timer and pick one thing.
+
+Your future self will thank you.
+
+=====`
+  },
+  {
+    name: "🤝 Casual Professional Style",
+    usageTips: "Use this style for project descriptions, brainstorming documents, technical notes, internal communications, and content that mixes informal ideas with professional information.",
+    types: ['nonfiction'],
+    tags: ['cross-genre', 'business', 'casual'],
+    value: `**Narrative Voice and Tone**: Relaxed yet competent, like explaining complex ideas to a smart colleague over coffee. Allows personality to show through while maintaining credibility. Comfortable switching between formal and informal as context requires.
+
+**Sentence Structure and Pacing**: Natural, conversational flow with varied sentence lengths. Uses fragments for emphasis ("Important note:"). Parenthetical asides for additional context. Bullets and numbered lists for clarity without being rigid.
+
+**Language and Vocabulary**: Plain English as default, technical terms when necessary (with quick explanations). Occasional colloquialisms and metaphors to illustrate points. First and second person pronouns welcomed. Contractions are fine.
+
+**Content Organization**: Flexible structure that follows thought process rather than rigid format. Headers for navigation but not overly formal. Mix of paragraph text, bullet points, and informal notes. Annotations and side comments acceptable.
+
+**Theme and Purpose**: Getting ideas across clearly without corporate stuffiness. Building understanding through approachable explanation. Documenting thoughts in progress. Creating collaborative, inclusive communication.
+
+=====
+
+Example snippets:
+
+**Project Alpha Update - March Status**
+
+So here's what we're thinking for the new feature rollout. We've got three main components (bear with me, this gets a bit technical):
+
+1. **The API integration** - basically, this talks to their system and pulls the data we need. Nothing fancy, just REST calls every 30 minutes.
+
+2. **The processing layer** - this is where the magic happens. We're taking their messy data and making it actually useful. Think of it like a really smart filter that knows what we care about.
+
+3. **The UI updates** - users will see a new dashboard widget. Super clean, just the essentials. (Note: Sarah from design has some thoughts on this - let's sync up Tuesday?)
+
+**Quick heads up:** The timeline is aggressive but doable. We're looking at 3 weeks for MVP, another 2 for polish. The main risk? Their API documentation is... let's say "creative." But we've dealt with worse.
+
+**Random thoughts that might matter:**
+- Should we add a dark mode toggle? Users keep asking
+- Performance testing on mobile - put this on the must-do list
+- Consider adding export functionality later (not launch-critical)
+
+Bottom line: We're in good shape, but let's stay flexible on the details.
+
+=====`
+  },
+  {
+    name: "🎯 Marketing/Promotional Style",
+    usageTips: "Use this style for product descriptions, landing pages, feature announcements, and promotional content that feels genuine and engaging rather than salesy.",
+    types: ['nonfiction'],
+    tags: ['cross-genre', 'promotional', 'commercial'],
+    value: `**Narrative Voice and Tone**: Enthusiastic but genuine, like a friend recommending something they actually use and love. Confident without being pushy. Focus on helping rather than selling. Human warmth over corporate polish.
+
+**Sentence Structure and Pacing**: Dynamic rhythm that builds excitement naturally. Mix of lengths to maintain energy. Questions that make readers think. Short paragraphs that move readers forward. Power words used tastefully, not excessively.
+
+**Language and Vocabulary**: Benefit-focused language that connects features to real-world value. Storytelling elements to create emotional connection. Specific details over vague claims. Social proof woven naturally into narrative.
+
+**Engagement Techniques**: Start with reader's problem or desire. Paint picture of transformation or solution. Use "you" to maintain direct connection. Include real examples and scenarios. Address objections conversationally.
+
+**Authenticity Markers**: Acknowledge limitations where appropriate. Use genuine testimonials and stories. Avoid hyperbole and impossible promises. Include personality and occasional humor. Let passion for product shine through naturally.
+
+=====
+
+Example snippets:
+
+**Finally, a Writing Tool That Gets It**
+
+You know that moment when you're staring at a blank page, deadline looming, and the words just won't come? We've been there. Actually, that's exactly why we built WriterFlow.
+
+Here's the thing: WriterFlow isn't going to write for you. (If only, right?) But it does something almost as good—it gets you unstuck. Think of it as your writing companion that knows exactly when to nudge you forward.
+
+The daily prompts? They're not random. Our algorithm learns your writing patterns and serves up exercises tailored to break through your specific blocks. One user told us it's like having a writing coach who actually gets her style—except available at 3 AM when inspiration strikes.
+
+And yes, there's an AI assistant, but it's not the annoying kind that tries to rewrite everything. It's more like a thoughtful editor who suggests alternatives when you're stuck on that one sentence for the fifteenth time.
+
+**What makes this different?**
+- No overwhelming feature bloat (we kept only what actually helps)
+- Works offline because inspiration doesn't wait for WiFi  
+- Syncs across devices without being creepy about your data
+- Actually affordable ($12/month, not $50+ like the big names)
+
+Look, we're not saying this will turn you into Hemingway overnight. But if you're tired of fighting with your tools instead of focusing on your ideas, maybe it's worth a try.
+
+=====`
+  },
+  {
+    name: "💼 Professional/Formal Style",
+    usageTips: "Use this style for formal business proposals, executive summaries, corporate reports, investor communications, and high-stakes professional documents.",
+    types: ['nonfiction'],
+    tags: ['cross-genre', 'business', 'formal'],
+    value: `**Narrative Voice and Tone**: Authoritative, objective, and polished. Third-person perspective maintaining professional distance. Confident without arrogance. Precise and deliberate in all statements. Credibility through competence and clarity.
+
+**Sentence Structure and Pacing**: Well-constructed sentences with clear subjects and strong verbs. Average 15-25 words for readability. Logical flow from general to specific. Smooth transitions between paragraphs and sections. Parallel structure for lists and comparisons.
+
+**Language and Vocabulary**: Industry-appropriate terminology used correctly. Formal register without unnecessary complexity. Active voice preferred for clarity and directness. Quantifiable metrics and specific evidence. Avoids colloquialisms, contractions, and casual phrases.
+
+**Document Structure**: Clear hierarchy with executive summary upfront. Logical sections with descriptive headings. Supporting data integrated smoothly. Conclusions that follow from presented evidence. Professional formatting throughout.
+
+**Strategic Focus**: Results-oriented language emphasizing ROI and value. Risk acknowledgment with mitigation strategies. Clear recommendations backed by analysis. Alignment with organizational objectives. Forward-looking while grounded in current realities.
+
+=====
+
+Example snippets:
+
+**Executive Summary**
+
+This proposal outlines a comprehensive digital transformation initiative designed to enhance operational efficiency and market competitiveness. The recommended solution addresses three critical business objectives: streamlining customer acquisition, reducing operational costs by 30%, and establishing scalable infrastructure for projected growth.
+
+**Current State Analysis**
+
+Our assessment reveals that existing systems operate at 60% efficiency due to manual processes and disconnected platforms. Customer acquisition costs have increased 45% year-over-year while conversion rates remain static at 2.3%. These metrics indicate substantial opportunity for improvement through strategic technological investment.
+
+**Proposed Solution**
+
+We recommend implementing an integrated cloud-based platform that consolidates customer relationship management, automated marketing, and analytics capabilities. This solution will deliver measurable improvements in three phases over 18 months, with initial ROI expected within the first quarter of implementation.
+
+**Financial Projections**
+
+The total investment requirement is $750,000, distributed across infrastructure ($400,000), software licensing ($200,000), and implementation services ($150,000). Conservative projections indicate cost savings of $300,000 annually beginning in Year 2, resulting in net positive ROI of $450,000 over the three-year analysis period.
 
 =====`
   }

@@ -114,6 +114,7 @@
                     @writing-style-set="writingStyleValue = writingStyle.value; writingStyleName = writingStyle.name"
                     :writingStyle="writingStyle"
                     :currentValue="writingStyleValue"
+                    :renderVariant="getStyleRenderVariant(writingStyle)"
                   />
                 </div>
                 <!-- Fill remaining slots if less than 3 styles in slide -->
@@ -266,6 +267,13 @@ const pageSize = 3;
 
 const creatingProject = ref(false);
 
+// Map project types to style categories (shared constant)
+const projectTypeMap = {
+  'story': 'fiction',
+  'nonfiction': 'nonfiction',
+  'blank': null // Show all styles without preference
+};
+
 // Computed properties for stepper
 const isLastStep = computed(() => {
   return currentStep.value === 4;
@@ -273,9 +281,31 @@ const isLastStep = computed(() => {
 
 // Computed property to group writing styles into slides of 3
 const writingStyleSlides = computed(() => {
+  const preferredType = projectTypeMap[newProjectType.value];
+  
+  // Sort styles based on project type
+  let sortedStyles = [...writingStyles];
+  
+  if (preferredType) {
+    sortedStyles.sort((a, b) => {
+      // Check if styles match the preferred type
+      const aMatches = a.types?.includes(preferredType) ? 1 : 0;
+      const bMatches = b.types?.includes(preferredType) ? 1 : 0;
+      
+      // Sort matching styles first
+      if (aMatches !== bMatches) {
+        return bMatches - aMatches; // Higher matches first
+      }
+      
+      // Keep original order for styles with same matching status
+      return 0;
+    });
+  }
+  
+  // Group sorted styles into slides of 3
   const slides = [];
-  for (let i = 0; i < writingStyles.length; i += pageSize) {
-    slides.push(writingStyles.slice(i, i + pageSize));
+  for (let i = 0; i < sortedStyles.length; i += pageSize) {
+    slides.push(sortedStyles.slice(i, i + pageSize));
   }
   return slides;
 });
@@ -298,6 +328,20 @@ function nextDisabled() {
 
 function toggleWritingStyleMode() {
   showCustomInput.value = !showCustomInput.value;
+}
+
+function getStyleRenderVariant(writingStyle) {
+  const preferredType = projectTypeMap[newProjectType.value];
+  
+  // No preference for blank projects
+  if (!preferredType) return null;
+  
+  // Check if style matches the project type
+  if (writingStyle.types?.includes(preferredType)) {
+    return 'recommended';
+  }
+  
+  return 'not-recommended';
 }
 
 const projectTemplates = [

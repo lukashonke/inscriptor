@@ -2,7 +2,7 @@
   <q-card class="inscriptor-shadow-1">
     <q-card-section class="row">
       <div class="col row items-center" style="height: 40px">
-        <div class="text-weight-bold" style="font-size: 0.9rem">{{ writingStyle.name }}</div>
+        <div class="" :class="{'text-italic': renderVariant === 'not-recommended', 'text-weight-bold': renderVariant === 'recommended', '': !renderVariant}" style="font-size: 0.9rem">{{ writingStyle.name }}</div>
       </div>
       <div class="col-auto q-ml-xs flex items-center">
         <q-btn no-caps :color="isCurrentStyle ? 'accent' : 'primary'" :class="{'bg-accent text-white': isCurrentStyle}" @click="onClick" padding="2px 8px" style="height: 30px; width: 70px;">
@@ -42,6 +42,11 @@ import {markdownToHtml, newLineToBr} from "src/common/utils/textUtils";
   const props = defineProps({
     writingStyle: Object,
     currentValue: String,
+    renderVariant: {
+      type: String,
+      default: null,
+      validator: (value) => [null, 'recommended', 'not-recommended'].includes(value)
+    }
   });
 
   const emit = defineEmits(['writingStyleSet']);
