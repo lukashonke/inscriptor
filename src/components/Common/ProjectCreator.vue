@@ -82,175 +82,13 @@
         icon="mdi-palette-outline"
         :done="currentStep > 2"
       >
-        <div class="row">
-          <div class="col">
-            <div class="text-subtitle2 q-mb-md text-primary">
-              <div>Choose your Writing Style (optional)</div>
-              <div class="text-caption">Writing style description will be fed into AI prompts to make it generate text that closely follows your style.</div>
-            </div>
-          </div>
-          <div class="col flex justify-end items-center">
-            <!-- Tag Filter Dropdown -->
-            <div class="row q-mb-md">
-              <div class="col-auto">
-                <q-btn-dropdown
-                  flat
-                  no-caps
-                  :label="filterLabel"
-                  :icon="selectedFilters.length > 0 ? 'mdi-filter' : 'mdi-filter-variant'"
-                  :color="selectedFilters.length > 0 ? 'accent' : 'primary'"
-                  class="q-mr-sm"
-                >
-                  <q-list dense>
-                    <q-item clickable v-ripple @click="clearAllFilters()" dense>
-                      <q-item-section>
-                        <q-item-label>Clear All Filters</q-item-label>
-                      </q-item-section>
-                      <q-item-section side v-if="selectedFilters.length > 0">
-                        <q-icon name="mdi-close" size="sm" />
-                      </q-item-section>
-                    </q-item>
-                    <q-separator />
-                    <q-item
-                      v-for="tag in availableTags"
-                      :key="tag"
-                      clickable
-                      v-ripple
-                      @click="toggleTagFilter(tag)"
-                    >
-                      <q-item-section side>
-                        <q-checkbox
-                          :model-value="selectedFilters.includes(tag)"
-                          @click.stop
-                          @update:model-value="toggleTagFilter(tag)"
-                          color="primary"
-                          size="sm"
-                        />
-                      </q-item-section>
-                      <q-item-section>
-                        <q-item-label>{{ formatTagName(tag) }}</q-item-label>
-                      </q-item-section>
-                      <q-item-section side>
-                        <q-chip
-                          :color="getTagColor(tag)"
-                          text-color="white"
-                          size="sm"
-                          dense
-                        >
-                          {{ getTagCountForFilter(tag) }}
-                        </q-chip>
-                      </q-item-section>
-                    </q-item>
-                  </q-list>
-                </q-btn-dropdown>
-                <q-btn
-                  v-if="selectedFilters.length > 0"
-                  flat
-                  round
-                  size="sm"
-                  icon="mdi-close"
-                  color="primary"
-                  @click="clearAllFilters()"
-                  class="q-ml-xs"
-                  title="Clear all filters"
-                />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="row q-mb-sm">
-          <q-carousel
-            v-model="slide"
-            class="q-px-none"
-            transition-prev="slide-right"
-            transition-next="slide-left"
-            swipeable
-            animated
-            control-color="primary"
-            arrows
-            height="auto"
-          >
-            <q-carousel-slide
-              v-for="(slideStyles, slideIndex) in writingStyleSlides"
-              :key="slideIndex"
-              :name="slideIndex"
-              class="column no-wrap q-px-xl"
-            >
-              <div class="row q-gutter-md q-pa-md">
-                <div
-                  v-for="writingStyle in slideStyles"
-                  :key="writingStyle.name"
-                  class="col"
-                >
-                  <WritingStyleSelectorItem
-                    @writing-style-set="writingStyleValue = writingStyle.value; writingStyleName = writingStyle.name"
-                    :writingStyle="writingStyle"
-                    :currentValue="writingStyleValue"
-                    :renderVariant="getStyleRenderVariant(writingStyle)"
-                  />
-                </div>
-                <!-- Fill remaining slots if less than 3 styles in slide -->
-                <div
-                  v-for="n in (pageSize - slideStyles.length)"
-                  :key="`empty-${n}`"
-                  class="col"
-                ></div>
-              </div>
-            </q-carousel-slide>
-          </q-carousel>
-        </div>
-
-        <div class="q-mb-md" v-if="showCustomInput">
-          <q-input
-            dense
-            filled
-            outlined
-            type="textarea"
-            flat
-            input-style="height: 220px;"
-            v-model="writingStyleValue"
-          />
-        </div>
-        <div class="row" v-if="showCustomInput">
-          <q-btn
-            flat
-            color="primary"
-            class="full-width"
-            icon="mdi-close"
-            @click="toggleWritingStyleMode"
-            no-caps
-          />
-        </div>
-        <template v-else>
-          <div class="row justify-center scroll-y q-px-xl q-py-md rounded-borders" style="height: 250px;" v-if="writingStyleValue">
-            <div class="full-width text-caption q-mb-sm text-primary">{{  writingStyleName }}:</div>
-            <div class="prompt-results" v-html="markdownToHtml(writingStyleValue)" />
-          </div>
-          <div class="row q-mt-md" v-if="writingStyleValue">
-            <q-btn
-              flat
-              color="primary"
-              class="full-width"
-              :icon="showCustomInput ? 'mdi-chevron-up' : 'mdi-pencil-outline'"
-              :label="showCustomInput ? 'Hide Custom Input' : 'Customize'"
-              @click="toggleWritingStyleMode"
-              no-caps
-            />
-          </div>
-          <div v-if="!writingStyleValue" style="height: 250px;" class="flex justify-center">
-            <q-btn
-              flat
-              color="primary"
-              class="full-width"
-              icon="mdi-pencil-outline"
-              label="Create Custom Style"
-              @click="toggleWritingStyleMode"
-              no-caps
-            />
-          </div>
-
-        </template>
+        <WritingStyleSelector
+          disable-customization
+          :new-project-type="newProjectType"
+          :initial-value="writingStyleValue"
+          :initial-name="writingStyleName"
+          @writing-style-changed="onWritingStyleChanged"
+        />
       </q-step>
 
       <q-step
@@ -307,11 +145,9 @@ import {getProjects, setUserState} from "src/common/apiServices/userProjectServi
 import {useCurrentUser} from "vuefire";
 import {useFileStore} from "stores/file-store";
 import {Notify} from "quasar";
-import {writingStyles} from "assets/writingStyles/writingStyleList";
-import WritingStyleSelectorItem from "components/Common/WritingStyleSelectorItem.vue";
 import {guid} from "src/common/utils/guidUtils";
 import {hasFlag, markdownToHtml} from "src/common/utils/textUtils";
-import {formatTagName, getTagColor, getTagCount, getAvailableTags} from "src/common/helpers/writingStyleTagsHelper";
+import WritingStyleSelector from 'components/Common/WritingStyleSelector.vue';
 
 const layoutStore = useLayoutStore();
 const promptStore = usePromptStore();
@@ -332,83 +168,16 @@ const syncToCloud = ref(user.value.isAnonymous ? false : props.defaultProjectTyp
 const importRecommendedPrompts = ref(true);
 const writingStyleName = ref('Default (Neutral) Style');
 const writingStyleValue = ref('');
-const showCustomInput = ref(false);
 
 const currentStep = ref(2);
 
-const slide = ref(0);
-const pageSize = 3;
-const selectedFilters = ref([]);
-
 const creatingProject = ref(false);
-
-// Map project types to style categories (shared constant)
-const projectTypeMap = {
-  'story': 'fiction',
-  'nonfiction': 'nonfiction',
-  'blank': null // Show all styles without preference
-};
 
 // Computed properties for stepper
 const isLastStep = computed(() => {
   return currentStep.value === 4;
 });
 
-// Get all unique tags from writing styles
-const availableTags = computed(() => {
-  return getAvailableTags(writingStyles);
-});
-
-// Computed property for filter label display
-const filterLabel = computed(() => {
-  if (selectedFilters.value.length === 0) return 'Filter...';
-  if (selectedFilters.value.length === 1) return `Filter: ${formatTagName(selectedFilters.value[0])}`;
-  if (selectedFilters.value.length <= 2) {
-    return selectedFilters.value.map(tag => formatTagName(tag)).join(', ');
-  }
-  return `${selectedFilters.value.length} filters applied`;
-});
-
-// Computed property to group writing styles into slides of 3
-const writingStyleSlides = computed(() => {
-  const preferredType = projectTypeMap[newProjectType.value];
-
-  // Start with all styles
-  let filteredStyles = [...writingStyles];
-
-  // Apply tag filters if any are selected (OR logic)
-  if (selectedFilters.value.length > 0) {
-    filteredStyles = filteredStyles.filter(style =>
-      style.tags && selectedFilters.value.some(tag =>
-        style.tags.includes(tag)
-      )
-    );
-  }
-
-  // Sort styles based on project type preference
-  if (preferredType) {
-    filteredStyles.sort((a, b) => {
-      // Check if styles match the preferred type
-      const aMatches = a.types?.includes(preferredType) ? 1 : 0;
-      const bMatches = b.types?.includes(preferredType) ? 1 : 0;
-
-      // Sort matching styles first
-      if (aMatches !== bMatches) {
-        return bMatches - aMatches; // Higher matches first
-      }
-
-      // Keep original order for styles with same matching status
-      return 0;
-    });
-  }
-
-  // Group filtered and sorted styles into slides of 3
-  const slides = [];
-  for (let i = 0; i < filteredStyles.length; i += pageSize) {
-    slides.push(filteredStyles.slice(i, i + pageSize));
-  }
-  return slides;
-});
 
 // Validation functions
 function nextDisabled() {
@@ -426,50 +195,11 @@ function nextDisabled() {
   }
 }
 
-function toggleWritingStyleMode() {
-  showCustomInput.value = !showCustomInput.value;
-}
 
-function getStyleRenderVariant(writingStyle) {
-  const preferredType = projectTypeMap[newProjectType.value];
-
-  // No preference for blank projects
-  if (!preferredType) return null;
-
-  // Check if style matches the project type
-  if (writingStyle.types?.includes(preferredType)) {
-    return 'recommended';
-  }
-
-  return 'not-recommended';
-}
-
-// Wrapper function for tag count to provide writingStyles context
-function getTagCountForFilter(tag) {
-  return getTagCount(tag, writingStyles);
-}
-
-// Multiple tag filter management functions
-function toggleTagFilter(tag) {
-  const index = selectedFilters.value.indexOf(tag);
-  if (index > -1) {
-    // Tag is selected, remove it
-    selectedFilters.value.splice(index, 1);
-  } else {
-    // Tag is not selected, add it
-    selectedFilters.value.push(tag);
-  }
-}
-
-function removeTagFilter(tag) {
-  const index = selectedFilters.value.indexOf(tag);
-  if (index > -1) {
-    selectedFilters.value.splice(index, 1);
-  }
-}
-
-function clearAllFilters() {
-  selectedFilters.value = [];
+// Handle writing style selection from WritingStyleSelector component
+function onWritingStyleChanged(styleData) {
+  writingStyleValue.value = styleData.value;
+  writingStyleName.value = styleData.name;
 }
 
 const projectTemplates = [
@@ -523,7 +253,6 @@ async function confirmNewProject() {
 
       return;
     }
-
 
     if(!await canCreateProject() && syncToCloud.value) {
       Notify.create({

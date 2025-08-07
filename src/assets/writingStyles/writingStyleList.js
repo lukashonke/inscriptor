@@ -1025,7 +1025,7 @@ And yes, there's an AI assistant, but it's not the annoying kind that tries to r
 
 **What makes this different?**
 - No overwhelming feature bloat (we kept only what actually helps)
-- Works offline because inspiration doesn't wait for WiFi  
+- Works offline because inspiration doesn't wait for WiFi
 - Syncs across devices without being creepy about your data
 - Actually affordable ($12/month, not $50+ like the big names)
 
@@ -1067,6 +1067,122 @@ We recommend implementing an integrated cloud-based platform that consolidates c
 **Financial Projections**
 
 The total investment requirement is $750,000, distributed across infrastructure ($400,000), software licensing ($200,000), and implementation services ($150,000). Conservative projections indicate cost savings of $300,000 annually beginning in Year 2, resulting in net positive ROI of $450,000 over the three-year analysis period.
+
+=====`
+  },
+  {
+    name: "👶 Children's Literature Style",
+    usageTips: "Use this style for picture books, chapter books, middle-grade fiction, and any content specifically written for young readers (ages 3-12).",
+    types: ['fiction'],
+    tags: ['genre-defining', 'character-focused', 'educational'],
+    value: `**Narrative Voice and Tone**: Warm, encouraging, and wonder-filled, speaking directly to young hearts and minds. The voice should be trustworthy and kind, never condescending, respecting children's intelligence while meeting them at their developmental level. Creates safe space for exploration of emotions and ideas.
+
+**Sentence Structure and Pacing**: Simple, clear sentences for younger readers (5-10 words) gradually increasing complexity for older children (10-20 words). Repetition and rhythm aid comprehension and memory. Short paragraphs and chapters maintain engagement. Natural places for page turns in picture books.
+
+**Language and Vocabulary**: Age-appropriate vocabulary with context clues for new words. Introduces challenging concepts through familiar comparisons. Sound play, alliteration, and onomatopoeia for younger readers. Avoids baby talk while remaining accessible. Educational without being preachy.
+
+**Dialogue Style**: Characters speak in distinct, memorable voices that children can easily distinguish. Natural child dialogue that sounds authentic without inappropriate content. Adult characters model good communication. Dialogue advances plot while teaching social skills.
+
+**Theme and Motives**: Universal childhood experiences—friendship, fear, discovery, growing up. Gentle moral lessons woven through story rather than heavy-handed preaching. Celebrates imagination, curiosity, and resilience. Problems are age-appropriate with satisfying resolutions. Always ends with hope.
+
+=====
+
+Example snippets:
+
+Luna had a secret. It lived in her pocket, small and warm and wonderful.
+
+"What's in your pocket?" asked her teacher, Mrs. Maple, who noticed everything.
+
+Luna pressed her hand against the pocket. The secret wiggled. "Nothing," she whispered.
+
+But secrets have a funny way of not staying secret, especially when they're alive.
+
+At recess, Luna sat under the big oak tree, away from the other children. Carefully, so carefully, she opened her pocket just a crack. Two bright eyes peeked out. Then whiskers. Then the softest pink nose she'd ever seen.
+
+"Hello, Stardust," Luna whispered to the tiny hamster. "I know I'm not supposed to bring you to school, but you were so lonely at home."
+
+Stardust squeaked, which Luna understood meant, "I'm happy to be here with you."
+
+Everything would have been fine if Stardust hadn't smelled Tommy's peanut butter sandwich.
+
+ZOOM! The little hamster shot out of Luna's pocket, across the playground, and right up Tommy's leg.
+
+"EEEEEP!" Tommy squealed, dropping his sandwich. "Something's attacking me!"
+
+But then he looked down and saw Stardust, sitting on his shoe, nibbling the sandwich crust with tiny, happy sounds.
+
+"Is that... a hamster?" Tommy asked, his fear turning to delight.
+
+Soon all the children gathered around, gentle as butterflies, taking turns petting Stardust with one finger.
+
+"Luna," said Mrs. Maple, walking over with a knowing smile, "is this your 'nothing'?"
+
+Luna's cheeks turned pink. "I'm sorry, Mrs. Maple. He was lonely, and I thought maybe... maybe school would make him happy."
+
+Mrs. Maple knelt down beside the children. "You know what? I think Stardust has taught us something important today. Sometimes, when we share what we love—even when we're not supposed to—we make everyone a little happier."
+
+She winked at Luna. "But next time, ask first. Our class could use a proper pet. What do you all think?"
+
+"YES!" shouted twenty voices at once.
+
+And that's how Stardust became the first official hamster student at Willowbrook Elementary, with his own tiny desk and everything.
+
+=====`
+  },
+  {
+    name: "🎭 Satirical/Ironic Style",
+    usageTips: "Use this style for social commentary, political satire, parody, and any writing that uses humor to critique society, institutions, or human behavior.",
+    types: ['fiction', 'nonfiction'],
+    tags: ['cross-genre', 'literary', 'commercial'],
+    value: `**Narrative Voice and Tone**: Clever and subversive, using wit as a scalpel to expose hypocrisy and folly. The voice should be intelligent and observant, employing irony and sarcasm without becoming mean-spirited. Maintains sophisticated distance while delivering pointed social criticism through humor.
+
+**Sentence Structure and Pacing**: Strategic pacing that sets up expectations then subverts them for ironic effect. Varies between elaborate setups and punchy punchlines. Uses parallel structure to highlight contradictions. Timing is crucial—builds anticipation before delivering satirical observations.
+
+**Language and Vocabulary**: Sophisticated wordplay including double entendres, puns, and verbal irony. Contrasts formal language with absurd situations for comic effect. Uses euphemisms, understatement, and hyperbole strategically. Technical jargon employed ironically to mock pretension.
+
+**Dialogue Style**: Characters often speak at cross-purposes, revealing their blind spots through their own words. Conversation exposes vanity, ignorance, or self-deception. Uses dramatic irony where readers understand more than characters. Parodies recognizable speech patterns and social dialects.
+
+**Theme and Motives**: Exposes societal flaws, institutional failures, and human pretensions through humor. Challenges complacency and conventional wisdom. Often focuses on power imbalances, social inequality, or moral hypocrisy. Aims to provoke thought and potentially inspire change through laughter.
+
+=====
+
+Example snippets:
+
+**The Art of Modern Productivity**
+
+Sarah, Director of Workflow Optimization, arrived at her standing desk promptly at 6:47 AM—three minutes earlier than her self-improvement app recommended for "Maximum Morning Momentum." She adjusted her ergonomic everything and opened her laptop to begin her daily ritual of being incredibly, measurably productive.
+
+First: checking her productivity tracking app to see how productive she'd been yesterday. (Moderately productive, with room for optimization.) Second: updating her goal-setting app with today's objectives for being productive. Third: reading three articles about productivity techniques she didn't have time to implement because she was too busy reading about productivity.
+
+Her calendar pinged. Meeting in Conference Room Synergy: "Streamlining Our Efficiency Initiatives."
+
+Sarah gathered her bullet journal, her productivity planner, and her laptop (equipped with seventeen apps designed to eliminate the need for bullet journals and productivity planners). She power-walked to the meeting, tracking her steps on her fitness app, which would later congratulate her for being such an efficient walker.
+
+"Good morning, optimization warriors!" chirped Brad from HR, who had recently returned from a weekend seminar on "Leveraging Mindfulness for Maximum Impact." "Today we're going to discuss how we can more efficiently implement our efficiency improvements."
+
+Sarah nodded enthusiastically while discreetly checking her phone to see if she'd reached her daily goal of being enthusiastic about efficiency.
+
+Two hours later, they had scheduled three follow-up meetings to determine the most productive way to schedule follow-up meetings. Sarah made a note in her productivity journal: "Great progress on productivity initiatives."
+
+On her way back to her standing desk (sitting was for quitters), Sarah passed the break room where Janet from Accounting sat reading an actual paper book—not even a self-help book about reading more efficiently—and sipping coffee she'd made herself instead of ordering from the artisanal productivity café downstairs.
+
+"Aren't you supposed to be optimizing something?" Sarah asked.
+
+Janet looked up with the sort of peaceful expression that probably wasn't available in any app store. "I am. I'm optimizing my enjoyment of this Tuesday."
+
+Sarah walked away, slightly disturbed. She made another note: "Janet may need productivity intervention."
+
+At her desk, she opened her laptop to discover that her productivity apps had been so busy tracking her productivity that they'd crashed her computer. While it rebooted, she stared out the window at people walking slowly, talking to each other, accomplishing absolutely nothing measurable.
+
+They looked insufferably content.
+
+Her computer chirped back to life, and Sarah opened her task management app. Today's remaining objectives: "Be productive. Optimize efficiency. Achieve maximum leverage."
+
+She paused, fingers hovering over the keyboard. Then she closed the laptop, walked to the break room, and sat down next to Janet.
+
+"Teach me about Tuesday optimization," she said.
+
+Janet smiled and poured her a cup of thoroughly unoptimized coffee.
 
 =====`
   },

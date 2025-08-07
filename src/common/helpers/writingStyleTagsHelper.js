@@ -3,15 +3,49 @@
  */
 
 /**
+ * Get emoji icon for a specific tag
+ * @param {string} tag - The tag name
+ * @returns {string} - The emoji icon for the tag
+ */
+export function getTagIcon(tag) {
+  const tagIcons = {
+    'universal': '🌍',
+    'cross-genre': '🔀',
+    'commercial': '💼',
+    'literary': '📚',
+    'character-focused': '👥',
+    'plot-focused': '⚡',
+    'atmosphere-focused': '🌙',
+    'genre-defining': '🎭',
+    'casual': '😊',
+    'formal': '🎩',
+    'business': '💼',
+    'promotional': '📢',
+    'educational': '🎓',
+    'storytelling': '📖'
+  };
+
+  return tagIcons[tag] || '🏷️';
+}
+
+/**
  * Format tag name from kebab-case to Title Case
  * @param {string} tag - The tag in kebab-case format
+ * @param {boolean} includeIcon - Whether to include emoji icon
  * @returns {string} - The formatted tag name in Title Case
  */
-export function formatTagName(tag) {
-  return tag
+export function formatTagName(tag, includeIcon = false) {
+  const formattedName = tag
     .split('-')
     .map(word => word.charAt(0).toUpperCase() + word.slice(1))
     .join(' ');
+
+  if (includeIcon) {
+    const icon = getTagIcon(tag);
+    return `${icon} ${formattedName}`;
+  }
+
+  return formattedName;
 }
 
 /**
@@ -25,7 +59,7 @@ export function getTagColor(tag) {
     'cross-genre': 'blue-grey',
     'commercial': 'green',
     'literary': 'purple',
-    'character-focused': 'amber',
+    'character-focused': 'deep-purple',
     'plot-focused': 'red',
     'atmosphere-focused': 'teal',
     'genre-defining': 'indigo',
@@ -47,7 +81,7 @@ export function getTagColor(tag) {
  * @returns {number} - Number of styles with this tag
  */
 export function getTagCount(tag, writingStyles) {
-  return writingStyles.filter(style => 
+  return writingStyles.filter(style =>
     style.tags && style.tags.includes(tag)
   ).length;
 }
