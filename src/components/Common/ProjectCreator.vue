@@ -169,7 +169,7 @@ const importRecommendedPrompts = ref(true);
 const writingStyleName = ref('Default (Neutral) Style');
 const writingStyleValue = ref('');
 
-const currentStep = ref(2);
+const currentStep = ref(1);
 
 const creatingProject = ref(false);
 

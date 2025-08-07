@@ -33,6 +33,163 @@ Outside, the city hummed with its usual energy, oblivious to the small revolutio
 =====`
   },
   {
+    name: "🤝 Casual Professional Style",
+    usageTips: "Use this style for project descriptions, brainstorming documents, technical notes, internal communications, and content that mixes informal ideas with professional information.",
+    types: ['nonfiction'],
+    tags: ['Cross Genre', 'Business and Projects', 'Casual'],
+    value: `**Narrative Voice and Tone**: Relaxed yet competent, like explaining complex ideas to a smart colleague over coffee. Allows personality to show through while maintaining credibility. Comfortable switching between formal and informal as context requires.
+
+**Sentence Structure and Pacing**: Natural, conversational flow with varied sentence lengths. Uses fragments for emphasis ("Important note:"). Parenthetical asides for additional context. Bullets and numbered lists for clarity without being rigid.
+
+**Language and Vocabulary**: Plain English as default, technical terms when necessary (with quick explanations). Occasional colloquialisms and metaphors to illustrate points. First and second person pronouns welcomed. Contractions are fine.
+
+**Content Organization**: Flexible structure that follows thought process rather than rigid format. Headers for navigation but not overly formal. Mix of paragraph text, bullet points, and informal notes. Annotations and side comments acceptable.
+
+**Theme and Purpose**: Getting ideas across clearly without corporate stuffiness. Building understanding through approachable explanation. Documenting thoughts in progress. Creating collaborative, inclusive communication.
+
+=====
+
+Example snippets:
+
+**Project Alpha Update - March Status**
+
+So here's what we're thinking for the new feature rollout. We've got three main components (bear with me, this gets a bit technical):
+
+1. **The API integration** - basically, this talks to their system and pulls the data we need. Nothing fancy, just REST calls every 30 minutes.
+
+2. **The processing layer** - this is where the magic happens. We're taking their messy data and making it actually useful. Think of it like a really smart filter that knows what we care about.
+
+3. **The UI updates** - users will see a new dashboard widget. Super clean, just the essentials. (Note: Sarah from design has some thoughts on this - let's sync up Tuesday?)
+
+**Quick heads up:** The timeline is aggressive but doable. We're looking at 3 weeks for MVP, another 2 for polish. The main risk? Their API documentation is... let's say "creative." But we've dealt with worse.
+
+**Random thoughts that might matter:**
+- Should we add a dark mode toggle? Users keep asking
+- Performance testing on mobile - put this on the must-do list
+- Consider adding export functionality later (not launch-critical)
+
+Bottom line: We're in good shape, but let's stay flexible on the details.
+
+=====`
+  },
+  {
+    name: "💼 Professional/Formal Style",
+    usageTips: "Use this style for formal business proposals, executive summaries, corporate reports, investor communications, and high-stakes professional documents.",
+    types: ['nonfiction'],
+    tags: ['Cross Genre', 'Business and Projects', 'Serious'],
+    value: `**Narrative Voice and Tone**: Authoritative, objective, and polished. Third-person perspective maintaining professional distance. Confident without arrogance. Precise and deliberate in all statements. Credibility through competence and clarity.
+
+**Sentence Structure and Pacing**: Well-constructed sentences with clear subjects and strong verbs. Average 15-25 words for readability. Logical flow from general to specific. Smooth transitions between paragraphs and sections. Parallel structure for lists and comparisons.
+
+**Language and Vocabulary**: Industry-appropriate terminology used correctly. Formal register without unnecessary complexity. Active voice preferred for clarity and directness. Quantifiable metrics and specific evidence. Avoids colloquialisms, contractions, and casual phrases.
+
+**Document Structure**: Clear hierarchy with executive summary upfront. Logical sections with descriptive headings. Supporting data integrated smoothly. Conclusions that follow from presented evidence. Professional formatting throughout.
+
+**Strategic Focus**: Results-oriented language emphasizing ROI and value. Risk acknowledgment with mitigation strategies. Clear recommendations backed by analysis. Alignment with organizational objectives. Forward-looking while grounded in current realities.
+
+=====
+
+Example snippets:
+
+**Executive Summary**
+
+This proposal outlines a comprehensive digital transformation initiative designed to enhance operational efficiency and market competitiveness. The recommended solution addresses three critical business objectives: streamlining customer acquisition, reducing operational costs by 30%, and establishing scalable infrastructure for projected growth.
+
+**Current State Analysis**
+
+Our assessment reveals that existing systems operate at 60% efficiency due to manual processes and disconnected platforms. Customer acquisition costs have increased 45% year-over-year while conversion rates remain static at 2.3%. These metrics indicate substantial opportunity for improvement through strategic technological investment.
+
+**Proposed Solution**
+
+We recommend implementing an integrated cloud-based platform that consolidates customer relationship management, automated marketing, and analytics capabilities. This solution will deliver measurable improvements in three phases over 18 months, with initial ROI expected within the first quarter of implementation.
+
+**Financial Projections**
+
+The total investment requirement is $750,000, distributed across infrastructure ($400,000), software licensing ($200,000), and implementation services ($150,000). Conservative projections indicate cost savings of $300,000 annually beginning in Year 2, resulting in net positive ROI of $450,000 over the three-year analysis period.
+
+=====`
+  },
+  {
+    name: "📱 Digital Content Style",
+    usageTips: "Use this style for web content, blog posts, social media, newsletters, and online articles that need to be engaging and scannable.",
+    types: ['nonfiction'],
+    tags: ['Genre Defining', 'Digital Web Content', 'Casual'],
+    value: `**Content Structure and Format**: Scannable, mobile-friendly content with clear headers, bullet points, and short paragraphs. Optimized for digital reading patterns—F-pattern scanning, with key information front-loaded.
+
+**Sentence Structure and Pacing**: Short, punchy sentences (10-15 words average) mixed with occasional longer ones for variety. Paragraphs rarely exceed 3-4 lines on mobile. Uses white space strategically to reduce cognitive load.
+
+**Language and Vocabulary**: Clear, accessible language avoiding jargon unless audience-appropriate. SEO-conscious without keyword stuffing. Action-oriented verbs and concrete nouns. Conversational tone that builds connection.
+
+**Engagement Techniques**: Hook readers immediately with compelling openings. Use questions, statistics, and relatable scenarios. Include clear CTAs. Break up text with visuals, lists, and formatting. Make content shareable and memorable.
+
+**Tone and Voice**: Friendly, informative, and value-focused. Speaks directly to reader's needs and pain points. Balances authority with approachability. Maintains brand consistency while being human.
+
+=====
+
+Example snippets:
+
+**The 5-Minute Rule That Changed Everything**
+
+Procrastination killing your productivity? Here's a simple hack that actually works.
+
+Set a timer for 5 minutes. That's it.
+
+Pick the task you've been avoiding most. Maybe it's that email response, the budget spreadsheet, or cleaning your desk. Doesn't matter how big it is. Just commit to 5 minutes.
+
+Here's the magic: You'll either finish the task (surprise!) or build enough momentum to keep going. Our brains hate stopping once we've started. It's called the Zeigarnik effect, and you can use it to your advantage.
+
+**Why it works:**
+• Removes the mental barrier of "this will take forever"
+• Creates immediate action instead of endless planning
+• Builds confidence through small wins
+• Makes overwhelming tasks feel manageable
+
+Try it right now. Seriously. Set that timer and pick one thing.
+
+Your future self will thank you.
+
+=====`
+  },
+  {
+    name: "🎯 Marketing/Promotional Style",
+    usageTips: "Use this style for product descriptions, landing pages, feature announcements, and promotional content that feels genuine and engaging rather than salesy.",
+    types: ['nonfiction'],
+    tags: ['Cross Genre', 'Digital Web Content', 'Witty'],
+    value: `**Narrative Voice and Tone**: Enthusiastic but genuine, like a friend recommending something they actually use and love. Confident without being pushy. Focus on helping rather than selling. Human warmth over corporate polish.
+
+**Sentence Structure and Pacing**: Dynamic rhythm that builds excitement naturally. Mix of lengths to maintain energy. Questions that make readers think. Short paragraphs that move readers forward. Power words used tastefully, not excessively.
+
+**Language and Vocabulary**: Benefit-focused language that connects features to real-world value. Storytelling elements to create emotional connection. Specific details over vague claims. Social proof woven naturally into narrative.
+
+**Engagement Techniques**: Start with reader's problem or desire. Paint picture of transformation or solution. Use "you" to maintain direct connection. Include real examples and scenarios. Address objections conversationally.
+
+**Authenticity Markers**: Acknowledge limitations where appropriate. Use genuine testimonials and stories. Avoid hyperbole and impossible promises. Include personality and occasional humor. Let passion for product shine through naturally.
+
+=====
+
+Example snippets:
+
+**Finally, a Writing Tool That Gets It**
+
+You know that moment when you're staring at a blank page, deadline looming, and the words just won't come? We've been there. Actually, that's exactly why we built WriterFlow.
+
+Here's the thing: WriterFlow isn't going to write for you. (If only, right?) But it does something almost as good—it gets you unstuck. Think of it as your writing companion that knows exactly when to nudge you forward.
+
+The daily prompts? They're not random. Our algorithm learns your writing patterns and serves up exercises tailored to break through your specific blocks. One user told us it's like having a writing coach who actually gets her style—except available at 3 AM when inspiration strikes.
+
+And yes, there's an AI assistant, but it's not the annoying kind that tries to rewrite everything. It's more like a thoughtful editor who suggests alternatives when you're stuck on that one sentence for the fifteenth time.
+
+**What makes this different?**
+- No overwhelming feature bloat (we kept only what actually helps)
+- Works offline because inspiration doesn't wait for WiFi
+- Syncs across devices without being creepy about your data
+- Actually affordable ($12/month, not $50+ like the big names)
+
+Look, we're not saying this will turn you into Hemingway overnight. But if you're tired of fighting with your tools instead of focusing on your ideas, maybe it's worth a try.
+
+=====`
+  },
+  {
     name: "📚 Literary Fiction Style",
     usageTips: "Use this style for character-driven narratives in literary magazines and serious contemporary literature.",
     types: ['fiction'],
@@ -68,7 +225,7 @@ The photograph remained between them, a bridge and a chasm both.
 =====`
   },
   {
-    name: "⚡ Commercial Thriller Style",
+    name: "⚡ Action Thriller Style",
     usageTips: "Use this style for fast-paced thrillers, suspense novels, action-adventure, and page-turner fiction.",
     types: ['fiction'],
     tags: ['Genre Defining', 'Plot-Driven', 'Creative Writing', 'Dramatic'],
@@ -79,7 +236,6 @@ The photograph remained between them, a bridge and a chasm both.
 **Language and Vocabulary**: Clear, concrete language focusing on action and sensory details. Strong, active verbs drive every sentence. Technical terms are used sparingly and explained through context. Avoids adverbs in favor of more precise verbs.
 
 **Dialogue Style**: Crisp, purposeful exchanges that reveal information and advance plot simultaneously. Characters speak in distinct voices with minimal dialogue tags. Interruptions, overlapping conversations, and unfinished sentences create realistic urgency.
-
 
 **Theme and Motives**: Good versus evil with clear stakes. Themes of justice, survival, and moral compromise under pressure. Heroes are flawed but ultimately sympathetic. Villains are competent and genuinely threatening.
 
@@ -914,163 +1070,6 @@ These findings necessitate a reconceptualization of digital wellness interventio
 =====`
   },
   {
-    name: "📱 Digital Content Style",
-    usageTips: "Use this style for web content, blog posts, social media, newsletters, and online articles that need to be engaging and scannable.",
-    types: ['nonfiction'],
-    tags: ['Genre Defining', 'Digital Web Content', 'Casual'],
-    value: `**Content Structure and Format**: Scannable, mobile-friendly content with clear headers, bullet points, and short paragraphs. Optimized for digital reading patterns—F-pattern scanning, with key information front-loaded.
-
-**Sentence Structure and Pacing**: Short, punchy sentences (10-15 words average) mixed with occasional longer ones for variety. Paragraphs rarely exceed 3-4 lines on mobile. Uses white space strategically to reduce cognitive load.
-
-**Language and Vocabulary**: Clear, accessible language avoiding jargon unless audience-appropriate. SEO-conscious without keyword stuffing. Action-oriented verbs and concrete nouns. Conversational tone that builds connection.
-
-**Engagement Techniques**: Hook readers immediately with compelling openings. Use questions, statistics, and relatable scenarios. Include clear CTAs. Break up text with visuals, lists, and formatting. Make content shareable and memorable.
-
-**Tone and Voice**: Friendly, informative, and value-focused. Speaks directly to reader's needs and pain points. Balances authority with approachability. Maintains brand consistency while being human.
-
-=====
-
-Example snippets:
-
-**The 5-Minute Rule That Changed Everything**
-
-Procrastination killing your productivity? Here's a simple hack that actually works.
-
-Set a timer for 5 minutes. That's it.
-
-Pick the task you've been avoiding most. Maybe it's that email response, the budget spreadsheet, or cleaning your desk. Doesn't matter how big it is. Just commit to 5 minutes.
-
-Here's the magic: You'll either finish the task (surprise!) or build enough momentum to keep going. Our brains hate stopping once we've started. It's called the Zeigarnik effect, and you can use it to your advantage.
-
-**Why it works:**
-• Removes the mental barrier of "this will take forever"
-• Creates immediate action instead of endless planning
-• Builds confidence through small wins
-• Makes overwhelming tasks feel manageable
-
-Try it right now. Seriously. Set that timer and pick one thing.
-
-Your future self will thank you.
-
-=====`
-  },
-  {
-    name: "🤝 Casual Professional Style",
-    usageTips: "Use this style for project descriptions, brainstorming documents, technical notes, internal communications, and content that mixes informal ideas with professional information.",
-    types: ['nonfiction'],
-    tags: ['Cross Genre', 'Business and Projects', 'Casual'],
-    value: `**Narrative Voice and Tone**: Relaxed yet competent, like explaining complex ideas to a smart colleague over coffee. Allows personality to show through while maintaining credibility. Comfortable switching between formal and informal as context requires.
-
-**Sentence Structure and Pacing**: Natural, conversational flow with varied sentence lengths. Uses fragments for emphasis ("Important note:"). Parenthetical asides for additional context. Bullets and numbered lists for clarity without being rigid.
-
-**Language and Vocabulary**: Plain English as default, technical terms when necessary (with quick explanations). Occasional colloquialisms and metaphors to illustrate points. First and second person pronouns welcomed. Contractions are fine.
-
-**Content Organization**: Flexible structure that follows thought process rather than rigid format. Headers for navigation but not overly formal. Mix of paragraph text, bullet points, and informal notes. Annotations and side comments acceptable.
-
-**Theme and Purpose**: Getting ideas across clearly without corporate stuffiness. Building understanding through approachable explanation. Documenting thoughts in progress. Creating collaborative, inclusive communication.
-
-=====
-
-Example snippets:
-
-**Project Alpha Update - March Status**
-
-So here's what we're thinking for the new feature rollout. We've got three main components (bear with me, this gets a bit technical):
-
-1. **The API integration** - basically, this talks to their system and pulls the data we need. Nothing fancy, just REST calls every 30 minutes.
-
-2. **The processing layer** - this is where the magic happens. We're taking their messy data and making it actually useful. Think of it like a really smart filter that knows what we care about.
-
-3. **The UI updates** - users will see a new dashboard widget. Super clean, just the essentials. (Note: Sarah from design has some thoughts on this - let's sync up Tuesday?)
-
-**Quick heads up:** The timeline is aggressive but doable. We're looking at 3 weeks for MVP, another 2 for polish. The main risk? Their API documentation is... let's say "creative." But we've dealt with worse.
-
-**Random thoughts that might matter:**
-- Should we add a dark mode toggle? Users keep asking
-- Performance testing on mobile - put this on the must-do list
-- Consider adding export functionality later (not launch-critical)
-
-Bottom line: We're in good shape, but let's stay flexible on the details.
-
-=====`
-  },
-  {
-    name: "🎯 Marketing/Promotional Style",
-    usageTips: "Use this style for product descriptions, landing pages, feature announcements, and promotional content that feels genuine and engaging rather than salesy.",
-    types: ['nonfiction'],
-    tags: ['Cross Genre', 'Digital Web Content', 'Witty'],
-    value: `**Narrative Voice and Tone**: Enthusiastic but genuine, like a friend recommending something they actually use and love. Confident without being pushy. Focus on helping rather than selling. Human warmth over corporate polish.
-
-**Sentence Structure and Pacing**: Dynamic rhythm that builds excitement naturally. Mix of lengths to maintain energy. Questions that make readers think. Short paragraphs that move readers forward. Power words used tastefully, not excessively.
-
-**Language and Vocabulary**: Benefit-focused language that connects features to real-world value. Storytelling elements to create emotional connection. Specific details over vague claims. Social proof woven naturally into narrative.
-
-**Engagement Techniques**: Start with reader's problem or desire. Paint picture of transformation or solution. Use "you" to maintain direct connection. Include real examples and scenarios. Address objections conversationally.
-
-**Authenticity Markers**: Acknowledge limitations where appropriate. Use genuine testimonials and stories. Avoid hyperbole and impossible promises. Include personality and occasional humor. Let passion for product shine through naturally.
-
-=====
-
-Example snippets:
-
-**Finally, a Writing Tool That Gets It**
-
-You know that moment when you're staring at a blank page, deadline looming, and the words just won't come? We've been there. Actually, that's exactly why we built WriterFlow.
-
-Here's the thing: WriterFlow isn't going to write for you. (If only, right?) But it does something almost as good—it gets you unstuck. Think of it as your writing companion that knows exactly when to nudge you forward.
-
-The daily prompts? They're not random. Our algorithm learns your writing patterns and serves up exercises tailored to break through your specific blocks. One user told us it's like having a writing coach who actually gets her style—except available at 3 AM when inspiration strikes.
-
-And yes, there's an AI assistant, but it's not the annoying kind that tries to rewrite everything. It's more like a thoughtful editor who suggests alternatives when you're stuck on that one sentence for the fifteenth time.
-
-**What makes this different?**
-- No overwhelming feature bloat (we kept only what actually helps)
-- Works offline because inspiration doesn't wait for WiFi
-- Syncs across devices without being creepy about your data
-- Actually affordable ($12/month, not $50+ like the big names)
-
-Look, we're not saying this will turn you into Hemingway overnight. But if you're tired of fighting with your tools instead of focusing on your ideas, maybe it's worth a try.
-
-=====`
-  },
-  {
-    name: "💼 Professional/Formal Style",
-    usageTips: "Use this style for formal business proposals, executive summaries, corporate reports, investor communications, and high-stakes professional documents.",
-    types: ['nonfiction'],
-    tags: ['Cross Genre', 'Business and Projects', 'Serious'],
-    value: `**Narrative Voice and Tone**: Authoritative, objective, and polished. Third-person perspective maintaining professional distance. Confident without arrogance. Precise and deliberate in all statements. Credibility through competence and clarity.
-
-**Sentence Structure and Pacing**: Well-constructed sentences with clear subjects and strong verbs. Average 15-25 words for readability. Logical flow from general to specific. Smooth transitions between paragraphs and sections. Parallel structure for lists and comparisons.
-
-**Language and Vocabulary**: Industry-appropriate terminology used correctly. Formal register without unnecessary complexity. Active voice preferred for clarity and directness. Quantifiable metrics and specific evidence. Avoids colloquialisms, contractions, and casual phrases.
-
-**Document Structure**: Clear hierarchy with executive summary upfront. Logical sections with descriptive headings. Supporting data integrated smoothly. Conclusions that follow from presented evidence. Professional formatting throughout.
-
-**Strategic Focus**: Results-oriented language emphasizing ROI and value. Risk acknowledgment with mitigation strategies. Clear recommendations backed by analysis. Alignment with organizational objectives. Forward-looking while grounded in current realities.
-
-=====
-
-Example snippets:
-
-**Executive Summary**
-
-This proposal outlines a comprehensive digital transformation initiative designed to enhance operational efficiency and market competitiveness. The recommended solution addresses three critical business objectives: streamlining customer acquisition, reducing operational costs by 30%, and establishing scalable infrastructure for projected growth.
-
-**Current State Analysis**
-
-Our assessment reveals that existing systems operate at 60% efficiency due to manual processes and disconnected platforms. Customer acquisition costs have increased 45% year-over-year while conversion rates remain static at 2.3%. These metrics indicate substantial opportunity for improvement through strategic technological investment.
-
-**Proposed Solution**
-
-We recommend implementing an integrated cloud-based platform that consolidates customer relationship management, automated marketing, and analytics capabilities. This solution will deliver measurable improvements in three phases over 18 months, with initial ROI expected within the first quarter of implementation.
-
-**Financial Projections**
-
-The total investment requirement is $750,000, distributed across infrastructure ($400,000), software licensing ($200,000), and implementation services ($150,000). Conservative projections indicate cost savings of $300,000 annually beginning in Year 2, resulting in net positive ROI of $450,000 over the three-year analysis period.
-
-=====`
-  },
-  {
     name: "👶 Children's Literature Style",
     usageTips: "Use this style for picture books, chapter books, middle-grade fiction, and any content specifically written for young readers (ages 3-12).",
     types: ['fiction'],
@@ -1533,7 +1532,7 @@ Your brain isn't a thesaurus. Keep it simple.
 
 2/ Delete every instance of "in order to"
 
-Just say "to." 
+Just say "to."
 
 Your readers will thank you.
 
@@ -1631,7 +1630,7 @@ Rain streaks the windows. SARAH (28), disheveled in yesterday's clothes, clutche
 
 SARAH
 (into phone)
-Hey Mom, it's me. Again. I know 
+Hey Mom, it's me. Again. I know
 you said not to call, but—
 
 The line goes dead. Sarah stares at the phone.
@@ -1653,7 +1652,7 @@ Rough life.
 She takes the coffee, hands shaking slightly. Marcus notices.
 
 MARCUS
-You know, we're hiring. Night 
+You know, we're hiring. Night
 shift pays better.
 
 SARAH
@@ -1661,11 +1660,11 @@ SARAH
 You don't even know me.
 
 MARCUS
-I know you tip in exact change 
-because you're counting every 
-penny. I know you order the same 
-thing every day because routine 
-is the only thing holding you 
+I know you tip in exact change
+because you're counting every
+penny. I know you order the same
+thing every day because routine
+is the only thing holding you
 together right now.
 
 Sarah looks up, really seeing him for the first time.
