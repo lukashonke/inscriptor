@@ -83,10 +83,10 @@
     </div>
   </div>
 
-  <div class="row q-mb-sm">
+  <div class="row q-mb-sm full-width">
     <q-carousel
       v-model="slide"
-      class="q-px-none"
+      class="q-px-none full-width"
       transition-prev="slide-right"
       transition-next="slide-left"
       swipeable
@@ -288,10 +288,10 @@ const writingStyleSlides = computed(() => {
   // Start with all styles
   let filteredStyles = [...writingStyles];
 
-  // Apply tag filters if any are selected (OR logic)
+  // Apply tag filters if any are selected (AND logic)
   if (selectedFilters.value.length > 0) {
     filteredStyles = filteredStyles.filter(style =>
-        style.tags && selectedFilters.value.some(tag =>
+        style.tags && selectedFilters.value.every(tag =>
           style.tags.includes(tag)
         )
     );
@@ -351,9 +351,44 @@ function getStyleRenderVariant(writingStyle) {
   return 'not-recommended';
 }
 
-// Wrapper function for tag count to provide writingStyles context
+// Get tag count based on current filtered results
 function getTagCountForFilter(tag) {
-  return getTagCount(tag, writingStyles);
+  const preferredType = projectTypeMap[props.newProjectType];
+
+  // Start with all styles
+  let baseStyles = [...writingStyles];
+
+  // Apply project type sorting/filtering first (same logic as main filter)
+  if (preferredType) {
+    baseStyles.sort((a, b) => {
+      const aMatches = a.types?.includes(preferredType) ? 1 : 0;
+      const bMatches = b.types?.includes(preferredType) ? 1 : 0;
+      if (aMatches !== bMatches) {
+        return bMatches - aMatches;
+      }
+      return 0;
+    });
+  }
+
+  // If no filters are selected, show count for all styles
+  if (selectedFilters.value.length === 0) {
+    return getTagCount(tag, baseStyles);
+  }
+
+  // Apply current filters (excluding the tag we're counting for)
+  const otherFilters = selectedFilters.value.filter(filter => filter !== tag);
+  let filteredStyles = baseStyles;
+
+  if (otherFilters.length > 0) {
+    filteredStyles = baseStyles.filter(style =>
+      style.tags && otherFilters.every(filterTag =>
+        style.tags.includes(filterTag)
+      )
+    );
+  }
+
+  // Count how many of the filtered styles have the target tag
+  return getTagCount(tag, filteredStyles);
 }
 
 // Multiple tag filter management functions

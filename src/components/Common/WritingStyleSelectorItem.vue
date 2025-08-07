@@ -16,7 +16,7 @@
       <div class="text-italic scroll-y" style="font-size: 0.8rem; height: 60px;">{{ writingStyle.usageTips }}</div>
 
       <!-- Tags Display -->
-      <div v-if="writingStyle.tags && writingStyle.tags.length > 0" class="">
+      <div v-if="writingStyle.tags && writingStyle.tags.length > 0" class="flex items-center" style="min-height: 60px;">
         <q-chip
           v-for="tag in writingStyle.tags"
           :key="tag"

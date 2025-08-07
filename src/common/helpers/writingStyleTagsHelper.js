@@ -9,20 +9,28 @@
  */
 export function getTagIcon(tag) {
   const tagIcons = {
-    'universal': '🌍',
-    'cross-genre': '🔀',
-    'commercial': '💼',
-    'literary': '📚',
-    'character-focused': '👥',
-    'plot-focused': '⚡',
-    'atmosphere-focused': '🌙',
-    'genre-defining': '🎭',
-    'casual': '😊',
-    'formal': '🎩',
-    'business': '💼',
-    'promotional': '📢',
-    'educational': '🎓',
-    'storytelling': '📖'
+    // Group 1 - Scope
+    'Universal': '🌍',
+    'Cross Genre': '🔀',
+    'Genre Defining': '🎭',
+    
+    // Group 2 - Primary Focus
+    'Character-Driven': '👥',
+    'Plot-Driven': '⚡',
+    'Atmosphere-Driven': '🌙',
+    'Dialogue-Driven': '💬',
+    
+    // Group 3 - Target Use
+    'Creative Writing': '✍️',
+    'Business and Projects': '💼',
+    'Digital Web Content': '📱',
+    
+    // Group 4 - Tone/Style
+    'Witty': '😄',
+    'Serious': '🎯',
+    'Playful': '🎈',
+    'Dramatic': '🎬',
+    'Casual': '😊'
   };
 
   return tagIcons[tag] || '🏷️';
@@ -55,20 +63,28 @@ export function formatTagName(tag, includeIcon = false) {
  */
 export function getTagColor(tag) {
   const tagColors = {
-    'universal': 'blue',
-    'cross-genre': 'blue-grey',
-    'commercial': 'green',
-    'literary': 'purple',
-    'character-focused': 'deep-purple',
-    'plot-focused': 'red',
-    'atmosphere-focused': 'teal',
-    'genre-defining': 'indigo',
-    'casual': 'light-green',
-    'formal': 'brown',
-    'business': 'grey',
-    'promotional': 'orange',
-    'educational': 'cyan',
-    'storytelling': 'pink'
+    // Group 1 - Scope (blue tones)
+    'Universal': 'blue',
+    'Cross Genre': 'blue-grey',
+    'Genre Defining': 'indigo',
+    
+    // Group 2 - Primary Focus (purple/red tones)
+    'Character-Driven': 'deep-purple',
+    'Plot-Driven': 'red',
+    'Atmosphere-Driven': 'teal',
+    'Dialogue-Driven': 'purple',
+    
+    // Group 3 - Target Use (green/grey tones)
+    'Creative Writing': 'green',
+    'Business and Projects': 'grey',
+    'Digital Web Content': 'cyan',
+    
+    // Group 4 - Tone/Style (warm tones)
+    'Witty': 'orange',
+    'Serious': 'brown',
+    'Playful': 'pink',
+    'Dramatic': 'deep-orange',
+    'Casual': 'light-green'
   };
 
   return tagColors[tag] || 'blue-grey';
@@ -87,16 +103,44 @@ export function getTagCount(tag, writingStyles) {
 }
 
 /**
- * Get all unique tags from a collection of writing styles
+ * Get all unique tags from a collection of writing styles, ordered by group priority
  * @param {Array} writingStyles - Array of writing style objects
- * @returns {Array} - Sorted array of unique tags
+ * @returns {Array} - Ordered array of unique tags
  */
 export function getAvailableTags(writingStyles) {
+  // Define the tag order by groups
+  const tagOrder = [
+    // Group 1 - Scope (required - choose one)
+    'Universal',
+    'Cross Genre', 
+    'Genre Defining',
+    
+    // Group 2 - Primary Focus
+    'Character-Driven',
+    'Plot-Driven',
+    'Atmosphere-Driven',
+    'Dialogue-Driven',
+    
+    // Group 3 - Target Use
+    'Creative Writing',
+    'Business and Projects',
+    'Digital Web Content',
+    
+    // Group 4 - Tone/Style
+    'Witty',
+    'Serious',
+    'Playful',
+    'Dramatic',
+    'Casual'
+  ];
+
   const tagSet = new Set();
   writingStyles.forEach(style => {
     if (style.tags) {
       style.tags.forEach(tag => tagSet.add(tag));
     }
   });
-  return Array.from(tagSet).sort();
+  
+  // Return tags in the defined order, only including those that exist
+  return tagOrder.filter(tag => tagSet.has(tag));
 }
