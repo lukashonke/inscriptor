@@ -13,18 +13,18 @@ export function getTagIcon(tag) {
     'Universal': '🌍',
     'Cross Genre': '🔀',
     'Genre Defining': '🎭',
-    
+
     // Group 2 - Primary Focus
     'Character-Driven': '👥',
     'Plot-Driven': '⚡',
     'Atmosphere-Driven': '🌙',
     'Dialogue-Driven': '💬',
-    
+
     // Group 3 - Target Use
     'Creative Writing': '✍️',
     'Business and Projects': '💼',
     'Digital Web Content': '📱',
-    
+
     // Group 4 - Tone/Style
     'Witty': '😄',
     'Serious': '🎯',
@@ -65,20 +65,20 @@ export function getTagColor(tag) {
   const tagColors = {
     // Group 1 - Scope (blue tones)
     'Universal': 'blue',
-    'Cross Genre': 'blue-grey',
-    'Genre Defining': 'indigo',
-    
+    'Cross Genre': 'teal',
+    'Genre Defining': 'blue-grey',
+
     // Group 2 - Primary Focus (purple/red tones)
-    'Character-Driven': 'deep-purple',
+    'Character-Driven': 'teal',
     'Plot-Driven': 'red',
-    'Atmosphere-Driven': 'teal',
+    'Atmosphere-Driven': 'deep-purple',
     'Dialogue-Driven': 'purple',
-    
+
     // Group 3 - Target Use (green/grey tones)
     'Creative Writing': 'green',
     'Business and Projects': 'grey',
     'Digital Web Content': 'cyan',
-    
+
     // Group 4 - Tone/Style (warm tones)
     'Witty': 'orange',
     'Serious': 'brown',
@@ -112,20 +112,20 @@ export function getAvailableTags(writingStyles) {
   const tagOrder = [
     // Group 1 - Scope (required - choose one)
     'Universal',
-    'Cross Genre', 
+    'Cross Genre',
     'Genre Defining',
-    
+
     // Group 2 - Primary Focus
     'Character-Driven',
     'Plot-Driven',
     'Atmosphere-Driven',
     'Dialogue-Driven',
-    
+
     // Group 3 - Target Use
     'Creative Writing',
     'Business and Projects',
     'Digital Web Content',
-    
+
     // Group 4 - Tone/Style
     'Witty',
     'Serious',
@@ -140,7 +140,7 @@ export function getAvailableTags(writingStyles) {
       style.tags.forEach(tag => tagSet.add(tag));
     }
   });
-  
+
   // Return tags in the defined order, only including those that exist
   return tagOrder.filter(tag => tagSet.has(tag));
 }
