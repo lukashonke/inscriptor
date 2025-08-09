@@ -572,7 +572,7 @@ The children in apartment 3B started laughing again on Thursday.
     usageTips: "Use this style for historical novels, period dramas, and authentic time-period stories.",
     types: ['fiction'],
     tags: ['Genre Defining', 'Atmosphere-Driven', 'Creative Writing', 'Serious'],
-    value: `**Narrative Voice and Tone**: Immersive and authentic to the period while remaining accessible to modern readers. The voice should transport without alienating, using period-appropriate sensibilities filtered through contemporary storytelling techniques. Rich with historical detail that serves story rather than overwhelming it.
+    value: `**Narrative Voice and Tone**: Immersive and authentic to the period while staying accessible to modern readers. The voice transports readers to another time without making them feel lost or confused. Uses period-appropriate attitudes and social awareness while keeping the storytelling engaging. Rich with historical detail that helps the story rather than slowing it down.
 
 **Sentence Structure and Pacing**: Slightly more formal structure reflecting historical periods (20-30 words average). Pacing allows for historical context without becoming textbook-like. Uses period-appropriate rhythms while maintaining modern readability. Descriptive passages paint era without halting narrative.
 
@@ -627,11 +627,11 @@ But Shanghai, she'd heard, had need of English governesses who weren't afraid of
     usageTips: "Use this style for epic fantasy, high fantasy, and grand fantasy narratives with complex world-building.",
     types: ['fiction'],
     tags: ['Genre Defining', 'Plot-Driven', 'Creative Writing', 'Dramatic'],
-    value: `**Narrative Voice and Tone**: Grand and immersive, with a sense of mythic weight and historical significance. The voice should balance accessibility with the formal cadences of epic storytelling. Multiple POVs weave together to create a tapestry of perspectives across a vast world.
+    value: `**Narrative Voice and Tone**: Grand and immersive, with a sense of mythic weight and historical significance. The voice balances accessibility with the formal rhythms of epic storytelling. Multiple viewpoints work together to show different perspectives across a vast world.
 
 **Sentence Structure and Pacing**: Varied lengths (15-30 words average) with longer sentences for world-building and description. Pacing builds slowly, allowing readers to absorb complex worldbuilding. Action scenes shift to shorter, punchier sentences. Uses parallel structure for prophecies and formal speech.
 
-**Language and Vocabulary**: Elevated but not archaic language. Creates linguistic authenticity through consistent naming conventions, invented terms for magic/culture, and formal modes of address. Avoids modern idioms that would break immersion. Rich sensory descriptions of settings and magic.
+**Language and Vocabulary**: Elevated but not archaic language. Creates believable fantasy worlds through consistent naming patterns, invented terms for magic and culture, and formal speech for important characters. Avoids modern phrases that would break the fantasy feeling. Rich sensory descriptions of settings and magic.
 
 **Dialogue Style**: Formal registers for nobility/ancient beings, varied dialects for different regions/peoples. Characters speak in ways that reflect their culture and station. Prophecies and oaths carry weight. Uses "said" bookisms sparingly but effectively for fantasy creatures.
 
@@ -680,11 +680,11 @@ As if in answer, the runestone at his throat began to burn.
     usageTips: "Use this style for storytelling across general fiction, memoirs, short stories, and creative non-fiction.",
     types: ['fiction', 'nonfiction'],
     tags: ['Universal', 'Character-Driven', 'Creative Writing'],
-    value: `**Narrative Voice and Tone**: Engaging and storytelling, adaptable to first-person or third-person perspectives. Creates intimacy with reader through carefully chosen perspective. First-person provides immediacy and personal connection; third-person offers flexibility and broader scope. Voice should draw readers into the story world from the first sentence.
+    value: `**Narrative Voice and Tone**: Engaging and story-focused, works well for both first-person and third-person perspectives. Connects readers to characters through the right perspective choice. First-person feels immediate and personal; third-person gives flexibility and broader view. Voice pulls readers into the story from the very beginning.
 
-**Sentence Structure and Pacing**: Balanced pacing that mirrors story tension, mixing descriptive passages with action-driven sentences. Use longer sentences for scene-setting and reflection, shorter ones for action and tension. Vary paragraph length to control reading speed - single-line paragraphs for dramatic effect.
+**Sentence Structure and Pacing**: Balanced pacing that matches story tension, mixing description with action. Use longer sentences for setting scenes and reflection, shorter ones for action and tension. Change paragraph length to control reading speed - single-line paragraphs for dramatic moments.
 
-**Language and Vocabulary**: Clear and versatile, varying to suit the plot and characters. Match vocabulary to narrator's background and story setting. Use concrete, sensory details to ground readers in scenes. Avoid excessive adjectives; choose strong verbs instead.
+**Language and Vocabulary**: Clear and flexible, changing to fit the plot and characters. Match vocabulary to who's telling the story and where it's set. Use concrete, sensory details to help readers picture scenes. Avoid too many adjectives; choose strong verbs instead.
 
 **Dialogue Style**: Realistic and purposeful, driving the story forward while revealing character. Each character should have distinct speech patterns. Balance dialogue with action beats and narrative description. Use subtext - what characters don't say is often as important as what they do.
 
@@ -748,11 +748,11 @@ Six months later? Jake's running three times a week and actually enjoying it. Al
     usageTips: "Use this style for travel writing, product descriptions, and creating vivid atmospheric scenes in fiction.",
     types: ['fiction', 'nonfiction'],
     tags: ['Cross Genre', 'Atmosphere-Driven', 'Creative Writing'],
-    value: `**Narrative Voice and Tone**: Vivid and immersive, painting pictures with words. Often emotional and evocative, appealing to all five senses. Creates atmosphere and mood through detailed observation. The narrator becomes a camera with feelings.
+    value: `**Narrative Voice and Tone**: Vivid and immersive, painting clear pictures with words. Emotional and evocative, appealing to all five senses. Creates atmosphere and mood through detailed observation. The voice shows readers exactly what they need to see and feel.
 
-**Sentence Structure and Pacing**: Long, flowing sentences that mirror the sweep of observation. Complex sentence structures with multiple clauses. Pacing deliberately slowed to allow readers to savor details. Uses semicolons and dashes for connected thoughts.
+**Sentence Structure and Pacing**: Long, flowing sentences that follow the rhythm of observation. Complex sentence structures with multiple connected ideas. Pacing slowed down to let readers savor details and absorb the scene. Uses connecting words to link related thoughts and images.
 
-**Language and Vocabulary**: Rich, poetic, and detailed vocabulary. Liberal use of metaphors, similes, and personification. Precise adjectives and adverbs chosen for their sensory impact. Technical terms for specific details (vermillion instead of red, susurration instead of whisper).
+**Language and Vocabulary**: Rich, detailed vocabulary chosen for sensory impact. Plenty of metaphors, comparisons, and personification. Precise adjectives and descriptive words that create clear mental images. Choose specific words that paint exact pictures rather than general terms.
 
 **Dialogue Style**: Minimal dialogue, and when used, it's surrounded by description of tone, gesture, and atmosphere. More focused on how things are said than what is said. Dialogue serves to enhance mood rather than drive plot.
 
@@ -1190,7 +1190,7 @@ Janet smiled and poured her a cup of thoroughly unoptimized coffee.
     usageTips: "Use this style for modern realistic stories, slice-of-life narratives, and contemporary settings across any genre.",
     types: ['fiction'],
     tags: ['Universal', 'Character-Driven', 'Creative Writing'],
-    value: `**Narrative Voice and Tone**: Modern and accessible, capturing the rhythms of contemporary life. The voice should feel immediate and relatable while maintaining literary quality. Often employs close third-person or authentic first-person narration that reflects current cultural awareness and social dynamics.
+    value: `**Narrative Voice and Tone**: Modern and accessible, capturing the rhythms of contemporary life. The voice feels immediate and relatable while maintaining good storytelling quality. Often uses close third-person or authentic first-person narration that reflects current cultural awareness and social issues.
 
 **Sentence Structure and Pacing**: Natural flow with varied sentence lengths that mirror real conversation and thought patterns. Pacing reflects modern life—quick dialogue exchanges, longer contemplative passages, and rhythms that feel familiar to contemporary readers.
 
@@ -1225,11 +1225,11 @@ And despite everything—the notifications, the deadlines, the constant ping of 
     usageTips: "Use this style when internal conflict and character development are the primary focus of your story across any genre.",
     types: ['fiction'],
     tags: ['Cross Genre', 'Character-Driven', 'Creative Writing'],
-    value: `**Narrative Voice and Tone**: Intimate and psychologically astute, diving deep into character motivation and internal landscape. The voice creates close emotional connection with readers through authentic exploration of human complexity and growth.
+    value: `**Narrative Voice and Tone**: Intimate and character-focused, diving deep into character motivation and internal thoughts. The voice creates close emotional connection with readers through authentic exploration of human complexity and growth.
 
 **Sentence Structure and Pacing**: Follows the rhythms of thought and emotion rather than external action. Uses longer, more complex sentences for internal exploration and shorter ones for moments of realization or decision. Pacing allows for deep character development.
 
-**Language and Vocabulary**: Rich in psychological detail and emotional nuance. Precise vocabulary for distinguishing between subtle feelings and motivations. Metaphors often drawn from the character's personal experience and worldview.
+**Language and Vocabulary**: Rich in emotional detail and psychological insight. Precise vocabulary for different feelings and motivations. Comparisons often drawn from the character's personal experience and background.
 
 **Dialogue Style**: Reveals character through subtext, speech patterns, and what remains unspoken. Conversations show relationship dynamics and internal conflicts. Characters often struggle to express their deeper truths directly.
 
@@ -1299,11 +1299,11 @@ Five minutes. She'd make it in four.
     usageTips: "Use this style for thoughtful narratives, coming-of-age stories, and philosophical fiction across any genre.",
     types: ['fiction'],
     tags: ['Cross Genre', 'Character-Driven', 'Creative Writing', 'Serious'],
-    value: `**Narrative Voice and Tone**: Contemplative and thoughtful, inviting readers into deeper consideration of life's complexities. The voice should be patient with ambiguity and comfortable exploring philosophical questions through personal experience.
+    value: `**Narrative Voice and Tone**: Contemplative and thoughtful, inviting readers into deeper thinking about life's complexities. The voice is patient with uncertainty and comfortable exploring big questions through personal experience.
 
-**Sentence Structure and Pacing**: Leisurely pacing that allows for meditation and reflection. Longer, more complex sentences that mirror the meandering nature of deep thought. Builds meaning through accumulation of insight rather than dramatic action.
+**Sentence Structure and Pacing**: Unhurried pacing that allows for meditation and reflection. Longer, more complex sentences that follow the wandering nature of deep thought. Builds meaning through gathering insights rather than dramatic action.
 
-**Language and Vocabulary**: Sophisticated and nuanced, with attention to the subtle shadings of meaning and emotion. Rich in metaphor and symbolism. Vocabulary that can express complex ideas and delicate emotional distinctions.
+**Language and Vocabulary**: Thoughtful and nuanced, paying attention to subtle differences in meaning and emotion. Rich in comparisons and symbolic meaning. Vocabulary that can express complex ideas and delicate emotional differences.
 
 **Dialogue Style**: Conversations often touch on deeper meanings and life questions. Characters may speak indirectly, using stories or examples to convey larger truths. Silences and pauses carry significant weight.
 
@@ -1507,7 +1507,7 @@ Thomas was at his kitchen table, reviewing his lesson plans for the day, when th
 
 He set down his coffee and picked up the letter with hands that trembled slightly. In his fifteen years of teaching at the local high school, Thomas had watched too many bright students leave town for opportunities their hometown couldn't provide. He had begun to wonder if he, too, was meant for something more—if the restlessness he felt was trying to tell him something important.
 
-The letter was brief but warm. The headmaster, Dr. Elizabeth Thornfield, requested his presence for an interview the following week. They were seeking, she wrote, "an educator who understands that true learning happens when we challenge our students to exceed their own expectations." 
+The letter was brief but warm. The headmaster, Dr. Elizabeth Thornfield, requested his presence for an interview the following week. They were seeking, she wrote, "an educator who understands that true learning happens when we challenge our students to exceed their own expectations."
 
 Thomas smiled at that. It was exactly what he'd always believed, standing before countless classrooms, watching the moment when understanding dawned in a student's eyes—that magical instant when confusion transformed into clarity.
 
