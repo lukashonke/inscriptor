@@ -232,7 +232,7 @@
               </template>
               <template v-else-if="promptStore.promptUserInputs?.length > 0 ?? false">
                 <template v-for="input in promptStore.promptUserInputs" :key="input.id">
-                  <q-chip :color="input.color + '-3'" removable @remove="removeInput(input)">
+                  <q-chip :color="input.color + (layoutStore.darkMode ? '-10' : '-3')" removable @remove="removeInput(input)">
                     {{ input.label }}
                     &nbsp;<q-badge :color="inputWarning(input).color" v-if="inputWarning(input)">
                       <q-icon name="error" />&nbsp;
@@ -258,7 +258,7 @@
                         <div class="row">
                           <div class="col-auto">
                             <q-chip :text-color="getInputChipFontColor(selectedTextPromptInput)" :color="getInputChipColor(selectedTextPromptInput)" :icon="getInputChipIcon(selectedTextPromptInput)" :clickable="isInputAllowedForThisPrompt(selectedTextPromptInput)" @click="toggleInput(selectedTextPromptInput)" >
-                              {{ selectedTextPromptInput.label }} &nbsp;
+                              {{ selectedTextPromptInput.label }}
                               <q-tooltip color="primary">
                                 <div>include selected text</div>
                                 <div>
@@ -677,7 +677,15 @@
       //return 'white';
     }
 
-    return containsInput(input) ? (input.color + '-4') : (input.color + '-1');
+    if(layoutStore.darkMode) {
+      if(!isInputAllowedForThisPrompt(input)) {
+        return 'grey-9';
+      }
+
+      return containsInput(input) ? (input.color + '-10') : (input.color + '-10');
+    } else {
+      return containsInput(input) ? (input.color + '-4') : (input.color + '-1');
+    }
   }
 
   function getInputChipIcon(input) {
@@ -690,10 +698,10 @@
 
   function getInputChipFontColor(context) {
     if(!isInputAllowedForThisPrompt(context)) {
-      return 'grey-4';
+      return layoutStore.darkMode ? 'grey-10' : 'grey-4';
     }
 
-    return 'black'
+    return layoutStore.darkMode ? 'white' : 'black';
   }
 
   function addInput(input, parametersValue = undefined) {

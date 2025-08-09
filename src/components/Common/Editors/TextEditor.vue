@@ -226,7 +226,7 @@
     </floating-menu>
   </div>
 
-  <div v-if="editor" class="q-mb-md sticky inscriptor-shadow-1">
+  <div v-if="editor" class="q-mb-md sticky" :class="layoutStore.darkMode ? '' : 'inscriptor-shadow-1'">
     <q-card class="row justify-center q-gutter-x-xs " bordered flat>
       <div class="col-auto">
         <q-btn size="11px" dense flat icon="format_bold" @click="editor.chain().focus().toggleBold().run()" :class="{ 'text-grey-5': !editor.isActive('bold'), 'text-primary': editor.isActive('bold') }" />

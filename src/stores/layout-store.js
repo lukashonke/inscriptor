@@ -123,7 +123,7 @@ export const useLayoutStore = defineStore('layout', {
         document.body.classList.remove('day-mode');
         document.body.classList.add('dark-mode');
         // Set lighter primary color for dark mode
-        setCssVar('primary', '#7e7e8e');
+        setCssVar('primary', '#656573'); // 629b8c
       } else {
         document.body.classList.remove('dark-mode');
         document.body.classList.add('day-mode');
