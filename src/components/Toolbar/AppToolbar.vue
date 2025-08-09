@@ -122,7 +122,7 @@
             </q-item-section>
             <q-item-section>
               <q-item-label>
-                {{ layoutStore.darkMode ? 'Light Mode' : 'Dark Mode' }}
+                {{ layoutStore.darkMode ? 'Light Mode' : 'Dark Mode (beta)' }}
               </q-item-label>
             </q-item-section>
           </q-item>
