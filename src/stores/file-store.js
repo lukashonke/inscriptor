@@ -374,8 +374,6 @@ export const useFileStore = defineStore('files', {
         return;
       }
 
-      debugger;
-
       //const fourteenDaysAgo = Date.now() - (14 * 24 * 60 * 60 * 1000); // 14 days in milliseconds
       const fourteenDaysAgo = Date.now() - (60 * 1000); // 14 days in milliseconds
       const filesToDelete = [];
