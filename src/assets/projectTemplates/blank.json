@@ -16,6 +16,25 @@
       "parentId": null,
       "settings": {
       }
+    },
+    {
+      "id": "__trash_bin__",
+      "title": "Trash Bin",
+      "content": "",
+      "order": 99999,
+      "icon": "mdi-delete",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": null,
+      "isStatic": true,
+      "isTrashBin": true,
+      "deletedAt": null,
+      "previousParentId": null,
+      "settings": {}
     }
   ],
   "variables": [
