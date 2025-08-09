@@ -1,6 +1,6 @@
 <template>
   <div class="row" style="width: 550px;">
-    <div class="col-auto right-border bg-grey-1" id="promptSelectorCategories">
+    <div class="col-auto right-border" :class="layoutStore.darkMode ? 'bg-dark' : 'bg-grey-1'" id="promptSelectorCategories">
       <div class="row">
         <div class="col full-width">
           <q-btn
@@ -9,9 +9,11 @@
             label="New Prompt"
             icon="mdi-creation-outline"
             :class="[
-              'bg-primary' + (currentPromptCategory === '-custom-' ? '-1' : '-0'),
-               'text-accent'
-               ]"
+              layoutStore.darkMode
+                ? (currentPromptCategory === '-custom-' ? 'bg-grey-1' : '')
+                : ('bg-primary' + (currentPromptCategory === '-custom-' ? '-1' : '-0')),
+              layoutStore.darkMode ? 'text-white' : 'text-accent'
+            ]"
             class="full-width items-start"
             unelevated
             @click="currentPromptCategory = '-custom-'">
@@ -27,9 +29,11 @@
             label="Pinned"
             icon="mdi-pin"
             :class="[
-              'bg-orange' + (currentPromptCategory === '-pinned-' ? '-1' : '-0'),
-               'text-orange-9'
-               ]"
+              layoutStore.darkMode
+                ? (currentPromptCategory === '-pinned-' ? 'bg-grey-1' : '')
+                : ('bg-orange' + (currentPromptCategory === '-pinned-' ? '-1' : '-0')),
+              layoutStore.darkMode ? 'text-white' : 'text-orange-9'
+            ]"
             class="full-width items-start"
             unelevated
             @click="currentPromptCategory = '-pinned-'">
@@ -46,9 +50,15 @@
             :label="category.label.length === 0 ? 'Default' : category.label"
             :icon="category.icon ?? 'mdi-circle-outline'"
             :class="[
-              'bg-' + (category.color ?? 'blue') + (currentPromptCategory === category.label ? '-1' : '-0'),
-               'text-' + (category.color ?? 'blue') + '-9'
-               ]"
+              layoutStore.darkMode
+                ? (currentPromptCategory === category.label
+                    ? 'bg-grey-1 text-' + (category.color ?? 'blue') + '-5'
+                    : 'text-' + (category.color ?? 'blue') + '-3')
+                : ('bg-' + (category.color ?? 'blue') + (currentPromptCategory === category.label ? '-1' : '-0')),
+              layoutStore.darkMode
+                ? 'text-white'
+                : ('text-' + (category.color ?? 'blue') + '-9')
+            ]"
             class="full-width items-start"
             unelevated
             @click="currentPromptCategory = category.label">
@@ -99,9 +109,9 @@
             label="Open Inscriptor Hub"
             icon="mdi-storefront-outline"
             :class="[
-              'bg-primary-0',
-               'text-black'
-               ]"
+              layoutStore.darkMode ? '' : 'bg-primary-0',
+              layoutStore.darkMode ? 'text-white' : 'text-black'
+            ]"
             class="full-width items-start"
             unelevated
             @click="layoutStore.promptMarketplaceOpen = true">
@@ -114,7 +124,7 @@
 
         <template v-if="selectedCategory">
           <q-card-section  class="full-width text-center no-padding">
-            <div v-if="selectedCategory.description" class="q-py-sm q-px-md text-left text-italic text-caption text-grey-6">
+            <div v-if="selectedCategory.description" class="q-py-sm q-px-md text-left text-italic text-caption" :class="layoutStore.darkMode ? 'text-grey-4' : 'text-grey-6'">
               {{selectedCategory.description}}
             </div>
           </q-card-section>
@@ -181,7 +191,7 @@
         </q-card-section>
 
         <q-card-section class="full-width q-pa-sm" v-if="groupPromptsByFolder(categoryPrompts).length > 0">
-          <div class="q-pa-sm shadow-1">
+          <div class="q-pa-sm shadow-1" :class="layoutStore.darkMode ? 'bordered' : ''">
             <div class="q-mt-xs">
               <template v-for="prompt in groupPromptsByFolder(categoryPrompts)" :key="prompt.id">
                 <div class="row text-caption full-width q-pb-xs">
