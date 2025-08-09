@@ -14,6 +14,9 @@
     <div class="row" :class="[offset]">
       <div
         ref="mainFileDiv"
+        :draggable="!file.isStatic"
+        @dragstart="startDrag($event, file)"
+        @dragend="endDrag($event, file)"
         @dragevent.prevent
         @dragover.prevent
         @dragenter="onDragEnter($event, file)"
@@ -194,6 +197,12 @@ let dragEnterTarget = null;
 let dragBetweenEnterTarget = null;
 
 function startDrag(event, item) {
+  // Prevent dragging static files
+  if (item.isStatic) {
+    event.preventDefault();
+    return false;
+  }
+
   if(event.target && event.target.style) {
     event.target.style.opacity = '0.4';
   }

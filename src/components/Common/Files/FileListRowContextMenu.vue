@@ -187,7 +187,8 @@
       </q-item>
 
       <q-separator/>
-      <q-item clickable v-close-popup @click="deleteFile">
+      <!-- Regular files: Show normal delete (but not for static files) -->
+      <q-item v-if="!file.isStatic" clickable v-close-popup @click="deleteFile">
         <q-item-section avatar>
           <q-icon name="mdi-delete-outline" color="negative"/>
         </q-item-section>
