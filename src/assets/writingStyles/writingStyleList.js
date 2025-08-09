@@ -37,13 +37,13 @@ Outside, the city hummed with its usual energy, oblivious to the small revolutio
     usageTips: "Use this style for project descriptions, brainstorming documents, technical notes, internal communications, and content that mixes informal ideas with professional information.",
     types: ['nonfiction'],
     tags: ['Cross Genre', 'Business and Projects', 'Casual'],
-    value: `**Narrative Voice and Tone**: Relaxed yet competent, like explaining complex ideas to a smart colleague over coffee. Allows personality to show through while maintaining credibility. Comfortable switching between formal and informal as context requires.
+    value: `**Narrative Voice and Tone**: Relaxed yet competent, like explaining complex ideas to a smart colleague over coffee. Allows personality to show through while maintaining credibility. Switches between formal and informal as needed.
 
 **Sentence Structure and Pacing**: Natural, conversational flow with varied sentence lengths. Uses fragments for emphasis ("Important note:"). Adds side comments in parentheses for extra context. Bullets and numbered lists for clarity without being rigid.
 
 **Language and Vocabulary**: Plain English as default, technical terms when necessary (with quick explanations). Occasional colloquialisms and metaphors to illustrate points. First and second person pronouns welcomed. Contractions are fine.
 
-**Content Organization**: Flexible structure that follows thought process rather than rigid format. Headers for navigation but not overly formal. Mix of paragraph text, bullet points, and informal notes. Annotations and side comments acceptable.
+**Content Organization**: Flexible structure that follows thought process rather than rigid format. Headers for navigation but not overly formal. Mix of paragraph text, bullet points, and informal notes. Notes and side comments are fine.
 
 **Theme and Purpose**: Getting ideas across clearly without corporate stuffiness. Building understanding through approachable explanation. Documenting thoughts in progress. Creating collaborative, inclusive communication.
 
@@ -194,15 +194,15 @@ Look, we're not saying this will turn you into Hemingway overnight. But if you'r
     usageTips: "Use this style for character-driven narratives in literary magazines and serious contemporary literature.",
     types: ['fiction'],
     tags: ['Genre Defining', 'Character-Driven', 'Creative Writing', 'Serious'],
-    value: `**Narrative Voice and Tone**: Introspective and layered, with emphasis on psychological depth and emotional nuance. The voice is sophisticated yet intimate, drawing readers into characters' inner lives. Explores human experiences through subtle observations and metaphorical language.
+    value: `**Narrative Voice and Tone**: Introspective and layered, with emphasis on psychological depth and emotional complexity. The voice is sophisticated yet intimate, drawing readers into characters' inner lives. Explores human experiences through subtle observations and metaphorical language.
 
-**Sentence Structure and Pacing**: Complex, varied sentence structures with lengths ranging from 5 to 40+ words. Uses rhythm and cadence as storytelling tools. Deliberately paced to mirror emotional states—long, flowing sentences for contemplation; short, fragmented ones for tension or revelation.
+**Sentence Structure and Pacing**: Complex, varied sentence structures with lengths ranging from 5 to 40+ words. Uses rhythm and flow as storytelling tools. Deliberately paced to mirror emotional states—long, flowing sentences for contemplation; short, fragmented ones for tension or revelation.
 
-**Language and Vocabulary**: Rich, evocative language with careful attention to word choice. Employs literary devices like metaphor, symbolism, and alliteration. Vocabulary is sophisticated but never gratuitously so—each word serves the narrative's emotional truth.
+**Language and Vocabulary**: Rich, evocative language with careful attention to word choice. Uses writing techniques like metaphor, symbolism, and alliteration. Vocabulary is sophisticated but never unnecessarily so—each word serves the narrative's emotional truth.
 
-**Dialogue Style**: Subtext-heavy conversations where what's unsaid matters as much as what's spoken. Characters often talk around subjects rather than directly addressing them. Dialogue reveals character through speech patterns, hesitations, and unique vocabularies.
+**Dialogue Style**: Conversations where what's not said matters as much as what's spoken. Characters often talk around subjects rather than directly addressing them. Dialogue reveals character through speech patterns, hesitations, and unique vocabularies.
 
-**Theme and Motives**: Explores universal human experiences—identity, loss, connection, meaning. Themes emerge organically through character actions and observations rather than explicit statements. Often ambiguous endings that invite interpretation.
+**Theme and Motives**: Explores universal human experiences—identity, loss, connection, meaning. Themes develop naturally through character actions and observations rather than explicit statements. Often open endings that let readers draw their own conclusions.
 
 =====
 
@@ -1010,7 +1010,7 @@ The phone rang. Neither of them moved to answer it.
     tags: ['Cross Genre', 'Character-Driven', 'Creative Writing', 'Serious'],
     value: `**Narrative Voice and Tone:** Introspective, elegant, and layered with meaning. Multiple levels of interpretation. Self-conscious about language and form. Often philosophical or meditative. Comfortable with ambiguity and contradiction.
 
-**Sentence Structure and Pacing:** Complex architecture with subordinate clauses and parenthetical asides. Sentences as carefully constructed as poetry. Rhythm and sound as important as meaning. Deliberately slow to encourage contemplation.
+**Sentence Structure and Pacing:** Complex structure with dependent phrases and side comments in parentheses. Sentences as carefully constructed as poetry. Rhythm and sound as important as meaning. Deliberately slow to encourage contemplation.
 
 **Language and Vocabulary:** Sophisticated vocabulary deployed precisely. Rich in metaphor, symbolism, and allusion. References to other works of literature, art, philosophy. Words chosen for resonance as much as meaning. Creative word combinations that blend senses.
 
@@ -1022,9 +1022,9 @@ The phone rang. Neither of them moved to answer it.
 
 Example snippets:
 
-Memory, Judith thought, was not unlike the palimpsest she had discovered in her grandmother's attic - each recollection written over the last, yet somehow all remaining visible, creating a narrative that was simultaneously singular and multiple, true and fabricated.
+Memory, Judith thought, was not unlike the ancient document she had discovered in her grandmother's attic - each recollection written over the last, yet somehow all remaining visible, creating a narrative that was simultaneously singular and multiple, true and fabricated.
 
-She stood before the mirror, but it was not her reflection she sought. Rather, she was searching for that liminal space between self and image, that fraction of a second where identity hesitates before assuming its daily mask. In that hesitation lived all her possible selves.
+She stood before the mirror, but it was not her reflection she sought. Rather, she was searching for that threshold space between self and image, that fraction of a second where identity hesitates before assuming its daily mask. In that hesitation lived all her possible selves.
 
 "Do you ever wonder," Marcus said, his fingers tracing the rim of his wine glass in endless circles, "if we're merely characters in someone else's dream?"
 
@@ -1043,15 +1043,15 @@ Time, in this room, had taken on the quality of amber - golden, viscous, preserv
     usageTips: "Use this style for research papers, academic journals, dissertations, and scholarly publications.",
     types: ['nonfiction'],
     tags: ['Genre Defining', 'Business and Projects', 'Serious'],
-    value: `**Narrative Voice and Tone:** Formal, analytical, and objective. Third-person perspective maintaining scholarly distance. Cautious about claims - uses hedging language appropriately. Authority established through evidence, not assertion.
+    value: `**Narrative Voice and Tone:** Formal, analytical, and objective. Third-person perspective maintaining scholarly distance. Cautious about claims - uses cautious phrasing when needed. Authority established through evidence, not assertion.
 
-**Sentence Structure and Pacing:** Complex sentences with multiple subordinate clauses. Careful logical progression. Topic sentences followed by evidence and analysis. Transitional phrases linking ideas. Methodical pacing.
+**Sentence Structure and Pacing:** Complex sentences with multiple dependent phrases. Careful logical progression. Topic sentences followed by evidence and analysis. Transitional phrases linking ideas. Methodical pacing.
 
 **Language and Vocabulary:** Technical terminology specific to discipline. Precise word choice avoiding ambiguity. Often turns verbs into nouns. Passive voice when emphasizing results over actors. Latin phrases and specialized jargon used correctly.
 
 **Dialogue Style:** Rarely uses direct dialogue except in quotations from primary sources. Interviews presented as block quotes. Citation immediately follows quoted material. Paraphrasing preferred over extensive quoting.
 
-**Theme and Motives:** Advances knowledge through systematic investigation. Questions assumptions and builds on prior research. Acknowledges limitations and suggests future directions. Values precision, replicability, and intellectual honesty.
+**Theme and Motives:** Advances knowledge through systematic investigation. Questions assumptions and builds on prior research. Acknowledges limitations and suggests next steps. Values precision, replicability, and intellectual honesty.
 
 =====
 
@@ -1485,7 +1485,7 @@ Outside, a car door slammed. Their neighbor getting ready for work. Normal peopl
     usageTips: "Use this style for traditional narrative structure with timeless, accessible storytelling across any genre.",
     types: ['fiction'],
     tags: ['Universal', 'Plot-Driven', 'Creative Writing'],
-    value: `**Narrative Voice and Tone**: Clear, authoritative, and engaging, drawing on established storytelling traditions. The voice should be accessible to all readers while maintaining literary quality. Comfortable with omniscient or limited third-person perspective that knows when to zoom in for intimacy and pull back for context. Creates immediate trust with readers through confident, warm narration.
+    value: `**Narrative Voice and Tone**: Clear, authoritative, and engaging, drawing on established storytelling traditions. The voice should be accessible to all readers while maintaining literary quality. Comfortable with all-knowing or limited third-person perspective that knows when to zoom in for intimacy and pull back for context. Creates immediate trust with readers through confident, warm narration.
 
 **Sentence Structure and Pacing**: Balanced pacing with clear beginning, middle, and end structure. Varied sentence lengths (15-25 words average) that serve story rhythm naturally. Builds tension toward climax with satisfying resolution that feels both surprising and inevitable. Uses traditional techniques like foreshadowing, callbacks, and dramatic irony without calling attention to them.
 
