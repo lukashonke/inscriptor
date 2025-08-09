@@ -39,7 +39,7 @@ Outside, the city hummed with its usual energy, oblivious to the small revolutio
     tags: ['Cross Genre', 'Business and Projects', 'Casual'],
     value: `**Narrative Voice and Tone**: Relaxed yet competent, like explaining complex ideas to a smart colleague over coffee. Allows personality to show through while maintaining credibility. Comfortable switching between formal and informal as context requires.
 
-**Sentence Structure and Pacing**: Natural, conversational flow with varied sentence lengths. Uses fragments for emphasis ("Important note:"). Parenthetical asides for additional context. Bullets and numbered lists for clarity without being rigid.
+**Sentence Structure and Pacing**: Natural, conversational flow with varied sentence lengths. Uses fragments for emphasis ("Important note:"). Adds side comments in parentheses for extra context. Bullets and numbered lists for clarity without being rigid.
 
 **Language and Vocabulary**: Plain English as default, technical terms when necessary (with quick explanations). Occasional colloquialisms and metaphors to illustrate points. First and second person pronouns welcomed. Contractions are fine.
 
@@ -114,9 +114,9 @@ The total investment requirement is $750,000, distributed across infrastructure 
     usageTips: "Use this style for web content, blog posts, social media, newsletters, and online articles that need to be engaging and scannable.",
     types: ['nonfiction'],
     tags: ['Genre Defining', 'Digital Web Content', 'Casual'],
-    value: `**Content Structure and Format**: Scannable, mobile-friendly content with clear headers, bullet points, and short paragraphs. Optimized for digital reading patterns—F-pattern scanning, with key information front-loaded.
+    value: `**Content Structure and Format**: Easy to scan content with clear headers, bullet points, and short paragraphs. Put the most important info at the top where people look first.
 
-**Sentence Structure and Pacing**: Short, punchy sentences (10-15 words average) mixed with occasional longer ones for variety. Paragraphs rarely exceed 3-4 lines on mobile. Uses white space strategically to reduce cognitive load.
+**Sentence Structure and Pacing**: Short, punchy sentences (10-15 words average) mixed with occasional longer ones for variety. Paragraphs rarely exceed 3-4 lines on mobile. Uses white space to make reading easier.
 
 **Language and Vocabulary**: Clear, accessible language avoiding jargon unless audience-appropriate. SEO-conscious without keyword stuffing. Action-oriented verbs and concrete nouns. Conversational tone that builds connection.
 
@@ -719,7 +719,7 @@ As she stumbled past him into the warmth of the lighthouse, Thomas couldn't shak
 
 **Sentence Structure and Pacing**: Short to medium sentences (10-15 words average) with a steady, easy flow. Lots of sentence variety to maintain conversational rhythm. Frequent paragraph breaks to avoid text walls. Uses contractions naturally (it's, you're, don't).
 
-**Language and Vocabulary**: Everyday language that a middle schooler could understand. Avoids jargon and complex terminology unless absolutely necessary, and explains it simply when used. Prefers common words over fancy alternatives. Uses analogies and examples from daily life.
+**Language and Vocabulary**: Everyday language that a middle schooler could understand. Avoids jargon and complex terminology unless absolutely necessary, and explains it simply when used. Prefers common words over fancy alternatives. Uses comparisons and examples from daily life.
 
 **Dialogue Style**: Casual and relatable, reflecting how people actually talk. Includes interruptions, incomplete thoughts, and natural speech patterns. Characters use contractions and colloquialisms. Avoids overly formal or stilted dialogue.
 
@@ -935,7 +935,7 @@ By Day 7, I'd made progress. I was now waking up at 9:59 AM instead of 10. Rome 
 
 **Sentence Structure and Pacing**: Short, declarative sentences (8-15 words average). Subject-verb-object construction dominates. Paragraphs rarely exceed three sentences. White space as narrative tool. Repetition used sparingly but with purpose.
 
-**Language and Vocabulary**: Simple, concrete words. Anglo-Saxon over Latin roots. One adjective maximum per sentence. Strong verbs carry description. Metaphors are rare and earned. No word exists without purpose.
+**Language and Vocabulary**: Simple, concrete words. Short common words over long fancy ones. One adjective maximum per sentence. Strong verbs carry description. Metaphors are rare and earned. No word exists without purpose.
 
 **Dialogue Style**: Characters speak in fragments and implications. Subtext over text. What's not said matters more. Dialogue tags minimal or absent. Conversations feel overheard rather than explained.
 
