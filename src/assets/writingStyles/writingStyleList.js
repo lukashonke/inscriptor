@@ -390,7 +390,7 @@ Nathan Cross was either very lost or very dead. In this town, sometimes they wer
 
 **Sentence Structure and Pacing**: Medium to long sentences (20-30 words average) with technical concepts integrated smoothly. Information revealed through action and dialogue rather than info-dumps. Pacing varies—slower for concept introduction, faster for action sequences.
 
-**Language and Vocabulary**: Technical terminology used accurately but explained through context. Neologisms and future slang that feel organic. Scientific concepts as metaphors for human experience. Avoids technobabble while respecting reader intelligence.
+**Language and Vocabulary**: Technical terminology used accurately but explained through context. Made-up words and future slang that feel organic. Scientific concepts as metaphors for human experience. Avoids technobabble while respecting reader intelligence.
 
 **Dialogue Style**: Characters speak with expertise in their fields while remaining distinct individuals. Technical discussions reveal character through approach to problems. Authentic representation of how scientists and engineers actually communicate—including humor and humanity.
 
@@ -1012,7 +1012,7 @@ The phone rang. Neither of them moved to answer it.
 
 **Sentence Structure and Pacing:** Complex architecture with subordinate clauses and parenthetical asides. Sentences as carefully constructed as poetry. Rhythm and sound as important as meaning. Deliberately slow to encourage contemplation.
 
-**Language and Vocabulary:** Sophisticated vocabulary deployed precisely. Rich in metaphor, symbolism, and allusion. Intertextual references to literature, art, philosophy. Words chosen for resonance as much as meaning. Synesthesia and unexpected combinations.
+**Language and Vocabulary:** Sophisticated vocabulary deployed precisely. Rich in metaphor, symbolism, and allusion. References to other works of literature, art, philosophy. Words chosen for resonance as much as meaning. Creative word combinations that blend senses.
 
 **Dialogue Style:** Intellectually charged conversations about ideas as much as events. Subtext more important than text. Characters speak in distinctive, elevated registers. Dialogue reveals psychological complexity and philosophical positions.
 
@@ -1047,7 +1047,7 @@ Time, in this room, had taken on the quality of amber - golden, viscous, preserv
 
 **Sentence Structure and Pacing:** Complex sentences with multiple subordinate clauses. Careful logical progression. Topic sentences followed by evidence and analysis. Transitional phrases linking ideas. Methodical pacing.
 
-**Language and Vocabulary:** Technical terminology specific to discipline. Precise word choice avoiding ambiguity. Nominalization common. Passive voice when emphasizing results over actors. Latin phrases and specialized jargon used correctly.
+**Language and Vocabulary:** Technical terminology specific to discipline. Precise word choice avoiding ambiguity. Often turns verbs into nouns. Passive voice when emphasizing results over actors. Latin phrases and specialized jargon used correctly.
 
 **Dialogue Style:** Rarely uses direct dialogue except in quotations from primary sources. Interviews presented as block quotes. Citation immediately follows quoted material. Paraphrasing preferred over extensive quoting.
 
@@ -1074,7 +1074,7 @@ These findings necessitate a reconceptualization of digital wellness interventio
     usageTips: "Use this style for picture books, chapter books, middle-grade fiction, and any content specifically written for young readers (ages 3-12).",
     types: ['fiction'],
     tags: ['Genre Defining', 'Character-Driven', 'Creative Writing', 'Playful'],
-    value: `**Narrative Voice and Tone**: Warm, encouraging, and wonder-filled, speaking directly to young hearts and minds. The voice should be trustworthy and kind, never condescending, respecting children's intelligence while meeting them at their developmental level. Creates safe space for exploration of emotions and ideas.
+    value: `**Narrative Voice and Tone**: Warm, encouraging, and wonder-filled, speaking warmly to children. The voice should be trustworthy and kind, never condescending, respecting children's intelligence while using age-appropriate language. Helps children explore feelings and ideas safely.
 
 **Sentence Structure and Pacing**: Simple, clear sentences for younger readers (5-10 words) gradually increasing complexity for older children (10-20 words). Repetition and rhythm aid comprehension and memory. Short paragraphs and chapters maintain engagement. Natural places for page turns in picture books.
 
@@ -1137,9 +1137,9 @@ And that's how Stardust became the first official hamster student at Willowbrook
 
 **Sentence Structure and Pacing**: Strategic pacing that sets up expectations then subverts them for ironic effect. Varies between elaborate setups and punchy punchlines. Uses parallel structure to highlight contradictions. Timing is crucial—builds anticipation before delivering satirical observations.
 
-**Language and Vocabulary**: Sophisticated wordplay including double entendres, puns, and verbal irony. Contrasts formal language with absurd situations for comic effect. Uses euphemisms, understatement, and hyperbole strategically. Technical jargon employed ironically to mock pretension.
+**Language and Vocabulary**: Sophisticated wordplay including double meanings, puns, and verbal irony. Contrasts formal language with absurd situations for comic effect. Uses euphemisms, understatement, and hyperbole strategically. Technical jargon employed ironically to mock pretension.
 
-**Dialogue Style**: Characters often speak at cross-purposes, revealing their blind spots through their own words. Conversation exposes vanity, ignorance, or self-deception. Uses dramatic irony where readers understand more than characters. Parodies recognizable speech patterns and social dialects.
+**Dialogue Style**: Characters often speak at cross-purposes, revealing their blind spots through their own words. Conversation exposes vanity, ignorance, or self-deception. Uses irony where readers understand more than characters do. Parodies recognizable speech patterns and social dialects.
 
 **Theme and Motives**: Exposes societal flaws, institutional failures, and human pretensions through humor. Challenges complacency and conventional wisdom. Often focuses on power imbalances, social inequality, or moral hypocrisy. Aims to provoke thought and potentially inspire change through laughter.
 
