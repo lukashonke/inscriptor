@@ -194,7 +194,7 @@ Look, we're not saying this will turn you into Hemingway overnight. But if you'r
     usageTips: "Use this style for character-driven narratives in literary magazines and serious contemporary literature.",
     types: ['fiction'],
     tags: ['Genre Defining', 'Character-Driven', 'Creative Writing', 'Serious'],
-    value: `**Narrative Voice and Tone**: Introspective and layered, with emphasis on psychological depth and emotional nuance. The voice should be sophisticated yet intimate, inviting readers into the interior lives of characters. Explores the human condition through subtle observations and metaphorical language.
+    value: `**Narrative Voice and Tone**: Introspective and layered, with emphasis on psychological depth and emotional nuance. The voice is sophisticated yet intimate, drawing readers into characters' inner lives. Explores human experiences through subtle observations and metaphorical language.
 
 **Sentence Structure and Pacing**: Complex, varied sentence structures with lengths ranging from 5 to 40+ words. Uses rhythm and cadence as storytelling tools. Deliberately paced to mirror emotional states—long, flowing sentences for contemplation; short, fragmented ones for tension or revelation.
 
@@ -1260,9 +1260,9 @@ The resignation letter disappeared into the digital ether, and Sarah realized sh
     usageTips: "Use this style for action-oriented stories, adventures, and fast-paced narratives across any genre.",
     types: ['fiction'],
     tags: ['Cross Genre', 'Plot-Driven', 'Creative Writing', 'Dramatic'],
-    value: `**Narrative Voice and Tone**: Energetic and forward-moving, maintaining momentum and reader engagement. The voice should create urgency and excitement while clearly conveying action sequences and plot developments. Confident and dynamic storytelling.
+    value: `**Narrative Voice and Tone**: Energetic and forward-moving, maintaining momentum and reader engagement. The voice creates urgency and excitement while clearly showing action sequences and plot developments. Confident and dynamic storytelling.
 
-**Sentence Structure and Pacing**: Varies strategically—short, punchy sentences for action and tension, longer ones for necessary exposition. Quick pacing with frequent scene breaks and cliffhangers. Structure serves the plot's forward momentum.
+**Sentence Structure and Pacing**: Varies strategically—short, punchy sentences for action and tension, longer ones for necessary exposition. Quick pacing with frequent scene breaks and cliffhangers. Structure keeps the plot moving forward.
 
 **Language and Vocabulary**: Clear, concrete language emphasizing action and movement. Strong verbs drive every sentence. Sensory details focus on immediate experience rather than lengthy description. Precise terminology for action sequences.
 
