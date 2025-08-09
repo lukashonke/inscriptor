@@ -17,7 +17,24 @@ export function createFile(title) {
 
     children: [],
     parentId: null,
+
+    deletedAt: null,
+    previousParentId: null,
+    isStatic: false,
   }
+
+  return file;
+}
+
+export function createTrashBinFile() {
+  const file = createFile('Trash Bin');
+
+  // Override specific properties for trash bin
+  file.id = '__trash_bin__';
+  file.order = 99999;
+  file.icon = 'mdi-delete';
+  file.isStatic = true;
+  file.isTrashBin = true;
 
   return file;
 }

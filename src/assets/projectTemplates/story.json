@@ -113,6 +113,7 @@
       "labels": [],
       "view": "text",
       "parentId": null,
+      "isStatic": true,
       "settings": {
         "contextType": {
           "label": "Characters",
@@ -133,6 +134,7 @@
       "labels": [],
       "view": "text",
       "parentId": null,
+      "isStatic": true,
       "settings": {
         "contextType": {
           "label": "Places",
@@ -153,6 +155,7 @@
       "labels": [],
       "view": "text",
       "parentId": null,
+      "isStatic": true,
       "settings": {
         "contextType": {
           "label": "Notes",
@@ -173,12 +176,32 @@
       "labels": [],
       "view": "text",
       "parentId": null,
+      "isStatic": true,
       "settings": {
         "contextType": {
           "label": "Research",
           "color": "deep-orange"
         }
       }
+    },
+    {
+      "id": "__trash_bin__",
+      "title": "Trash Bin",
+      "content": "",
+      "order": 99999,
+      "icon": "mdi-delete",
+      "expanded": false,
+      "synopsis": "",
+      "note": "",
+      "state": "",
+      "labels": [],
+      "view": "text",
+      "parentId": null,
+      "isStatic": true,
+      "isTrashBin": true,
+      "deletedAt": null,
+      "previousParentId": null,
+      "settings": {}
     }
   ],
   "variables": [
