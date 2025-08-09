@@ -174,7 +174,7 @@
             <div class="row q-mt-md q-mb-md q-gutter-x-lg justify-center" v-else>
 
               <div class="col flex justify-end">
-                <q-card style="max-width: 330px; min-height: 510px;" class="plan-card-bg">
+                <q-card style="max-width: 330px; min-height: 510px;" class="plan-card-bg inscriptor-shadow-1 bordered">
                   <q-card-section class="plan-card-header-bg">
                     <div class="flex items-center">
                       <span class="text-h6">Free plan</span>
@@ -182,7 +182,7 @@
                     </div>
                     Free & Open Source. Consider Premium plan to support the project!
                   </q-card-section>
-                  <q-card-section class="plan-card-header-bg shadow-1">
+                  <q-card-section class="plan-card-header-bg">
                     <div class="text-h6">Free</div>
                   </q-card-section>
                   <q-list class="q-py-sm plan-features-bg">
@@ -241,23 +241,23 @@
                     </q-item>
 
                   </q-list>
-                  <q-card-actions v-if="userData.subscriptionLevel === 0" class="bg-blue-grey-1">
+                  <q-card-actions v-if="userData.subscriptionLevel === 0" class="plan-features-bg">
 
                   </q-card-actions>
                 </q-card>
               </div>
 
               <div class="col">
-                <q-card class="shadow-16" :class="{'primary-highlight': userData.subscriptionLevel === 1}" style="max-width: 330px;  min-height: 510px;">
+                <q-card class="inscriptor-shadow-1 bordered" :class="{'primary-highlight': userData.subscriptionLevel === 1}" style="max-width: 330px;  min-height: 510px;">
                   <q-card-section class="bg-accent text-white">
                     <div class="flex items-center">
                       <q-icon name="mdi-crown-outline" class="q-mr-xs q-pt-xs" color="amber" size="sm" />
                       <span class="text-h6 q-ml-xs text-aleo">Inscriptor Premium</span>
-                      <q-badge color="amber" text-color="grey-9" class="q-ml-md" v-if="userData.subscriptionLevel === 1">Current</q-badge>
+                      <q-badge color="primary" text-color="" class="q-ml-md" v-if="userData.subscriptionLevel === 1">Current</q-badge>
                     </div>
                     Get the most from Inscriptor with cloud and monthly AI credits.
                   </q-card-section>
-                  <q-card-section class="bg-accent text-white shadow-2">
+                  <q-card-section class="bg-accent text-white">
                     <div class="row">
                       <div class="col">
                         <div class="text-h6">
@@ -271,7 +271,7 @@
                           :label="`Anually`"
                           v-model="yearly"
                         />
-                        <q-badge v-if="yearly" color="amber" text-color="grey-9" class="q-mr-sm q-mt-xs" floating>Save 21%</q-badge>
+                        <q-badge v-if="yearly" color="amber" :text-color="layoutStore.darkMode ? 'black' : 'grey-9'" class="q-mr-sm q-mt-xs" floating>Save 21%</q-badge>
                       </div>
                     </div>
 

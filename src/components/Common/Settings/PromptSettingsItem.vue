@@ -435,8 +435,8 @@
                       </q-expansion-item>
                     </template>
                   </template>
-                  <q-card-actions>
-                    <q-btn label="Add parameter" outline icon="mdi-plus" flat dense @click="addParameter(prompt)"/>
+                  <q-card-actions class="q-mt-md">
+                    <q-btn label="Add parameter" color="primary" outline icon="mdi-plus" flat dense @click="addParameter(prompt)"/>
                   </q-card-actions>
                 </q-card>
               </q-card-section>
