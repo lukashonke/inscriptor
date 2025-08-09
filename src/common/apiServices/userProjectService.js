@@ -110,9 +110,9 @@ export async function uploadProject(user, projectData, abortController) {
     }
   } catch (error) {
     Notify.create({
-      message: 'Project upload failed. Please try again.',
+      message: 'Project upload failed. It will be retried. If the issue persist, please refresh the window.',
       color: 'negative',
-      position: 'top'
+      position: 'top',
     });
     throw error
   }
@@ -150,7 +150,7 @@ export async function uploadProjectUserProjectSettings(user, projectId, data, ab
     return JSON.parse(await response.text());
   } catch (error) {
     Notify.create({
-      message: 'Project upload failed. Please try again.',
+      message: 'Project upload failed. It will be retried. If the issue persist, please refresh the window.',
       color: 'negative',
       position: 'top'
     });
@@ -190,7 +190,7 @@ export async function uploadProjectData(user, projectId, data, abortController) 
     return JSON.parse(await response.text());
   } catch (error) {
     Notify.create({
-      message: 'Project upload failed. Please try again.',
+      message: 'Project upload failed. It will be retried. If the issue persist, please refresh the window.',
       color: 'negative',
       position: 'top'
     });
@@ -230,7 +230,7 @@ export async function uploadProjectFiles(user, projectId, files, abortController
     return JSON.parse(await response.text());
   } catch (error) {
     Notify.create({
-      message: 'Project upload failed. Please try again.',
+      message: 'Project upload failed. It will be retried. If the issue persist, please refresh the window.',
       color: 'negative',
       position: 'top'
     });

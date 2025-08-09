@@ -2,6 +2,8 @@ export const writingStyles = [
   {
     name: "✏️ Default (Neutral) Style",
     usageTips: "Use this style for clear, versatile writing across business, general fiction, articles, and everyday communication.",
+    types: ['fiction', 'nonfiction'],
+    tags: ['Universal', 'Creative Writing'],
     value: `**Narrative Voice and Tone**: Balanced, clear, and versatile, suitable for a general audience. The voice should be relatable without being overly casual or overly formal. Maintains reader engagement through clarity rather than stylistic flourishes.
 
 **Sentence Structure and Pacing**: Moderate sentence length (15-20 words average) with a steady, natural flow. Mix short punchy sentences for impact with longer ones for explanation. Vary rhythm to avoid monotony.
@@ -31,17 +33,176 @@ Outside, the city hummed with its usual energy, oblivious to the small revolutio
 =====`
   },
   {
+    name: "🤝 Casual Professional Style",
+    usageTips: "Use this style for project descriptions, brainstorming documents, technical notes, internal communications, and content that mixes informal ideas with professional information.",
+    types: ['nonfiction'],
+    tags: ['Cross Genre', 'Business and Projects', 'Casual'],
+    value: `**Narrative Voice and Tone**: Relaxed yet competent, like explaining complex ideas to a smart colleague over coffee. Allows personality to show through while maintaining credibility. Switches between formal and informal as needed.
+
+**Sentence Structure and Pacing**: Natural, conversational flow with varied sentence lengths. Uses fragments for emphasis ("Important note:"). Adds side comments in parentheses for extra context. Bullets and numbered lists for clarity without being rigid.
+
+**Language and Vocabulary**: Plain English as default, technical terms when necessary (with quick explanations). Occasional colloquialisms and metaphors to illustrate points. First and second person pronouns welcomed. Contractions are fine.
+
+**Content Organization**: Flexible structure that follows thought process rather than rigid format. Headers for navigation but not overly formal. Mix of paragraph text, bullet points, and informal notes. Notes and side comments are fine.
+
+**Theme and Purpose**: Getting ideas across clearly without corporate stuffiness. Building understanding through approachable explanation. Documenting thoughts in progress. Creating collaborative, inclusive communication.
+
+=====
+
+Example snippets:
+
+**Project Alpha Update - March Status**
+
+So here's what we're thinking for the new feature rollout. We've got three main components (bear with me, this gets a bit technical):
+
+1. **The API integration** - basically, this talks to their system and pulls the data we need. Nothing fancy, just REST calls every 30 minutes.
+
+2. **The processing layer** - this is where the magic happens. We're taking their messy data and making it actually useful. Think of it like a really smart filter that knows what we care about.
+
+3. **The UI updates** - users will see a new dashboard widget. Super clean, just the essentials. (Note: Sarah from design has some thoughts on this - let's sync up Tuesday?)
+
+**Quick heads up:** The timeline is aggressive but doable. We're looking at 3 weeks for MVP, another 2 for polish. The main risk? Their API documentation is... let's say "creative." But we've dealt with worse.
+
+**Random thoughts that might matter:**
+- Should we add a dark mode toggle? Users keep asking
+- Performance testing on mobile - put this on the must-do list
+- Consider adding export functionality later (not launch-critical)
+
+Bottom line: We're in good shape, but let's stay flexible on the details.
+
+=====`
+  },
+  {
+    name: "💼 Professional/Formal Style",
+    usageTips: "Use this style for formal business proposals, executive summaries, corporate reports, investor communications, and high-stakes professional documents.",
+    types: ['nonfiction'],
+    tags: ['Cross Genre', 'Business and Projects', 'Serious'],
+    value: `**Narrative Voice and Tone**: Authoritative, objective, and polished. Third-person perspective maintaining professional distance. Confident without arrogance. Precise and deliberate in all statements. Credibility through competence and clarity.
+
+**Sentence Structure and Pacing**: Well-constructed sentences with clear subjects and strong verbs. Average 15-25 words for readability. Logical flow from general to specific. Smooth transitions between paragraphs and sections. Parallel structure for lists and comparisons.
+
+**Language and Vocabulary**: Industry-appropriate terminology used correctly. Formal register without unnecessary complexity. Active voice preferred for clarity and directness. Quantifiable metrics and specific evidence. Avoids colloquialisms, contractions, and casual phrases.
+
+**Document Structure**: Clear hierarchy with executive summary upfront. Logical sections with descriptive headings. Supporting data integrated smoothly. Conclusions that follow from presented evidence. Professional formatting throughout.
+
+**Strategic Focus**: Results-oriented language emphasizing ROI and value. Risk acknowledgment with mitigation strategies. Clear recommendations backed by analysis. Alignment with organizational objectives. Forward-looking while grounded in current realities.
+
+=====
+
+Example snippets:
+
+**Executive Summary**
+
+This proposal outlines a comprehensive digital transformation initiative designed to enhance operational efficiency and market competitiveness. The recommended solution addresses three critical business objectives: streamlining customer acquisition, reducing operational costs by 30%, and establishing scalable infrastructure for projected growth.
+
+**Current State Analysis**
+
+Our assessment reveals that existing systems operate at 60% efficiency due to manual processes and disconnected platforms. Customer acquisition costs have increased 45% year-over-year while conversion rates remain static at 2.3%. These metrics indicate substantial opportunity for improvement through strategic technological investment.
+
+**Proposed Solution**
+
+We recommend implementing an integrated cloud-based platform that consolidates customer relationship management, automated marketing, and analytics capabilities. This solution will deliver measurable improvements in three phases over 18 months, with initial ROI expected within the first quarter of implementation.
+
+**Financial Projections**
+
+The total investment requirement is $750,000, distributed across infrastructure ($400,000), software licensing ($200,000), and implementation services ($150,000). Conservative projections indicate cost savings of $300,000 annually beginning in Year 2, resulting in net positive ROI of $450,000 over the three-year analysis period.
+
+=====`
+  },
+  {
+    name: "📱 Digital Content Style",
+    usageTips: "Use this style for web content, blog posts, social media, newsletters, and online articles that need to be engaging and scannable.",
+    types: ['nonfiction'],
+    tags: ['Genre Defining', 'Digital Web Content', 'Casual'],
+    value: `**Content Structure and Format**: Easy to scan content with clear headers, bullet points, and short paragraphs. Put the most important info at the top where people look first.
+
+**Sentence Structure and Pacing**: Short, punchy sentences (10-15 words average) mixed with occasional longer ones for variety. Paragraphs rarely exceed 3-4 lines on mobile. Uses white space to make reading easier.
+
+**Language and Vocabulary**: Clear, accessible language avoiding jargon unless audience-appropriate. SEO-conscious without keyword stuffing. Action-oriented verbs and concrete nouns. Conversational tone that builds connection.
+
+**Engagement Techniques**: Hook readers immediately with compelling openings. Use questions, statistics, and relatable scenarios. Include clear CTAs. Break up text with visuals, lists, and formatting. Make content shareable and memorable.
+
+**Tone and Voice**: Friendly, informative, and value-focused. Speaks directly to reader's needs and pain points. Balances authority with approachability. Maintains brand consistency while being human.
+
+=====
+
+Example snippets:
+
+**The 5-Minute Rule That Changed Everything**
+
+Procrastination killing your productivity? Here's a simple hack that actually works.
+
+Set a timer for 5 minutes. That's it.
+
+Pick the task you've been avoiding most. Maybe it's that email response, the budget spreadsheet, or cleaning your desk. Doesn't matter how big it is. Just commit to 5 minutes.
+
+Here's the magic: You'll either finish the task (surprise!) or build enough momentum to keep going. Our brains hate stopping once we've started. It's called the Zeigarnik effect, and you can use it to your advantage.
+
+**Why it works:**
+• Removes the mental barrier of "this will take forever"
+• Creates immediate action instead of endless planning
+• Builds confidence through small wins
+• Makes overwhelming tasks feel manageable
+
+Try it right now. Seriously. Set that timer and pick one thing.
+
+Your future self will thank you.
+
+=====`
+  },
+  {
+    name: "🎯 Marketing/Promotional Style",
+    usageTips: "Use this style for product descriptions, landing pages, feature announcements, and promotional content that feels genuine and engaging rather than salesy.",
+    types: ['nonfiction'],
+    tags: ['Cross Genre', 'Digital Web Content', 'Witty'],
+    value: `**Narrative Voice and Tone**: Enthusiastic but genuine, like a friend recommending something they actually use and love. Confident without being pushy. Focus on helping rather than selling. Human warmth over corporate polish.
+
+**Sentence Structure and Pacing**: Dynamic rhythm that builds excitement naturally. Mix of lengths to maintain energy. Questions that make readers think. Short paragraphs that move readers forward. Power words used tastefully, not excessively.
+
+**Language and Vocabulary**: Benefit-focused language that connects features to real-world value. Storytelling elements to create emotional connection. Specific details over vague claims. Social proof woven naturally into narrative.
+
+**Engagement Techniques**: Start with reader's problem or desire. Paint picture of transformation or solution. Use "you" to maintain direct connection. Include real examples and scenarios. Address objections conversationally.
+
+**Authenticity Markers**: Acknowledge limitations where appropriate. Use genuine testimonials and stories. Avoid hyperbole and impossible promises. Include personality and occasional humor. Let passion for product shine through naturally.
+
+=====
+
+Example snippets:
+
+**Finally, a Writing Tool That Gets It**
+
+You know that moment when you're staring at a blank page, deadline looming, and the words just won't come? We've been there. Actually, that's exactly why we built WriterFlow.
+
+Here's the thing: WriterFlow isn't going to write for you. (If only, right?) But it does something almost as good—it gets you unstuck. Think of it as your writing companion that knows exactly when to nudge you forward.
+
+The daily prompts? They're not random. Our algorithm learns your writing patterns and serves up exercises tailored to break through your specific blocks. One user told us it's like having a writing coach who actually gets her style—except available at 3 AM when inspiration strikes.
+
+And yes, there's an AI assistant, but it's not the annoying kind that tries to rewrite everything. It's more like a thoughtful editor who suggests alternatives when you're stuck on that one sentence for the fifteenth time.
+
+**What makes this different?**
+- No overwhelming feature bloat (we kept only what actually helps)
+- Works offline because inspiration doesn't wait for WiFi
+- Syncs across devices without being creepy about your data
+- Actually affordable ($12/month, not $50+ like the big names)
+
+Look, we're not saying this will turn you into Hemingway overnight. But if you're tired of fighting with your tools instead of focusing on your ideas, maybe it's worth a try.
+
+=====`
+  },
+  {
     name: "📚 Literary Fiction Style",
     usageTips: "Use this style for character-driven narratives in literary magazines and serious contemporary literature.",
-    value: `**Narrative Voice and Tone**: Introspective and layered, with emphasis on psychological depth and emotional nuance. The voice should be sophisticated yet intimate, inviting readers into the interior lives of characters. Explores the human condition through subtle observations and metaphorical language.
+    types: ['fiction'],
+    tags: ['Genre Defining', 'Character-Driven', 'Creative Writing', 'Serious'],
+    value: `**Narrative Voice and Tone**: Introspective and layered, with emphasis on psychological depth and emotional complexity. The voice is sophisticated yet intimate, drawing readers into characters' inner lives. Explores human experiences through subtle observations and metaphorical language.
 
-**Sentence Structure and Pacing**: Complex, varied sentence structures with lengths ranging from 5 to 40+ words. Uses rhythm and cadence as storytelling tools. Deliberately paced to mirror emotional states—long, flowing sentences for contemplation; short, fragmented ones for tension or revelation.
+**Sentence Structure and Pacing**: Complex, varied sentence structures with lengths ranging from 5 to 40+ words. Uses rhythm and flow as storytelling tools. Deliberately paced to mirror emotional states—long, flowing sentences for contemplation; short, fragmented ones for tension or revelation.
 
-**Language and Vocabulary**: Rich, evocative language with careful attention to word choice. Employs literary devices like metaphor, symbolism, and alliteration. Vocabulary is sophisticated but never gratuitously so—each word serves the narrative's emotional truth.
+**Language and Vocabulary**: Rich, evocative language with careful attention to word choice. Uses writing techniques like metaphor, symbolism, and alliteration. Vocabulary is sophisticated but never unnecessarily so—each word serves the narrative's emotional truth.
 
-**Dialogue Style**: Subtext-heavy conversations where what's unsaid matters as much as what's spoken. Characters often talk around subjects rather than directly addressing them. Dialogue reveals character through speech patterns, hesitations, and unique vocabularies.
+**Dialogue Style**: Conversations where what's not said matters as much as what's spoken. Characters often talk around subjects rather than directly addressing them. Dialogue reveals character through speech patterns, hesitations, and unique vocabularies.
 
-**Theme and Motives**: Explores universal human experiences—identity, loss, connection, meaning. Themes emerge organically through character actions and observations rather than explicit statements. Often ambiguous endings that invite interpretation.
+**Theme and Motives**: Explores universal human experiences—identity, loss, connection, meaning. Themes develop naturally through character actions and observations rather than explicit statements. Often open endings that let readers draw their own conclusions.
 
 =====
 
@@ -64,8 +225,10 @@ The photograph remained between them, a bridge and a chasm both.
 =====`
   },
   {
-    name: "⚡ Commercial Thriller Style",
+    name: "⚡ Action Thriller Style",
     usageTips: "Use this style for fast-paced thrillers, suspense novels, action-adventure, and page-turner fiction.",
+    types: ['fiction'],
+    tags: ['Genre Defining', 'Plot-Driven', 'Creative Writing', 'Dramatic'],
     value: `**Narrative Voice and Tone**: Urgent and propulsive, creating immediate tension and maintaining relentless forward momentum. The voice should be confident and direct, pulling readers through the story with cinematic intensity. Every paragraph earns its place by advancing plot or ratcheting tension.
 
 **Sentence Structure and Pacing**: Short, punchy sentences dominate (8-15 words average), with occasional longer sentences for variety. Paragraphs are brief—often just one or two sentences. Chapters end on cliffhangers. White space is used strategically to increase reading speed.
@@ -73,7 +236,6 @@ The photograph remained between them, a bridge and a chasm both.
 **Language and Vocabulary**: Clear, concrete language focusing on action and sensory details. Strong, active verbs drive every sentence. Technical terms are used sparingly and explained through context. Avoids adverbs in favor of more precise verbs.
 
 **Dialogue Style**: Crisp, purposeful exchanges that reveal information and advance plot simultaneously. Characters speak in distinct voices with minimal dialogue tags. Interruptions, overlapping conversations, and unfinished sentences create realistic urgency.
-
 
 **Theme and Motives**: Good versus evil with clear stakes. Themes of justice, survival, and moral compromise under pressure. Heroes are flawed but ultimately sympathetic. Villains are competent and genuinely threatening.
 
@@ -114,6 +276,8 @@ Chen was waiting in the situation room, satellite feeds covering every wall. "Fo
   {
     name: "🎭 Young Adult Contemporary Style",
     usageTips: "Use this style for YA fiction, teen romance, and contemporary young adult novels.",
+    types: ['fiction'],
+    tags: ['Genre Defining', 'Character-Driven', 'Creative Writing', 'Playful'],
     value: `**Narrative Voice and Tone**: Authentic, immediate, and emotionally honest, capturing the intensity of teenage experience without condescension. The voice should feel genuinely young while tackling serious themes. Often uses first-person present tense for immediacy and connection.
 
 **Sentence Structure and Pacing**: Conversational rhythm with varied sentence lengths (10-25 words average). Fragments used for emphasis and emotional punch. Quick pacing with short chapters that end on emotional beats rather than cliffhangers.
@@ -159,6 +323,8 @@ A story where I figure out who I really am when everything I thought mattered fa
   {
     name: "🕵️ Hard-Boiled Mystery Style",
     usageTips: "Use this style for noir fiction, detective novels, crime fiction, and gritty mysteries.",
+    types: ['fiction'],
+    tags: ['Genre Defining', 'Atmosphere-Driven', 'Creative Writing', 'Serious'],
     value: `**Narrative Voice and Tone**: Cynical, world-weary, yet somehow still idealistic beneath the armor. First-person narration with a distinctive, jaded voice that's seen too much but can't stop looking. Dark humor as a defense mechanism. The city is always a character.
 
 **Sentence Structure and Pacing**: Terse, rhythmic sentences that hit like punches (10-20 words average). Occasional longer sentences for atmosphere or reflection. Paragraphs are lean. Uses repetition and parallel structure for emphasis and rhythm.
@@ -218,11 +384,13 @@ Nathan Cross was either very lost or very dead. In this town, sometimes they wer
   {
     name: "🚀 Science Fiction Technical Style",
     usageTips: "Use this style for hard science fiction, space opera, and scientifically grounded speculative fiction.",
+    types: ['fiction'],
+    tags: ['Genre Defining', 'Plot-Driven', 'Creative Writing', 'Serious'],
     value: `**Narrative Voice and Tone**: Precise and analytical while maintaining human warmth. The voice balances technical accuracy with emotional truth, never letting the science overshadow the human story. Sense of wonder tempered by scientific plausibility.
 
 **Sentence Structure and Pacing**: Medium to long sentences (20-30 words average) with technical concepts integrated smoothly. Information revealed through action and dialogue rather than info-dumps. Pacing varies—slower for concept introduction, faster for action sequences.
 
-**Language and Vocabulary**: Technical terminology used accurately but explained through context. Neologisms and future slang that feel organic. Scientific concepts as metaphors for human experience. Avoids technobabble while respecting reader intelligence.
+**Language and Vocabulary**: Technical terminology used accurately but explained through context. Made-up words and future slang that feel organic. Scientific concepts as metaphors for human experience. Avoids technobabble while respecting reader intelligence.
 
 **Dialogue Style**: Characters speak with expertise in their fields while remaining distinct individuals. Technical discussions reveal character through approach to problems. Authentic representation of how scientists and engineers actually communicate—including humor and humanity.
 
@@ -263,6 +431,8 @@ Sarah opened a secure channel to Mission Control. "Houston, this is Horizon Stat
   {
     name: "💕 Romantic Comedy Style",
     usageTips: "Use this style for romantic comedies, contemporary romance, and feel-good love stories.",
+    types: ['fiction'],
+    tags: ['Genre Defining', 'Character-Driven', 'Creative Writing', 'Witty'],
     value: `**Narrative Voice and Tone**: Witty, warm, and self-aware with a light touch even when dealing with deeper emotions. The voice should sparkle with humor while maintaining genuine emotional stakes. Often uses direct address or humorous observations about life and love.
 
 **Sentence Structure and Pacing**: Snappy pacing with varied sentence lengths (12-25 words average). Comedic timing through paragraph breaks and punchy one-liners. Builds to comedic and romantic peaks with careful rhythm. Uses callbacks and running gags for continuity.
@@ -331,6 +501,8 @@ But the game wasn't over yet.
   {
     name: "👻 Horror/Suspense Style",
     usageTips: "Use this style for horror novels, psychological thrillers, and supernatural fiction.",
+    types: ['fiction'],
+    tags: ['Genre Defining', 'Atmosphere-Driven', 'Creative Writing', 'Dramatic'],
     value: `**Narrative Voice and Tone**: Atmospheric and unsettling, building dread through what's not shown as much as what is. The voice should create unease through subtle wrongness and growing tension. Reliability of narrator may be questioned as story progresses.
 
 **Sentence Structure and Pacing**: Varies dramatically—long, creeping sentences for building tension, short fragments for shocks. Paragraphs shrink during intense scenes. Uses white space and section breaks to control reader breathing. Rhythm mimics heartbeat—slow, then racing.
@@ -398,7 +570,9 @@ The children in apartment 3B started laughing again on Thursday.
   {
     name: "🏛️ Historical Fiction Style",
     usageTips: "Use this style for historical novels, period dramas, and authentic time-period stories.",
-    value: `**Narrative Voice and Tone**: Immersive and authentic to the period while remaining accessible to modern readers. The voice should transport without alienating, using period-appropriate sensibilities filtered through contemporary storytelling techniques. Rich with historical detail that serves story rather than overwhelming it.
+    types: ['fiction'],
+    tags: ['Genre Defining', 'Atmosphere-Driven', 'Creative Writing', 'Serious'],
+    value: `**Narrative Voice and Tone**: Immersive and authentic to the period while staying accessible to modern readers. The voice transports readers to another time without making them feel lost or confused. Uses period-appropriate attitudes and social awareness while keeping the storytelling engaging. Rich with historical detail that helps the story rather than slowing it down.
 
 **Sentence Structure and Pacing**: Slightly more formal structure reflecting historical periods (20-30 words average). Pacing allows for historical context without becoming textbook-like. Uses period-appropriate rhythms while maintaining modern readability. Descriptive passages paint era without halting narrative.
 
@@ -451,11 +625,13 @@ But Shanghai, she'd heard, had need of English governesses who weren't afraid of
   {
     name: "⚔️ Epic Fantasy Style",
     usageTips: "Use this style for epic fantasy, high fantasy, and grand fantasy narratives with complex world-building.",
-    value: `**Narrative Voice and Tone**: Grand and immersive, with a sense of mythic weight and historical significance. The voice should balance accessibility with the formal cadences of epic storytelling. Multiple POVs weave together to create a tapestry of perspectives across a vast world.
+    types: ['fiction'],
+    tags: ['Genre Defining', 'Plot-Driven', 'Creative Writing', 'Dramatic'],
+    value: `**Narrative Voice and Tone**: Grand and immersive, with a sense of mythic weight and historical significance. The voice balances accessibility with the formal rhythms of epic storytelling. Multiple viewpoints work together to show different perspectives across a vast world.
 
 **Sentence Structure and Pacing**: Varied lengths (15-30 words average) with longer sentences for world-building and description. Pacing builds slowly, allowing readers to absorb complex worldbuilding. Action scenes shift to shorter, punchier sentences. Uses parallel structure for prophecies and formal speech.
 
-**Language and Vocabulary**: Elevated but not archaic language. Creates linguistic authenticity through consistent naming conventions, invented terms for magic/culture, and formal modes of address. Avoids modern idioms that would break immersion. Rich sensory descriptions of settings and magic.
+**Language and Vocabulary**: Elevated but not archaic language. Creates believable fantasy worlds through consistent naming patterns, invented terms for magic and culture, and formal speech for important characters. Avoids modern phrases that would break the fantasy feeling. Rich sensory descriptions of settings and magic.
 
 **Dialogue Style**: Formal registers for nobility/ancient beings, varied dialects for different regions/peoples. Characters speak in ways that reflect their culture and station. Prophecies and oaths carry weight. Uses "said" bookisms sparingly but effectively for fantasy creatures.
 
@@ -502,11 +678,13 @@ As if in answer, the runestone at his throat began to burn.
   {
     name: "📖 Narrative Style",
     usageTips: "Use this style for storytelling across general fiction, memoirs, short stories, and creative non-fiction.",
-    value: `**Narrative Voice and Tone**: Engaging and storytelling, adaptable to first-person or third-person perspectives. Creates intimacy with reader through carefully chosen perspective. First-person provides immediacy and personal connection; third-person offers flexibility and broader scope. Voice should draw readers into the story world from the first sentence.
+    types: ['fiction', 'nonfiction'],
+    tags: ['Universal', 'Character-Driven', 'Creative Writing'],
+    value: `**Narrative Voice and Tone**: Engaging and story-focused, works well for both first-person and third-person perspectives. Connects readers to characters through the right perspective choice. First-person feels immediate and personal; third-person gives flexibility and broader view. Voice pulls readers into the story from the very beginning.
 
-**Sentence Structure and Pacing**: Balanced pacing that mirrors story tension, mixing descriptive passages with action-driven sentences. Use longer sentences for scene-setting and reflection, shorter ones for action and tension. Vary paragraph length to control reading speed - single-line paragraphs for dramatic effect.
+**Sentence Structure and Pacing**: Balanced pacing that matches story tension, mixing description with action. Use longer sentences for setting scenes and reflection, shorter ones for action and tension. Change paragraph length to control reading speed - single-line paragraphs for dramatic moments.
 
-**Language and Vocabulary**: Clear and versatile, varying to suit the plot and characters. Match vocabulary to narrator's background and story setting. Use concrete, sensory details to ground readers in scenes. Avoid excessive adjectives; choose strong verbs instead.
+**Language and Vocabulary**: Clear and flexible, changing to fit the plot and characters. Match vocabulary to who's telling the story and where it's set. Use concrete, sensory details to help readers picture scenes. Avoid too many adjectives; choose strong verbs instead.
 
 **Dialogue Style**: Realistic and purposeful, driving the story forward while revealing character. Each character should have distinct speech patterns. Balance dialogue with action beats and narrative description. Use subtext - what characters don't say is often as important as what they do.
 
@@ -535,11 +713,13 @@ As she stumbled past him into the warmth of the lighthouse, Thomas couldn't shak
   {
     name: "💬 Simple/Conversational Style",
     usageTips: "Use this style for friendly, accessible communication in blogs, social media, emails, and casual non-fiction.",
+    types: ['fiction', 'nonfiction'],
+    tags: ['Universal', 'Digital Web Content', 'Casual'],
     value: `**Narrative Voice and Tone**: Friendly, informal, and approachable, as if talking to a friend over coffee. Uses "you" to address reader directly. Feels like a natural conversation rather than formal writing. Warm and encouraging without being condescending.
 
 **Sentence Structure and Pacing**: Short to medium sentences (10-15 words average) with a steady, easy flow. Lots of sentence variety to maintain conversational rhythm. Frequent paragraph breaks to avoid text walls. Uses contractions naturally (it's, you're, don't).
 
-**Language and Vocabulary**: Everyday language that a middle schooler could understand. Avoids jargon and complex terminology unless absolutely necessary, and explains it simply when used. Prefers common words over fancy alternatives. Uses analogies and examples from daily life.
+**Language and Vocabulary**: Everyday language that a middle schooler could understand. Avoids jargon and complex terminology unless absolutely necessary, and explains it simply when used. Prefers common words over fancy alternatives. Uses comparisons and examples from daily life.
 
 **Dialogue Style**: Casual and relatable, reflecting how people actually talk. Includes interruptions, incomplete thoughts, and natural speech patterns. Characters use contractions and colloquialisms. Avoids overly formal or stilted dialogue.
 
@@ -566,11 +746,13 @@ Six months later? Jake's running three times a week and actually enjoying it. Al
   {
     name: "🎨 Descriptive Style",
     usageTips: "Use this style for travel writing, product descriptions, and creating vivid atmospheric scenes in fiction.",
-    value: `**Narrative Voice and Tone**: Vivid and immersive, painting pictures with words. Often emotional and evocative, appealing to all five senses. Creates atmosphere and mood through detailed observation. The narrator becomes a camera with feelings.
+    types: ['fiction', 'nonfiction'],
+    tags: ['Cross Genre', 'Atmosphere-Driven', 'Creative Writing'],
+    value: `**Narrative Voice and Tone**: Vivid and immersive, painting clear pictures with words. Emotional and evocative, appealing to all five senses. Creates atmosphere and mood through detailed observation. The voice shows readers exactly what they need to see and feel.
 
-**Sentence Structure and Pacing**: Long, flowing sentences that mirror the sweep of observation. Complex sentence structures with multiple clauses. Pacing deliberately slowed to allow readers to savor details. Uses semicolons and dashes for connected thoughts.
+**Sentence Structure and Pacing**: Long, flowing sentences that follow the rhythm of observation. Complex sentence structures with multiple connected ideas. Pacing slowed down to let readers savor details and absorb the scene. Uses connecting words to link related thoughts and images.
 
-**Language and Vocabulary**: Rich, poetic, and detailed vocabulary. Liberal use of metaphors, similes, and personification. Precise adjectives and adverbs chosen for their sensory impact. Technical terms for specific details (vermillion instead of red, susurration instead of whisper).
+**Language and Vocabulary**: Rich, detailed vocabulary chosen for sensory impact. Plenty of metaphors, comparisons, and personification. Precise adjectives and descriptive words that create clear mental images. Choose specific words that paint exact pictures rather than general terms.
 
 **Dialogue Style**: Minimal dialogue, and when used, it's surrounded by description of tone, gesture, and atmosphere. More focused on how things are said than what is said. Dialogue serves to enhance mood rather than drive plot.
 
@@ -595,6 +777,8 @@ But he was already turning away, his footsteps crushing the gravel path with a f
   {
     name: "🗣️ Persuasive Style",
     usageTips: "Use this style for marketing copy, opinion pieces, political writing, and content designed to inspire action.",
+    types: ['nonfiction'],
+    tags: ['Cross Genre', 'Digital Web Content', 'Witty'],
     value: `**Narrative Voice and Tone**: Confident, passionate, and authoritative without being preachy. Builds trust through expertise and empathy. Uses inclusive language ("we" and "us") to create solidarity. Balances emotional appeal with logical reasoning.
 
 **Sentence Structure and Pacing**: Strategic variety - short, punchy sentences for key points, longer ones for evidence. Rhetorical questions to engage readers. Building momentum toward call to action. Uses repetition and parallel structure for emphasis.
@@ -632,6 +816,8 @@ Join us. Not tomorrow. Not next week. Now. Because the cost of waiting isn't jus
   {
     name: "📚 Expository Style",
     usageTips: "Use this style for clear explanations in textbooks, how-to guides, technical documentation, and educational content.",
+    types: ['nonfiction'],
+    tags: ['Cross Genre', 'Business and Projects', 'Digital Web Content'],
     value: `**Narrative Voice and Tone**: Neutral, instructional, and objective. Teacher-like but not condescending. Focuses on clarity above all else. Maintains professional distance while remaining engaging. Anticipates reader questions and addresses them systematically.
 
 **Sentence Structure and Pacing**: Logical progression from simple to complex. Topic sentences lead each paragraph. Moderate-length sentences (15-25 words) for optimal comprehension. Clear transitions between ideas (first, next, therefore, however).
@@ -665,6 +851,8 @@ This process has practical applications across numerous fields. In healthcare, m
   {
     name: "📰 Journalistic Style",
     usageTips: "Use this style for news articles, press releases, reports, and objective informational content.",
+    types: ['nonfiction'],
+    tags: ['Genre Defining', 'Digital Web Content', 'Serious'],
     value: `**Narrative Voice and Tone**: Direct, factual, and impartial. Objective observer reporting facts without personal opinion. Maintains professional distance from subjects. Authority comes from accuracy and sourcing, not personal perspective.
 
 **Sentence Structure and Pacing**: Short, declarative sentences prioritizing clarity. Lead sentences contain who, what, when, where, why. Inverted pyramid structure - most important information first. One idea per sentence for easy scanning.
@@ -702,6 +890,8 @@ Construction could begin as early as next spring, according to city planning off
   {
     name: "😂 Humorous/Lighthearted Style",
     usageTips: "Use this style for comedy writing, humorous essays, social media content, and light entertainment.",
+    types: ['fiction', 'nonfiction'],
+    tags: ['Universal', 'Creative Writing', 'Digital Web Content', 'Witty'],
     value: `**Narrative Voice and Tone**: Witty, playful, and self-aware. Often breaks the fourth wall or acknowledges absurdity. Confident enough to be silly. Finds humor in everyday situations. Never mean-spirited, always inclusive.
 
 **Sentence Structure and Pacing**: Quick and punchy for comedic timing. Varies rhythm for setup and punchline. Short sentences for zingers, longer ones for elaborate setups. Strategic use of fragments. Paragraph breaks for comic beats.
@@ -739,11 +929,13 @@ By Day 7, I'd made progress. I was now waking up at 9:59 AM instead of 10. Rome 
   {
     name: "🪶 Minimalist Style",
     usageTips: "Use this style for literary short stories, experimental fiction, and artistic prose that conveys deep emotion through simplicity.",
+    types: ['fiction', 'nonfiction'],
+    tags: ['Cross Genre', 'Character-Driven', 'Creative Writing', 'Serious'],
     value: `**Narrative Voice and Tone**: Stripped down to essentials, where every word carries weight. The voice trusts readers to fill gaps with their own experience. Emotions conveyed through action and implication rather than exposition. Silence speaks as loudly as words.
 
 **Sentence Structure and Pacing**: Short, declarative sentences (8-15 words average). Subject-verb-object construction dominates. Paragraphs rarely exceed three sentences. White space as narrative tool. Repetition used sparingly but with purpose.
 
-**Language and Vocabulary**: Simple, concrete words. Anglo-Saxon over Latin roots. One adjective maximum per sentence. Strong verbs carry description. Metaphors are rare and earned. No word exists without purpose.
+**Language and Vocabulary**: Simple, concrete words. Short common words over long fancy ones. One adjective maximum per sentence. Strong verbs carry description. Metaphors are rare and earned. No word exists without purpose.
 
 **Dialogue Style**: Characters speak in fragments and implications. Subtext over text. What's not said matters more. Dialogue tags minimal or absent. Conversations feel overheard rather than explained.
 
@@ -814,11 +1006,13 @@ The phone rang. Neither of them moved to answer it.
   {
     name: "🖋️ Sophisticated/Literary Style",
     usageTips: "Use this style for literary journals, experimental literature, and high art writing with complex themes.",
+    types: ['fiction', 'nonfiction'],
+    tags: ['Cross Genre', 'Character-Driven', 'Creative Writing', 'Serious'],
     value: `**Narrative Voice and Tone:** Introspective, elegant, and layered with meaning. Multiple levels of interpretation. Self-conscious about language and form. Often philosophical or meditative. Comfortable with ambiguity and contradiction.
 
-**Sentence Structure and Pacing:** Complex architecture with subordinate clauses and parenthetical asides. Sentences as carefully constructed as poetry. Rhythm and sound as important as meaning. Deliberately slow to encourage contemplation.
+**Sentence Structure and Pacing:** Complex structure with dependent phrases and side comments in parentheses. Sentences as carefully constructed as poetry. Rhythm and sound as important as meaning. Deliberately slow to encourage contemplation.
 
-**Language and Vocabulary:** Sophisticated vocabulary deployed precisely. Rich in metaphor, symbolism, and allusion. Intertextual references to literature, art, philosophy. Words chosen for resonance as much as meaning. Synesthesia and unexpected combinations.
+**Language and Vocabulary:** Sophisticated vocabulary deployed precisely. Rich in metaphor, symbolism, and allusion. References to other works of literature, art, philosophy. Words chosen for resonance as much as meaning. Creative word combinations that blend senses.
 
 **Dialogue Style:** Intellectually charged conversations about ideas as much as events. Subtext more important than text. Characters speak in distinctive, elevated registers. Dialogue reveals psychological complexity and philosophical positions.
 
@@ -828,9 +1022,9 @@ The phone rang. Neither of them moved to answer it.
 
 Example snippets:
 
-Memory, Judith thought, was not unlike the palimpsest she had discovered in her grandmother's attic - each recollection written over the last, yet somehow all remaining visible, creating a narrative that was simultaneously singular and multiple, true and fabricated.
+Memory, Judith thought, was not unlike the ancient document she had discovered in her grandmother's attic - each recollection written over the last, yet somehow all remaining visible, creating a narrative that was simultaneously singular and multiple, true and fabricated.
 
-She stood before the mirror, but it was not her reflection she sought. Rather, she was searching for that liminal space between self and image, that fraction of a second where identity hesitates before assuming its daily mask. In that hesitation lived all her possible selves.
+She stood before the mirror, but it was not her reflection she sought. Rather, she was searching for that threshold space between self and image, that fraction of a second where identity hesitates before assuming its daily mask. In that hesitation lived all her possible selves.
 
 "Do you ever wonder," Marcus said, his fingers tracing the rim of his wine glass in endless circles, "if we're merely characters in someone else's dream?"
 
@@ -847,15 +1041,17 @@ Time, in this room, had taken on the quality of amber - golden, viscous, preserv
   {
     name: "🎓 Academic/Scholarly Style",
     usageTips: "Use this style for research papers, academic journals, dissertations, and scholarly publications.",
-    value: `**Narrative Voice and Tone:** Formal, analytical, and objective. Third-person perspective maintaining scholarly distance. Cautious about claims - uses hedging language appropriately. Authority established through evidence, not assertion.
+    types: ['nonfiction'],
+    tags: ['Genre Defining', 'Business and Projects', 'Serious'],
+    value: `**Narrative Voice and Tone:** Formal, analytical, and objective. Third-person perspective maintaining scholarly distance. Cautious about claims - uses cautious phrasing when needed. Authority established through evidence, not assertion.
 
-**Sentence Structure and Pacing:** Complex sentences with multiple subordinate clauses. Careful logical progression. Topic sentences followed by evidence and analysis. Transitional phrases linking ideas. Methodical pacing.
+**Sentence Structure and Pacing:** Complex sentences with multiple dependent phrases. Careful logical progression. Topic sentences followed by evidence and analysis. Transitional phrases linking ideas. Methodical pacing.
 
-**Language and Vocabulary:** Technical terminology specific to discipline. Precise word choice avoiding ambiguity. Nominalization common. Passive voice when emphasizing results over actors. Latin phrases and specialized jargon used correctly.
+**Language and Vocabulary:** Technical terminology specific to discipline. Precise word choice avoiding ambiguity. Often turns verbs into nouns. Passive voice when emphasizing results over actors. Latin phrases and specialized jargon used correctly.
 
 **Dialogue Style:** Rarely uses direct dialogue except in quotations from primary sources. Interviews presented as block quotes. Citation immediately follows quoted material. Paraphrasing preferred over extensive quoting.
 
-**Theme and Motives:** Advances knowledge through systematic investigation. Questions assumptions and builds on prior research. Acknowledges limitations and suggests future directions. Values precision, replicability, and intellectual honesty.
+**Theme and Motives:** Advances knowledge through systematic investigation. Questions assumptions and builds on prior research. Acknowledges limitations and suggests next steps. Values precision, replicability, and intellectual honesty.
 
 =====
 
@@ -870,6 +1066,689 @@ Notably, participants who engaged primarily in content creation (defined as post
 Furthermore, qualitative analysis revealed three emergent themes: (1) the paradox of connection and isolation, (2) performance of identity versus authentic self-expression, and (3) temporal factors in self-esteem fluctuation. As one participant articulated: "It's not about how much time I spend online, but what I'm doing there and why" (Participant 284, age 16).
 
 These findings necessitate a reconceptualization of digital wellness interventions. Rather than focusing solely on screen time reduction, practitioners might consider encouraging creative engagement and critical media literacy. Future research should investigate the longitudinal effects of such interventions.
+
+=====`
+  },
+  {
+    name: "👶 Children's Literature Style",
+    usageTips: "Use this style for picture books, chapter books, middle-grade fiction, and any content specifically written for young readers (ages 3-12).",
+    types: ['fiction'],
+    tags: ['Genre Defining', 'Character-Driven', 'Creative Writing', 'Playful'],
+    value: `**Narrative Voice and Tone**: Warm, encouraging, and wonder-filled, speaking warmly to children. The voice should be trustworthy and kind, never condescending, respecting children's intelligence while using age-appropriate language. Helps children explore feelings and ideas safely.
+
+**Sentence Structure and Pacing**: Simple, clear sentences for younger readers (5-10 words) gradually increasing complexity for older children (10-20 words). Repetition and rhythm aid comprehension and memory. Short paragraphs and chapters maintain engagement. Natural places for page turns in picture books.
+
+**Language and Vocabulary**: Age-appropriate vocabulary with context clues for new words. Introduces challenging concepts through familiar comparisons. Sound play, alliteration, and onomatopoeia for younger readers. Avoids baby talk while remaining accessible. Educational without being preachy.
+
+**Dialogue Style**: Characters speak in distinct, memorable voices that children can easily distinguish. Natural child dialogue that sounds authentic without inappropriate content. Adult characters model good communication. Dialogue advances plot while teaching social skills.
+
+**Theme and Motives**: Universal childhood experiences—friendship, fear, discovery, growing up. Gentle moral lessons woven through story rather than heavy-handed preaching. Celebrates imagination, curiosity, and resilience. Problems are age-appropriate with satisfying resolutions. Always ends with hope.
+
+=====
+
+Example snippets:
+
+Luna had a secret. It lived in her pocket, small and warm and wonderful.
+
+"What's in your pocket?" asked her teacher, Mrs. Maple, who noticed everything.
+
+Luna pressed her hand against the pocket. The secret wiggled. "Nothing," she whispered.
+
+But secrets have a funny way of not staying secret, especially when they're alive.
+
+At recess, Luna sat under the big oak tree, away from the other children. Carefully, so carefully, she opened her pocket just a crack. Two bright eyes peeked out. Then whiskers. Then the softest pink nose she'd ever seen.
+
+"Hello, Stardust," Luna whispered to the tiny hamster. "I know I'm not supposed to bring you to school, but you were so lonely at home."
+
+Stardust squeaked, which Luna understood meant, "I'm happy to be here with you."
+
+Everything would have been fine if Stardust hadn't smelled Tommy's peanut butter sandwich.
+
+ZOOM! The little hamster shot out of Luna's pocket, across the playground, and right up Tommy's leg.
+
+"EEEEEP!" Tommy squealed, dropping his sandwich. "Something's attacking me!"
+
+But then he looked down and saw Stardust, sitting on his shoe, nibbling the sandwich crust with tiny, happy sounds.
+
+"Is that... a hamster?" Tommy asked, his fear turning to delight.
+
+Soon all the children gathered around, gentle as butterflies, taking turns petting Stardust with one finger.
+
+"Luna," said Mrs. Maple, walking over with a knowing smile, "is this your 'nothing'?"
+
+Luna's cheeks turned pink. "I'm sorry, Mrs. Maple. He was lonely, and I thought maybe... maybe school would make him happy."
+
+Mrs. Maple knelt down beside the children. "You know what? I think Stardust has taught us something important today. Sometimes, when we share what we love—even when we're not supposed to—we make everyone a little happier."
+
+She winked at Luna. "But next time, ask first. Our class could use a proper pet. What do you all think?"
+
+"YES!" shouted twenty voices at once.
+
+And that's how Stardust became the first official hamster student at Willowbrook Elementary, with his own tiny desk and everything.
+
+=====`
+  },
+  {
+    name: "🎭 Satirical/Ironic Style",
+    usageTips: "Use this style for social commentary, political satire, parody, and any writing that uses humor to critique society, institutions, or human behavior.",
+    types: ['fiction', 'nonfiction'],
+    tags: ['Cross Genre', 'Character-Driven', 'Creative Writing', 'Witty'],
+    value: `**Narrative Voice and Tone**: Clever and subversive, using wit as a scalpel to expose hypocrisy and folly. The voice should be intelligent and observant, employing irony and sarcasm without becoming mean-spirited. Maintains sophisticated distance while delivering pointed social criticism through humor.
+
+**Sentence Structure and Pacing**: Strategic pacing that sets up expectations then subverts them for ironic effect. Varies between elaborate setups and punchy punchlines. Uses parallel structure to highlight contradictions. Timing is crucial—builds anticipation before delivering satirical observations.
+
+**Language and Vocabulary**: Sophisticated wordplay including double meanings, puns, and verbal irony. Contrasts formal language with absurd situations for comic effect. Uses euphemisms, understatement, and hyperbole strategically. Technical jargon employed ironically to mock pretension.
+
+**Dialogue Style**: Characters often speak at cross-purposes, revealing their blind spots through their own words. Conversation exposes vanity, ignorance, or self-deception. Uses irony where readers understand more than characters do. Parodies recognizable speech patterns and social dialects.
+
+**Theme and Motives**: Exposes societal flaws, institutional failures, and human pretensions through humor. Challenges complacency and conventional wisdom. Often focuses on power imbalances, social inequality, or moral hypocrisy. Aims to provoke thought and potentially inspire change through laughter.
+
+=====
+
+Example snippets:
+
+**The Art of Modern Productivity**
+
+Sarah, Director of Workflow Optimization, arrived at her standing desk promptly at 6:47 AM—three minutes earlier than her self-improvement app recommended for "Maximum Morning Momentum." She adjusted her ergonomic everything and opened her laptop to begin her daily ritual of being incredibly, measurably productive.
+
+First: checking her productivity tracking app to see how productive she'd been yesterday. (Moderately productive, with room for optimization.) Second: updating her goal-setting app with today's objectives for being productive. Third: reading three articles about productivity techniques she didn't have time to implement because she was too busy reading about productivity.
+
+Her calendar pinged. Meeting in Conference Room Synergy: "Streamlining Our Efficiency Initiatives."
+
+Sarah gathered her bullet journal, her productivity planner, and her laptop (equipped with seventeen apps designed to eliminate the need for bullet journals and productivity planners). She power-walked to the meeting, tracking her steps on her fitness app, which would later congratulate her for being such an efficient walker.
+
+"Good morning, optimization warriors!" chirped Brad from HR, who had recently returned from a weekend seminar on "Leveraging Mindfulness for Maximum Impact." "Today we're going to discuss how we can more efficiently implement our efficiency improvements."
+
+Sarah nodded enthusiastically while discreetly checking her phone to see if she'd reached her daily goal of being enthusiastic about efficiency.
+
+Two hours later, they had scheduled three follow-up meetings to determine the most productive way to schedule follow-up meetings. Sarah made a note in her productivity journal: "Great progress on productivity initiatives."
+
+On her way back to her standing desk (sitting was for quitters), Sarah passed the break room where Janet from Accounting sat reading an actual paper book—not even a self-help book about reading more efficiently—and sipping coffee she'd made herself instead of ordering from the artisanal productivity café downstairs.
+
+"Aren't you supposed to be optimizing something?" Sarah asked.
+
+Janet looked up with the sort of peaceful expression that probably wasn't available in any app store. "I am. I'm optimizing my enjoyment of this Tuesday."
+
+Sarah walked away, slightly disturbed. She made another note: "Janet may need productivity intervention."
+
+At her desk, she opened her laptop to discover that her productivity apps had been so busy tracking her productivity that they'd crashed her computer. While it rebooted, she stared out the window at people walking slowly, talking to each other, accomplishing absolutely nothing measurable.
+
+They looked insufferably content.
+
+Her computer chirped back to life, and Sarah opened her task management app. Today's remaining objectives: "Be productive. Optimize efficiency. Achieve maximum leverage."
+
+She paused, fingers hovering over the keyboard. Then she closed the laptop, walked to the break room, and sat down next to Janet.
+
+"Teach me about Tuesday optimization," she said.
+
+Janet smiled and poured her a cup of thoroughly unoptimized coffee.
+
+=====`
+  },
+  {
+    name: "📝 Contemporary Fiction Style",
+    usageTips: "Use this style for modern realistic stories, slice-of-life narratives, and contemporary settings across any genre.",
+    types: ['fiction'],
+    tags: ['Universal', 'Character-Driven', 'Creative Writing'],
+    value: `**Narrative Voice and Tone**: Modern and accessible, capturing the rhythms of contemporary life. The voice feels immediate and relatable while maintaining good storytelling quality. Often uses close third-person or authentic first-person narration that reflects current cultural awareness and social issues.
+
+**Sentence Structure and Pacing**: Natural flow with varied sentence lengths that mirror real conversation and thought patterns. Pacing reflects modern life—quick dialogue exchanges, longer contemplative passages, and rhythms that feel familiar to contemporary readers.
+
+**Language and Vocabulary**: Contemporary vernacular mixed with precise, evocative language. Includes current cultural references, technology, and social issues woven naturally into narrative. Avoids dated expressions while maintaining timeless emotional truth.
+
+**Dialogue Style**: Authentic modern conversations that reveal character relationships and social dynamics. Characters speak in ways that reflect their generation, background, and social context. Natural interruptions, overlapping thoughts, and realistic speech patterns.
+
+**Theme and Motives**: Explores contemporary issues through personal stories—identity in the digital age, modern relationships, work-life balance, social change, cultural diversity. Universal human experiences viewed through a current lens.
+
+=====
+
+Example snippets:
+
+Maya's phone buzzed for the seventh time during dinner, but she ignored it, focusing instead on her grandmother's hands as they broke apart the warm naan.
+
+"Your generation," Nani said, not looking up from the plate, "always so busy talking to people who aren't here."
+
+"I'm here now," Maya said, though she could feel the phantom vibration of another notification against her thigh.
+
+"Are you?" Her grandmother's eyes held that particular blend of wisdom and mischief that had terrified and delighted Maya since childhood. "Because your mind keeps jumping like a cricket in a jar."
+
+Maya set her phone face-down on the table, the small gesture feeling bigger than it should. Outside, Mumbai's evening traffic created its familiar symphony, but in this small kitchen, time moved differently. Here, stories were still told rather than streamed, and the most important conversations happened over food that took hours to prepare.
+
+"Tell me about the boy again," Nani said, spooning more curry onto Maya's plate. "The one who makes you smile at your phone like that."
+
+And despite everything—the notifications, the deadlines, the constant ping of a world demanding attention—Maya found herself settling into the rhythm of her grandmother's questions, the ancient art of sharing life over a shared meal.
+
+=====`
+  },
+  {
+    name: "🎭 Character-Driven Style",
+    usageTips: "Use this style when internal conflict and character development are the primary focus of your story across any genre.",
+    types: ['fiction'],
+    tags: ['Cross Genre', 'Character-Driven', 'Creative Writing'],
+    value: `**Narrative Voice and Tone**: Intimate and character-focused, diving deep into character motivation and internal thoughts. The voice creates close emotional connection with readers through authentic exploration of human complexity and growth.
+
+**Sentence Structure and Pacing**: Follows the rhythms of thought and emotion rather than external action. Uses longer, more complex sentences for internal exploration and shorter ones for moments of realization or decision. Pacing allows for deep character development.
+
+**Language and Vocabulary**: Rich in emotional detail and psychological insight. Precise vocabulary for different feelings and motivations. Comparisons often drawn from the character's personal experience and background.
+
+**Dialogue Style**: Reveals character through subtext, speech patterns, and what remains unspoken. Conversations show relationship dynamics and internal conflicts. Characters often struggle to express their deeper truths directly.
+
+**Theme and Motives**: Focuses on character transformation, self-discovery, relationships, and personal growth. How characters change through challenges and choices. The complexity of human motivation and the journey toward self-understanding.
+
+=====
+
+Example snippets:
+
+Sarah had always thought of herself as the kind of person who made decisions quickly, but here she sat for the third morning in a row, staring at the resignation letter on her laptop screen, her finger hovering over the send button like a hummingbird afraid to land.
+
+The cursor blinked at her—impatient, expectant, mocking. Such a small thing, that blinking line, yet it represented everything she was too afraid to become and too tired to keep avoiding.
+
+Her reflection in the computer screen showed a woman she barely recognized: dark circles under eyes that had once sparkled with ambition, shoulders curved inward as if protecting something precious and fragile. When had she started looking so defeated?
+
+The email from her college roommate still sat in her inbox, full of excited updates about the nonprofit she'd started in Guatemala. "Remember when we used to stay up all night talking about changing the world?" Jessica had written. "I finally figured out how to start."
+
+Sarah touched the screen where her reflection met her friend's words. She did remember. She remembered the girl who had believed her dreams were not just possible but inevitable. The girl who had never imagined she'd spend her days managing someone else's vision while her own slowly suffocated in a cubicle.
+
+Her phone rang—her boss, no doubt wondering where the quarterly reports were. Sarah let it go to voicemail and finally, before she could change her mind again, clicked send.
+
+The resignation letter disappeared into the digital ether, and Sarah realized she was holding her breath. Not from fear, but from something she hadn't felt in years: anticipation.
+
+=====`
+  },
+  {
+    name: "⚡ Plot-Driven Style",
+    usageTips: "Use this style for action-oriented stories, adventures, and fast-paced narratives across any genre.",
+    types: ['fiction'],
+    tags: ['Cross Genre', 'Plot-Driven', 'Creative Writing', 'Dramatic'],
+    value: `**Narrative Voice and Tone**: Energetic and forward-moving, maintaining momentum and reader engagement. The voice creates urgency and excitement while clearly showing action sequences and plot developments. Confident and dynamic storytelling.
+
+**Sentence Structure and Pacing**: Varies strategically—short, punchy sentences for action and tension, longer ones for necessary exposition. Quick pacing with frequent scene breaks and cliffhangers. Structure keeps the plot moving forward.
+
+**Language and Vocabulary**: Clear, concrete language emphasizing action and movement. Strong verbs drive every sentence. Sensory details focus on immediate experience rather than lengthy description. Precise terminology for action sequences.
+
+**Dialogue Style**: Purposeful exchanges that advance plot and reveal information efficiently. Characters speak naturally but conversations move story forward. Quick banter, urgent exchanges, and dialogue that builds tension.
+
+**Theme and Motives**: External conflict drives internal growth. Themes emerge through action and consequence rather than introspection. Character development happens through choices made under pressure and responses to challenges.
+
+=====
+
+Example snippets:
+
+The explosion threw Elena twenty feet into the fountain, and she had exactly thirty seconds before Kozlov's men surrounded the plaza.
+
+She surfaced, spitting chlorinated water and checking her earpiece. Static. The comm was dead, which meant Mikhail was either compromised or worse. No time to find out which.
+
+Elena hauled herself over the fountain's edge, glass from the embassy windows crunching under her boots. The briefcase—where was the briefcase? There, half-buried under debris from the blast, its titanium shell scratched but intact.
+
+Footsteps. Multiple sets, moving fast.
+
+She grabbed the case and sprinted toward the motorcycle she'd stashed behind the cathedral. The key turned on the first try—finally, something was going right. The engine roared to life just as the first shots rang out, bullets sparking off the stone walls around her.
+
+Elena gunned it down the narrow alley, leaning hard into the turn onto Via Roma. In her mirror, she counted four vehicles giving chase. Kozlov wasn't taking any chances.
+
+Her phone buzzed against her ribs—a text from a blocked number: "Bridge. Five minutes. Come alone."
+
+Elena checked her watch. The rendezvous was across the city, and she had half the Russian mob breathing down her neck. She downshifted and took the next corner at sixty kilometers per hour.
+
+Five minutes. She'd make it in four.
+
+=====`
+  },
+  {
+    name: "💭 Introspective/Reflective Style",
+    usageTips: "Use this style for thoughtful narratives, coming-of-age stories, and philosophical fiction across any genre.",
+    types: ['fiction'],
+    tags: ['Cross Genre', 'Character-Driven', 'Creative Writing', 'Serious'],
+    value: `**Narrative Voice and Tone**: Contemplative and thoughtful, inviting readers into deeper thinking about life's complexities. The voice is patient with uncertainty and comfortable exploring big questions through personal experience.
+
+**Sentence Structure and Pacing**: Unhurried pacing that allows for meditation and reflection. Longer, more complex sentences that follow the wandering nature of deep thought. Builds meaning through gathering insights rather than dramatic action.
+
+**Language and Vocabulary**: Thoughtful and nuanced, paying attention to subtle differences in meaning and emotion. Rich in comparisons and symbolic meaning. Vocabulary that can express complex ideas and delicate emotional differences.
+
+**Dialogue Style**: Conversations often touch on deeper meanings and life questions. Characters may speak indirectly, using stories or examples to convey larger truths. Silences and pauses carry significant weight.
+
+**Theme and Motives**: Explores fundamental questions about existence, meaning, identity, and human nature. How characters understand themselves and their place in the world. The search for truth and understanding through personal experience.
+
+=====
+
+Example snippets:
+
+There's something about airports that makes you acutely aware of time—not the mechanical time of clocks and schedules, but the deeper current that carries all of us forward whether we're ready or not.
+
+I sat in Terminal C, watching strangers navigate their own small dramas of departure and arrival, and wondered when I had become the kind of person who observed life rather than lived it. The businessman arguing into his phone about quarterly projections, the young mother trying to comfort a crying toddler, the elderly couple holding hands as they waited for their final boarding call—each of them was writing the story of their life, making choices that would ripple forward in ways they couldn't possibly imagine.
+
+My own ticket felt heavy in my pocket. Flight 447 to Portland, departing in two hours. After that, a new job, a new apartment, a chance to become someone different from who I'd been for the past thirty-five years. But here's what nobody tells you about reinventing yourself: you can change your geography, your career, even your daily habits, but you still wake up every morning inside the same consciousness, carrying the same collection of joys and wounds that have always defined you.
+
+The boarding announcement echoed through the terminal, and I watched the usual choreography of gathering belongings and forming lines. Soon, that would be me, stepping onto a plane that would carry me toward a future I had chosen but couldn't fully envision.
+
+Maybe that was the point. Maybe the courage wasn't in having a perfect plan, but in accepting that some questions could only be answered by moving forward into the uncertainty, trusting that the person you are becoming will be equal to whatever you discover along the way.
+
+=====`
+  },
+  {
+    name: "🌟 Uplifting/Feel-Good Style",
+    usageTips: "Use this style for positive, heartwarming tales and hopeful narratives that inspire readers across any genre.",
+    types: ['fiction'],
+    tags: ['Universal', 'Character-Driven', 'Creative Writing', 'Playful'],
+    value: `**Narrative Voice and Tone**: Warm, optimistic, and emotionally generous. The voice finds hope and beauty even in difficult situations, celebrating human resilience and the possibility of positive change. Genuine warmth without naive simplicity. Often uses close third-person or first-person perspectives to create intimate connection with characters' emotional journeys.
+
+**Sentence Structure and Pacing**: Comfortable, flowing pacing (15-25 words average) that lets readers enjoy positive moments and character growth. Mix shorter sentences for key moments with longer ones for warmth and description. Give readers time to feel connections and emotions. Build scenes toward satisfying, hopeful endings.
+
+**Language and Vocabulary**: Rich in positive imagery and uplifting comparisons from nature, light, growth, and healing. Language that emphasizes what's possible and how people connect. Warm details that create comfort and joy—soft textures, happy sounds, bright colors. Avoids cynicism while honestly showing real struggles. Uses words that inspire hope without preaching.
+
+**Dialogue Style**: Conversations reveal kindness, wisdom, and authentic human connection through supportive exchanges. Characters speak with compassion and understanding, offering comfort through active listening and encouragement. Humor that brings people together rather than divides—gentle, inclusive, often self-deprecating. Shows characters choosing to be their best selves in moments of vulnerability and connection.
+
+**Conflict and Resolution**: Creates meaningful tension through internal struggles, community challenges, or past hurts that require genuine healing. Conflict feels authentic and relatable—job loss, family struggles, personal insecurities, overcoming fear—but focuses on how people grow and support each other through difficulties. Resolutions feel earned rather than easy, showing characters actively choosing hope, forgiveness, and positive change.
+
+**Theme and Motives**: Hope triumphing over adversity through human connection, the transformative power of kindness and community, personal growth and second chances, love in its many forms. How small acts of compassion create ripple effects of positive change. The belief that people can heal, grow, and find purpose through supporting one another. Universal themes of belonging, forgiveness, resilience, and discovering unexpected strength in difficult times.
+
+=====
+
+Example snippets:
+
+The community garden had started as Mrs. Chen's crazy idea, but three months later, it had become the heart of Maple Street in ways no one had expected.
+
+Tom knelt between the tomato plants, showing eight-year-old Marcus how to tie the vines to their stakes. Six months ago, Tom had been laid off from the factory where he'd worked for fifteen years. He'd spent weeks sitting on his porch, watching the neighborhood kids walk by, wondering what he was supposed to do with all this unexpected time. The rejection letters had piled up on his kitchen counter like fallen leaves—dozens of them, each one a quiet reminder that at fifty-two, he was somehow both overqualified and obsolete.
+
+"Like this, Mr. Tom?" Marcus held up a vine he'd secured with careful loops of green twine.
+
+"Perfect," Tom said, and meant it. The boy had gentle hands for gardening, a patience that seemed unusual for his age. "You've got the touch."
+
+Marcus beamed, dirt streaking his cheek where he'd wiped away sweat. His grandmother had started bringing him to the garden after school, partly to keep him busy while she worked her evening shift at the hospital, but mostly because she believed children should know where food comes from. "My abuela says plants are like people," Marcus said, patting the soil around a seedling. "They grow better when they're not alone."
+
+At the far end of the plot, Mrs. Chen was explaining companion planting to a group of teenagers from the high school, her English mixed with enthusiastic gestures and the occasional Chinese phrase that somehow made perfect sense anyway. The teenagers—kids who supposedly only cared about video games and social media—listened intently as she described how marigolds could protect vegetables from pests.
+
+"See?" Marcus whispered to Tom. "Even the flowers take care of each other."
+
+"Community," Mrs. Chen had said when she first proposed the garden, "grows best when people have something to tend together."
+
+Tom watched Marcus carefully position another tie around the tomato vine and realized she had been right about more than just plants. They were all growing something here—not just vegetables, but connections, purpose, the quiet satisfaction of nurturing something valuable together. For the first time in months, the word "unemployed" didn't feel like a weight in his chest. Here, surrounded by dirt and hope and an eight-year-old's wisdom, he was simply Tom—the man who knew about tomatoes and patience, who had something precious to offer and something even more precious to receive.
+
+=====`
+  },
+  {
+    name: "🌙 Atmospheric/Mood Style",
+    usageTips: "Use this style when setting, mood, and atmosphere are crucial elements of your story across any genre.",
+    types: ['fiction'],
+    tags: ['Cross Genre', 'Atmosphere-Driven', 'Creative Writing'],
+    value: `**Narrative Voice and Tone**: Vivid and immersive, creating a strong sense of place and mood. The voice draws clear pictures with words, making readers feel like they're there in the setting. Rich in sensory details and emotional atmosphere that matches the story.
+
+**Sentence Structure and Pacing**: Varies to match the mood being created—longer, flowing sentences for dreamy or contemplative atmospheres, shorter ones for tension or urgency. Pacing gives readers time to fully absorb the environmental details and emotional feeling.
+
+**Language and Vocabulary**: Rich in sensory language and descriptive details. Careful word choice to evoke specific moods and feelings. Use comparisons and images that connect setting to emotion. Pick vocabulary that creates atmosphere through how words sound and feel as well as their meaning.
+
+**Dialogue Style**: Characters speak in ways that reflect and enhance the story's atmosphere. Dialogue may be sparse, letting setting and mood take center stage, or it may echo the environmental feeling through rhythm and word choice.
+
+**Theme and Motives**: How environment shapes character and emotion. The relationship between internal and external landscapes. Setting as a reflection of psychological states. The power of place to influence story and meaning.
+
+=====
+
+Example snippets:
+
+The lighthouse keeper's cottage sat at the edge of the world, where the Atlantic rolled endlessly against granite cliffs that had been carved by centuries of salt and storm.
+
+Eleanor arrived on a Tuesday morning when the fog hung so thick she could barely see the worn path beneath her feet. The cottage emerged from the gray like a memory half-forgotten—weathered shingles silvered by decades of ocean air, windows that reflected nothing but mist, a door painted red as fresh blood against the monochrome landscape.
+
+Inside, the air held the scent of old wood and brine, of books left too long in humid salt air. The floorboards creaked with each step, a language of their own that spoke of solitude and endurance. Through the kitchen window, she could just make out the lighthouse itself, its white tower disappearing into the fog like a giant's finger pointing toward heaven.
+
+The real estate agent had warned her about the isolation. "Six months of winter," he'd said, "when sometimes you don't see another soul for weeks." But Eleanor had come here precisely for that silence, for the way the ocean's constant whisper could drown out all the voices in her head.
+
+She set her single suitcase on the bed and opened the window, letting the fog drift into the room like curious spirits. Somewhere in the gray, a fog horn sounded—deep, mournful, eternal. It was the sound of ships finding their way home, of safety in darkness, of light that persisted even when no one could see it.
+
+Eleanor smiled for the first time in months. This was exactly what she had been looking for: a place where the weather could match her mood, where solitude was not just accepted but necessary, where she could finally stop pretending to be anything other than what she was—someone who needed to disappear for a while into the gray space between sea and sky.
+
+=====`
+  },
+  {
+    name: "💬 Dialogue-Heavy Style",
+    usageTips: "Use this style for character interaction-focused stories and ensemble pieces driven by conversation across any genre.",
+    types: ['fiction'],
+    tags: ['Cross Genre', 'Dialogue-Driven', 'Creative Writing'],
+    value: `**Narrative Voice and Tone**: Observational and character-focused, letting dialogue carry most of the storytelling. The narrative voice provides just enough context and description to support the conversations while staying out of the way. Shows readers what they need to see while letting characters reveal themselves through talking.
+
+**Sentence Structure and Pacing**: Quick, lively pacing (8-15 words average for narrative) that follows conversational rhythm. Short paragraphs with frequent dialogue breaks give readers breathing room and keep them engaged. Use white space to control how conversations flow. Mix single-line responses for tension with longer blocks for important revelations.
+
+**Language and Vocabulary**: Natural, realistic dialogue that shows character through how people talk—their word choices, speech patterns, and verbal habits. Each character sounds different based on their background, education, personality, and mood. Keep narrative language simple and invisible, focusing on clear action and concrete details. Use dialogue tags sparingly—"said" when needed, but often let conversation stand alone.
+
+**Action and Description**: Include small actions between dialogue lines—pouring coffee, avoiding eye contact, fidgeting—that show what characters are really feeling. Use just enough environmental details to ground conversations in specific places. Show character reactions through physical behavior instead of explanation: nervous gestures, body language, moments of connection or pulling away.
+
+**Dialogue Techniques**: Long, realistic conversations that move the plot forward and show who characters really are. Use interruptions, people talking over each other, and unfinished thoughts to make it feel real. Characters often have different goals in the same conversation, which reveals their priorities. Pay attention to subtext—what people don't say is often as important as what they do. Include natural speech patterns like pauses, repeated words, and verbal habits.
+
+**Theme and Motives**: Explore relationships and character dynamics through how people interact and behave. Show how people communicate, misunderstand each other, connect, and fight, especially when they're vulnerable. Focus on the gap between what people say and what they really mean. Reveal power dynamics through who talks when and how. Show human connection and disconnection through dialogue choices and responses.
+
+=====
+
+Example snippets:
+
+"You're wearing the blue tie."
+
+Janet didn't look up from her coffee. The newspaper lay folded beside her plate, still in its plastic sleeve.
+
+"It's navy."
+
+"Same thing."
+
+David adjusted the knot, catching his reflection in the kitchen window. Twenty-two years, and she still called it blue. "The interview's at ten. I should leave—"
+
+"Traffic will be terrible on the bridge."
+
+"I'm taking the tunnel."
+
+"The tunnel's worse." Janet turned a page of her magazine. The sound was sharp in the quiet kitchen.
+
+He poured coffee into his travel mug. His hands were steadier than he'd expected.
+
+"Jan."
+
+"What?"
+
+"Look at me."
+
+She finally raised her eyes. "You look fine. You always look fine."
+
+"That's not what I meant."
+
+"I know what you meant."
+
+David sat down across from her. The want ads lay spread between them like a map of all the places he might go without her. She'd circled three jobs in red ink. All in Chicago.
+
+"We should talk about—"
+
+"About what? About how you're taking a job in Chicago?" Her fingers made air quotes around the words she'd been practicing. "About how we've been married twenty-two years and you're just now telling me you're 'not fulfilled'?"
+
+"It's not about fulfillment."
+
+"No?" She closed the magazine. "What's it about then?"
+
+"It's about..." He stopped. Every word felt like a landmine. "It's about waking up."
+
+"I see." Janet's voice went flat. "And I'm what—the dream you want to wake up from?"
+
+"Come on—"
+
+"No, you come on, David." She stood up, her chair scraping against the floor. "Don't pretty it up with metaphors. If you want to leave, then leave. But don't make it about self-actualization or whatever midlife crisis bullshit you're selling yourself."
+
+He reached for her hand. She pulled it away.
+
+"The kids will want to know why."
+
+"We'll figure out—"
+
+"We." Janet laughed, but there was no humor in it. She picked up her coffee mug, then set it down without drinking. "There is no we in this decision, is there?"
+
+Outside, a car door slammed. Their neighbor getting ready for work. Normal people doing normal things on what used to be a normal Tuesday morning.
+
+=====`
+  },
+  {
+    name: "📖 Classic Storytelling Style",
+    usageTips: "Use this style for traditional narrative structure with timeless, accessible storytelling across any genre.",
+    types: ['fiction'],
+    tags: ['Universal', 'Plot-Driven', 'Creative Writing'],
+    value: `**Narrative Voice and Tone**: Clear, authoritative, and engaging, drawing on established storytelling traditions. The voice should be accessible to all readers while maintaining literary quality. Comfortable with all-knowing or limited third-person perspective that knows when to zoom in for intimacy and pull back for context. Creates immediate trust with readers through confident, warm narration.
+
+**Sentence Structure and Pacing**: Balanced pacing with clear beginning, middle, and end structure. Varied sentence lengths (15-25 words average) that serve story rhythm naturally. Builds tension toward climax with satisfying resolution that feels both surprising and inevitable. Uses traditional techniques like foreshadowing, callbacks, and dramatic irony without calling attention to them.
+
+**Language and Vocabulary**: Accessible yet polished language that serves the story without drawing attention to itself. Clear, precise word choice that feels natural rather than writerly. Timeless quality that avoids both dated references and trendy modern slang. Rich but not overwrought description that paints clear pictures without slowing momentum.
+
+**Story Structure**: Embraces complete narrative arcs with proper setup, development, and payoff. Every element introduced serves a purpose and finds resolution. Characters undergo meaningful change through challenges they face. Conflict feels organic and resolution feels earned. Stories deliver on their promises to readers with satisfying conclusions.
+
+**Dialogue Style**: Natural conversations that reveal character and advance plot simultaneously. Dialogue feels authentic to characters while remaining clear and purposeful. Each character has a distinct but not exaggerated voice. Conversations serve multiple story functions without feeling forced. Includes both conflict and connection through character interaction.
+
+**Theme and Motives**: Universal themes that resonate across cultures and time periods—love, loss, growth, redemption, belonging, courage. Clear story arc with character transformation that feels genuine. Moral and emotional clarity without being heavy-handed or preachy. Stories that feel both familiar and fresh, comfortable yet compelling. Delivers emotional satisfaction through earned character victories and meaningful growth.
+
+=====
+
+Example snippets:
+
+The letter that changed Thomas Hartwell's life arrived on a Tuesday morning in March, delivered by a postman who had no idea he was carrying someone's future in his worn leather bag.
+
+Thomas was at his kitchen table, reviewing his lesson plans for the day, when the envelope slid through his mail slot and landed with a soft whisper. The return address bore the seal of Blackwood Academy—a school so prestigious that Thomas had never seriously imagined they would respond to his application. But here it was, his name written in careful script across cream-colored paper.
+
+He set down his coffee and picked up the letter with hands that trembled slightly. In his fifteen years of teaching at the local high school, Thomas had watched too many bright students leave town for opportunities their hometown couldn't provide. He had begun to wonder if he, too, was meant for something more—if the restlessness he felt was trying to tell him something important.
+
+The letter was brief but warm. The headmaster, Dr. Elizabeth Thornfield, requested his presence for an interview the following week. They were seeking, she wrote, "an educator who understands that true learning happens when we challenge our students to exceed their own expectations."
+
+Thomas smiled at that. It was exactly what he'd always believed, standing before countless classrooms, watching the moment when understanding dawned in a student's eyes—that magical instant when confusion transformed into clarity.
+
+He read the letter three times, each reading making the opportunity feel more real and more terrifying. Taking the position would mean leaving behind everything he knew: his students, his small apartment above the bookstore, the Friday night dinners with his sister and her family. It would mean starting over at forty-three, in a place where nobody knew him, where he'd have to prove himself all over again.
+
+But it would also mean teaching students who wanted to learn, having resources he'd only dreamed of, becoming the teacher he'd always wanted to be.
+
+He folded the letter carefully and placed it next to his lesson plans. Today, he would teach Shakespeare to a classroom of teenagers who claimed they hated poetry. He'd show them, as he always did, that the words of a playwright four hundred years dead could still make them laugh, make them think, make them feel. Tomorrow, he would begin to decide whether he was brave enough to follow his own advice about exceeding expectations.
+
+Outside his window, spring was beginning to show itself in the tentative green of new leaves. Thomas had always loved spring—the promise of it, the hope. Everything that had seemed dead through winter suddenly revealing it had been alive all along, just waiting for the right moment to grow.
+
+Maybe, he thought, picking up his coffee again, people were like that too. Maybe you were never too old to bloom into something new.
+
+=====`
+  },
+  {
+    name: "📺 Social Media Style",
+    usageTips: "Use this style for Twitter/X threads, Instagram captions, TikTok scripts, LinkedIn posts, and engaging social media content.",
+    types: ['nonfiction'],
+    tags: ['Genre Defining', 'Digital Web Content', 'Casual'],
+    value: `**Content Structure and Format**: Platform-optimized content with hooks, scannable text, and strategic use of emojis, hashtags, and mentions. Designed for thumb-stopping, shareability, and engagement. Each post serves a clear purpose within seconds of reading.
+
+**Sentence Structure and Pacing**: Ultra-short sentences and fragments (3-8 words average) for maximum impact. Strategic line breaks for visual appeal and readability on mobile. Quick, punchy delivery that respects shrinking attention spans. Uses cliffhangers and pattern interrupts.
+
+**Language and Vocabulary**: Conversational, relatable language that feels like talking to a friend. Platform-specific terminology and trending phrases. Accessibility-focused with simple vocabulary. Heavy use of active voice and action words that drive engagement.
+
+**Engagement Techniques**: Opens with hooks that stop scrolling immediately. Uses questions, controversial statements, or surprising facts. Includes clear calls-to-action (like, share, comment). Creates community through inclusive language and shared experiences.
+
+**Platform Adaptation**: Twitter/X: Thread-friendly with numbered points and continuity. Instagram: Visual storytelling with caption space optimization. TikTok: Script format with timing cues. LinkedIn: Professional but personable tone with industry relevance.
+
+=====
+
+Example snippets:
+
+**Twitter/X Thread:**
+
+🧵 THREAD: 5 writing mistakes that make you sound like a robot (and how to fix them)
+
+1/ Stop using "utilize" when you mean "use"
+
+Your brain isn't a thesaurus. Keep it simple.
+
+2/ Delete every instance of "in order to"
+
+Just say "to."
+
+Your readers will thank you.
+
+3/ Kill the passive voice
+
+❌ "Mistakes were made"
+✅ "I screwed up"
+
+See the difference?
+
+4/ Stop hedge words
+
+Maybe, perhaps, possibly, might...
+
+Pick a side. Own it.
+
+5/ Read your work out loud
+
+If you wouldn't say it to a friend, don't write it.
+
+What's your biggest writing pet peeve? 👇
+
+---
+
+**Instagram Caption:**
+
+POV: You're a writer staring at a blank page 📝
+
+We've all been there. That blinking cursor mocking us. The pressure building.
+
+Here's what I do when writer's block hits:
+
+✨ Change locations (coffee shop energy hits different)
+✨ Write the worst possible version first
+✨ Set a 10-minute timer and just word-vomit
+✨ Read something completely unrelated
+✨ Take a walk without my phone
+
+The blank page isn't your enemy. It's possibility waiting to happen.
+
+What's your go-to cure for writer's block? Tell me in the comments 👇
+
+#WritingTips #WritersBlock #CreativeProcess #WritingCommunity
+
+---
+
+**LinkedIn Post:**
+
+Hot take: Your company's "professional" writing is driving customers away.
+
+I just tried to understand a software company's pricing page.
+
+15 minutes later, I still don't know what they actually do.
+
+The problem? Corporate speak that prioritizes sounding smart over being clear.
+
+Instead of "We facilitate optimal solutions for diverse stakeholder ecosystems"
+
+Try "We help teams work better together"
+
+Your customers don't need a dictionary to buy from you.
+
+They need clarity.
+
+What's the worst example of corporate jargon you've seen? Share it below 👇
+
+=====`
+  },
+  {
+    name: "🎬 Script/Screenplay Style",
+    usageTips: "Use this style for screenplays, stage plays, video scripts, podcast scripts, and any content requiring professional script formatting.",
+    types: ['fiction'],
+    tags: ['Genre Defining', 'Dialogue-Driven', 'Creative Writing'],
+    value: `**Format Structure**: Industry-standard formatting with scene headings, action lines, character names, dialogue, and parentheticals. Proper margins, spacing, and capitalization conventions. Each element serves a specific production purpose.
+
+**Scene and Action Description**: Concise, visual action lines written in present tense. Focus on what the audience sees and hears, not internal thoughts. Economical description that serves the story and guides production teams without over-directing.
+
+**Dialogue Craft**: Character-specific voices that sound natural when spoken aloud. Subtext-heavy conversations where characters often say one thing while meaning another. Rhythmic speech patterns that reflect personality, background, and emotional state.
+
+**Technical Elements**: Proper scene headings (INT./EXT. LOCATION - TIME). Character introductions in ALL CAPS on first appearance. Parentheticals used sparingly for essential direction only. Transitions (CUT TO:, FADE IN:) when necessary for storytelling.
+
+**Visual Storytelling**: Show don't tell through action and dialogue. Camera-conscious writing that suggests shots without being prescriptive. Conflict-driven scenes that advance plot and reveal character simultaneously. Efficient storytelling within format constraints.
+
+=====
+
+Example snippets:
+
+**Screenplay Format:**
+
+FADE IN:
+
+EXT. COFFEE SHOP - MORNING
+
+Rain streaks the windows. SARAH (28), disheveled in yesterday's clothes, clutches a phone with a cracked screen. She dials. It goes to voicemail.
+
+SARAH
+(into phone)
+Hey Mom, it's me. Again. I know
+you said not to call, but—
+
+The line goes dead. Sarah stares at the phone.
+
+MARCUS (30s), the barista, approaches with a steaming mug.
+
+MARCUS
+Triple shot americano?
+
+SARAH
+Make it a quad.
+
+MARCUS
+Rough night?
+
+SARAH
+Rough life.
+
+She takes the coffee, hands shaking slightly. Marcus notices.
+
+MARCUS
+You know, we're hiring. Night
+shift pays better.
+
+SARAH
+(surprised)
+You don't even know me.
+
+MARCUS
+I know you tip in exact change
+because you're counting every
+penny. I know you order the same
+thing every day because routine
+is the only thing holding you
+together right now.
+
+Sarah looks up, really seeing him for the first time.
+
+SARAH
+That obvious?
+
+MARCUS
+Takes one to know one.
+
+He slides a job application across the counter.
+
+MARCUS (CONT'D)
+Think about it.
+
+Sarah picks up the application, hope flickering in her eyes.
+
+CUT TO:
+
+---
+
+**Stage Play Format:**
+
+SETTING: A small apartment kitchen. Morning light streams through a single window. ELENA sits at a worn table, surrounded by unpaid bills.
+
+ELENA: (Reading a letter aloud) "Final notice." (Laughs bitterly) They really mean it this time.
+
+(DAVID enters from offstage, work clothes dirty, lunch pail in hand)
+
+DAVID: Morning, El.
+
+ELENA: (Not looking up) Is it? I hadn't noticed.
+
+DAVID: (Setting down his lunch pail) What's got you—
+(He sees the bills)
+Oh.
+
+ELENA: Three months behind on rent. Two on utilities. The car payment... (Waves the letter) Well, let's just say we're walking everywhere now.
+
+DAVID: (Moving to her, hesitant) What about your sister?
+
+ELENA: (Finally looking at him) You want me to beg?
+
+DAVID: I want you to survive.
+
+(Long pause. Elena crumples the letter)
+
+ELENA: Pride's expensive, isn't it?
+
+DAVID: (Gentle) We'll figure it out. We always do.
+
+ELENA: Do we? Or do we just... postpone the inevitable?
+
+(DAVID sits across from her, reaches for her hands)
+
+DAVID: Look at me, Elena. Look at me.
+
+(She does)
+
+DAVID: (Cont'd) We're still here. That counts for something.
+
+ELENA: (Softly) Does it?
+
+(Lights dim as DAVID takes her hands in his)
 
 =====`
   }

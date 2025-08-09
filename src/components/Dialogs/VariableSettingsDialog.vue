@@ -17,51 +17,29 @@
               switch-toggle-side
           >
             <q-card-section>
-              <div class="row q-gutter-x-sm">
-                <div class="col-auto" v-if="!variable.undeletable">
-                  <q-input filled dense v-model="variable.title" :readonly="(variable.undeletable === true)" label="Name" />
-                </div>
-                <div class="col">
-                  <q-input filled dense v-model="variable.value" label="Value" type="textarea"/>
-                  <div class="q-mt-md">
-                    <q-btn
-                      dense
-                      no-caps
-                      :icon="showWritingStyles ? 'mdi-chevron-up' : 'mdi-chevron-down'"
-                      :label="showWritingStyles ? 'Hide Examples' : 'Show Examples'"
-                      @click="showWritingStyles = !showWritingStyles"
-                      color="primary"
-                    />
-                  </div>
-                </div>
-                <div class="col-auto" v-if="!(variable.undeletable === true)">
-                  <q-btn flat label="" color="red" icon="mdi-delete-outline" @click="fileStore.removeVariable(index)" />
-                </div>
+              <div  v-if="variable.title === 'WritingStyle'" class="q-pt-sm">
+                <WritingStyleSelector
+                  :initial-value="variable.value"
+                  :title="null"
+                  use-ai-input
+                  :cols="4"
+                  :sub-title="null"
+                  @writing-style-changed="(styleData) => variable.value = styleData.value"
+                />
               </div>
-
-              <template  v-if="variable.title === 'WritingStyle'">
-
-
-                <q-slide-transition>
-                  <div v-if="showWritingStyles">
-                    <div class="row justify-center q-mt-md q-mb-sm">
-                      <q-pagination
-                        v-model="current"
-                        :max="maxPages"
-                        direction-links
-                      />
-                    </div>
-
-                    <div class="row">
-                      <div v-for="writingStyle in writingStyles.slice((current - 1) * pageSize, current * pageSize)" :key="writingStyle" class="col-4 q-pa-sm">
-                        <WritingStyleSelectorItem  @writing-style-set="variable.value = writingStyle.value" :writingStyle="writingStyle" :currentValue="variable.value" />
-                      </div>
-                    </div>
+              <template v-else>
+                <div class="row q-gutter-x-sm">
+                  <div class="col-auto" v-if="!variable.undeletable">
+                    <q-input filled dense v-model="variable.title" :readonly="(variable.undeletable === true)" label="Name" />
                   </div>
-                </q-slide-transition>
-
+                  <div class="col">
+                    <q-input filled dense v-model="variable.value" label="Value" type="textarea"/>
+                  </div>
+                  <div class="col-auto" v-if="!(variable.undeletable === true)">
+                    <q-btn flat label="" color="red" icon="mdi-delete-outline" @click="fileStore.removeVariable(index)" />
+                  </div>
+                </div>
               </template>
-
 
             </q-card-section>
           </q-expansion-item>
@@ -75,19 +53,13 @@
 
 <script setup>
   import {useLayoutStore} from "stores/layout-store";
-  import {computed, ref} from "vue";
+  import {computed} from "vue";
   import {useFileStore} from "stores/file-store";
   import HelpIcon from "components/Common/HelpIcon.vue";
-  import {writingStyles} from "assets/writingStyles/writingStyleList";
-  import WritingStyleSelectorItem from "components/Common/WritingStyleSelectorItem.vue";
+  import WritingStyleSelector from 'components/Common/WritingStyleSelector.vue';
 
   const layoutStore = useLayoutStore();
   const fileStore = useFileStore();
-
-  const maxPages = computed(() => Math.ceil(writingStyles.length / pageSize));
-  const current = ref(1);
-  const pageSize = 3;
-  const showWritingStyles = ref(false);
 
   const variableSettingsOpened = computed({
     get() {

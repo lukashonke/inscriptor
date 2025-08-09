@@ -82,101 +82,13 @@
         icon="mdi-palette-outline"
         :done="currentStep > 2"
       >
-        <div class="text-subtitle2 q-mb-md text-primary">
-          <div>Choose your Writing Style (optional)</div>
-          <div class="text-caption">Writing style description will be fed into AI prompts to make it generate text that closely follows your style.</div>
-        </div>
-        <div class="row q-mb-sm">
-          <q-carousel
-            v-model="slide"
-            class="q-px-none"
-            transition-prev="slide-right"
-            transition-next="slide-left"
-            swipeable
-            animated
-            control-color="primary"
-            arrows
-            height="auto"
-          >
-            <q-carousel-slide
-              v-for="(slideStyles, slideIndex) in writingStyleSlides"
-              :key="slideIndex"
-              :name="slideIndex"
-              class="column no-wrap q-px-xl"
-            >
-              <div class="row q-gutter-md q-pa-md">
-                <div
-                  v-for="writingStyle in slideStyles"
-                  :key="writingStyle.name"
-                  class="col"
-                >
-                  <WritingStyleSelectorItem
-                    @writing-style-set="writingStyleValue = writingStyle.value; writingStyleName = writingStyle.name"
-                    :writingStyle="writingStyle"
-                    :currentValue="writingStyleValue"
-                  />
-                </div>
-                <!-- Fill remaining slots if less than 3 styles in slide -->
-                <div
-                  v-for="n in (pageSize - slideStyles.length)"
-                  :key="`empty-${n}`"
-                  class="col"
-                ></div>
-              </div>
-            </q-carousel-slide>
-          </q-carousel>
-        </div>
-
-        <div class="q-mb-md" v-if="showCustomInput">
-          <q-input
-            dense
-            filled
-            outlined
-            type="textarea"
-            flat
-            input-style="height: 220px;"
-            v-model="writingStyleValue"
-          />
-        </div>
-        <div class="row" v-if="showCustomInput">
-          <q-btn
-            flat
-            color="primary"
-            class="full-width"
-            icon="mdi-close"
-            @click="toggleWritingStyleMode"
-            no-caps
-          />
-        </div>
-        <template v-else>
-          <div class="row justify-center scroll-y q-px-xl q-py-md rounded-borders" style="height: 250px;" v-if="writingStyleValue">
-            <div class="full-width text-caption q-mb-sm text-primary">{{  writingStyleName }}:</div>
-            <div class="prompt-results" v-html="markdownToHtml(writingStyleValue)" />
-          </div>
-          <div class="row q-mt-md" v-if="writingStyleValue">
-            <q-btn
-              flat
-              color="primary"
-              class="full-width"
-              :icon="showCustomInput ? 'mdi-chevron-up' : 'mdi-pencil-outline'"
-              :label="showCustomInput ? 'Hide Custom Input' : 'Customize'"
-              @click="toggleWritingStyleMode"
-              no-caps
-            />
-          </div>
-          <div v-if="!writingStyleValue" style="height: 250px;" class="flex justify-center">
-            <q-btn
-              flat
-              color="primary"
-              class="full-width"
-              icon="mdi-pencil-outline"
-              label="Create Custom Style"
-              @click="toggleWritingStyleMode"
-              no-caps
-            />
-          </div>
-
-        </template>
+        <WritingStyleSelector
+          disable-customization
+          :new-project-type="newProjectType"
+          :initial-value="writingStyleValue"
+          :initial-name="writingStyleName"
+          @writing-style-changed="onWritingStyleChanged"
+        />
       </q-step>
 
       <q-step
@@ -233,10 +145,9 @@ import {getProjects, setUserState} from "src/common/apiServices/userProjectServi
 import {useCurrentUser} from "vuefire";
 import {useFileStore} from "stores/file-store";
 import {Notify} from "quasar";
-import {writingStyles} from "assets/writingStyles/writingStyleList";
-import WritingStyleSelectorItem from "components/Common/WritingStyleSelectorItem.vue";
 import {guid} from "src/common/utils/guidUtils";
 import {hasFlag, markdownToHtml} from "src/common/utils/textUtils";
+import WritingStyleSelector from 'components/Common/WritingStyleSelector.vue';
 
 const layoutStore = useLayoutStore();
 const promptStore = usePromptStore();
@@ -257,12 +168,8 @@ const syncToCloud = ref(user.value.isAnonymous ? false : props.defaultProjectTyp
 const importRecommendedPrompts = ref(true);
 const writingStyleName = ref('Default (Neutral) Style');
 const writingStyleValue = ref('');
-const showCustomInput = ref(false);
 
 const currentStep = ref(1);
-
-const slide = ref(0);
-const pageSize = 3;
 
 const creatingProject = ref(false);
 
@@ -271,14 +178,6 @@ const isLastStep = computed(() => {
   return currentStep.value === 4;
 });
 
-// Computed property to group writing styles into slides of 3
-const writingStyleSlides = computed(() => {
-  const slides = [];
-  for (let i = 0; i < writingStyles.length; i += pageSize) {
-    slides.push(writingStyles.slice(i, i + pageSize));
-  }
-  return slides;
-});
 
 // Validation functions
 function nextDisabled() {
@@ -296,8 +195,11 @@ function nextDisabled() {
   }
 }
 
-function toggleWritingStyleMode() {
-  showCustomInput.value = !showCustomInput.value;
+
+// Handle writing style selection from WritingStyleSelector component
+function onWritingStyleChanged(styleData) {
+  writingStyleValue.value = styleData.value;
+  writingStyleName.value = styleData.name;
 }
 
 const projectTemplates = [
@@ -351,7 +253,6 @@ async function confirmNewProject() {
 
       return;
     }
-
 
     if(!await canCreateProject() && syncToCloud.value) {
       Notify.create({

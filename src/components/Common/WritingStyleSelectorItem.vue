@@ -2,7 +2,7 @@
   <q-card class="inscriptor-shadow-1">
     <q-card-section class="row">
       <div class="col row items-center" style="height: 40px">
-        <div class="text-weight-bold" style="font-size: 0.9rem">{{ writingStyle.name }}</div>
+        <div class="" :class="{'text-italic': renderVariant === 'not-recommended', 'text-weight-bold': renderVariant === 'recommended', '': !renderVariant}" style="font-size: 0.9rem">{{ writingStyle.name }}</div>
       </div>
       <div class="col-auto q-ml-xs flex items-center">
         <q-btn no-caps :color="isCurrentStyle ? 'accent' : 'primary'" :class="{'bg-accent text-white': isCurrentStyle}" @click="onClick" padding="2px 8px" style="height: 30px; width: 70px;">
@@ -14,6 +14,21 @@
     <q-separator />
     <q-card-section>
       <div class="text-italic scroll-y" style="font-size: 0.8rem; height: 60px;">{{ writingStyle.usageTips }}</div>
+
+      <!-- Tags Display -->
+      <div v-if="writingStyle.tags && writingStyle.tags.length > 0" class="flex items-center" style="min-height: 60px;">
+        <q-chip
+          v-for="tag in writingStyle.tags"
+          :key="tag"
+          :color="getTagColor(tag) + '-6'"
+          :text-color="getTagColor(tag) + '-1'"
+          size="11px"
+          class="q-px-sm q-py-sm q-mr-xs q-mb-xs"
+        >
+          {{ formatTagName(tag, false) }}
+        </q-chip>
+      </div>
+
       <div class="q-mt-md">
         <q-btn
           dense
@@ -37,11 +52,17 @@
 
 <script setup>
 import {markdownToHtml, newLineToBr} from "src/common/utils/textUtils";
-  import {ref, computed} from "vue";
+import {ref, computed} from "vue";
+import {formatTagName, getTagColor} from "src/common/helpers/writingStyleTagsHelper";
 
   const props = defineProps({
     writingStyle: Object,
     currentValue: String,
+    renderVariant: {
+      type: String,
+      default: null,
+      validator: (value) => [null, 'recommended', 'not-recommended'].includes(value)
+    }
   });
 
   const emit = defineEmits(['writingStyleSet']);
