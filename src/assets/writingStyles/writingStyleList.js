@@ -1485,33 +1485,41 @@ Outside, a car door slammed. Their neighbor getting ready for work. Normal peopl
     usageTips: "Use this style for traditional narrative structure with timeless, accessible storytelling across any genre.",
     types: ['fiction'],
     tags: ['Universal', 'Plot-Driven', 'Creative Writing'],
-    value: `**Narrative Voice and Tone**: Clear, authoritative, and engaging, drawing on established storytelling traditions. The voice should be accessible to all readers while maintaining literary quality. Comfortable with omniscient or limited third-person perspective.
+    value: `**Narrative Voice and Tone**: Clear, authoritative, and engaging, drawing on established storytelling traditions. The voice should be accessible to all readers while maintaining literary quality. Comfortable with omniscient or limited third-person perspective that knows when to zoom in for intimacy and pull back for context. Creates immediate trust with readers through confident, warm narration.
 
-**Sentence Structure and Pacing**: Balanced pacing with clear three-act structure. Varied sentence lengths that serve story rhythm. Builds tension toward climax with satisfying resolution. Uses traditional techniques like foreshadowing and dramatic irony.
+**Sentence Structure and Pacing**: Balanced pacing with clear beginning, middle, and end structure. Varied sentence lengths (15-25 words average) that serve story rhythm naturally. Builds tension toward climax with satisfying resolution that feels both surprising and inevitable. Uses traditional techniques like foreshadowing, callbacks, and dramatic irony without calling attention to them.
 
-**Language and Vocabulary**: Accessible yet elegant language that serves the story without drawing attention to itself. Clear, precise word choice. Timeless quality that doesn't feel dated or overly trendy. Rich but not overwrought description.
+**Language and Vocabulary**: Accessible yet polished language that serves the story without drawing attention to itself. Clear, precise word choice that feels natural rather than writerly. Timeless quality that avoids both dated references and trendy modern slang. Rich but not overwrought description that paints clear pictures without slowing momentum.
 
-**Dialogue Style**: Natural conversations that reveal character and advance plot. Dialogue that feels authentic to character and time period. Clear attribution and realistic speech patterns. Conversations serve multiple story functions.
+**Story Structure**: Embraces complete narrative arcs with proper setup, development, and payoff. Every element introduced serves a purpose and finds resolution. Characters undergo meaningful change through challenges they face. Conflict feels organic and resolution feels earned. Stories deliver on their promises to readers with satisfying conclusions.
 
-**Theme and Motives**: Universal themes that resonate across cultures and time periods. Clear story arc with character growth and change. Moral and emotional clarity without being heavy-handed. Stories that feel both familiar and fresh.
+**Dialogue Style**: Natural conversations that reveal character and advance plot simultaneously. Dialogue feels authentic to characters while remaining clear and purposeful. Each character has a distinct but not exaggerated voice. Conversations serve multiple story functions without feeling forced. Includes both conflict and connection through character interaction.
+
+**Theme and Motives**: Universal themes that resonate across cultures and time periods—love, loss, growth, redemption, belonging, courage. Clear story arc with character transformation that feels genuine. Moral and emotional clarity without being heavy-handed or preachy. Stories that feel both familiar and fresh, comfortable yet compelling. Delivers emotional satisfaction through earned character victories and meaningful growth.
 
 =====
 
 Example snippets:
 
-The letter that changed Thomas Hartwell's life arrived on a Tuesday morning in March, delivered by a postman who had no idea he was carrying someone's destiny in his worn leather bag.
+The letter that changed Thomas Hartwell's life arrived on a Tuesday morning in March, delivered by a postman who had no idea he was carrying someone's future in his worn leather bag.
 
-Thomas was at his kitchen table, reviewing his lesson plans for the day, when the envelope slid through his mail slot and landed with the soft whisper that only important correspondence makes. The return address bore the seal of Blackwood Academy—a school so prestigious that Thomas had never seriously imagined they would respond to his application.
+Thomas was at his kitchen table, reviewing his lesson plans for the day, when the envelope slid through his mail slot and landed with a soft whisper. The return address bore the seal of Blackwood Academy—a school so prestigious that Thomas had never seriously imagined they would respond to his application. But here it was, his name written in careful script across cream-colored paper.
 
-He set down his coffee and picked up the letter with hands that trembled slightly. In his fifteen years of teaching at the local high school, Thomas had watched too many bright students leave town for opportunities their hometown couldn't provide. He had begun to wonder if he, too, was meant for something beyond the familiar boundaries of Millfield.
+He set down his coffee and picked up the letter with hands that trembled slightly. In his fifteen years of teaching at the local high school, Thomas had watched too many bright students leave town for opportunities their hometown couldn't provide. He had begun to wonder if he, too, was meant for something more—if the restlessness he felt was trying to tell him something important.
 
-The letter was brief but cordial. The headmaster, Dr. Elizabeth Thornfield, requested his presence for an interview the following week. They were seeking, she wrote, "an educator who understands that true learning happens when we challenge our students to exceed their own expectations."
+The letter was brief but warm. The headmaster, Dr. Elizabeth Thornfield, requested his presence for an interview the following week. They were seeking, she wrote, "an educator who understands that true learning happens when we challenge our students to exceed their own expectations." 
 
-Thomas read the letter three times, each reading making the opportunity feel more real and more terrifying. Taking the position would mean leaving behind everything he had known—his students, his small apartment above the bookstore, the Friday night dinners with his sister and her family. But it would also mean stepping into the life he had always imagined for himself, the one that existed in the quiet hours before dawn when he planned lessons he dreamed of teaching.
+Thomas smiled at that. It was exactly what he'd always believed, standing before countless classrooms, watching the moment when understanding dawned in a student's eyes—that magical instant when confusion transformed into clarity.
 
-He folded the letter carefully and placed it next to his lesson plans. Today, he would teach Shakespeare to a classroom of teenagers who thought they had no use for poetry. Tomorrow, he would begin to consider whether the man who wrote those lesson plans was ready to become the teacher he had always wanted to be.
+He read the letter three times, each reading making the opportunity feel more real and more terrifying. Taking the position would mean leaving behind everything he knew: his students, his small apartment above the bookstore, the Friday night dinners with his sister and her family. It would mean starting over at forty-three, in a place where nobody knew him, where he'd have to prove himself all over again.
 
-Outside his window, spring was beginning to show itself in the tentative green of new leaves, and Thomas thought that perhaps change, like the seasons, came not all at once but in small, inevitable moments that accumulated into transformation.
+But it would also mean teaching students who wanted to learn, having resources he'd only dreamed of, becoming the teacher he'd always wanted to be.
+
+He folded the letter carefully and placed it next to his lesson plans. Today, he would teach Shakespeare to a classroom of teenagers who claimed they hated poetry. He'd show them, as he always did, that the words of a playwright four hundred years dead could still make them laugh, make them think, make them feel. Tomorrow, he would begin to decide whether he was brave enough to follow his own advice about exceeding expectations.
+
+Outside his window, spring was beginning to show itself in the tentative green of new leaves. Thomas had always loved spring—the promise of it, the hope. Everything that had seemed dead through winter suddenly revealing it had been alive all along, just waiting for the right moment to grow.
+
+Maybe, he thought, picking up his coffee again, people were like that too. Maybe you were never too old to bloom into something new.
 
 =====`
   },
