@@ -6,7 +6,8 @@
         dense
         @remove="scope.removeAtIndex(scope.index)"
         :tabindex="scope.tabindex"
-        :color="scope.opt.color + '-3'"
+        :color="layoutStore.darkMode ? scope.opt.color + '-10' : scope.opt.color + '-3'"
+        :text-color="layoutStore.darkMode ? scope.opt.color + '-4' : 'black'"
         class="q-my-xs q-mx-xs"
       >
         {{ scope.opt.label }}
@@ -36,7 +37,7 @@
 
       <template v-if="promptStore.promptContext?.length > 0 ?? false">
         <template v-for="context in promptStore.promptContext" :key="context.id">
-          <q-chip :color="context.color + '-3'" removable @remove="removeContext(context)">
+          <q-chip :color="layoutStore.darkMode ? context.color + '-10' : context.color + '-3'" :text-color="layoutStore.darkMode ? context.color + '-4' : 'black'" removable @remove="removeContext(context)">
             {{ context.label }}
             &nbsp;<q-badge :color="contextWarning(context).color" v-if="contextWarning(context)">
             <q-icon name="error" />&nbsp;
@@ -93,7 +94,7 @@
                 <div class="row">
                   <div class="col-auto">
                     <q-chip :text-color="getContextChipFontColor(currentFilePromptContext)" :color="getContextChipColor(currentFilePromptContext)" :icon="getContextChipIcon(currentFilePromptContext)" :clickable="isContextAllowedForThisPrompt(currentFilePromptContext)" @click="toggleContext(currentFilePromptContext)" >
-                      {{ currentFilePromptContext.label }} &nbsp;
+                      {{ currentFilePromptContext.label }}
                       <q-tooltip color="primary"  :delay="500">
                         <div>include all text from {{ currentFile?.title }}</div>
                         <div>
@@ -305,6 +306,7 @@ import {Dialog} from 'quasar';
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
+const layoutStore = useLayoutStore();
 
 const props = defineProps({
   prompt: {
@@ -509,7 +511,15 @@ function getContextChipColor(context) {
     //return 'white';
   }
 
-  return containsContext(context) ? (context.color + '-4') : (context.color + '-1');
+  if(layoutStore.darkMode) {
+    if(!isContextAllowedForThisPrompt(context)) {
+      return 'grey-9';
+    }
+
+    return containsContext(context) ? (context.color + '-10') : 'grey-8';
+  } else {
+    return containsContext(context) ? (context.color + '-4') : (context.color + '-1');
+  }
 }
 
 function getContextChipIcon(context) {
@@ -522,10 +532,10 @@ function getContextChipIcon(context) {
 
 function getContextChipFontColor(context) {
   if(!isContextAllowedForThisPrompt(context)) {
-    return 'grey-4';
+    return layoutStore.darkMode ? 'grey-10' : 'grey-4';
   }
 
-  return 'black'
+  return layoutStore.darkMode ? (context.color + '-4') : 'black';
 }
 
 function addContext(context, parametersValue = undefined) {

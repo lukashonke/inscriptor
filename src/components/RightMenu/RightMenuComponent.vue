@@ -6,7 +6,7 @@
       v-model="layoutStore.fileDetailsOpen"
       id="fileDetails"
     >
-      <q-card v-if="file">
+      <q-card v-if="file" :class="layoutStore.darkMode ? '' : ''">
         <q-card-section class="q-pb-sm">
           <div class="row q-gutter-x-sm">
             <div class="col">
@@ -88,7 +88,7 @@
                 <q-chip
                   @remove="scope.removeAtIndex(scope.index)"
                   :tabindex="scope.tabindex"
-                  :color="scope.opt.color + '-3'"
+                  :color="scope.opt.color + (layoutStore.darkMode ? '-9' : '-3')"
                   dense
                   class="q-ma-none"
                 >

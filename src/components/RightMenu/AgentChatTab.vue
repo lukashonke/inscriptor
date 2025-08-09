@@ -219,7 +219,7 @@
       <!-- Input area -->
       <div class="col-auto"  >
         <div class="full-width" style="position: absolute; bottom: 0; right: 0; z-index: 1000;">
-          <div class="q-mr-lg bg-theme-primary">
+          <div class="q-mr-lg">
             <div class="">
 
               <div class="text-caption q-pa-md q-pb-sm q-pt-sm text-grey-7" v-if="currentChatMessages.length === 0">
@@ -307,10 +307,12 @@ import ToolCallDisplay from './ToolCallDisplay.vue';
 import AgentPromptResult from './AgentPromptResult.vue';
 import FileDetailItem from 'components/Common/Files/FileDetailItem.vue';
 import {isImageGenerationModel} from 'src/common/helpers/modelHelper';
+import {useLayoutStore} from 'stores/layout-store';
 
 const aiAgentStore = useAiAgentStore();
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
+const layoutStore = useLayoutStore();
 
 const inputText = ref('');
 const inputRef = ref(null);
