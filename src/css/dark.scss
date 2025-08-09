@@ -1,10 +1,10 @@
 .dark-mode {
   .bg-accent-1 {
-    background-color: rgba(178, 163, 45, 0.95);
+    background-color: rgba(77, 92, 210, 0.05);
   }
 
   .bg-accent-lighter {
-    background-color: rgb(63, 72, 168, 0.92);
+    background-color: rgba(54, 60, 149, 1);
   }
 
   .gradient-variation-1 {
@@ -47,24 +47,44 @@
     background-color: #1a2332;
   }
 
+  .q-separator--dark {
+    background-color: rgba(255, 255, 255, 0.2);
+  }
+
   .left-border {
-    border-left: 1px solid rgba(255, 255, 255, 0.88);
+    border-left: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .all-border {
-    border: 1px solid rgba(255, 255, 255, 0.88);
+    border: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .bottom-border {
-    border-bottom: 1px solid rgba(255, 255, 255, 0.88);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .right-border {
-    border-right: 1px solid rgba(255, 255, 255, 0.88);
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
   }
 
   .top-border {
-    border-top: 1px solid rgba(255, 255, 255, 0.88);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+  }
+
+  .bordered {
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .q-menu {
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .shadow-1 {
+    box-shadow: none !important;
+  }
+
+  .text-black {
+    color: #333 !important;
   }
 
   .menu-title {
@@ -415,6 +435,18 @@
     background-color: rgba(255, 255, 255, 0.08) !important;
   }
 
+  .q-field--highlighted .q-field__label {
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  .text-primary {
+    color: #a8a8a8 !important;
+  }
+
+  .text-accent {
+    color: #6c7dff !important;
+  }
+
   .splitter-left-menu {
     border-right-color: #444 !important;
     background-color: #1e1e1e !important;
@@ -511,13 +543,6 @@
   }
 
   // ConsoleDialog dark mode styling
-  .text-grey {
-    color: rgba(255, 255, 255, 0.6) !important;
-  }
-
-  .text-negative {
-    color: #ff5252 !important;
-  }
 
   // PromptSelector dark mode styling
   #promptSelectorCategories {
@@ -571,7 +596,87 @@
   }
 
   .q-card--dark {
-    border-color: rgba(255, 255, 255, 0.15) !important;
+    border: 1px solid rgba(255, 255, 255, 0.2) !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24) !important;
+  }
+
+  .inscriptor-shadow-1 {
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.3) !important;
+    border: 1px solid #444 !important;
+  }
+
+  .text-grey {
+    color: rgba(255, 255, 255, 0.88) !important;
+  }
+
+  .text-grey-1 {
+    color: rgba(255, 255, 255, 0.82) !important;
+  }
+
+  .text-grey-2 {
+    color: rgba(255, 255, 255, 0.72) !important;
+  }
+
+  .text-grey-3 {
+    color: rgba(255, 255, 255, 0.62) !important;
+  }
+
+  .text-grey-4 {
+    color: rgba(255, 255, 255, 0.52) !important;
+  }
+
+  .text-grey-5 {
+    color: rgba(255, 255, 255, 0.48) !important;
+  }
+
+  .text-grey-6 {
+    color: rgba(255, 255, 255, 0.45) !important;
+  }
+
+  .text-grey-7 {
+    color: rgba(255, 255, 255, 0.42) !important;
+  }
+
+  .text-grey-8 {
+    color: rgba(255, 255, 255, 0.4) !important;
+  }
+
+  .text-grey-9 {
+    color: rgba(255, 255, 255, 0.25) !important;
+  }
+
+  .text-grey-10 {
+    color: rgba(255, 255, 255, 0.2) !important;
+  }
+
+  .cm-placeholder {
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  .q-item--active {
+    color: #8fa5d6 !important;
+  }
+
+  .bg-blue-grey-1 {
+    background-color: #2a3147 !important;
+  }
+
+  .bg-grey {
+    background-color: #424242 !important;
+  }
+
+  .q-dark {
+  }
+
+  .q-menu--dark {
+    box-shadow: none !important;
+  }
+
+  .text-negative {
+    color: #f44336 !important;
+  }
+
+  #promptSelectorCategories {
+    background-color: #2d2d2d !important;
   }
 }

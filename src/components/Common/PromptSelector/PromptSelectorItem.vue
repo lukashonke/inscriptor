@@ -21,7 +21,7 @@
     <template v-else>
       <div class="row full-width">
         <div class="col">
-          <q-btn flat size="10px" @click="promptClick(prompt)" :class="['bg-' + prompt.color + '-1', boldness]" class="full-width row" no-caps padding="5px 7px" v-close-popup>
+          <q-btn flat size="10px" @click="promptClick(prompt)" :class="[layoutStore.darkMode ? 'text-' + prompt.color + '-5' : 'bg-' + prompt.color + '-1', boldness]" class="full-width row" no-caps padding="5px 7px" v-close-popup>
             <div class="col-auto flex items-centers">
               <q-icon :name="icon" />
             </div>
@@ -29,7 +29,7 @@
               <div class="float-left">
                 {{ truncate(prompt.title, 50) }}
               </div>
-              <div class="float-right text-grey" style="font-size: 10px">
+              <div class="float-right" :class="layoutStore.darkMode ? 'text-grey-5' : 'text-grey'" style="font-size: 10px">
                 {{truncate(model.name, 30)}}
                 <q-tooltip v-if="model.name.length > 30">
                   {{ model.name }}
@@ -164,7 +164,7 @@
                         @click="moveToCategory(prompt, category.label)"
                         dense
                         clickable
-                        :class="category.color + '-3'"
+                        :class="layoutStore.darkMode ? 'text-' + category.color + '-5' : category.color + '-3'"
                       >
                         <q-item-section side>
                           <q-icon :name="category.icon" :color="category.color" size="xs" />
@@ -216,7 +216,7 @@
                         @click="moveToFolder(prompt, folder.label)"
                         dense
                         clickable
-                        :class="folder.color + '-3'"
+                        :class="layoutStore.darkMode ? 'text-' + folder.color + '-5' : folder.color + '-3'"
                       >
                         <q-item-section side>
                           <q-icon :name="folder.icon ?? 'mdi-folder-outline'" size="xs" />
@@ -329,6 +329,9 @@ function promptWithTemperature(prompt, temperature) {
 }
 
 const menuButtonColor = computed(() => {
+  if (layoutStore.darkMode) {
+    return isHovered.value ? 'text-grey-3' : 'text-grey-7';
+  }
   return isHovered.value ? 'text-grey-8' : 'text-white';
 });
 
@@ -343,7 +346,11 @@ const model = computed(() => {
 const isSticky = computed(() => fileStore.isStickyPrompt(props.prompt, fileStore.selectedFile));
 
 function pinColor(prompt) {
-  return fileStore.isStickyPrompt(prompt, fileStore.selectedFile) ? 'orange' : 'grey-8';
+  const isSticky = fileStore.isStickyPrompt(prompt, fileStore.selectedFile);
+  if (layoutStore.darkMode) {
+    return isSticky ? 'orange' : 'grey-5';
+  }
+  return isSticky ? 'orange' : 'grey-8';
 }
 
 const canBeSticky = computed(() => props.prompt.promptType === "general" || props.prompt.promptType === "selection" || props.prompt.promptType === "insert");
