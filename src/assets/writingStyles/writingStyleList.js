@@ -1330,15 +1330,17 @@ Maybe that was the point. Maybe the courage wasn't in having a perfect plan, but
     usageTips: "Use this style for positive, heartwarming tales and hopeful narratives that inspire readers across any genre.",
     types: ['fiction'],
     tags: ['Universal', 'Character-Driven', 'Creative Writing', 'Playful'],
-    value: `**Narrative Voice and Tone**: Warm, optimistic, and emotionally generous. The voice should find hope and beauty even in difficult situations, celebrating human resilience and the possibility of positive change. Genuine warmth without naive simplicity.
+    value: `**Narrative Voice and Tone**: Warm, optimistic, and emotionally generous. The voice should find hope and beauty even in difficult situations, celebrating human resilience and the possibility of positive change. Genuine warmth without naive simplicity. Often uses close third-person or first-person perspectives to create intimate connection with characters' emotional journeys.
 
-**Sentence Structure and Pacing**: Comfortable, flowing pacing that allows readers to savor positive moments. Builds toward satisfying resolutions and emotional payoffs. Structure supports character growth and relationship development.
+**Sentence Structure and Pacing**: Comfortable, flowing pacing (15-25 words average) that allows readers to savor positive moments and emotional growth. Varies rhythm to build emotional crescendos—shorter sentences for impactful realizations, longer ones for descriptive warmth. Creates breathing room for reflection and connection. Structures scenes to build toward satisfying resolutions and earned emotional payoffs.
 
-**Language and Vocabulary**: Rich in positive imagery and uplifting metaphors. Language that emphasizes possibility, growth, and connection. Warm sensory details that create comfort and joy. Avoids cynicism while remaining authentic.
+**Language and Vocabulary**: Rich in positive imagery and uplifting metaphors drawn from nature, light, growth, and healing. Language that emphasizes possibility, transformation, and human connection. Warm sensory details that create comfort and joy—textures of embraces, sounds of laughter, colors of sunrise. Avoids cynicism while honestly acknowledging real struggles. Uses words that inspire hope without preaching or false optimism.
 
-**Dialogue Style**: Conversations reveal kindness, wisdom, and human connection. Characters support each other through words and actions. Humor that brings people together rather than divides. Dialogue shows people at their best.
+**Dialogue Style**: Conversations reveal kindness, wisdom, and authentic human connection through supportive exchanges. Characters speak with compassion and understanding, offering comfort through active listening and encouragement. Humor that brings people together rather than divides—gentle, inclusive, often self-deprecating. Shows characters choosing to be their best selves in moments of vulnerability and connection.
 
-**Theme and Motives**: Hope triumphing over adversity, the power of kindness and community, personal growth and second chances, love in its many forms. How people help each other heal and grow. The belief that positive change is always possible.
+**Conflict and Resolution**: Creates meaningful tension through internal struggles, community challenges, or past hurts that require genuine healing. Conflict feels authentic and relatable—job loss, family struggles, personal insecurities, overcoming fear—but focuses on how people grow and support each other through difficulties. Resolutions feel earned rather than easy, showing characters actively choosing hope, forgiveness, and positive change.
+
+**Theme and Motives**: Hope triumphing over adversity through human connection, the transformative power of kindness and community, personal growth and second chances, love in its many forms. How small acts of compassion create ripple effects of positive change. The belief that people can heal, grow, and find purpose through supporting one another. Universal themes of belonging, forgiveness, resilience, and discovering unexpected strength in difficult times.
 
 =====
 
@@ -1346,19 +1348,21 @@ Example snippets:
 
 The community garden had started as Mrs. Chen's crazy idea, but three months later, it had become the heart of Maple Street in ways no one had expected.
 
-Tom knelt between the tomato plants, showing eight-year-old Marcus how to tie the vines to their stakes. Six months ago, Tom had been laid off from the factory where he'd worked for fifteen years. He'd spent weeks sitting on his porch, watching the neighborhood kids walk by, wondering what he was supposed to do with all this unexpected time.
+Tom knelt between the tomato plants, showing eight-year-old Marcus how to tie the vines to their stakes. Six months ago, Tom had been laid off from the factory where he'd worked for fifteen years. He'd spent weeks sitting on his porch, watching the neighborhood kids walk by, wondering what he was supposed to do with all this unexpected time. The rejection letters had piled up on his kitchen counter like fallen leaves—dozens of them, each one a quiet reminder that at fifty-two, he was somehow both overqualified and obsolete.
 
 "Like this, Mr. Tom?" Marcus held up a vine he'd secured with careful loops of green twine.
 
 "Perfect," Tom said, and meant it. The boy had gentle hands for gardening, a patience that seemed unusual for his age. "You've got the touch."
 
-Marcus beamed, dirt streaking his cheek where he'd wiped away sweat. His grandmother had started bringing him to the garden after school, partly to keep him busy while she worked her evening shift at the hospital, but mostly because she believed children should know where food comes from.
+Marcus beamed, dirt streaking his cheek where he'd wiped away sweat. His grandmother had started bringing him to the garden after school, partly to keep him busy while she worked her evening shift at the hospital, but mostly because she believed children should know where food comes from. "My abuela says plants are like people," Marcus said, patting the soil around a seedling. "They grow better when they're not alone."
 
 At the far end of the plot, Mrs. Chen was explaining companion planting to a group of teenagers from the high school, her English mixed with enthusiastic gestures and the occasional Chinese phrase that somehow made perfect sense anyway. The teenagers—kids who supposedly only cared about video games and social media—listened intently as she described how marigolds could protect vegetables from pests.
 
+"See?" Marcus whispered to Tom. "Even the flowers take care of each other."
+
 "Community," Mrs. Chen had said when she first proposed the garden, "grows best when people have something to tend together."
 
-Tom watched Marcus carefully position another tie around the tomato vine and realized she had been right about more than just plants. They were all growing something here—not just vegetables, but connections, purpose, the quiet satisfaction of nurturing something valuable together.
+Tom watched Marcus carefully position another tie around the tomato vine and realized she had been right about more than just plants. They were all growing something here—not just vegetables, but connections, purpose, the quiet satisfaction of nurturing something valuable together. For the first time in months, the word "unemployed" didn't feel like a weight in his chest. Here, surrounded by dirt and hope and an eight-year-old's wisdom, he was simply Tom—the man who knew about tomatoes and patience, who had something precious to offer and something even more precious to receive.
 
 =====`
   },
@@ -1400,35 +1404,39 @@ Eleanor smiled for the first time in months. This was exactly what she had been 
     usageTips: "Use this style for character interaction-focused stories and ensemble pieces driven by conversation across any genre.",
     types: ['fiction'],
     tags: ['Cross Genre', 'Dialogue-Driven', 'Creative Writing'],
-    value: `**Narrative Voice and Tone**: Observational and character-focused, letting dialogue carry the primary storytelling burden. The narrative voice provides just enough context and description to support the conversations while staying out of the way.
+    value: `**Narrative Voice and Tone**: Observational and character-focused, letting dialogue carry 70-80% of the storytelling burden. The narrative voice provides essential context through action beats, internal reactions, and environmental details that enhance conversation without overwhelming it. Functions as a skilled cinematographer, showing readers what they need to see while characters reveal themselves through speech.
 
-**Sentence Structure and Pacing**: Quick, dynamic pacing driven by conversational rhythm. Short paragraphs and frequent dialogue breaks. Minimal but effective description between exchanges. Structure follows the natural flow of conversation.
+**Sentence Structure and Pacing**: Quick, dynamic pacing (8-15 words average for narrative) driven by conversational rhythm and natural speech patterns. Short paragraphs with frequent dialogue breaks create breathing space and maintain reader engagement. Uses white space strategically to control conversation flow. Varies paragraph length to match emotional intensity—single-line responses for tension, longer blocks for complex revelations.
 
-**Language and Vocabulary**: Natural, realistic dialogue that reveals character through speech patterns, word choices, and verbal habits. Each character has a distinct voice. Dialogue tags used sparingly, letting conversation speak for itself.
+**Language and Vocabulary**: Natural, realistic dialogue that reveals character through distinct speech patterns, vocabulary choices, and verbal habits. Each character has a unique voice reflecting their background, education, personality, and emotional state. Narrative language remains simple and invisible, focusing on precise action verbs and concrete details. Dialogue tags used minimally—"said" preferred when needed, but conversation often stands alone.
 
-**Dialogue Style**: Extensive, realistic exchanges that advance plot and develop character simultaneously. Conversations have subtext and multiple layers. Characters speak authentically for their backgrounds and personalities. Overlapping conversations and interrupted thoughts.
+**Action and Description Integration**: Weaves essential action beats between dialogue lines—characters pouring coffee, avoiding eye contact, fidgeting with objects—that reveal subtext and emotional states. Uses environmental details sparingly but effectively to ground conversations in specific settings. Shows character reactions through physical behavior rather than exposition: nervous gestures, protective postures, moments of connection or withdrawal.
 
-**Theme and Motives**: Relationships and character dynamics explored through interaction. How people communicate, misunderstand, connect, and conflict. The spaces between what people say and what they mean. Human connection through conversation.
+**Dialogue Techniques**: Extensive, realistic exchanges that advance plot and develop character simultaneously through layered conversation. Uses interruptions, overlapping speech, and unfinished thoughts to create authenticity. Characters often speak at cross-purposes, revealing different priorities and perspectives. Employs subtext heavily—what's not said carries equal weight to spoken words. Includes realistic speech patterns: hesitations, repetitions, and natural verbal quirks.
+
+**Theme and Motives**: Relationships and character dynamics explored entirely through interaction and behavior. How people communicate, misunderstand, connect, and conflict in moments of vulnerability. The spaces between what people say and what they mean. Power dynamics revealed through conversation patterns. Human connection and disconnection made visible through dialogue choices and responses.
 
 =====
 
 Example snippets:
 
-"You're wearing the blue tie," Janet said, not looking up from her coffee.
+"You're wearing the blue tie."
+
+Janet didn't look up from her coffee. The newspaper lay folded beside her plate, still in its plastic sleeve.
 
 "It's navy."
 
 "Same thing."
 
-David adjusted the knot, catching his reflection in the kitchen window. "The interview's at ten. I should leave soon."
+David adjusted the knot, catching his reflection in the kitchen window. Twenty-two years, and she still called it blue. "The interview's at ten. I should leave—"
 
-"Mmm." Janet turned a page of her magazine. "Traffic will be terrible on the bridge."
+"Traffic will be terrible on the bridge."
 
 "I'm taking the tunnel."
 
-"The tunnel's worse."
+"The tunnel's worse." Janet turned a page of her magazine. The sound was sharp in the quiet kitchen.
 
-He poured coffee into his travel mug, the silence stretching between them like a bridge neither wanted to cross first.
+He poured coffee into his travel mug. His hands were steadier than he'd expected.
 
 "Jan."
 
@@ -1442,29 +1450,33 @@ She finally raised her eyes. "You look fine. You always look fine."
 
 "I know what you meant."
 
-David sat down across from her, the want ads spread between them like a map of all the places he might go without her. "We should talk about—"
+David sat down across from her. The want ads lay spread between them like a map of all the places he might go without her. She'd circled three jobs in red ink. All in Chicago.
 
-"About what? About how you're taking a job in Chicago? About how we've been married twenty-two years and you're just now telling me you're 'not fulfilled'?" Her fingers made air quotes, and he realized she'd been practicing this conversation in her head for weeks.
+"We should talk about—"
+
+"About what? About how you're taking a job in Chicago?" Her fingers made air quotes around the words she'd been practicing. "About how we've been married twenty-two years and you're just now telling me you're 'not fulfilled'?"
 
 "It's not about fulfillment."
 
-"No? What's it about then?"
+"No?" She closed the magazine. "What's it about then?"
 
-"It's about..." He stopped, looking for words that wouldn't sound like betrayal. "It's about waking up."
+"It's about..." He stopped. Every word felt like a landmine. "It's about waking up."
 
-"I see. And I'm what—the dream you want to wake up from?"
+"I see." Janet's voice went flat. "And I'm what—the dream you want to wake up from?"
 
-"Janet, come on."
+"Come on—"
 
-"No, you come on, David. Don't pretty it up with metaphors. If you want to leave, then leave. But don't make it about self-actualization or whatever midlife crisis bullshit you're selling yourself."
+"No, you come on, David." She stood up, her chair scraping against the floor. "Don't pretty it up with metaphors. If you want to leave, then leave. But don't make it about self-actualization or whatever midlife crisis bullshit you're selling yourself."
 
 He reached for her hand. She pulled it away.
 
-"The kids will want to know why," she said.
+"The kids will want to know why."
 
-"We'll figure out what to tell them."
+"We'll figure out—"
 
-"We." Janet laughed, but there was no humor in it. "There is no we in this decision, is there?"
+"We." Janet laughed, but there was no humor in it. She picked up her coffee mug, then set it down without drinking. "There is no we in this decision, is there?"
+
+Outside, a car door slammed. Their neighbor getting ready for work. Normal people doing normal things on what used to be a normal Tuesday morning.
 
 =====`
   },
