@@ -1330,11 +1330,11 @@ Maybe that was the point. Maybe the courage wasn't in having a perfect plan, but
     usageTips: "Use this style for positive, heartwarming tales and hopeful narratives that inspire readers across any genre.",
     types: ['fiction'],
     tags: ['Universal', 'Character-Driven', 'Creative Writing', 'Playful'],
-    value: `**Narrative Voice and Tone**: Warm, optimistic, and emotionally generous. The voice should find hope and beauty even in difficult situations, celebrating human resilience and the possibility of positive change. Genuine warmth without naive simplicity. Often uses close third-person or first-person perspectives to create intimate connection with characters' emotional journeys.
+    value: `**Narrative Voice and Tone**: Warm, optimistic, and emotionally generous. The voice finds hope and beauty even in difficult situations, celebrating human resilience and the possibility of positive change. Genuine warmth without naive simplicity. Often uses close third-person or first-person perspectives to create intimate connection with characters' emotional journeys.
 
-**Sentence Structure and Pacing**: Comfortable, flowing pacing (15-25 words average) that allows readers to savor positive moments and emotional growth. Varies rhythm to build emotional crescendos—shorter sentences for impactful realizations, longer ones for descriptive warmth. Creates breathing room for reflection and connection. Structures scenes to build toward satisfying resolutions and earned emotional payoffs.
+**Sentence Structure and Pacing**: Comfortable, flowing pacing (15-25 words average) that lets readers enjoy positive moments and character growth. Mix shorter sentences for key moments with longer ones for warmth and description. Give readers time to feel connections and emotions. Build scenes toward satisfying, hopeful endings.
 
-**Language and Vocabulary**: Rich in positive imagery and uplifting metaphors drawn from nature, light, growth, and healing. Language that emphasizes possibility, transformation, and human connection. Warm sensory details that create comfort and joy—textures of embraces, sounds of laughter, colors of sunrise. Avoids cynicism while honestly acknowledging real struggles. Uses words that inspire hope without preaching or false optimism.
+**Language and Vocabulary**: Rich in positive imagery and uplifting comparisons from nature, light, growth, and healing. Language that emphasizes what's possible and how people connect. Warm details that create comfort and joy—soft textures, happy sounds, bright colors. Avoids cynicism while honestly showing real struggles. Uses words that inspire hope without preaching.
 
 **Dialogue Style**: Conversations reveal kindness, wisdom, and authentic human connection through supportive exchanges. Characters speak with compassion and understanding, offering comfort through active listening and encouragement. Humor that brings people together rather than divides—gentle, inclusive, often self-deprecating. Shows characters choosing to be their best selves in moments of vulnerability and connection.
 
@@ -1371,13 +1371,13 @@ Tom watched Marcus carefully position another tie around the tomato vine and rea
     usageTips: "Use this style when setting, mood, and atmosphere are crucial elements of your story across any genre.",
     types: ['fiction'],
     tags: ['Cross Genre', 'Atmosphere-Driven', 'Creative Writing'],
-    value: `**Narrative Voice and Tone**: Evocative and immersive, creating a strong sense of place and mood. The voice should paint vivid pictures with words, making readers feel they are experiencing the setting directly. Rich in sensory detail and emotional atmosphere.
+    value: `**Narrative Voice and Tone**: Vivid and immersive, creating a strong sense of place and mood. The voice draws clear pictures with words, making readers feel like they're there in the setting. Rich in sensory details and emotional atmosphere that matches the story.
 
-**Sentence Structure and Pacing**: Varies to match the mood being created—longer, flowing sentences for dreamy or contemplative atmospheres, shorter ones for tension or urgency. Pacing allows readers to fully absorb the environmental details and emotional tone.
+**Sentence Structure and Pacing**: Varies to match the mood being created—longer, flowing sentences for dreamy or contemplative atmospheres, shorter ones for tension or urgency. Pacing gives readers time to fully absorb the environmental details and emotional feeling.
 
-**Language and Vocabulary**: Rich in sensory language and descriptive detail. Careful word choice to evoke specific moods and feelings. Metaphors and similes that connect setting to emotion. Vocabulary that creates atmosphere through sound and rhythm as well as meaning.
+**Language and Vocabulary**: Rich in sensory language and descriptive details. Careful word choice to evoke specific moods and feelings. Use comparisons and images that connect setting to emotion. Pick vocabulary that creates atmosphere through how words sound and feel as well as their meaning.
 
-**Dialogue Style**: Characters speak in ways that reflect and enhance the story's atmosphere. Dialogue may be sparse, allowing setting and mood to dominate, or it may echo the environmental tone through rhythm and word choice.
+**Dialogue Style**: Characters speak in ways that reflect and enhance the story's atmosphere. Dialogue may be sparse, letting setting and mood take center stage, or it may echo the environmental feeling through rhythm and word choice.
 
 **Theme and Motives**: How environment shapes character and emotion. The relationship between internal and external landscapes. Setting as a reflection of psychological states. The power of place to influence story and meaning.
 
@@ -1404,17 +1404,17 @@ Eleanor smiled for the first time in months. This was exactly what she had been 
     usageTips: "Use this style for character interaction-focused stories and ensemble pieces driven by conversation across any genre.",
     types: ['fiction'],
     tags: ['Cross Genre', 'Dialogue-Driven', 'Creative Writing'],
-    value: `**Narrative Voice and Tone**: Observational and character-focused, letting dialogue carry 70-80% of the storytelling burden. The narrative voice provides essential context through action beats, internal reactions, and environmental details that enhance conversation without overwhelming it. Functions as a skilled cinematographer, showing readers what they need to see while characters reveal themselves through speech.
+    value: `**Narrative Voice and Tone**: Observational and character-focused, letting dialogue carry most of the storytelling. The narrative voice provides just enough context and description to support the conversations while staying out of the way. Shows readers what they need to see while letting characters reveal themselves through talking.
 
-**Sentence Structure and Pacing**: Quick, dynamic pacing (8-15 words average for narrative) driven by conversational rhythm and natural speech patterns. Short paragraphs with frequent dialogue breaks create breathing space and maintain reader engagement. Uses white space strategically to control conversation flow. Varies paragraph length to match emotional intensity—single-line responses for tension, longer blocks for complex revelations.
+**Sentence Structure and Pacing**: Quick, lively pacing (8-15 words average for narrative) that follows conversational rhythm. Short paragraphs with frequent dialogue breaks give readers breathing room and keep them engaged. Use white space to control how conversations flow. Mix single-line responses for tension with longer blocks for important revelations.
 
-**Language and Vocabulary**: Natural, realistic dialogue that reveals character through distinct speech patterns, vocabulary choices, and verbal habits. Each character has a unique voice reflecting their background, education, personality, and emotional state. Narrative language remains simple and invisible, focusing on precise action verbs and concrete details. Dialogue tags used minimally—"said" preferred when needed, but conversation often stands alone.
+**Language and Vocabulary**: Natural, realistic dialogue that shows character through how people talk—their word choices, speech patterns, and verbal habits. Each character sounds different based on their background, education, personality, and mood. Keep narrative language simple and invisible, focusing on clear action and concrete details. Use dialogue tags sparingly—"said" when needed, but often let conversation stand alone.
 
-**Action and Description Integration**: Weaves essential action beats between dialogue lines—characters pouring coffee, avoiding eye contact, fidgeting with objects—that reveal subtext and emotional states. Uses environmental details sparingly but effectively to ground conversations in specific settings. Shows character reactions through physical behavior rather than exposition: nervous gestures, protective postures, moments of connection or withdrawal.
+**Action and Description**: Include small actions between dialogue lines—pouring coffee, avoiding eye contact, fidgeting—that show what characters are really feeling. Use just enough environmental details to ground conversations in specific places. Show character reactions through physical behavior instead of explanation: nervous gestures, body language, moments of connection or pulling away.
 
-**Dialogue Techniques**: Extensive, realistic exchanges that advance plot and develop character simultaneously through layered conversation. Uses interruptions, overlapping speech, and unfinished thoughts to create authenticity. Characters often speak at cross-purposes, revealing different priorities and perspectives. Employs subtext heavily—what's not said carries equal weight to spoken words. Includes realistic speech patterns: hesitations, repetitions, and natural verbal quirks.
+**Dialogue Techniques**: Long, realistic conversations that move the plot forward and show who characters really are. Use interruptions, people talking over each other, and unfinished thoughts to make it feel real. Characters often have different goals in the same conversation, which reveals their priorities. Pay attention to subtext—what people don't say is often as important as what they do. Include natural speech patterns like pauses, repeated words, and verbal habits.
 
-**Theme and Motives**: Relationships and character dynamics explored entirely through interaction and behavior. How people communicate, misunderstand, connect, and conflict in moments of vulnerability. The spaces between what people say and what they mean. Power dynamics revealed through conversation patterns. Human connection and disconnection made visible through dialogue choices and responses.
+**Theme and Motives**: Explore relationships and character dynamics through how people interact and behave. Show how people communicate, misunderstand each other, connect, and fight, especially when they're vulnerable. Focus on the gap between what people say and what they really mean. Reveal power dynamics through who talks when and how. Show human connection and disconnection through dialogue choices and responses.
 
 =====
 
