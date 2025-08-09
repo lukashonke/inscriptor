@@ -232,7 +232,7 @@
               </template>
               <template v-else-if="promptStore.promptUserInputs?.length > 0 ?? false">
                 <template v-for="input in promptStore.promptUserInputs" :key="input.id">
-                  <q-chip :color="input.color + (layoutStore.darkMode ? '-10' : '-3')" removable @remove="removeInput(input)">
+                  <q-chip :color="layoutStore.darkMode ? input.color + '-10' : input.color + '-3'" :text-color="layoutStore.darkMode ? input.color + '-4' : 'black'" removable @remove="removeInput(input)">
                     {{ input.label }}
                     &nbsp;<q-badge :color="inputWarning(input).color" v-if="inputWarning(input)">
                       <q-icon name="error" />&nbsp;
@@ -682,7 +682,7 @@
         return 'grey-9';
       }
 
-      return containsInput(input) ? (input.color + '-10') : (input.color + '-10');
+      return containsInput(input) ? (input.color + '-10') : 'grey-8';
     } else {
       return containsInput(input) ? (input.color + '-4') : (input.color + '-1');
     }
@@ -701,7 +701,7 @@
       return layoutStore.darkMode ? 'grey-10' : 'grey-4';
     }
 
-    return layoutStore.darkMode ? 'white' : 'black';
+    return layoutStore.darkMode ? (context.color + '-4') : 'black';
   }
 
   function addInput(input, parametersValue = undefined) {

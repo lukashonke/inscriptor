@@ -6,7 +6,8 @@
         dense
         @remove="scope.removeAtIndex(scope.index)"
         :tabindex="scope.tabindex"
-        :color="scope.opt.color + (layoutStore.darkMode ? '-10' : '-3')"
+        :color="layoutStore.darkMode ? scope.opt.color + '-10' : scope.opt.color + '-3'"
+        :text-color="layoutStore.darkMode ? scope.opt.color + '-4' : 'black'"
         class="q-my-xs q-mx-xs"
       >
         {{ scope.opt.label }}
@@ -36,7 +37,7 @@
 
       <template v-if="promptStore.promptContext?.length > 0 ?? false">
         <template v-for="context in promptStore.promptContext" :key="context.id">
-          <q-chip :color="context.color + (layoutStore.darkMode ? '-10' : '-3')" removable @remove="removeContext(context)">
+          <q-chip :color="layoutStore.darkMode ? context.color + '-10' : context.color + '-3'" :text-color="layoutStore.darkMode ? context.color + '-4' : 'black'" removable @remove="removeContext(context)">
             {{ context.label }}
             &nbsp;<q-badge :color="contextWarning(context).color" v-if="contextWarning(context)">
             <q-icon name="error" />&nbsp;
@@ -515,7 +516,7 @@ function getContextChipColor(context) {
       return 'grey-9';
     }
 
-    return containsContext(context) ? (context.color + '-10') : (context.color + '-10');
+    return containsContext(context) ? (context.color + '-10') : 'grey-8';
   } else {
     return containsContext(context) ? (context.color + '-4') : (context.color + '-1');
   }
@@ -534,7 +535,7 @@ function getContextChipFontColor(context) {
     return layoutStore.darkMode ? 'grey-10' : 'grey-4';
   }
 
-  return layoutStore.darkMode ? 'white' : 'black';
+  return layoutStore.darkMode ? (context.color + '-4') : 'black';
 }
 
 function addContext(context, parametersValue = undefined) {
