@@ -6,6 +6,7 @@ import {usePromptStore} from 'stores/prompt-store';
 import {useEditorStore} from 'stores/editor-store';
 import {useFileStore} from 'stores/file-store';
 import { editorTextBetween} from 'src/common/utils/editorUtils';
+import { markdownToHtml } from 'src/common/utils/textUtils';
 import {currentFilePromptContext, createDynamicContext, allPromptContexts} from 'src/common/resources/promptContexts';
 import { useFileSearch } from 'src/composables/useFileSearch';
 import {Notify, useQuasar} from 'quasar';
@@ -282,23 +283,26 @@ export const useAiAgentStore = defineStore('ai-agent', {
       } else if (operationType === 'add') {
         // Insert new paragraph at specified position
         const insertPos = position === 'before' ? from : to;
-        // Create paragraph HTML content - UniqueID extension will auto-generate ID
-        const paragraphContent = `<p>${data.aiSuggestion}</p>`;
+        // Convert markdown to HTML for proper formatting
+        const htmlContent = markdownToHtml(data.aiSuggestion);
         editorStore.editor
           .chain()
           .focus()
-          .insertContentAt(insertPos, paragraphContent)
+          .insertContentAt(insertPos, htmlContent)
           .run();
       } else {
         // Default modify operation
+        // Convert markdown to HTML for proper formatting
+        const htmlContent = markdownToHtml(data.aiSuggestion);
         editorStore.editor
           .chain()
           .focus()
-          .command(({ tr, state }) => {
-            // Replace the content at the specified range
-            tr.replaceWith(from, to, state.schema.text(data.aiSuggestion));
+          .command(({ tr }) => {
+            // Delete the existing content and insert the new HTML content
+            tr.delete(from, to);
             return true;
           })
+          .insertContentAt(from, htmlContent)
           .run();
       }
 
