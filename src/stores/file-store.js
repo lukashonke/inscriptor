@@ -5,6 +5,7 @@ import {
   saveToJson,
   unflattenFiles,
   createFile,
+  createTrashBinFile,
   useFindFileRecursively
 } from "src/common/utils/fileUtils";
 import {open, save} from '@tauri-apps/plugin-dialog';
@@ -190,6 +191,18 @@ export const useFileStore = defineStore('files', {
       return true;
     },
     async setParent(file, parentId, atIndex) {
+      // Prevent moving static files
+      if (file.isStatic) {
+        return;
+      }
+
+      // Special handling for moving files to trash bin via drag and drop
+      if (parentId === '__trash_bin__') {
+        // Set deletion metadata
+        file.deletedAt = Date.now();
+        file.previousParentId = file.parentId;
+      }
+
       if(file.parentId === parentId) {
         if(atIndex !== null) {
           await this.setOrder(file, atIndex);
@@ -225,6 +238,19 @@ export const useFileStore = defineStore('files', {
     async removeFile(id) {
       const file = this.getFile(id);
 
+      // Prevent deletion of static files
+      if (file.isStatic) {
+        return;
+      }
+
+      // Ensure trash bin exists
+      const trashBin = this.ensureTrashBinExists();
+
+      // Set deletion metadata
+      file.deletedAt = Date.now();
+      file.previousParentId = file.parentId;
+
+      // Remove from current location
       let filesToRemoveFrom;
       if(file.parentId) {
         const parent = this.getFile(file.parentId);
@@ -233,12 +259,188 @@ export const useFileStore = defineStore('files', {
         filesToRemoveFrom = this.files;
       }
 
-      const index = filesToRemoveFrom.findIndex((file) => file.id === id);
-      filesToRemoveFrom.splice(index, 1);
+      const index = filesToRemoveFrom.findIndex((f) => f.id === id);
+      if (index > -1) {
+        filesToRemoveFrom.splice(index, 1);
+      }
 
-      await this.saveProjectFiles([{ id: id, requestType: 'Delete' }]);
+      // Move to trash bin
+      trashBin.children.push(file);
+      file.parentId = trashBin.id;
+      file.parent = trashBin;
+
+      // Mark as dirty for cloud sync
+      this.setDirty(file);
+      this.setDirty(trashBin);
 
       this.refreshOrders(filesToRemoveFrom);
+    },
+    async restoreFile(id) {
+      const file = this.getFile(id);
+
+      // Check if file is in trash bin
+      if (!file || !file.deletedAt) {
+        Notify.create({
+          message: 'File is not in trash or cannot be restored.',
+          color: 'warning',
+          position: 'top'
+        });
+        return;
+      }
+
+      const trashBin = this.getFile('__trash_bin__');
+      if (!trashBin) {
+        Notify.create({
+          message: 'Trash bin not found.',
+          color: 'negative',
+          position: 'top'
+        });
+        return;
+      }
+
+      // Remove from trash bin
+      const trashIndex = trashBin.children.findIndex((f) => f.id === id);
+      if (trashIndex > -1) {
+        trashBin.children.splice(trashIndex, 1);
+      }
+
+      // Restore to original location or root if parent no longer exists
+      let targetParent = null;
+      let targetCollection = this.files;
+
+      if (file.previousParentId) {
+        targetParent = this.getFile(file.previousParentId);
+        if (targetParent) {
+          targetCollection = targetParent.children;
+        }
+      }
+
+      // Clear deletion metadata
+      file.deletedAt = null;
+      file.previousParentId = null;
+      file.parentId = targetParent ? targetParent.id : null;
+      file.parent = targetParent;
+
+      // Add to target location
+      targetCollection.push(file);
+
+      // Mark as dirty for cloud sync
+      this.setDirty(file);
+      this.setDirty(trashBin);
+
+      this.refreshOrders(targetCollection);
+
+      Notify.create({
+        message: `${file.title} has been restored.`,
+        color: 'positive',
+        position: 'top'
+      });
+    },
+    async permanentlyDeleteFile(id) {
+      const file = this.getFile(id);
+
+      if (!file) {
+        return;
+      }
+
+      // Prevent permanent deletion of static files
+      if (file.isStatic) {
+        return;
+      }
+
+      const trashBin = this.getFile('__trash_bin__');
+
+      // Remove from trash bin
+      if (trashBin && file.parentId === trashBin.id) {
+        const trashIndex = trashBin.children.findIndex((f) => f.id === id);
+        if (trashIndex > -1) {
+          trashBin.children.splice(trashIndex, 1);
+        }
+        this.setDirty(trashBin);
+      }
+
+      // Permanently delete from cloud
+      await this.saveProjectFiles([{ id: id, requestType: 'Delete', file: file }]);
+
+      Notify.create({
+        message: `${file.title} has been permanently deleted.`,
+        color: 'positive',
+        position: 'top'
+      });
+    },
+    async cleanupOldDeletedFiles() {
+      const trashBin = this.getFile('__trash_bin__');
+      if (!trashBin || !trashBin.children) {
+        return;
+      }
+
+      debugger;
+
+      //const fourteenDaysAgo = Date.now() - (14 * 24 * 60 * 60 * 1000); // 14 days in milliseconds
+      const fourteenDaysAgo = Date.now() - (60 * 1000); // 14 days in milliseconds
+      const filesToDelete = [];
+      const filesToKeep = [];
+
+      // Separate files to delete from those to keep
+      trashBin.children.forEach(file => {
+        if (file.deletedAt && file.deletedAt < fourteenDaysAgo) {
+          filesToDelete.push(file);
+        } else {
+          filesToKeep.push(file);
+        }
+      });
+
+      if (filesToDelete.length === 0) {
+        return;
+      }
+
+      // Update trash bin children to only include files to keep
+      trashBin.children = filesToKeep;
+      this.setDirty(trashBin);
+
+      // Permanently delete old files from cloud
+      const deleteRequests = filesToDelete.map(file => ({
+        id: file.id,
+        requestType: 'Delete',
+        file: file,
+      }));
+
+      await this.saveProjectFiles(deleteRequests);
+
+      console.log(`Cleaned up ${filesToDelete.length} files older than 14 days from trash bin.`);
+    },
+    async emptyTrash() {
+      const trashBin = this.getFile('__trash_bin__');
+      if (!trashBin || !trashBin.children || trashBin.children.length === 0) {
+        Notify.create({
+          message: 'Trash bin is already empty.',
+          color: 'info',
+          position: 'top'
+        });
+        return;
+      }
+
+      const filesToDelete = [...trashBin.children];
+      const deleteCount = filesToDelete.length;
+
+      // Clear trash bin
+      trashBin.children = [];
+      this.setDirty(trashBin);
+
+      // Permanently delete all files from cloud
+      const deleteRequests = filesToDelete.map(file => ({
+        id: file.id,
+        requestType: 'Delete',
+        file: file,
+      }));
+
+      await this.saveProjectFiles(deleteRequests);
+
+      Notify.create({
+        message: `${deleteCount} file${deleteCount === 1 ? '' : 's'} permanently deleted from trash.`,
+        color: 'positive',
+        position: 'top'
+      });
     },
     getAllFileParents(file) {
       const parents = [];
@@ -620,6 +822,12 @@ export const useFileStore = defineStore('files', {
           writingStyleVariable.value = data.projectSettings.initialWritingStyle;
         }
       }
+
+      // Ensure trash bin exists for all loaded projects
+      this.ensureTrashBinExists();
+
+      // Clean up files older than 14 days from trash bin
+      await this.cleanupOldDeletedFiles();
     },
     getProjectData(excludeFiles = false) {
       return {
@@ -1039,6 +1247,25 @@ export const useFileStore = defineStore('files', {
       } else {
         return file.title;
       }
+    },
+    ensureTrashBinExists() {
+      // Check if trash bin already exists
+      const trashBin = this.files.find(file => file.id === '__trash_bin__');
+      if (trashBin) {
+        // Ensure it's positioned last
+        const index = this.files.indexOf(trashBin);
+        if (index !== this.files.length - 1) {
+          this.files.splice(index, 1);
+          this.files.push(trashBin);
+        }
+        return trashBin;
+      }
+
+      // Create and add trash bin
+      const trashBinFile = createTrashBinFile();
+      this.files.push(trashBinFile);
+      this.initialiseParents(this.files, null);
+      return trashBinFile;
     },
   }
 });
