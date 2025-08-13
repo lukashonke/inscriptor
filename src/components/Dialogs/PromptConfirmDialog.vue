@@ -71,7 +71,7 @@
                     </q-item>
                   </q-list>
                 </q-menu>
-                <q-tooltip>
+                <q-tooltip :delay="500">
                   Edit this message
                 </q-tooltip>
               </q-btn>
@@ -112,7 +112,7 @@
               </q-item>
             </q-list>
           </q-menu>
-          <q-tooltip>
+          <q-tooltip :delay="500">
             Add custom message
           </q-tooltip>
         </q-btn>
@@ -177,7 +177,7 @@
           <q-space />
           <q-btn icon="close" flat round dense v-close-popup />
         </div>
-        <q-tooltip class="q-px-md text-italic" v-if="prompt.description">
+        <q-tooltip class="q-px-md text-italic" v-if="prompt.description" :delay="500">
           Prompt Description: {{ prompt.description }}
         </q-tooltip>
       </q-card-section>
@@ -238,7 +238,7 @@
                       <q-icon name="error" />&nbsp;
                       {{ inputWarning(input).warning }}
                     </q-badge>
-                    <q-tooltip color="primary" >
+                    <q-tooltip color="primary"  :delay="500">
                       {{ input.description }}
                     </q-tooltip>
                   </q-chip>
@@ -259,7 +259,7 @@
                           <div class="col-auto">
                             <q-chip :text-color="getInputChipFontColor(selectedTextPromptInput)" :color="getInputChipColor(selectedTextPromptInput)" :icon="getInputChipIcon(selectedTextPromptInput)" :clickable="isInputAllowedForThisPrompt(selectedTextPromptInput)" @click="toggleInput(selectedTextPromptInput)" >
                               {{ selectedTextPromptInput.label }}
-                              <q-tooltip color="primary">
+                              <q-tooltip color="primary" :delay="500">
                                 <div>include selected text</div>
                                 <div>
                                   <q-badge :color="inputWarning(selectedTextPromptInput).color" v-if="inputWarning(selectedTextPromptInput)">
@@ -272,7 +272,7 @@
                           <div class="col-auto">
                             <q-chip :text-color="getInputChipFontColor(currentFilePromptInput)" :color="getInputChipColor(currentFilePromptInput)" :icon="getInputChipIcon(currentFilePromptInput)" :clickable="isInputAllowedForThisPrompt(currentFilePromptInput)" @click="toggleInput(currentFilePromptInput)" >
                               {{ currentFilePromptInput.label }} &nbsp;
-                              <q-tooltip color="primary">
+                              <q-tooltip color="primary" :delay="500">
                                 <div>include all text from {{ currentFile?.title }}</div>
                                 <div>
                                   <q-badge :color="inputWarning(currentFilePromptContext).color" v-if="inputWarning(currentFilePromptContext)">
@@ -409,6 +409,12 @@
         </div>
         <div class="col-auto q-mr-md" v-if="!request.agent">
           <q-btn flat label="Preview & Cost" no-caps color="secondary" @click="previewPrompt" class="float-left" :disable="!canConfirmPrompt"/>
+        </div>
+        <div class="col-auto q-mr-md" v-else>
+          <span>
+            <q-icon name="mdi-cloud-outline" />
+            Agent uses Inscriptor AI cloud
+          </span>
         </div>
         <div class="col-auto">
           <q-btn color="accent" :icon="request.agent ? 'mdi-robot-outline' : 'mdi-creation-outline'" :label="request.agent ? 'Run Agent' : 'Run Prompt'" v-close-popup @click="confirmPrompt(false)" class="float-right" :disable="!canConfirmPrompt" autofocus/>

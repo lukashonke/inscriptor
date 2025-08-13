@@ -155,10 +155,6 @@ const props = defineProps({
   },
 });
 
-const truncateContextChars = computed(() => {
-  return isMainRowHovered.value ? 15 : 0;
-})
-
 const offset = computed(() => 'tree-padding-' + props.level);
 
 const isMainRowHovered = computed(() => isHovered.value && (!isEmptyChildRefHovered.value || !emptyChildRef.value));
@@ -175,6 +171,7 @@ const isSelected = computed(() => fileStore.selectedFile?.id === props.file.id);
 const classes = computed(() => {
   return {
     'bg-file-list-selected': isSelected.value,
+    'q-mt-sm': props.file.id === '__trash_bin__',
   };
 });
 

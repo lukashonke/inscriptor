@@ -44,11 +44,11 @@
 
   <transition appear enter-active-class="animated fadeIn slow" leave-active-class="animated fadeOut">
 
-    <q-card :class="[isReactionToAnotherPrompt ? 'q-ml-md' : '', isPreviousPromptResult ? 'gradient-variation-3' : 'gradient-variation-1']" class="hoverable-card idea-card  q-pa-xs no-p-margin">
+    <q-card :class="[isReactionToAnotherPrompt ? 'q-ml-md' : '', isPreviousPromptResult ? 'gradient-variation-3' : 'gradient-variation-1']" class="hoverable-card idea-card  q-pa-xs no-p-margin" @click="onCardClick" :style="{ cursor: collapsed ? 'pointer' : 'default' }">
       <div class="prompt-actions" :class="type === 'inline' ? '' : 'sticky-top'">
         <div class="row no-wrap ellipsis">
           <div class="col-auto">
-            <q-btn color="grey-7" flat unelevated size="sm" :icon="type === 'inline' ? 'mdi-plus' : 'mdi-chevron-double-left'" @click="insert" :loading="copying" class="hoverable-btn-semi">
+            <q-btn color="grey-7" flat unelevated size="sm" :icon="type === 'inline' ? 'mdi-plus' : 'mdi-chevron-double-left'" @click.stop="insert" :loading="copying" class="hoverable-btn-semi">
               <q-tooltip :delay="1000">
                 Click to insert
               </q-tooltip>
@@ -109,11 +109,11 @@
           </div>
 
           <div class="col-auto" v-if="collapsed">
-            <q-btn color="grey-7" flat unelevated size="sm" :icon="collapsed ? 'mdi-plus-square' : 'mdi-minus-box-outline'" @click="collapsed = !collapsed" class="hoverable-btn-semi">
+            <q-btn color="grey-7" flat unelevated size="sm" :icon="collapsed ? 'mdi-plus-square' : 'mdi-minus-box-outline'" @click.stop="collapsed = !collapsed" class="hoverable-btn-semi">
             </q-btn>
           </div>
           <div class="col-auto" v-if="hasClose">
-            <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-close" @click="onClose" class="hoverable-btn-semi">
+            <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-close" @click.stop="onClose" class="hoverable-btn-semi">
             </q-btn>
           </div>
           <div class="col-auto" v-else-if="showMenu">
@@ -168,7 +168,7 @@
             </div>
           </div>
           <div class="col-auto">
-            <q-btn class="float-right hoverable-btn-semi" flat color="warning" unelevated size="sm" icon="mdi-stop" @click.prevent="stopPrompting($event)" v-if="isPrompting" >
+            <q-btn class="float-right hoverable-btn-semi" flat color="warning" unelevated size="sm" icon="mdi-stop" @click.stop.prevent="stopPrompting($event)" v-if="isPrompting" >
               <q-tooltip>Stop</q-tooltip>
             </q-btn>
           </div>
@@ -357,7 +357,7 @@
           </q-btn>
         </div>
 
-        <div class="col q-ml-md">
+        <div class="col q-ml-md" v-if="!disableFollowupActions">
           <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm"
             @click.prevent="generateFollowUpQuestions()" icon="mdi-creation-outline"
             v-if="promptStore.getPredefinedPromptId('Prompt Follow-Up Generator')"
@@ -401,7 +401,6 @@
         </div>
 
         <q-space />
-
         <div class="col-auto" v-if="allowRegenerate">
           <q-btn v-if="!promptResult.prompt.enablePromptRuns" class="text-weight-bold float-right hoverable-btn-semi" flat color="grey-7"
             unelevated size="sm" icon="arrow_drop_down">
@@ -515,14 +514,14 @@
     <template v-for="(previousResult, index) in promptResult.prevResults" :key="index">
       <transition appear enter-active-class="animated fadeIn slow" leave-active-class="animated fadeOut">
         <div class="q-mx-md">
-          <PromptResult :prompt-result="previousResult" :showPromptInfo="false" :isPreviousPromptResult="true" />
+          <PromptResult :prompt-result="previousResult" :showPromptInfo="false" :isPreviousPromptResult="true" disable-followup-actions/>
         </div>
       </transition>
     </template>
   </template>
 
   <div class="row q-mr-md q-mt-md" v-if="inlinePromptResult">
-    <PromptResult :promptResult="inlinePromptResult" type="inline" has-close @close="inlinePromptResult = null" :show-prompt-info="false" @replace-self="replacePromptResult"/>
+    <PromptResult :promptResult="inlinePromptResult" type="inline" has-close @close="inlinePromptResult = null" :show-prompt-info="false" @replace-self="replacePromptResult" disable-followup-actions/>
   </div>
 </template>
 
@@ -584,6 +583,10 @@
       type: Boolean,
       default: false,
     },
+    disableFollowupActions: {
+      type: Boolean,
+      default: false,
+    },
     insertTarget: {
       type: Object,
     },
@@ -626,6 +629,17 @@
 
   function onClose() {
     emits('close')
+  }
+
+  function onCardClick(event) {
+    // Only maximize if currently collapsed
+    if (collapsed.value) {
+      // Prevent event if it's coming from a button or interactive element
+      if (event.target.tagName === 'BUTTON' || event.target.closest('button') || event.target.closest('.q-btn')) {
+        return;
+      }
+      collapsed.value = false;
+    }
   }
 
   const expanded = ref(false);
@@ -1195,6 +1209,8 @@
   async function copyToClipboard(event) {
     event.stopPropagation();
 
+    const layoutStore = useLayoutStore();
+
     if(layoutStore.runsInDesktopApp()) {
       await writeText(replaceParameterEditorText(promptResultText.value));
     } else {
@@ -1397,7 +1413,7 @@
 <style scoped>
   .prompt-actions{
     z-index: 5;
-    height: 1.7rem;
+    max-height: 1.7rem;
   }
 
   h3 {

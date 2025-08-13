@@ -100,7 +100,7 @@
 
               <div v-if="refinePromptResult">
                   <q-spinner v-if="prompting" />
-                  <PromptResult :promptResult="refinePromptResult" :insert-target="(text) => systemPrompt = (trimInputWithAi(convertHtmlToText(text, true)))" type="inline" :has-close="true" @close="refinePromptResult = null" @replace-self="replacePromptResult"/>
+                  <PromptResult :promptResult="refinePromptResult" :insert-target="(text) => systemPrompt = (trimInputWithAi(convertHtmlToText(text, true)))" type="inline" :has-close="true" @close="refinePromptResult = null" @replace-self="replacePromptResult" disableFollowupActions/>
               </div>
 
               <q-slide-transition>

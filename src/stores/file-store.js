@@ -130,20 +130,35 @@ export const useFileStore = defineStore('files', {
       return file;
     },
     refreshOrders(files) {
+      // Find and remove trash bin if present
+      const trashBinIndex = files.findIndex(f => f.id === '__trash_bin__');
+      let trashBin = null;
+      if (trashBinIndex !== -1) {
+        trashBin = files.splice(trashBinIndex, 1)[0];
+      }
+
       let anyChanged = false;
       for(let i = 0; i < files.length; i++) {
 
-        if(files[i].order === i) {
-          continue;
+        if(files[i].order !== i) {
+          anyChanged = true;
+          files[i].order = i;
+          this.setDirty(files[i]);
         }
-
-        anyChanged = true;
-        files[i].order = i;
-        this.setDirty(files[i]);
       }
 
       if(anyChanged) {
         files.sort((a, b) => a.order - b.order);
+      }
+
+      // Add trash bin back at the end if it was present
+      if (trashBin) {
+        files.push(trashBin);
+        const newOrder = files.length - 1;
+        if (trashBin.order !== newOrder) {
+          trashBin.order = newOrder;
+          this.setDirty(trashBin);
+        }
       }
     },
     setDirty(file) {
@@ -374,8 +389,7 @@ export const useFileStore = defineStore('files', {
         return;
       }
 
-      //const fourteenDaysAgo = Date.now() - (14 * 24 * 60 * 60 * 1000); // 14 days in milliseconds
-      const fourteenDaysAgo = Date.now() - (60 * 1000); // 14 days in milliseconds
+      const fourteenDaysAgo = Date.now() - (14 * 24 * 60 * 60 * 1000); // 14 days in milliseconds
       const filesToDelete = [];
       const filesToKeep = [];
 
@@ -698,8 +712,13 @@ export const useFileStore = defineStore('files', {
 
       const projectData = this.getProject();
 
-
       await writeTextFile(filePath, saveToJson(projectData));
+
+      // Clear dirty flags after successful local save
+      const dirtyFiles = this.getDirtyFiles();
+      for (const dirtyFile of dirtyFiles) {
+        dirtyFile.dirty = false;
+      }
 
       if(setLastDataFile) {
         //const dataStore = useDataStore();

@@ -1,5 +1,5 @@
 <template>
-  <q-card class="inscriptor-shadow-1">
+  <q-card class="inscriptor-shadow-1" v-if="variant === 'default'">
     <q-card-section class="row">
       <div class="col row items-center" style="height: 40px">
         <div class="" :class="{'text-italic': renderVariant === 'not-recommended', 'text-weight-bold': renderVariant === 'recommended', '': !renderVariant}" style="font-size: 0.9rem">{{ writingStyle.name }}</div>
@@ -48,6 +48,50 @@
       </q-card-section>
     </q-slide-transition>
   </q-card>
+
+  <q-card class="inscriptor-shadow-1 cursor-pointer hover-enlarge" :class="{'selected-style': isCurrentStyle}" v-if="variant === 'initialSelector'" @click="onClick">
+    <q-card-section class="row" :class="isCurrentStyle ? '' : ''">
+      <div class="col row items-center" style="height: 40px">
+        <div class="" :class="{'text-italic': renderVariant === 'not-recommended', 'text-weight-bold': renderVariant === 'recommended', '': !renderVariant}" style="font-size: 0.9rem">{{ writingStyle.name }}</div>
+      </div>
+    </q-card-section>
+    <q-separator />
+    <q-card-section>
+      <div class="text-italic scroll-y" style="font-size: 0.8rem; height: 60px;">{{ writingStyle.usageTips }}</div>
+
+      <!-- Tags Display -->
+      <div v-if="writingStyle.tags && writingStyle.tags.length > 0" class="flex items-center" style="min-height: 60px;">
+        <q-chip
+          v-for="tag in writingStyle.tags"
+          :key="tag"
+          :color="getTagColor(tag) + '-6'"
+          :text-color="getTagColor(tag) + '-1'"
+          size="11px"
+          class="q-px-sm q-py-sm q-mr-xs q-mb-xs"
+        >
+          {{ formatTagName(tag, false) }}
+        </q-chip>
+      </div>
+
+      <div class="q-mt-md">
+        <q-btn
+          dense
+          flat
+          no-caps
+          :icon="showExamples ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+          :label="showExamples ? 'Hide' : 'Expand'"
+          @click.stop="showExamples = !showExamples"
+          color="primary"
+          size="sm"
+        />
+      </div>
+    </q-card-section>
+    <q-slide-transition>
+      <q-card-section v-if="showExamples" class="q-pt-none">
+        <div class="scroll writing-style-md" style="font-size: 0.8rem; max-height: 300px; background-color: rgba(0, 0, 0, 0.06); padding: 12px; border-radius: 4px;" v-html="markdownToHtml(writingStyle.value)"></div>
+      </q-card-section>
+    </q-slide-transition>
+  </q-card>
 </template>
 
 <script setup>
@@ -62,6 +106,11 @@ import {formatTagName, getTagColor} from "src/common/helpers/writingStyleTagsHel
       type: String,
       default: null,
       validator: (value) => [null, 'recommended', 'not-recommended'].includes(value)
+    },
+    variant: {
+      type: String,
+      default: 'default',
+      validator: (value) => ['default', 'initialSelector'].includes(value)
     }
   });
 
@@ -88,6 +137,20 @@ import {formatTagName, getTagColor} from "src/common/helpers/writingStyleTagsHel
 </script>
 
 <style scoped>
+.hover-enlarge {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-enlarge:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.selected-style {
+  border: 2px solid var(--q-accent);
+  transform: scale(1.02);
+}
+
 body.body--dark .scroll {
   background-color: rgba(255, 255, 255, 0.05) !important;
 }

@@ -41,14 +41,15 @@
         icon="mdi-folder-multiple-outline"
         :done="currentStep > 2"
       >
-        <div class="text-subtitle2 q-mb-md text-primary text-center">
-          Choose a template to get started
+        <div class="text-subtitle2 q-mb-lg text-primary text-center">
+          Choose a template to get started:
         </div>
         <div class="row q-gutter-md justify-center q-mb-md">
           <div
             v-for="template in projectTemplates"
             :key="template.id"
-            class="col-4"
+            class="col-auto"
+            style="max-width: 300px;"
           >
             <q-card
               :class="{

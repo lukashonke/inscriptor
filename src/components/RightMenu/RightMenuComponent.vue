@@ -190,7 +190,7 @@
                     enter-active-class="animated fadeInDown slower"
                     leave-active-class="animated fadeOut delay-1s"
                   >
-                    <PromptResult :promptResult="promptResult" is-selection-analysis/>
+                    <PromptResult :promptResult="promptResult" is-selection-analysis disable-followup-actions/>
 
                   </transition>
                 </div>

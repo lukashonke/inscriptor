@@ -31,16 +31,16 @@
         <div class="comparison-container">
           <!-- Operation type indicator -->
           <div v-if="getOperationType() !== 'modify'" class="operation-indicator q-mb-sm">
-            <q-chip 
-              :color="getOperationColor()" 
-              text-color="white" 
+            <q-chip
+              :color="getOperationColor()"
+              text-color="white"
               :icon="getOperationIcon()"
               size="sm"
             >
               {{ getOperationDescription() }}
             </q-chip>
           </div>
-          
+
           <!-- Content display for different operations -->
           <div v-if="getOperationType() === 'remove'" class="removal-preview q-mb-sm">
             <div class="text-caption text-grey-6 q-mb-xs">Content to be removed:</div>
@@ -48,7 +48,7 @@
               <del>{{ widgetData.originalText }}</del>
             </div>
           </div>
-          
+
           <div v-else-if="getOperationType() === 'add'" class="addition-preview q-mb-sm">
             <div class="text-caption text-grey-6 q-mb-xs">{{ getPositionDescription() }}:</div>
             <div class="q-pa-xs rounded border-positive bg-positive-1">
@@ -74,7 +74,7 @@
               @blur="finishEditing"
             ></div>
           </div>
-          
+
           <div v-else class="suggested-text q-mb-sm">
             <div
               v-if="!isEditingNow"
@@ -153,7 +153,7 @@
         <template v-for="(previousResult, index) in widgetData.promptResult.prevResults" :key="index">
           <transition appear enter-active-class="animated fadeIn slow" leave-active-class="animated fadeOut">
             <div class="q-mx-md q-mb-sm">
-              <PromptResult :prompt-result="previousResult" :showPromptInfo="false" :isPreviousPromptResult="true" :show-menu="false" :insert-func="acceptReplyBeforeAgent" :has-copy="false"/>
+              <PromptResult :prompt-result="previousResult" :showPromptInfo="false" :isPreviousPromptResult="true" :show-menu="false" :insert-func="acceptReplyBeforeAgent" :has-copy="false" disableFollowupActions/>
             </div>
           </transition>
         </template>
@@ -523,8 +523,8 @@ function getOperationDescription() {
 
 function getPositionDescription() {
   const position = props.widgetData.toolCallResult?.position;
-  return position === 'before' 
-    ? 'Insert new paragraph before this content' 
+  return position === 'before'
+    ? 'Insert new paragraph before this content'
     : 'Insert new paragraph after this content';
 }
 </script>
