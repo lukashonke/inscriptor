@@ -83,6 +83,7 @@
 <script setup>
 
 import {onMounted, computed, ref, onBeforeUnmount, watch} from 'vue'
+import {useDebounceFn} from '@vueuse/core'
 import FileDetail from "components/MainPanel/FileDetail.vue";
 import RightMenuComponent from "components/RightMenu/RightMenuComponent.vue";
 import LeftMenuComponent from "components/LeftMenu/LeftMenuComponent.vue";
@@ -90,53 +91,51 @@ import {useLayoutStore} from "stores/layout-store";
 
 const layoutStore = useLayoutStore();
 
-// Pixel dimensions
-const LEFT_MENU_MIN_WIDTH_PX = ref(300); // Minimum width for left menu in pixels
-const LEFT_MENU_HEIGHT_OFFSET_PX = ref(32); // Height offset for left menu
-const MAIN_PANEL_HEIGHT_OFFSET_PX = ref(50); // Height offset for main panel
-const RIGHT_PANEL_HEIGHT_OFFSET_PX = ref(33); // Height offset for right panel
-const SPLITTER_HANDLE_WIDTH_PX = ref(4); // Width of resize handles
-const MAIN_PANEL_WIDTH_OFFSET_PX = ref(8); // Width offset for main panel (2 handles)
-const SPLITTER_INDICATOR_HEIGHT_PX = ref(20); // Height of splitter handle indicator
-const SPLITTER_INDICATOR_WIDTH_PX = ref(2); // Width of splitter handle indicator
-const MOBILE_LEFT_MENU_MIN_WIDTH_PX = ref(220); // Minimum left menu width on mobile
+// Minimum widths in pixels
+const LEFT_PANEL_MIN_WIDTH = 250;
+const RIGHT_PANEL_MIN_WIDTH = 250;
+const MAIN_PANEL_MIN_WIDTH = 400;
 
-// Percentage dimensions
-const DEFAULT_LEFT_MENU_WIDTH_PCT = ref(12); // Default left menu width percentage
-const DEFAULT_RIGHT_PANEL_WIDTH_PCT = ref(15); // Default right panel width percentage
-const MAX_LEFT_MENU_WIDTH_PCT = ref(35); // Maximum left menu width percentage
-const MAX_RIGHT_PANEL_WIDTH_PCT = ref(50); // Maximum right panel width percentage
-const MIN_MAIN_PANEL_WIDTH_PCT = ref(20); // Minimum main panel width percentage
+// Height offsets for panels (keeping these as they're still needed)
+const LEFT_MENU_HEIGHT_OFFSET_PX = 32;
+const MAIN_PANEL_HEIGHT_OFFSET_PX = 50;
+const RIGHT_PANEL_HEIGHT_OFFSET_PX = 33;
+
+// Splitter handle width
+const SPLITTER_HANDLE_WIDTH = 4;
+
+// Container and resize state
 const splitterContainer = ref(null);
 const isResizing = ref(false);
 const resizeType = ref(''); // 'left' or 'right'
 const startX = ref(0);
-const startLeftMenuWidth = ref(DEFAULT_LEFT_MENU_WIDTH_PCT.value); // Default for left menu (matches minimum)
-const startRightPanelWidth = ref(DEFAULT_RIGHT_PANEL_WIDTH_PCT.value); // Starting width for right panel resize (matches minimum)
+const startLeftWidth = ref(0);
+const startRightWidth = ref(0);
 
-// Store panel widths as percentages
-const leftMenuWidthPercent = ref(layoutStore.leftDrawerOpen ? DEFAULT_LEFT_MENU_WIDTH_PCT.value : 0); // Will be updated to use dynamic minimum
-const rightPanelWidthPercent = ref(layoutStore.rightDrawerOpen ? (layoutStore.prevLayoutSplitterModel || DEFAULT_RIGHT_PANEL_WIDTH_PCT.value) : 0); // Show/hide based on rightDrawerOpen
+// Store panel widths in pixels
+const leftPanelWidthPx = ref(layoutStore.leftDrawerOpen ? 300 : 0);
+const rightPanelWidthPx = ref(layoutStore.rightDrawerOpen ? 350 : 0);
+
+// Track previous window width for resize handling
+const previousWindowWidth = ref(0);
+const resizeObserver = ref(null);
 
 // Computed properties for panel widths
 const leftMenuWidth = computed(() => {
-  return `${leftMenuWidthPercent.value}%`;
+  return `${leftPanelWidthPx.value}px`;
 });
 
 const rightPanelWidth = computed(() => {
-  return `${rightPanelWidthPercent.value}%`;
-});
-
-// Calculate minimum percentage for left panel width based on pixel minimum
-const leftMenuMinPercent = computed(() => {
-  if (!splitterContainer.value) return DEFAULT_LEFT_MENU_WIDTH_PCT.value; // fallback when container not ready
-  const containerWidth = splitterContainer.value.clientWidth;
-  return Math.max(DEFAULT_LEFT_MENU_WIDTH_PCT.value, (LEFT_MENU_MIN_WIDTH_PX.value / containerWidth) * 100);
+  return `${rightPanelWidthPx.value}px`;
 });
 
 const mainPanelWidth = computed(() => {
-  const remaining = 100 - leftMenuWidthPercent.value - rightPanelWidthPercent.value;
-  return `calc(${Math.max(MIN_MAIN_PANEL_WIDTH_PCT.value, remaining)}% - ${MAIN_PANEL_WIDTH_OFFSET_PX.value}px)`; // Subtract for two handles
+  if (!splitterContainer.value) return '100%';
+  const containerWidth = splitterContainer.value.clientWidth;
+  const handleWidth = layoutStore.leftDrawerOpen && layoutStore.rightDrawerOpen ? SPLITTER_HANDLE_WIDTH * 2 :
+                      (layoutStore.leftDrawerOpen || layoutStore.rightDrawerOpen) ? SPLITTER_HANDLE_WIDTH : 0;
+  const mainWidth = containerWidth - leftPanelWidthPx.value - rightPanelWidthPx.value - handleWidth;
+  return `${Math.max(MAIN_PANEL_MIN_WIDTH, mainWidth)}px`;
 });
 
 // Resize functionality for left handle (between left menu and main content)
@@ -144,7 +143,7 @@ const startLeftResize = (e) => {
   isResizing.value = true;
   resizeType.value = 'left';
   startX.value = e.clientX || e.touches[0].clientX;
-  startLeftMenuWidth.value = leftMenuWidthPercent.value;
+  startLeftWidth.value = leftPanelWidthPx.value;
 
   document.addEventListener('mousemove', handleResize);
   document.addEventListener('mouseup', stopResize);
@@ -160,7 +159,7 @@ const startRightResize = (e) => {
   isResizing.value = true;
   resizeType.value = 'right';
   startX.value = e.clientX || e.touches[0].clientX;
-  startRightPanelWidth.value = rightPanelWidthPercent.value;
+  startRightWidth.value = rightPanelWidthPx.value;
 
   document.addEventListener('mousemove', handleResize);
   document.addEventListener('mouseup', stopResize);
@@ -177,44 +176,47 @@ const handleResize = (e) => {
   const clientX = e.clientX || e.touches[0].clientX;
   const containerWidth = splitterContainer.value.clientWidth;
   const deltaX = clientX - startX.value;
-  const deltaPercent = (deltaX / containerWidth) * 100;
 
   if (resizeType.value === 'left') {
     // Only allow resizing if left drawer is open
     if (!layoutStore.leftDrawerOpen) return;
 
-    // Resizing left menu
-    let newLeftMenuWidth = startLeftMenuWidth.value + deltaPercent;
+    // Calculate new width in pixels
+    let newLeftWidth = startLeftWidth.value + deltaX;
 
-    // Apply limits (dynamic minimum based on pixel value to max percentage for left menu)
-    newLeftMenuWidth = Math.max(leftMenuMinPercent.value, Math.min(MAX_LEFT_MENU_WIDTH_PCT.value, newLeftMenuWidth));
+    // Calculate space needed for main panel
+    const handleWidth = layoutStore.rightDrawerOpen ? SPLITTER_HANDLE_WIDTH * 2 : SPLITTER_HANDLE_WIDTH;
+    const availableForMain = containerWidth - newLeftWidth - rightPanelWidthPx.value - handleWidth;
 
-    // Ensure main panel doesn't get too small
-    const remainingForMain = 100 - newLeftMenuWidth - rightPanelWidthPercent.value;
-    if (remainingForMain < MIN_MAIN_PANEL_WIDTH_PCT.value) {
-      newLeftMenuWidth = 100 - MIN_MAIN_PANEL_WIDTH_PCT.value - rightPanelWidthPercent.value;
+    // Apply minimum constraints
+    if (newLeftWidth < LEFT_PANEL_MIN_WIDTH) {
+      newLeftWidth = LEFT_PANEL_MIN_WIDTH;
+    }
+    if (availableForMain < MAIN_PANEL_MIN_WIDTH) {
+      newLeftWidth = containerWidth - MAIN_PANEL_MIN_WIDTH - rightPanelWidthPx.value - handleWidth;
     }
 
-    leftMenuWidthPercent.value = newLeftMenuWidth;
+    leftPanelWidthPx.value = newLeftWidth;
   } else if (resizeType.value === 'right') {
     // Only allow resizing if right drawer is open
     if (!layoutStore.rightDrawerOpen) return;
 
-    // Resizing right panel
-    let newRightPanelWidth = startRightPanelWidth.value - deltaPercent;
+    // Calculate new width in pixels (right panel moves opposite direction)
+    let newRightWidth = startRightWidth.value - deltaX;
 
-    // Apply limits (default to max percentage for right panel)
-    newRightPanelWidth = Math.max(DEFAULT_RIGHT_PANEL_WIDTH_PCT.value, Math.min(MAX_RIGHT_PANEL_WIDTH_PCT.value, newRightPanelWidth));
+    // Calculate space needed for main panel
+    const handleWidth = layoutStore.leftDrawerOpen ? SPLITTER_HANDLE_WIDTH * 2 : SPLITTER_HANDLE_WIDTH;
+    const availableForMain = containerWidth - leftPanelWidthPx.value - newRightWidth - handleWidth;
 
-    // Ensure main panel doesn't get too small
-    const remainingForMain = 100 - leftMenuWidthPercent.value - newRightPanelWidth;
-    if (remainingForMain < MIN_MAIN_PANEL_WIDTH_PCT.value) {
-      newRightPanelWidth = 100 - MIN_MAIN_PANEL_WIDTH_PCT.value - leftMenuWidthPercent.value;
+    // Apply minimum constraints
+    if (newRightWidth < RIGHT_PANEL_MIN_WIDTH) {
+      newRightWidth = RIGHT_PANEL_MIN_WIDTH;
+    }
+    if (availableForMain < MAIN_PANEL_MIN_WIDTH) {
+      newRightWidth = containerWidth - MAIN_PANEL_MIN_WIDTH - leftPanelWidthPx.value - handleWidth;
     }
 
-    rightPanelWidthPercent.value = newRightPanelWidth;
-    layoutStore.layoutSplitterModel = newRightPanelWidth; // Keep sync with store
-    layoutStore.prevLayoutSplitterModel = newRightPanelWidth; // Update saved width
+    rightPanelWidthPx.value = newRightWidth;
   }
 };
 
@@ -230,64 +232,99 @@ const stopResize = () => {
   document.body.style.userSelect = '';
 };
 
+// Handle window resize by triggering the existing resize logic
+const handleWindowResize = () => {
+  console.log('🔄 Window resize triggered - calling existing resize handler');
+
+  if (!splitterContainer.value) {
+    console.log('❌ No splitter container ref');
+    return;
+  }
+
+  const containerWidth = splitterContainer.value.clientWidth;
+  console.log('📏 New container width:', containerWidth);
+
+  // Process left panel if open - simulate mouse movement to force recalculation
+  if (layoutStore.leftDrawerOpen && leftPanelWidthPx.value > 0) {
+    console.log('🔧 Adjusting left panel via simulated mouse movement');
+
+    // Set up resize state
+    resizeType.value = 'left';
+    isResizing.value = true;
+    startX.value = leftPanelWidthPx.value; // Start at current panel width
+    startLeftWidth.value = leftPanelWidthPx.value;
+
+    // Simulate mouse movement that forces recalculation based on container width
+    const targetMouseX = leftPanelWidthPx.value + 1; // Slight movement to trigger recalculation
+
+    const simulatedEvent = {
+      clientX: targetMouseX,
+      touches: [{ clientX: targetMouseX }]
+    };
+
+    handleResize(simulatedEvent);
+    isResizing.value = false;
+  }
+
+  // Process right panel if open - simulate mouse movement to force recalculation
+  if (layoutStore.rightDrawerOpen && rightPanelWidthPx.value > 0) {
+    console.log('🔧 Adjusting right panel via simulated mouse movement');
+
+    // Set up resize state
+    resizeType.value = 'right';
+    isResizing.value = true;
+    // For right panel, start position at the right panel's left edge
+    startX.value = containerWidth - rightPanelWidthPx.value;
+    startRightWidth.value = rightPanelWidthPx.value;
+
+    // Simulate mouse movement that forces recalculation based on container width
+    const targetMouseX = containerWidth - rightPanelWidthPx.value - 1; // Slight movement
+
+    const simulatedEvent = {
+      clientX: targetMouseX,
+      touches: [{ clientX: targetMouseX }]
+    };
+
+    handleResize(simulatedEvent);
+    isResizing.value = false;
+  }
+
+  console.log('✅ Window resize handling complete');
+};
+
+// Create debounced version of resize handler
+const debouncedWindowResize = useDebounceFn(handleWindowResize, 100);
+
 // Watchers to sync with layout store
 watch(() => layoutStore.leftDrawerOpen, (newValue) => {
-  leftMenuWidthPercent.value = newValue ? leftMenuMinPercent.value : 0;
+  leftPanelWidthPx.value = newValue ? 300 : 0;
 });
 
 watch(() => layoutStore.rightDrawerOpen, (newValue) => {
-  if (newValue) {
-    // Opening: use prevLayoutSplitterModel or default percentage
-    rightPanelWidthPercent.value = layoutStore.prevLayoutSplitterModel || DEFAULT_RIGHT_PANEL_WIDTH_PCT.value;
-  } else {
-    // Closing: set to 0%
-    rightPanelWidthPercent.value = 0;
-  }
+  rightPanelWidthPx.value = newValue ? 350 : 0;
 });
-
-// Also watch layoutSplitterModel changes when panel is open (for manual resizing)
-watch(() => layoutStore.layoutSplitterModel, (newValue) => {
-  if (layoutStore.rightDrawerOpen && newValue !== 100) {
-    rightPanelWidthPercent.value = newValue;
-  }
-});
-
-// Handle window resize to maintain pixel widths
-let previousContainerWidth = 0;
-
-const handleWindowResize = () => {
-  if (layoutStore.leftDrawerOpen && splitterContainer.value) {
-    const oldWidth = previousContainerWidth || splitterContainer.value.clientWidth;
-    const newWidth = splitterContainer.value.clientWidth;
-
-    // Calculate what the current pixel width was
-    const currentPixelWidth = (leftMenuWidthPercent.value / 100) * oldWidth;
-
-    // Calculate new percentage to maintain same pixel width
-    let newPercent = (currentPixelWidth / newWidth) * 100;
-
-    // Apply constraints: minimum pixel width and maximum percentage
-    const minPercent = (LEFT_MENU_MIN_WIDTH_PX.value / newWidth) * 100;
-    newPercent = Math.max(minPercent, Math.min(MAX_LEFT_MENU_WIDTH_PCT.value, newPercent));
-
-    leftMenuWidthPercent.value = newPercent;
-    previousContainerWidth = newWidth;
-  }
-};
 
 onMounted(() => {
-  // Initialize left panel width with proper minimum on mount
+  console.log('🔧 MainPage mounted');
+
+  // Initialize panel widths on mount
   if (layoutStore.leftDrawerOpen) {
-    leftMenuWidthPercent.value = leftMenuMinPercent.value;
+    leftPanelWidthPx.value = 300;
+  }
+  if (layoutStore.rightDrawerOpen) {
+    rightPanelWidthPx.value = 350;
   }
 
-  // Initialize previous container width
+  // Initialize window width tracking and add resize listener
   if (splitterContainer.value) {
-    previousContainerWidth = splitterContainer.value.clientWidth;
+    previousWindowWidth.value = splitterContainer.value.clientWidth;
+    console.log('✅ Initialized container width:', previousWindowWidth.value);
+  } else {
+    console.log('❌ No splitter container on mount');
   }
 
-  // Add window resize listener
-  window.addEventListener('resize', handleWindowResize);
+  window.addEventListener('resize', debouncedWindowResize);
+  console.log('👂 Added debounced window resize listener');
 })
 
 onBeforeUnmount(() => {
@@ -295,9 +332,8 @@ onBeforeUnmount(() => {
   if (isResizing.value) {
     stopResize();
   }
-
   // Remove window resize listener
-  window.removeEventListener('resize', handleWindowResize);
+  window.removeEventListener('resize', debouncedWindowResize);
 });
 
 
@@ -320,14 +356,12 @@ onBeforeUnmount(() => {
 .splitter-left-menu {
   flex-shrink: 0;
   border-right: 1px solid;
-  transition: width 0.3s ease;
   overflow: hidden; /* Hide content when width is 0 */
 }
 
 .splitter-main {
   flex-shrink: 0;
   position: relative;
-  transition: width 0.3s ease;
   overflow: visible; /* Explicitly allow overflow for dialogs */
   z-index: 2; /* Higher z-index for main content and dialogs */
 }
@@ -335,7 +369,6 @@ onBeforeUnmount(() => {
 .splitter-right {
   flex-shrink: 0;
   border-left: 1px solid;
-  transition: width 0.3s ease;
   overflow: hidden; /* Hide content when width is 0 */
   z-index: 1; /* Lower z-index so dialogs can appear above */
 }
@@ -348,11 +381,6 @@ onBeforeUnmount(() => {
   transition: background-color 0.2s ease;
 }
 
-.splitter-handle:hover {
-}
-
-.splitter-handle:active {
-}
 
 /* Add visual indicator on hover */
 .splitter-handle::after {
@@ -384,16 +412,5 @@ onBeforeUnmount(() => {
   overflow-y: auto;
   overflow-x: hidden;
   position: relative;
-}
-
-/* Handle mobile touch */
-@media (max-width: 768px) {
-  .splitter-handle {
-    width: 8px; /* Make handle wider on mobile for easier touch */
-  }
-
-  .splitter-left-menu {
-    min-width: 220px; /* Ensure left menu doesn't get too narrow on mobile */
-  }
 }
 </style>
