@@ -42,10 +42,10 @@
     </q-input>
 
 
-    <div style="position: relative;" v-if="promptResult && promptResult.prompt === promptExecuted">
+    <div style="position: relative;" v-if="promptResult && promptResult.prompt === promptExecuted" class="q-mt-xs">
       <div class="bordered" style="position: absolute; top: 100%; left: 0; z-index: 10; ">
         <q-spinner v-if="prompting" />
-        <PromptResult :promptResult="promptResult" :insert-target="(text) => onInput(trimInputWithAi(convertHtmlToText(text, true)))" type="inline" :has-close="true" @close="promptResult = null" @replace-self="replacePromptResult"/>
+        <PromptResult :promptResult="promptResult" :insert-target="(text) => onInput(trimInputWithAi(convertHtmlToText(text, true)))" type="inline" :has-close="true" @close="promptResult = null" @replace-self="replacePromptResult" disableFollowupActions/>
       </div>
 
     </div>

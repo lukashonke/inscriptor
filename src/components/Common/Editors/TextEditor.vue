@@ -72,10 +72,8 @@
                       </div>
                     </div>
                   </div>
-
-
                   <div class="q-mb-sm q-mt-sm q-mx-sm" v-for="(promptResult, index) in promptStore.selectionPromptResults" :key="index">
-                    <PromptResult :promptResult="promptResult" type="inline"/>
+                    <PromptResult :promptResult="promptResult" type="inline" disable-followup-actions/>
                   </div>
                 </q-card>
                 <q-skeleton v-else animation="fade"/>
@@ -118,7 +116,7 @@
         </div>
 
         <div class="row" v-if="quickCommandTemporaryResult.length > 0">
-          <PromptResult v-if="quickCommandTemporaryPromptResult" :promptResult="quickCommandTemporaryPromptResult" type="inline" :has-close="true" @close="closeQuickPromptResult" :insert-func="insertQuickPromptResult" @on-insert="closeQuickPromptResult" @replace-self="replacePromptResult"  :show-prompt-info="false"/>
+          <PromptResult v-if="quickCommandTemporaryPromptResult" :promptResult="quickCommandTemporaryPromptResult" type="inline" :has-close="true" @close="closeQuickPromptResult" :insert-func="insertQuickPromptResult" @on-insert="closeQuickPromptResult" @replace-self="replacePromptResult"  :show-prompt-info="false"  disable-followup-actions/>
           <q-card v-else style="width: 400px; min-height: 50px;" class="hoverable-card idea-card gradient-variation-1 q-pa-xs no-p-margin">
             <div class="prompt-actions sticky-top">
               <div class="row no-wrap ellipsis">
@@ -197,7 +195,7 @@
           </div>
         </div>
         <div class="row " v-if="quickCommandTemporaryResult.length > 0">
-          <PromptResult v-if="quickCommandTemporaryPromptResult" :promptResult="quickCommandTemporaryPromptResult" type="inline" :has-close="true" @close="closeQuickPromptResult" :insert-func="insertQuickPromptResult" @replace-self="replacePromptResult" :show-prompt-info="false"/>
+          <PromptResult v-if="quickCommandTemporaryPromptResult" :promptResult="quickCommandTemporaryPromptResult" type="inline" :has-close="true" @close="closeQuickPromptResult" :insert-func="insertQuickPromptResult" @replace-self="replacePromptResult" :show-prompt-info="false"  disable-followup-actions/>
           <q-card v-else style="width: 400px; min-height: 50px;" class="hoverable-card idea-card gradient-variation-1 q-pa-xs no-p-margin">
             <div class="prompt-actions sticky-top">
               <div class="row no-wrap ellipsis">

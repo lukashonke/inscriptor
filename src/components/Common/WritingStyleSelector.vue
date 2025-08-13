@@ -112,6 +112,7 @@
               :writingStyle="writingStyle"
               :currentValue="writingStyleValue"
               :renderVariant="getStyleRenderVariant(writingStyle)"
+              :variant="disableCustomization ? 'initialSelector' : 'default'"
             />
           </div>
           <!-- Fill remaining slots if less than 3 styles in slide -->
@@ -155,11 +156,11 @@
     />
   </div>
   <template v-else>
-    <div class="row justify-center scroll-y q-px-xl q-py-md rounded-borders" style="height: 360px;" v-if="writingStyleValue">
+    <div class="row justify-center scroll-y q-px-xl q-py-md rounded-borders" style="height: 360px;" v-if="writingStyleValue && !disableCustomization">
       <div class="col-12 full-width text-caption q-mb-sm text-primary" style="max-width: 1000px;" v-if="writingStyleName">{{  writingStyleName }}:</div>
       <div class="col-12 prompt-results" style="max-width: 1000px;" v-html="markdownToHtml(writingStyleValue)" />
     </div>
-    <div class="row q-mt-md justify-center" v-if="writingStyleValue">
+    <div class="row q-mt-md justify-center" v-if="writingStyleValue && !disableCustomization">
       <div class="row justify-center" v-if="disableCustomization">
         <div class="col items-center full-width text-caption text-primary" >
           <q-icon name="mdi-information-outline" class="q-mr-xs" size="xs" />
@@ -177,7 +178,7 @@
         no-caps
       />
     </div>
-    <div v-if="!writingStyleValue" :style="{ height: (disableCustomization ? '140px' : '250px')}" class="flex justify-center">
+    <div v-if="!writingStyleValue || disableCustomization" :style="{ height: (disableCustomization ? '140px' : '250px')}" class="flex justify-center">
       <q-btn
         flat
         v-if="!disableCustomization"

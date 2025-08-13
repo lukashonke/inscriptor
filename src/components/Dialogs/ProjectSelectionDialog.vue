@@ -1,7 +1,7 @@
 <template>
   <q-dialog v-model="layoutStore.projectSelectionDialogOpen" :persistent="!fileStore.projectId" @beforeShow="onShow">
 
-    <q-card style="max-width: 90vw;" :style="{width: (creatingNewProject === true ? '1000px' : '700px')}" class="transform-animation">
+    <q-card style="max-width: 90vw;" :style="{width: (creatingNewProject === true ? '1200px' : '700px')}" class="transform-animation">
       <q-card-section v-if="!creatingNewProject" class="q-mb-md">
 
         <div class="q-mb-md">

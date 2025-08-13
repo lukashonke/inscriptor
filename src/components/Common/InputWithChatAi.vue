@@ -74,8 +74,9 @@
           <q-input
             v-model="chatInput"
             placeholder="Ask AI to modify..."
-            filled
             autofocus
+            borderless
+            class="q-pl-xs"
             dense
             @keyup.enter="sendChatMessage"
             :disable="isProcessing"

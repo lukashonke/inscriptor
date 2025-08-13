@@ -1,5 +1,5 @@
 <template>
-  <div class="q-mx-md">
+  <div class="q-mx-md full-width">
     <div class="column full-height">
 
       <!-- Loading indicator -->
@@ -14,7 +14,7 @@
       <div class="col-auto">
         <div class="flex items-center justify-center q-mb-md" v-if="maxChatsPage > 0">
           <div class="col-auto flex items-center" v-if="maxChatsPage > 0">
-            <q-pagination :max="maxChatsPage" v-model="page" direction-links :boundary-links="false" />
+            <q-pagination :max="maxChatsPage" v-model="page" direction-links :boundary-links="false" :max-pages="2" />
           </div>
 
           <!-- Current file indicator -->
@@ -70,7 +70,7 @@
         <template v-if="!currentChatMessages || currentChatMessages.length === 0">
           <div class="q-gutter-y-sm q-ml-xs chat-history-container justify-center q-mt-xl" style="margin-bottom: 100px;">
             <div class="row full-width justify-center" style="">
-              <q-card flat bordered class="col-auto" style="min-width: 600px; max-width: 600px;">
+              <q-card flat bordered class="col-auto" style="min-width: 350px; max-width: 600px;">
                 <q-card-section class="q-gutter-y-xs">
                   <div class="row text-caption">
                     Prompt for this chat:
@@ -225,12 +225,13 @@
               <div class="text-caption q-pa-md q-pb-sm q-pt-sm text-grey-7" v-if="currentChatMessages.length === 0">
                 <div class="bordered q-pa-sm help-text-area">
                   <q-icon name="mdi-robot" class="text-accent q-mb-xs" />
-                  AI Chat:
-                  <div>
-                    The AI can analyze, look for context in project and modify your document, asking for your approvals before.
+                  AI Agent Chat:
+                  <div class="q-mt-sm">
+                    It can analyze, look for context in project and modify your document, asking for your approvals before. Start by describing what you want the AI to do.
                   </div>
-                  <div>
-                    Start by describing what you want the AI to do.
+                  <div class="q-mt-sm">
+                    <q-icon name="mdi-cloud-outline" />
+                    Agent uses Inscriptor AI cloud, consuming AI credits.
                   </div>
                 </div>
               </div>

@@ -1,5 +1,5 @@
 <template>
-  <q-page class="" style="overflow: visible;">
+  <q-page class="" style="overflow: visible; overflow-x: hidden">
     <div class="full-width full-height" style="overflow: visible;">
 
       <div class="custom-splitter full-height" ref="splitterContainer">
@@ -67,7 +67,7 @@
           :style="{ width: rightPanelWidth }"
         >
           <div class="" :style="{ height: `calc(100vh - ${RIGHT_PANEL_HEIGHT_OFFSET_PX}px)` }">
-            <div class="">
+            <div class="overflow-hidden">
               <div class="fit bg-white-transparent">
                 <RightMenuComponent />
               </div>
@@ -92,8 +92,8 @@ import {useLayoutStore} from "stores/layout-store";
 const layoutStore = useLayoutStore();
 
 // Minimum widths in pixels
-const LEFT_PANEL_MIN_WIDTH = 250;
-const RIGHT_PANEL_MIN_WIDTH = 250;
+const LEFT_PANEL_MIN_WIDTH = 280;
+const RIGHT_PANEL_MIN_WIDTH = 400;
 const MAIN_PANEL_MIN_WIDTH = 400;
 
 // Height offsets for panels (keeping these as they're still needed)
