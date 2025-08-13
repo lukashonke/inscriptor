@@ -234,62 +234,37 @@ const stopResize = () => {
 
 // Handle window resize by triggering the existing resize logic
 const handleWindowResize = () => {
-  console.log('🔄 Window resize triggered - calling existing resize handler');
-
-  if (!splitterContainer.value) {
-    console.log('❌ No splitter container ref');
-    return;
-  }
+  if (!splitterContainer.value) return;
 
   const containerWidth = splitterContainer.value.clientWidth;
-  console.log('📏 New container width:', containerWidth);
 
-  // Process left panel if open - simulate mouse movement to force recalculation
+  // Process left panel if open
   if (layoutStore.leftDrawerOpen && leftPanelWidthPx.value > 0) {
-    console.log('🔧 Adjusting left panel via simulated mouse movement');
-
-    // Set up resize state
     resizeType.value = 'left';
     isResizing.value = true;
-    startX.value = leftPanelWidthPx.value; // Start at current panel width
+    startX.value = leftPanelWidthPx.value;
     startLeftWidth.value = leftPanelWidthPx.value;
 
-    // Simulate mouse movement that forces recalculation based on container width
-    const targetMouseX = leftPanelWidthPx.value + 1; // Slight movement to trigger recalculation
-
-    const simulatedEvent = {
-      clientX: targetMouseX,
-      touches: [{ clientX: targetMouseX }]
-    };
-
-    handleResize(simulatedEvent);
+    handleResize({
+      clientX: leftPanelWidthPx.value + 1,
+      touches: [{ clientX: leftPanelWidthPx.value + 1 }]
+    });
     isResizing.value = false;
   }
 
-  // Process right panel if open - simulate mouse movement to force recalculation
+  // Process right panel if open
   if (layoutStore.rightDrawerOpen && rightPanelWidthPx.value > 0) {
-    console.log('🔧 Adjusting right panel via simulated mouse movement');
-
-    // Set up resize state
     resizeType.value = 'right';
     isResizing.value = true;
-    // For right panel, start position at the right panel's left edge
     startX.value = containerWidth - rightPanelWidthPx.value;
     startRightWidth.value = rightPanelWidthPx.value;
 
-    // Simulate mouse movement that forces recalculation based on container width
-    const targetMouseX = containerWidth - rightPanelWidthPx.value - 1; // Slight movement
-
-    const simulatedEvent = {
-      clientX: targetMouseX,
-      touches: [{ clientX: targetMouseX }]
-    };
-
-    handleResize(simulatedEvent);
+    handleResize({
+      clientX: containerWidth - rightPanelWidthPx.value - 1,
+      touches: [{ clientX: containerWidth - rightPanelWidthPx.value - 1 }]
+    });
     isResizing.value = false;
   }
-
-  console.log('✅ Window resize handling complete');
 };
 
 // Create debounced version of resize handler
