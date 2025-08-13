@@ -389,8 +389,7 @@ export const useFileStore = defineStore('files', {
         return;
       }
 
-      //const fourteenDaysAgo = Date.now() - (14 * 24 * 60 * 60 * 1000); // 14 days in milliseconds
-      const fourteenDaysAgo = Date.now() - (60 * 1000); // 14 days in milliseconds
+      const fourteenDaysAgo = Date.now() - (14 * 24 * 60 * 60 * 1000); // 14 days in milliseconds
       const filesToDelete = [];
       const filesToKeep = [];
 
@@ -713,8 +712,13 @@ export const useFileStore = defineStore('files', {
 
       const projectData = this.getProject();
 
-
       await writeTextFile(filePath, saveToJson(projectData));
+
+      // Clear dirty flags after successful local save
+      const dirtyFiles = this.getDirtyFiles();
+      for (const dirtyFile of dirtyFiles) {
+        dirtyFile.dirty = false;
+      }
 
       if(setLastDataFile) {
         //const dataStore = useDataStore();
