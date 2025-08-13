@@ -130,20 +130,35 @@ export const useFileStore = defineStore('files', {
       return file;
     },
     refreshOrders(files) {
+      // Find and remove trash bin if present
+      const trashBinIndex = files.findIndex(f => f.id === '__trash_bin__');
+      let trashBin = null;
+      if (trashBinIndex !== -1) {
+        trashBin = files.splice(trashBinIndex, 1)[0];
+      }
+
       let anyChanged = false;
       for(let i = 0; i < files.length; i++) {
 
-        if(files[i].order === i) {
-          continue;
+        if(files[i].order !== i) {
+          anyChanged = true;
+          files[i].order = i;
+          this.setDirty(files[i]);
         }
-
-        anyChanged = true;
-        files[i].order = i;
-        this.setDirty(files[i]);
       }
 
       if(anyChanged) {
         files.sort((a, b) => a.order - b.order);
+      }
+
+      // Add trash bin back at the end if it was present
+      if (trashBin) {
+        files.push(trashBin);
+        const newOrder = files.length - 1;
+        if (trashBin.order !== newOrder) {
+          trashBin.order = newOrder;
+          this.setDirty(trashBin);
+        }
       }
     },
     setDirty(file) {
