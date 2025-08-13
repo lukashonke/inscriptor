@@ -1,5 +1,5 @@
 <template>
-  <q-page class="" style="overflow: visible;" :style="cssVariables">
+  <q-page class="" style="overflow: visible;">
     <div class="full-width full-height" style="overflow: visible;">
 
       <div class="custom-splitter full-height" ref="splitterContainer">
@@ -259,17 +259,17 @@ const handleWindowResize = () => {
   if (layoutStore.leftDrawerOpen && splitterContainer.value) {
     const oldWidth = previousContainerWidth || splitterContainer.value.clientWidth;
     const newWidth = splitterContainer.value.clientWidth;
-    
+
     // Calculate what the current pixel width was
     const currentPixelWidth = (leftMenuWidthPercent.value / 100) * oldWidth;
-    
+
     // Calculate new percentage to maintain same pixel width
     let newPercent = (currentPixelWidth / newWidth) * 100;
-    
+
     // Apply constraints: minimum pixel width and maximum percentage
     const minPercent = (LEFT_MENU_MIN_WIDTH_PX.value / newWidth) * 100;
     newPercent = Math.max(minPercent, Math.min(MAX_LEFT_MENU_WIDTH_PCT.value, newPercent));
-    
+
     leftMenuWidthPercent.value = newPercent;
     previousContainerWidth = newWidth;
   }
@@ -300,13 +300,6 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', handleWindowResize);
 });
 
-// Computed property to generate CSS variables
-const cssVariables = computed(() => ({
-  '--splitter-handle-width': `${SPLITTER_HANDLE_WIDTH_PX.value}px`,
-  '--splitter-indicator-height': `${SPLITTER_INDICATOR_HEIGHT_PX.value}px`,
-  '--splitter-indicator-width': `${SPLITTER_INDICATOR_WIDTH_PX.value}px`,
-  '--mobile-left-menu-min-width': `${MOBILE_LEFT_MENU_MIN_WIDTH_PX.value}px`
-}));
 
 </script>
 
@@ -348,7 +341,7 @@ const cssVariables = computed(() => ({
 }
 
 .splitter-handle {
-  width: var(--splitter-handle-width, 4px);
+  width: 4px;
   cursor: col-resize;
   flex-shrink: 0;
   position: relative;
@@ -367,8 +360,8 @@ const cssVariables = computed(() => ({
   position: absolute;
   top: 50%;
   left: 50%;
-  width: var(--splitter-indicator-width, 2px);
-  height: var(--splitter-indicator-height, 20px);
+  width: 2px;
+  height: 20px;
   transform: translate(-50%, -50%);
   border-radius: 1px;
   opacity: 0;
@@ -393,18 +386,14 @@ const cssVariables = computed(() => ({
   position: relative;
 }
 
-/* Shadow for Variables/Settings/History area */
-.inscriptor-insert-shadow-top {
-}
-
 /* Handle mobile touch */
 @media (max-width: 768px) {
   .splitter-handle {
-    width: calc(var(--splitter-handle-width, 4px) * 2); /* Make handle wider on mobile for easier touch */
+    width: 8px; /* Make handle wider on mobile for easier touch */
   }
 
   .splitter-left-menu {
-    min-width: var(--mobile-left-menu-min-width, 220px); /* Ensure left menu doesn't get too narrow on mobile */
+    min-width: 220px; /* Ensure left menu doesn't get too narrow on mobile */
   }
 }
 </style>
