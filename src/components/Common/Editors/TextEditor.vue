@@ -290,7 +290,7 @@
         </q-btn>
       </div>
 
-      <div class="col-auto" v-if="promptStore.projectAgents.length > 0" ref="agentSelectorButton">
+      <div class="col-auto" v-if="promptStore.projectAgents.length > 0" ref="agentSelectorButton" id="agentSelector">
         <q-btn
           v-if="!isAgentActive"
           size="11px"
