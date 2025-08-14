@@ -242,7 +242,7 @@ textarea::-webkit-scrollbar-button {
 }
 
 .no-p-margin {
-  p {
+  p:not(li > p):not(ul p):not(ol p) {
     margin: 0 0 8px 0 !important;
   }
 }

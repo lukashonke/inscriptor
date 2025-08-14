@@ -1428,7 +1428,7 @@ function stopAgentProcessing() {
 
 
 .user-message::before {
-  content: 'User:';
+  content: '';
   font-weight: bold;
 }
 

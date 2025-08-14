@@ -10,6 +10,56 @@
   font-size: 1.3em;
 }
 
+// Heading size adjustments for small UI
+.write-small.text-editor .tiptap,
+.write-small.text-editor-non-indented .tiptap,
+.write-small.text-editor-condensed .tiptap,
+.write-small.prompt-results {
+  h1 {
+    font-size: 20px !important;
+  }
+  h2 {
+    font-size: 17px !important;
+  }
+  h3 {
+    font-size: 15px !important;
+  }
+  h4 {
+    font-size: 14px !important;
+  }
+  h5 {
+    font-size: 12px !important;
+  }
+  h6 {
+    font-size: 11px !important;
+  }
+}
+
+// Heading size adjustments for large UI
+.write-large.text-editor .tiptap,
+.write-large.text-editor-non-indented .tiptap,
+.write-large.text-editor-condensed .tiptap,
+.write-large.prompt-results {
+  h1 {
+    font-size: 28px !important;
+  }
+  h2 {
+    font-size: 23px !important;
+  }
+  h3 {
+    font-size: 21px !important;
+  }
+  h4 {
+    font-size: 18px !important;
+  }
+  h5 {
+    font-size: 16px !important;
+  }
+  h6 {
+    font-size: 15px !important;
+  }
+}
+
 .dark-mode {
   .write-sans-serif {
     color: #c5c5c5;
@@ -101,7 +151,7 @@
 
 .prompt-results {
   h1 {
-    font-size: 1.5em;
+    font-size: 24px;
     font-weight: bold;
     line-height: 1.1;
     margin-bottom: 10px;
@@ -116,7 +166,7 @@
   }
 
   h2 {
-    font-size: 1.35em;
+    font-size: 20px;
     font-weight: bold;
     line-height: 1.1;
     margin-bottom: 10px;
@@ -124,7 +174,7 @@
   }
 
   h3 {
-    font-size: 1.25em;
+    font-size: 18px;
     font-weight: bold;
     line-height: 1.1;
     margin-bottom: 10px;
@@ -132,7 +182,7 @@
   }
 
   h4 {
-    font-size: 1.2em;
+    font-size: 16px;
     font-weight: bold;
     line-height: 1.1;
     margin-bottom: 10px;
@@ -140,7 +190,7 @@
   }
 
   h5 {
-    font-size: 1.1em;
+    font-size: 14px;
     font-weight: bold;
     line-height: 1.1;
     margin-bottom: 10px;
@@ -148,7 +198,7 @@
   }
 
   h6 {
-    font-size: 1.0em;
+    font-size: 13px;
     font-weight: bold;
     line-height: 1.1;
     margin-bottom: 10px;
@@ -237,8 +287,8 @@
       height: 1px;
       border: 0;
       border-top: 1px solid #ddd;
-      margin-top: 19px;
-      margin-bottom: 16px;
+      margin-bottom: 8px;
+      margin-top: 28px;
     }
 
     img {
@@ -252,27 +302,27 @@
     }
 
     h1 {
-      font-size: 1.7em;
+      font-size: 24px;
       font-weight: bold;
       line-height: 1.1;
-      margin-bottom: 10px;
-      margin-top: 30px;
+      margin-bottom: 8px;
+      margin-top: 28px;
     }
 
     h2 {
-      font-size: 1.4em;
+      font-size: 20px;
       font-weight: bold;
       line-height: 1.1;
-      margin-bottom: 10px;
-      margin-top: 30px;
+      margin-bottom: 8px;
+      margin-top: 28px;
     }
 
     h3 {
-      font-size: 1.1em;
+      font-size: 18px;
       font-weight: bold;
       line-height: 1.1;
-      margin-bottom: 10px;
-      margin-top: 30px;
+      margin-bottom: 8px;
+      margin-top: 28px;
     }
 
     outline: 0px solid #dddddd;
@@ -333,8 +383,8 @@
       height: 1px;
       border: 0;
       border-top: 1px solid #ddd;
-      margin-top: 19px;
-      margin-bottom: 16px;
+      margin-top: 28px;
+      margin-bottom: 8px;
     }
 
     img {
@@ -348,27 +398,27 @@
     }
 
     h1 {
-      font-size: 1.7em;
+      font-size: 24px;
       font-weight: bold;
       line-height: 1.1;
-      margin-bottom: 10px;
-      margin-top: 30px;
+      margin-bottom: 8px;
+      margin-top: 28px;
     }
 
     h2 {
       font-size: 1.4em;
       font-weight: bold;
       line-height: 1.1;
-      margin-bottom: 10px;
-      margin-top: 30px;
+      margin-bottom: 8px;
+      margin-top: 28px;
     }
 
     h3 {
-      font-size: 1.1em;
+      font-size: 18px;
       font-weight: bold;
       line-height: 1.1;
-      margin-bottom: 10px;
-      margin-top: 30px;
+      margin-bottom: 8px;
+      margin-top: 28px;
     }
 
     outline: 0px solid #dddddd;
@@ -431,6 +481,8 @@
       height: 1px;
       border: 0;
       border-top: 1px solid #ddd;
+      margin-bottom: 8px;
+      margin-top: 28px;
     }
 
     img {
@@ -444,27 +496,27 @@
     }
 
     h1 {
-      font-size: 1.7em;
+      font-size: 24px;
       font-weight: bold;
       line-height: 1.1;
-      margin-bottom: 10px;
-      margin-top: 30px;
+      margin-bottom: 8px;
+      margin-top: 28px;
     }
 
     h2 {
       font-size: 1.4em;
       font-weight: bold;
       line-height: 1.1;
-      margin-bottom: 10px;
-      margin-top: 30px;
+      margin-bottom: 8px;
+      margin-top: 28px;
     }
 
     h3 {
-      font-size: 1.1em;
+      font-size: 18px;
       font-weight: bold;
       line-height: 1.1;
-      margin-bottom: 10px;
-      margin-top: 30px;
+      margin-bottom: 8px;
+      margin-top: 28px;
     }
 
     outline: 0px solid #dddddd;
