@@ -117,13 +117,13 @@
           </q-item>
 
           <q-item clickable v-ripple @click="layoutStore.toggleDarkMode($q)" dense>
-            <q-item-section avatar>
-              <q-icon :name="layoutStore.darkMode ? 'light_mode' : 'dark_mode'" />
-            </q-item-section>
             <q-item-section>
               <q-item-label>
                 {{ layoutStore.darkMode ? 'Light Mode' : 'Dark Mode (beta)' }}
               </q-item-label>
+            </q-item-section>
+            <q-item-section avatar>
+              <q-icon :name="layoutStore.darkMode ? 'mdi-compare' : 'mdi-compare'" size="xs"/>
             </q-item-section>
           </q-item>
           <q-separator />

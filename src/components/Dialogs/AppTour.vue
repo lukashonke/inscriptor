@@ -129,15 +129,13 @@
             <q-icon :name="tutorial1Completed ? 'mdi-check' : '' " size="20px" class="bordered" :class="tutorial1Completed ? 'bg-accent text-white' : 'bg-white text-primary'"/>
           </div>
           <div class="col-auto flex items-center" style="width: 200px">
-            <q-btn flat no-caps label="Show advanced..." v-close-popup class="full-width" @click="advancedTutorialsShown = true"/>
+            <q-btn flat no-caps label="Show advanced... (0)" v-close-popup class="full-width" @click="advancedTutorialsShown = true"/>
           </div>
         </div>
 
         <div v-if="advancedTutorialsShown" class="row q-mt-lg">
           <span class="text-caption">Advanced tutorials are coming soon!</span>
         </div>
-
-
 
       </q-card-section>
 
