@@ -248,7 +248,7 @@ async function onDrop(event, targetPage) {
     files.push(fileStore.getFile(id))
   }
 
-  mainFileDiv.value?.classList.remove('bg-grey-4');
+  mainFileDiv.value?.classList.remove('bg-drag-hover');
 
   for (const file of files) {
     if (!fileStore.checkCanDrop(file, targetPage)) {
@@ -275,7 +275,7 @@ async function onDropBetween(event, targetPage, after) {
   console.log(targetPageCollection);
 
   if(dragBetweenEnterTarget) {
-    dragBetweenEnterTarget.classList.remove('bg-grey-4');
+    dragBetweenEnterTarget.classList.remove('bg-drag-hover');
   }
 
   const itemIds = JSON.parse(event.dataTransfer.getData('itemId'));
@@ -317,7 +317,7 @@ function onDragEnter(event, item) {
   dragEnterTarget = event.target;
 
   if(event.target) {
-    mainFileDiv.value.classList.add('bg-grey-4');
+    mainFileDiv.value.classList.add('bg-drag-hover');
   }
 
   event.stopPropagation();
@@ -328,7 +328,7 @@ function onDragLeave(event, item) {
   if(dragEnterTarget === event.target) {
     event.stopPropagation();
     event.preventDefault();
-    mainFileDiv.value.classList.remove('bg-grey-4');
+    mainFileDiv.value.classList.remove('bg-drag-hover');
   }
 }
 
@@ -336,7 +336,7 @@ function onDragBetweenEnter(event, item) {
   dragBetweenEnterTarget = event.target;
 
   if(event.target) {
-    event.target.classList.add('bg-grey-4');
+    event.target.classList.add('bg-drag-hover');
   }
 
   event.stopPropagation();
@@ -347,7 +347,7 @@ function onDragBetweenLeave(event, item) {
   if(dragBetweenEnterTarget === event.target) {
     event.stopPropagation();
     event.preventDefault();
-    event.target.classList.remove('bg-grey-4');
+    event.target.classList.remove('bg-drag-hover');
   }
 }
 

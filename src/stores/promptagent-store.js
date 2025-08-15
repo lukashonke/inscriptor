@@ -22,7 +22,7 @@ export const usePromptAgentStore = defineStore('prompt-agent', {
             continue;
           }
 
-          if ((request.abortController ?? promptStore.singletonPromptAbortController)?.signal?.aborted) {
+          if (request.abortController.signal.aborted) {
             return;
           }
 

@@ -111,7 +111,19 @@
 
       <div class="fit ai-panel scroll">
         <div class="text-center q-mt-md q-mb-md">
-          <q-btn-toggle :options="views" v-model="layoutStore.currentRightMenuView" unelevated no-caps class="bordered inscriptor-highlight-btn" toggle-color="primary" padding="xs md" id="aiSwitch" />
+          <q-btn-toggle :options="views" v-model="layoutStore.currentRightMenuView" unelevated no-caps class=" bordered inscriptor-highlight-btn" toggle-color="primary" padding="xs md" id="aiSwitch" >
+            <template v-slot:prompts>
+              <q-badge floating color="accent" :class="layoutStore.newPromptClass" v-if="promptStore.getTabData(promptTabId)?.promptResultsHistory.length > 0">{{promptStore.getTabData(promptTabId)?.promptResultsHistory.length}}</q-badge>
+            </template>
+
+            <template v-slot:chat>
+              <q-badge floating color="accent" :class="layoutStore.newChatClass" v-if="aiAgentStore.agentChats.chats?.length > 1">{{aiAgentStore.agentChats.chats?.length}}</q-badge>
+            </template>
+
+            <template v-slot:analysis>
+              <q-badge floating color="accent" :class="layoutStore.newAnalysisClass" v-if="selectionPromptResults?.length > 0">{{selectionPromptResults?.length}}</q-badge>
+            </template>
+          </q-btn-toggle>
         </div>
         <q-card flat v-if="promptStore.analysisEnabled" class="bg-transparent">
 
@@ -238,8 +250,10 @@
   import {chatTabId, promptTabId, agentChatTabId} from 'src/common/resources/tabs';
   import AgentChatTab from 'components/RightMenu/AgentChatTab.vue';
   import {getSelectedText} from 'src/common/utils/editorUtils';
+  import {useAiAgentStore} from 'stores/aiagent-store';
 
   const promptStore = usePromptStore();
+  const aiAgentStore = useAiAgentStore();
   const fileStore = useFileStore();
   const layoutStore = useLayoutStore();
   const tabs = computed(() => promptStore.tabs);
@@ -260,9 +274,9 @@
   })
 
   const views = [
-    {label: 'Prompts', value: 'prompts', icon: 'mdi-creation-outline'},
-    {label: 'Chat', value: 'agentChat', icon: 'mdi-robot'},
-    {label: 'Analysis', value: 'analysis', icon: 'mdi-chart-timeline-variant-shimmer'},
+    {label: 'Prompts', value: 'prompts', icon: 'mdi-creation-outline', slot: 'prompts' },
+    {label: 'Chat', value: 'agentChat', icon: 'mdi-robot', slot: 'chat' },
+    {label: 'Analysis', value: 'analysis', icon: 'mdi-chart-timeline-variant-shimmer', slot: 'analysis' },
   ];
 
   watch(() => layoutStore.currentRightMenuView, (newValue) => {
