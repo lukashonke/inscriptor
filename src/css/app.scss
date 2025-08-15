@@ -590,5 +590,20 @@ textarea::-webkit-scrollbar-button {
   }
 }
 
+/* Pulse animation class */
+.animate-pulse {
+  animation: pulse 0.5s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.25) translateY(-10px);
+    opacity: 0.9;
+  }
+}
 
 
