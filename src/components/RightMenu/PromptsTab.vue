@@ -1,10 +1,5 @@
 <template>
   <div class="q-mx-md">
-    <!--<div v-if="promptStore.isPrompting" class="menu-subtitle q-mb-lg">
-      <q-spinner-ios></q-spinner-ios> generating prompts...
-      <q-btn dense @click="promptStore.stopPrompt" label="Abort" size="sm" class="no-margin q-py-none" color="negative"/>
-    </div>-->
-
     <div class="flex justify-center q-mb-lg" v-if="maxResultsPage > 0">
       <div class="col-auto flex items-center" v-if="maxResultsPage > 0">
         <q-pagination :max="maxResultsPage" v-model="page" :max-pages="3"  :boundary-links="false" direction-links   />
@@ -47,18 +42,13 @@
               enter-active-class="animated fadeInDown slower"
               leave-active-class="animated fadeOut delay-1s"
             >
-              <div v-if="promptStore.isPrompting && !promptStore.isSilentPrompting" class="menu-subtitle q-ml-xs q-my-lg">
-                <q-spinner-ios></q-spinner-ios> <span>{{ (promptStore.isPrompting === true) ? 'generating prompts...' : 'generated' }}</span>
-                <q-btn dense @click="promptStore.stopPrompt" label="Abort" size="sm" class="no-margin q-py-none" color="negative"/>
+              <div v-if="promptResult.isGenerating" class="menu-subtitle q-ml-xs q-my-lg">
+                <q-spinner-ios></q-spinner-ios> <span>{{ (promptResult.isGenerating) ? 'generating prompts...' : 'generated' }}</span>
+                <q-btn dense @click="promptStore.stopPrompt(promptResult)" label="Abort" size="sm" class="no-margin q-py-none" color="negative"/>
               </div>
 
             </transition>
           </div>
-          <!--<template v-else>
-            <div class="menu-subtitle q-ml-xs q-my-lg">
-              <q-icon name="mdi-check" color="grey" size="xs" class="q-mr-xs"/> generated
-            </div>
-          </template>-->
 
         </template>
 

@@ -486,6 +486,7 @@ async function sendMessage() {
 
 function newChat() {
   aiAgentStore.createAgentChat();
+  layoutStore.notifyNewChat();
 }
 
 function removeCurrentChat() {

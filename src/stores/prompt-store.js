@@ -72,10 +72,6 @@ export const usePromptStore = defineStore('prompts', {
     currentWordsCount: 0,
     currentCharsCount: 0,
 
-    isPrompting: false,
-    isSilentPrompting: false,
-    singletonPromptAbortController: null,
-
     promptParametersShown: false,
     currentPromptConfirmationRequest: null,
 
@@ -188,11 +184,11 @@ export const usePromptStore = defineStore('prompts', {
               newRequest.userPrompt = userPrompt;
             }
 
-            if ((request.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
+            if (request.abortController.signal.aborted) {
               return null;
             }
 
-            if ((newRequest.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
+            if (newRequest.abortController?.signal.aborted) {
               return null;
             }
 
@@ -200,7 +196,7 @@ export const usePromptStore = defineStore('prompts', {
 
             this.calculateDiffs(newRequest, result);
 
-            if ((newRequest.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
+            if (newRequest.abortController.signal.aborted) {
               return null;
             }
 
@@ -218,13 +214,13 @@ export const usePromptStore = defineStore('prompts', {
 
             const result = await this.promptInternalStreaming(request);
 
-            if ((request.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
+            if (request.abortController.signal.aborted) {
               return null;
             }
 
             this.calculateDiffs(request, result);
 
-            if ((request.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
+            if (request.abortController.signal.aborted) {
               return null;
             }
 
@@ -293,6 +289,9 @@ export const usePromptStore = defineStore('prompts', {
       }
 
       this.selectionAnalysisRunning = true;
+
+      const layoutStore = useLayoutStore();
+      layoutStore.notifyNewAnalysis();
 
       try {
         this.clearSelectionAnalysisPrompts();
@@ -1077,17 +1076,6 @@ export const usePromptStore = defineStore('prompts', {
       layoutStore.promptUiDialogPromptResult = request.pr;
       layoutStore.promptUiDialogOpen = true;
     },
-    shouldCancelRunningPrompt(request) {
-      if(request.silent) {
-        return false;
-      }
-
-      if(request.allowParallel === true) {
-        return false;
-      }
-
-      return true;
-    },
     checkBeforePrompting(input, request) {
       if(input.missingVariable !== null) {
         Notify.create({
@@ -1106,9 +1094,15 @@ export const usePromptStore = defineStore('prompts', {
         return;
       }
 
+      if(!request.abortController) {
+        request.abortController = new AbortController();
+      }
+
       //TODO support local api keys
 
       const pr = this.createPromptResult2(request);
+      pr.isGenerating = true;
+      pr.abortController = request.abortController;
       request.pr = pr;
 
       const input = this.constructPromptInput2(request);
@@ -1170,7 +1164,7 @@ export const usePromptStore = defineStore('prompts', {
             response_format: input.jsonMode === true ? { type: "json_object" } : undefined,
           },
           {
-            signal: request.abortController?.signal ?? this.singletonPromptAbortController.signal,
+            signal: request.abortController.signal,
           });
 
         pr.completionResponse = completion;
@@ -1182,35 +1176,27 @@ export const usePromptStore = defineStore('prompts', {
         if (loggedPrompt) loggedPrompt.error = err;
         pr.error = err;
         throw err;
+      } finally {
+        pr.isGenerating = false;
       }
 
       return pr;
     },
     promptInternalStreaming(request) {
-      if(this.shouldCancelRunningPrompt(request)) {
-        if(this.isPrompting) {
-          this.singletonPromptAbortController?.abort();
-        }
-
-        this.isPrompting = true;
-      } else {
-        this.isSilentPrompting = request.silent;
-      }
-
-      if ((request.abortController ?? this.singletonPromptAbortController)?.signal?.aborted) {
-        return;
+      if(!request.abortController) {
+        request.abortController = new AbortController();
       }
 
       const layoutStore = useLayoutStore();
 
       const pr = this.createPromptResult2(request);
+      pr.isGenerating = true;
+      pr.abortController = request.abortController;
       request.pr = pr;
 
       const input = this.constructPromptInput2(request);
 
       this.checkBeforePrompting(input, request);
-
-      this.singletonPromptAbortController = new AbortController();
 
       if(this.hasCustomPromptUi(request) && !request.executeCustomPromptUi) {
         return new Promise(async (resolve, reject) => {
@@ -1551,7 +1537,7 @@ export const usePromptStore = defineStore('prompts', {
 
                 this.onStreamingPromptingEnd(request, pr);
               },
-              request.abortController ?? this.singletonPromptAbortController,
+              request.abortController,
               controllerName, actionName);
           }
           else if (promptingEngineToUse === 'lmstudio') {
@@ -1599,7 +1585,7 @@ export const usePromptStore = defineStore('prompts', {
                   //response_format: input.jsonMode === true ? { "type": "json_object" } : undefined,
                 },
                 {
-                  signal: request.abortController?.signal ?? this.singletonPromptAbortController.signal,
+                  signal: request.abortController.signal,
                   method: 'POST',
                 });
               for await (const chunk of stream) {
@@ -1680,7 +1666,7 @@ export const usePromptStore = defineStore('prompts', {
                   response_format: input.jsonMode === true ? { type: "json_object" } : undefined,
                 },
                 {
-                  signal: request.abortController?.signal ?? this.singletonPromptAbortController.signal,
+                  signal: request.abortController.signal,
                 });
               for await (const chunk of stream) {
                 pr.waitingForResponse = false;
@@ -1758,7 +1744,7 @@ export const usePromptStore = defineStore('prompts', {
                 model: model.modelName,
                 stream: true,
               }, {
-                signal: request.abortController?.signal ?? this.singletonPromptAbortController.signal,
+                signal: request.abortController.signal,
               }).on('text', (text) => {
                 pr.waitingForResponse = false;
                 pr.text += text;
@@ -1794,9 +1780,7 @@ export const usePromptStore = defineStore('prompts', {
 
               reject(err);
 
-              if(this.shouldCancelRunningPrompt(request)) {
-                this.isPrompting = false;
-              }
+              this.onStreamingPromptingEnd(request, pr);
             }
           }
           else if (promptingEngineToUse === 'client-ollama') { // JS client for ollama
@@ -1954,7 +1938,7 @@ export const usePromptStore = defineStore('prompts', {
 
               const idToken = await user.value.getIdToken();
 
-              response = await generateImage(idToken, promptRequest, request.abortController?.signal ?? this.singletonPromptAbortController);
+              response = await generateImage(idToken, promptRequest, request.abortController.signal);
 
               pr.type = 'image';
               if (!pr.images) {
@@ -1990,7 +1974,7 @@ export const usePromptStore = defineStore('prompts', {
             const promptData = applyPromptFormatPrefixSuffix(input.systemPrefix, input.systemSuffix, input.systemPrompt, input.userPrefix, input.userSuffix, input.userPrompt, input.assistantPrefix, input.assistantSuffix);
 
             try {
-              const result = await promptLocalAutomatic1111(model.args.url, promptData, request.abortController?.signal ?? this.singletonPromptAbortController);
+              const result = await promptLocalAutomatic1111(model.args.url, promptData, request.abortController.signal);
 
               if (result) {
                 pr.type = 'image';
@@ -2036,20 +2020,15 @@ export const usePromptStore = defineStore('prompts', {
       // replace new lines with <br>
       //pr.text = pr.text.replace(/\n/g, '<br>');
     },
-    stopPrompt() {
-      if(this.isPrompting) {
-        this.singletonPromptAbortController.abort();
-        this.isPrompting = false;
-        this.onStreamingPromptingEnd(null, null);
+    stopPrompt(pr) {
+      if(pr?.abortController) {
+        pr.abortController.abort();
+        this.onStreamingPromptingEnd(null, pr);
       }
     },
     onStreamingPromptingEnd(request, pr) {
-      if(request) {
-        if(this.shouldCancelRunningPrompt(request)) {
-          this.isPrompting = false;
-        } else {
-          this.isSilentPrompting = false;
-        }
+      if(pr) {
+        pr.isGenerating = false;
       }
     },
     pushLastPrompt(prompt) {
@@ -2139,48 +2118,51 @@ export const usePromptStore = defineStore('prompts', {
         collapsed: false,
       };
 
-      if(!request.silent) {
-        if(request.prompt.promptType === 'selectionAnalysis' || request.promptSource === 'selectionAnalysis') {
-          this.selectionPromptResults.push(pr);
-          pr = this.selectionPromptResults[this.selectionPromptResults.length - 1];
-        } else if (request.prompt.promptType === 'chat') {
-          let results = this.getTabData(chatTabId).promptResultsHistory[this.getTabData(chatTabId).promptResultsIndex];
+      // silent requests do not create or modify prompt result tabs
+      if (request.silent) {
+        return pr;
+      }
 
-          if(!results) {
-            this.newPromptResultsHistory(chatTabId);
+      if(request.prompt.promptType === 'selectionAnalysis' || request.promptSource === 'selectionAnalysis') {
+        this.selectionPromptResults.push(pr);
+        pr = this.selectionPromptResults[this.selectionPromptResults.length - 1];
+      } else if (request.prompt.promptType === 'chat') {
+        let results = this.getTabData(chatTabId).promptResultsHistory[this.getTabData(chatTabId).promptResultsIndex];
 
-            results = this.getTabData(chatTabId).promptResultsHistory[this.getTabData(chatTabId).promptResultsIndex];
-          }
+        if(!results) {
+          this.newPromptResultsHistory(chatTabId);
 
-          results.push(pr);
-          pr = results[results.length - 1];
+          results = this.getTabData(chatTabId).promptResultsHistory[this.getTabData(chatTabId).promptResultsIndex];
+        }
 
-        } else {
-          let results = this.getTabData(promptTabId).promptResultsHistory[this.getTabData(promptTabId).promptResultsIndex];
+        results.push(pr);
+        pr = results[results.length - 1];
 
-          if(!results) {
-            this.newPromptResultsHistory(promptTabId);
+      } else {
+        let results = this.getTabData(promptTabId).promptResultsHistory[this.getTabData(promptTabId).promptResultsIndex];
 
-            results = this.getTabData(promptTabId).promptResultsHistory[this.getTabData(promptTabId).promptResultsIndex];
-          }
+        if(!results) {
+          this.newPromptResultsHistory(promptTabId);
 
-          //TODO PR history add?
+          results = this.getTabData(promptTabId).promptResultsHistory[this.getTabData(promptTabId).promptResultsIndex];
+        }
 
-          results.push(pr);
-          pr = results[results.length - 1];
+        //TODO PR history add?
 
-          const resultGroupsCount = this.getTabData(promptTabId).promptResultsHistory.length;
-          if(resultGroupsCount > 30) {
-            this.getTabData(promptTabId).promptResultsHistory.splice(0, 1);
-            this.getTabData(promptTabId).promptResultsIndex -= 1;
-          }
+        results.push(pr);
+        pr = results[results.length - 1];
+
+        const resultGroupsCount = this.getTabData(promptTabId).promptResultsHistory.length;
+        if(resultGroupsCount > 30) {
+          this.getTabData(promptTabId).promptResultsHistory.splice(0, 1);
+          this.getTabData(promptTabId).promptResultsIndex -= 1;
         }
       }
 
       return pr;
     },
     removePromptResult(pr) {
-      this.stopPrompt();
+      this.stopPrompt(pr);
 
       const results = this.getTabData(getPromptTabId(pr.prompt.promptType)).promptResultsHistory[this.getTabData(getPromptTabId(pr.prompt.promptType)).promptResultsIndex];
       results.splice(results.indexOf(pr), 1);
@@ -2194,7 +2176,8 @@ export const usePromptStore = defineStore('prompts', {
       this.getTabData(tabId).promptResultsHistory.push([]);
       this.getTabData(tabId).promptResultsIndex = this.getTabData(tabId).promptResultsHistory.length - 1;
 
-      //
+      const layoutStore = useLayoutStore();
+      layoutStore.notifyNewPrompt();
     },
     clearPromptHistory(tabId) {
       this.getTabData(tabId).promptResultsHistory.splice(0, this.getTabData(tabId).promptResultsHistory.length);

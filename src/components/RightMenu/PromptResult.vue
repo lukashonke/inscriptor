@@ -361,7 +361,7 @@
           <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm"
             @click.prevent="generateFollowUpQuestions()" icon="mdi-creation-outline"
             v-if="promptStore.getPredefinedPromptId('Prompt Follow-Up Generator')"
-            :loading="promptStore.isSilentPrompting">
+            :loading="isPrompting">
             <q-tooltip>
               Generate Follow-up questions
             </q-tooltip>
@@ -1252,7 +1252,7 @@
   async function stopPrompting(event) {
     event.stopPropagation();
     const promptStore = usePromptStore();
-    promptStore.stopPrompt();
+    promptStore.stopPrompt(props.promptResult);
     promptStore.finishPromptResult(props.promptResult);
   }
 
@@ -1313,7 +1313,7 @@
   }
 
   const isPrompting = computed(() => {
-    return promptStore.isPrompting && !promptStore.isSilentPrompting;
+    return props.promptResult.isGenerating;
   });
 
   const promptResultTitle = computed(() => {

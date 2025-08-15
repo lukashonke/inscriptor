@@ -112,6 +112,10 @@ export const useLayoutStore = defineStore('layout', {
     editProjectMetadataOpen: false,
 
     currentRightMenuView: 'prompts',
+
+    newPromptClass: '',
+    newAnalysisClass: '',
+    newChatClass: '',
   }),
   getters: {
     getIsDragAndDropping: (state) => state.isDragAndDropping,
@@ -381,6 +385,30 @@ export const useLayoutStore = defineStore('layout', {
     openPromptUiDialog(promptResult) {
       this.promptUiDialogOpen = true;
       this.promptUiDialogPromptResult = promptResult;
-    }
+    },
+    notifyNewPrompt() {
+      if(this.newPromptClass === '') {
+        this.newPromptClass = 'animate-pulse';
+        setTimeout(() => {
+          this.newPromptClass = '';
+        }, 500);
+      }
+    },
+    notifyNewAnalysis() {
+      if(this.newAnalysisClass === '') {
+        this.newAnalysisClass = 'animate-pulse';
+        setTimeout(() => {
+          this.newAnalysisClass = '';
+        }, 500);
+      }
+    },
+    notifyNewChat() {
+      if(this.newChatClass === '') {
+        this.newChatClass = 'animate-pulse';
+        setTimeout(() => {
+          this.newChatClass = '';
+        }, 500);
+      }
+    },
   }
 });
