@@ -523,6 +523,11 @@ export const useFileStore = defineStore('files', {
         }, 100);
       }
 
+      const editorStore = useEditorStore();
+      if(editorStore.autoCompleteText) {
+        editorStore.setAutoCompleteText('');
+      }
+
       if(file && !file.dirty) {
         this.loadFileFromCloud(file.id);
       }

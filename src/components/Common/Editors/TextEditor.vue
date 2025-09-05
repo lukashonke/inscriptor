@@ -961,8 +961,6 @@ function shouldRunAutocomplete() {
     }
   }
 
-
-
   // existing autocomplete input
   if(editorStore.autoCompleteTextInput) {
     if(areAutocompleteInputsSame(editorStore.autoCompleteTextInput, autocompleteInput)) {
@@ -1031,10 +1029,12 @@ async function runAutocomplete() {
       //console.log('Autocomplete started', autocompleteInput);
 
       const result = await executePromptClick2(request);
-      if(!result) return;
+      if(!result) {
+        return;
+      }
 
       // sleep 1s
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      //await new Promise(resolve => setTimeout(resolve, 1000));
 
       // input has changed
       if(!areAutocompleteInputsSame(createAutocompleteInput(), autocompleteInput)) {
@@ -1334,6 +1334,7 @@ async function promptClick(promptClickData, forceAllFileText) {
     text: text,
     forceModelId: promptClickData.forceModelId,
     forceTemperature: promptClickData.forceTemperature,
+    reasoningEffort: promptClickData.reasoningEffort,
   }
 
   await executePromptClick2(request);

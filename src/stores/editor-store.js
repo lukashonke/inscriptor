@@ -47,7 +47,7 @@ export const useEditorStore = defineStore('editor', {
 
       this.autoCompleteText = text;
       if (this.editor) {
-        this.editor.view.updateState(this.editor.state); // TODO motherfucker not working
+        this.editor.view.updateState(this.editor.state);
       }
     },
     confirmAutocompleteText() {
