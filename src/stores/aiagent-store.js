@@ -525,7 +525,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           newRequest.onOutput = onOutput;
         }
 
-        const result = await promptStore.promptMultiple2(newRequest);
+        const result = await promptStore.promptMultiple(newRequest);
         return result;
       } catch (error) {
         // Log error
@@ -1396,102 +1396,102 @@ export const useAiAgentStore = defineStore('ai-agent', {
     // Helper method to format file tree with all levels
     formatFileTreeForAgent(files, fileStore, depth = 0, prefix = "", includeSummaries = false, maxSummaryLength = 100) {
       let output = '';
-      
+
       files.forEach((file, index) => {
         const isLastFile = index === files.length - 1;
         const connector = isLastFile ? "└── " : "├── ";
         const childPrefix = prefix + (isLastFile ? "    " : "│   ");
-        
+
         const metadata = [];
-        
+
         output += prefix + connector + file.title + ` [ID: ${file.id}]`;
-        
+
         if (file.labels && file.labels.length > 0) {
           const labelNames = file.labels.map(label => typeof label === 'string' ? label : label.label).join(', ');
           metadata.push(`Labels: ${labelNames}`);
         }
-        
+
         if (file.settings && file.settings.contextType && file.settings.contextType.label) {
           metadata.push(`Context: ${file.settings.contextType.label}`);
         }
-        
+
         const wordCount = fileStore.getTextWords(file, true, false);
         if (wordCount) {
           metadata.push(`Content: ${wordCount}`);
         }
-        
+
         // Add summary word count if summary exists
         if (file.synopsis && file.synopsis.trim()) {
           const summaryWords = file.synopsis.trim().split(/\s+/).length;
           metadata.push(`Summary: ${summaryWords} words`);
         }
-        
+
         if (file.children && file.children.length > 0) {
           metadata.push(`${file.children.length} sub-files`);
         }
-        
+
         if (metadata.length > 0) {
           output += ` (${metadata.join(', ')})`;
         }
-        
+
         output += '\n';
-        
+
         // Add summary content if requested
         if (includeSummaries && file.synopsis && file.synopsis.trim()) {
           const summaryText = file.synopsis.trim();
-          const truncatedSummary = summaryText.length > maxSummaryLength 
-            ? summaryText.substring(0, maxSummaryLength) + '...' 
+          const truncatedSummary = summaryText.length > maxSummaryLength
+            ? summaryText.substring(0, maxSummaryLength) + '...'
             : summaryText;
           output += prefix + (isLastFile && (!file.children || file.children.length === 0) ? '    ' : '│   ') + '📝 ' + truncatedSummary + '\n';
         }
-        
+
         // Recursively add children
         if (file.children && file.children.length > 0) {
           output += this.formatFileTreeForAgent(file.children, fileStore, depth + 1, childPrefix, includeSummaries, maxSummaryLength);
         }
       });
-      
+
       return output;
     },
     executeGetCurrentDocumentTool(args) {
       const { includeChildFileSummaries = false, maxSummaryLength = 100 } = args || {};
       const fileStore = useFileStore();
       const currentFile = fileStore.selectedFile;
-      
+
       let output = '';
-      
+
       // Add current file metadata
       if (currentFile) {
         output += `CURRENT FILE: ${currentFile.title}\n`;
         output += `Path: ${fileStore.getFileNameWithPath(currentFile)}\n`;
-        
+
         // Add file metadata
         const metadata = [];
         if (currentFile.labels && currentFile.labels.length > 0) {
           const labelNames = currentFile.labels.map(label => typeof label === 'string' ? label : label.label).join(', ');
           metadata.push(`Labels: ${labelNames}`);
         }
-        
+
         if (currentFile.settings && currentFile.settings.contextType && currentFile.settings.contextType.label) {
           metadata.push(`Context: ${currentFile.settings.contextType.label}`);
         }
-        
+
         if (currentFile.state && currentFile.state.trim()) {
           metadata.push(`State: ${currentFile.state}`);
         }
-        
+
         const wordCount = fileStore.getTextWords(currentFile, true, false);
         if (wordCount) {
           metadata.push(`Word Count: ${wordCount}`);
         }
-        
+
         if (metadata.length > 0) {
           output += metadata.join(' | ') + '\n';
         }
-        
+
         output += '\nDOCUMENT CONTENT:\n';
       }
-      
+
       const documentContent = this.generateFullFileWithNodeIds();
 
       if (!documentContent) {
@@ -1499,7 +1499,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
       } else {
         output += documentContent;
       }
-      
+
       // Add children files information after content
       if (currentFile && currentFile.children && currentFile.children.length > 0) {
         output += `\n\nCHILDREN FILES:\n`;

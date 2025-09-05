@@ -277,7 +277,7 @@ async function executePrompt2(request) {
     }
   }
 
-  return await promptStore.promptMultiple2(request);
+  return await promptStore.promptMultiple(request);
 }
 
 async function executeChatPrompt2(request) {
@@ -326,7 +326,7 @@ async function executeChatPrompt2(request) {
     }
   }
 
-  return await promptStore.promptMultiple2(request);
+  return await promptStore.promptMultiple(request);
 }
 
 export function cloneRequest(request, copyAbortController = false) {
@@ -368,6 +368,8 @@ export function cloneRequest(request, copyAbortController = false) {
     appendMessages: request.appendMessages ? [...request.appendMessages] : null,
     contextTypes: request.contextTypes ? [...request.contextTypes] : null,
     parametersValue: request.parametersValue ? [...request.parametersValue] : null,
+
+    reasoningEffort: request.reasoningEffort,
   }
 }
 

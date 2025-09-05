@@ -32,7 +32,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import {chatTabId, getPromptTabId, promptTabId} from 'src/common/resources/tabs';
 import {usePromptAgentStore} from 'stores/promptagent-store';
 import {url} from 'boot/axios';
-import {hasTemperature, hasTopP} from 'src/common/helpers/modelHelper';
+import {hasTemperature, hasTopP, supportsReasoning} from 'src/common/helpers/modelHelper';
 
 export const usePromptStore = defineStore('prompts', {
   state: () => ({
@@ -134,13 +134,13 @@ export const usePromptStore = defineStore('prompts', {
         this.defaultFileTemplate = createFile('Template file');
       }
     },
-    async promptMultiple2(request) {
+    async promptMultiple(request) {
       if(!this.canPromptRequest(request)) {
         return;
       }
 
       if(request.previewOnly) {
-        const input = this.constructPromptInput2(request);
+        const input = this.constructPromptInput(request);
         return input;
       }
 
@@ -262,8 +262,8 @@ export const usePromptStore = defineStore('prompts', {
         }
       }
     },
-    async promptAgain2(request) {
-      return await this.promptMultiple2(request);
+    async promptAgain(request) {
+      return await this.promptMultiple(request);
     },
     shouldNotifyError(e) {
       if(e.name === 'AbortError') {
@@ -346,7 +346,7 @@ export const usePromptStore = defineStore('prompts', {
 
       return true;
     },
-    constructPromptInput2(request) {
+    constructPromptInput(request) {
       const fileStore = useFileStore();
 
       let forceMessages = undefined;
@@ -366,6 +366,7 @@ export const usePromptStore = defineStore('prompts', {
 
       const model = this.getModelFromRequest(request);
       let temperature = hasTemperature(model) ? (request.forceTemperature != null ? request.forceTemperature : (request.prompt.settings.overrideTemperature ?? false) ? request.prompt.settings.temperature : model.defaultTemperature) : undefined;
+      let reasoningEffort = supportsReasoning(model) ? (request.reasoningEffort ?? request.prompt.reasoningEffort ?? model.defaultReasoningEffort) : undefined;
 
       // input object already provided from previous run, just use it
       if(request.forceInput) {
@@ -379,6 +380,7 @@ export const usePromptStore = defineStore('prompts', {
 
         request.forceInput.temperature = temperature;
         request.forceInput.model = model;
+        request.forceInput.reasoningEffort = reasoningEffort;
 
         return request.forceInput;
       }
@@ -1065,7 +1067,8 @@ export const usePromptStore = defineStore('prompts', {
         promptResultInput, promptResultAppendMessages,
         model,
         jsonMode,
-        tools
+        tools,
+        reasoningEffort
       }
     },
     hasCustomPromptUi(request) {
@@ -1106,7 +1109,7 @@ export const usePromptStore = defineStore('prompts', {
       pr.abortController = request.abortController;
       request.pr = pr;
 
-      const input = this.constructPromptInput2(request);
+      const input = this.constructPromptInput(request);
 
       this.checkBeforePrompting(input, request);
 
@@ -1114,6 +1117,7 @@ export const usePromptStore = defineStore('prompts', {
 
       pr.model = model;
       pr.temperature = input.temperature;
+      pr.reasoningEffort = input.reasoningEffort;
       pr.executedTextMessages = input.textMessages ? [...input.textMessages] : undefined;
       pr.waitingForResponse = true;
 
@@ -1157,6 +1161,7 @@ export const usePromptStore = defineStore('prompts', {
             messages: messages,
 
             temperature: model.hasTemperature === false ? undefined : input.temperature,
+            reasoning_effort: input.reasoningEffort,
 
             max_completion_tokens: input.maxTokens,
 
@@ -1195,7 +1200,7 @@ export const usePromptStore = defineStore('prompts', {
       pr.abortController = request.abortController;
       request.pr = pr;
 
-      const input = this.constructPromptInput2(request);
+      const input = this.constructPromptInput(request);
 
       this.checkBeforePrompting(input, request);
 
@@ -1213,6 +1218,7 @@ export const usePromptStore = defineStore('prompts', {
 
           pr.model = model;
           pr.temperature = input.temperature;
+          pr.reasoningEffort = input.reasoningEffort;
           pr.executedTextMessages = input.textMessages ? [...input.textMessages] : undefined;
 
           if(request.abortController && request.abortController.signal && request.abortController.signal.aborted) {
@@ -1356,6 +1362,7 @@ export const usePromptStore = defineStore('prompts', {
                 repeatPenalty: input.repeatPenalty,
                 frequencyPenalty: input.frequencyPenalty,
                 presencePenalty: input.presencePenalty,
+                reasoningEffort: input.reasoningEffort,
 
                 jsonMode: input.jsonMode,
                 tools: input.tools,
@@ -1367,8 +1374,6 @@ export const usePromptStore = defineStore('prompts', {
                 timeStamp: new Date().toISOString(),
                 pr: pr
               });
-
-              console.log(cloudInput, model.defaultStopStrings, input.temperature, input.maxTokens, input.topP, input.minP, input.topK, input.repeatPenalty, input.frequencyPenalty, input.presencePenalty);
 
             } else if (model.args.apiCallType === 'chat') {
 
@@ -1417,6 +1422,7 @@ export const usePromptStore = defineStore('prompts', {
                 repeatPenalty: input.repeatPenalty,
                 frequencyPenalty: input.frequencyPenalty,
                 presencePenalty: input.presencePenalty,
+                reasoningEffort: input.reasoningEffort,
 
                 jsonMode: input.jsonMode,
                 tools: input.tools,
@@ -1660,6 +1666,7 @@ export const usePromptStore = defineStore('prompts', {
                   presence_penalty: input.presencePenalty,
 
                   temperature: model.hasTemperature === false ? undefined : input.temperature,
+                  reasoning_effort: input.reasoningEffort,
                   top_p: input.topP,
 
                   max_completion_tokens: input.maxTokens,
@@ -2290,6 +2297,9 @@ export const usePromptStore = defineStore('prompts', {
       if(args.overrideContexts !== undefined) {
         prompt.overrideContexts = args.overrideContexts;
       }
+      if(args.reasoningEffort !== undefined) {
+        prompt.reasoningEffort = args.reasoningEffort;
+      }
       if(args.defaultContextTypes !== undefined) {
         prompt.defaultContextTypes = args.defaultContextTypes;
       }
@@ -2827,6 +2837,9 @@ export const usePromptStore = defineStore('prompts', {
       }
       if(args.enabled !== undefined) {
         model.enabled = args.enabled;
+      }
+      if(args.defaultReasoningEffort !== undefined) {
+        model.defaultReasoningEffort = args.defaultReasoningEffort;
       }
       if(args.promptTimes !== undefined) {
         model.promptTimes = args.promptTimes;

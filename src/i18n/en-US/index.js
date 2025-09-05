@@ -40,6 +40,7 @@ export default {
 
       searchPrefix: 'Text that marks paragraphs for processing (e.g., "//" for comments, "TODO:" for tasks). Leave empty to process all paragraphs sequentially. Only applies to non-independent agents.',
       isIndependent: 'Independent agents analyze your entire document and intelligently choose which paragraphs need improvement, asking for permission before changes. Non-independent agents process paragraphs with the search prefix or all paragraphs if no prefix is set.',
+      reasoningEffort: 'How much will the model think before replying. More thorough thinking leads to higher costs.',
     },
   },
 }
