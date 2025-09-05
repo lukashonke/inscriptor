@@ -937,6 +937,12 @@ function areAutocompleteInputsSame(input1, input2) {
 function shouldRunAutocomplete() {
   if(!editor.value) return false;
 
+  // Check if editor is focused
+  if(!editor.value.view.hasFocus()) {
+    console.log('Autocomplete not triggered: editor not focused');
+    return false;
+  }
+
   const selectedText = getSelectedText();
   if(selectedText && selectedText.length > 0) {
     //console.log('Autocomplete not triggered: selected text');
