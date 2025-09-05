@@ -32,6 +32,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import {chatTabId, getPromptTabId, promptTabId} from 'src/common/resources/tabs';
 import {usePromptAgentStore} from 'stores/promptagent-store';
 import {url} from 'boot/axios';
+import {hasTemperature, hasTopP} from 'src/common/helpers/modelHelper';
 
 export const usePromptStore = defineStore('prompts', {
   state: () => ({
@@ -364,7 +365,7 @@ export const usePromptStore = defineStore('prompts', {
       }
 
       const model = this.getModelFromRequest(request);
-      let temperature = request.forceTemperature != null ? request.forceTemperature : (request.prompt.settings.overrideTemperature ?? false) ? request.prompt.settings.temperature : model.defaultTemperature;
+      let temperature = hasTemperature(model) ? (request.forceTemperature != null ? request.forceTemperature : (request.prompt.settings.overrideTemperature ?? false) ? request.prompt.settings.temperature : model.defaultTemperature) : undefined;
 
       // input object already provided from previous run, just use it
       if(request.forceInput) {
@@ -383,7 +384,7 @@ export const usePromptStore = defineStore('prompts', {
       }
 
       let maxTokens = (request.prompt.settings.overrideMaxTokens ?? false) ? request.prompt.settings.maxTokens : model.defaultMaxTokens;
-      let topP = (request.prompt.settings.overrideTopP ?? false) ? request.prompt.settings.topP : model.defaultTopP;
+      let topP = hasTopP(model) ? ((request.prompt.settings.overrideTopP ?? false) ? request.prompt.settings.topP : model.defaultTopP) : undefined;
       let minP = model.defaultMinP;
       let topK = model.defaultTopK;
       let repeatPenalty = model.defaultRepeatPenalty;
