@@ -841,7 +841,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           // Add tool result to assistant history
           if(confirmationResult === 'accepted') {
             this.independentAgentChatHistory.push({
-              type: 'function',
+              type: 'tool',
               name: 'modifyParagraph',
               toolCallId: toolCallResult.toolCallId,
               text: `Successfully modified paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId}. User ACCEPTED the change.`
@@ -856,7 +856,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
             this.confirmationWidgetData = null;
           } else if (confirmationResult === 'skipped') {
             this.independentAgentChatHistory.push({
-              type: 'function',
+              type: 'tool',
               name: 'modifyParagraph',
               toolCallId: toolCallResult.toolCallId,
               text: `Modification of paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId} was SKIPPED by user. Do not suggest it again!`
@@ -1233,7 +1233,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
               properties: {
                 searchQuery: {
                   type: "string",
-                  description: "The text to search for"
+                  description: "The text to search for. Prefer simple keywords for exact or fuzzy matches, no advanced search syntax or logical operators are available."
                 },
                 searchType: {
                   type: "string",
@@ -2033,9 +2033,10 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
         // Prepare messages for AI
         const messages = chat.messages.map(msg => ({
-          type: msg.role === 'user' ? 'user' : msg.role === 'system' ? 'system' : 'assistant',
+          type: msg.role === 'user' ? 'user' : msg.role === 'system' ? 'system' : msg.role === 'tool' ? 'tool' : 'assistant',
           text: msg.content,
-          toolCalls: msg.toolCalls
+          toolCalls: msg.toolCalls,
+          toolCallId: msg.toolCallId
         }));
 
         // Create request with tools
@@ -2133,7 +2134,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
         );
         for (const toolCall of rejectedTools) {
           toolResults.push({
-            role: 'function',
+            role: 'tool',
             name: toolCall.function.name,
             content: 'Tool execution rejected by user',
             tool_call_id: toolCall.id
@@ -2147,15 +2148,15 @@ export const useAiAgentStore = defineStore('ai-agent', {
           // First, add tool results to permanent chat history
           for (const toolResult of toolResults) {
             this.addAgentMessage(this.agentChats.activeChat, {
-              role: 'function',
+              role: 'tool',
               content: toolResult.content,
-              toolName: toolResult.name,
+              //toolName: toolResult.name,
               toolCallId: toolResult.tool_call_id
             });
           }
 
           const messages = chat.messages.map(msg => ({
-            type: msg.role === 'user' ? 'user' : msg.role === 'system' ? 'system' : msg.role === 'function' ? 'function' : 'assistant',
+            type: msg.role === 'user' ? 'user' : msg.role === 'system' ? 'system' : msg.role === 'tool' ? 'tool' : 'assistant',
             text: msg.content,
             toolCalls: msg.toolCalls,
             name: msg.toolName,
@@ -2217,8 +2218,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
       if (toolResult.error) {
         return {
-          role: 'function',
-          name: toolCall.function.name,
+          role: 'tool',
           content: `Error: ${toolResult.error}`,
           tool_call_id: toolCall.id
         };
@@ -2237,8 +2237,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
         }
 
         return {
-          role: 'function',
-          name: toolCall.function.name,
+          role: 'tool',
           content: content,
           tool_call_id: toolCall.id
         };

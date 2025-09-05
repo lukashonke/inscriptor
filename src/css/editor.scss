@@ -16,22 +16,22 @@
 .write-small.text-editor-condensed .tiptap,
 .write-small.prompt-results {
   h1 {
-    font-size: 20px !important;
+    font-size: 18px !important;
   }
   h2 {
-    font-size: 17px !important;
+    font-size: 16px !important;
   }
   h3 {
-    font-size: 15px !important;
-  }
-  h4 {
     font-size: 14px !important;
   }
-  h5 {
+  h4 {
     font-size: 12px !important;
   }
+  h5 {
+    font-size: 10px !important;
+  }
   h6 {
-    font-size: 11px !important;
+    font-size: 9px !important;
   }
 }
 
@@ -41,22 +41,22 @@
 .write-large.text-editor-condensed .tiptap,
 .write-large.prompt-results {
   h1 {
-    font-size: 28px !important;
+    font-size: 26px !important;
   }
   h2 {
-    font-size: 23px !important;
+    font-size: 22px !important;
   }
   h3 {
-    font-size: 21px !important;
+    font-size: 20px !important;
   }
   h4 {
     font-size: 18px !important;
   }
   h5 {
-    font-size: 16px !important;
+    font-size: 15px !important;
   }
   h6 {
-    font-size: 15px !important;
+    font-size: 13px !important;
   }
 }
 
@@ -151,7 +151,7 @@
 
 .prompt-results {
   h1 {
-    font-size: 24px;
+    font-size: 20px;
     font-weight: bold;
     line-height: 1.1;
     margin-bottom: 10px;
@@ -166,7 +166,7 @@
   }
 
   h2 {
-    font-size: 20px;
+    font-size: 17px;
     font-weight: bold;
     line-height: 1.1;
     margin-bottom: 10px;
@@ -174,7 +174,7 @@
   }
 
   h3 {
-    font-size: 18px;
+    font-size: 15px;
     font-weight: bold;
     line-height: 1.1;
     margin-bottom: 10px;
@@ -182,14 +182,6 @@
   }
 
   h4 {
-    font-size: 16px;
-    font-weight: bold;
-    line-height: 1.1;
-    margin-bottom: 10px;
-    margin-top: 30px;
-  }
-
-  h5 {
     font-size: 14px;
     font-weight: bold;
     line-height: 1.1;
@@ -197,8 +189,16 @@
     margin-top: 30px;
   }
 
+  h5 {
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 1.1;
+    margin-bottom: 10px;
+    margin-top: 30px;
+  }
+
   h6 {
-    font-size: 13px;
+    font-size: 11px;
     font-weight: bold;
     line-height: 1.1;
     margin-bottom: 10px;

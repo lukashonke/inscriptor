@@ -1145,6 +1145,7 @@ export const usePromptStore = defineStore('prompts', {
           tool_call_id: m.toolCallId,
           name: m.name,
           content: m.text,
+          tool_calls: (m.toolCalls && m.toolCalls.length > 0) ? m.toolCalls.map(t => t) : undefined,
         };
       })
 

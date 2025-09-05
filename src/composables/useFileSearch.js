@@ -152,7 +152,7 @@ export function useFileSearch() {
     };
   }
 
-  function createSearchSnippet(result, query, maxLength = 150) {
+  function createSearchSnippet(result, query, maxLength = 300) {
     const file = result.file;
     const queryLower = query.toLowerCase();
 
@@ -163,8 +163,8 @@ export function useFileSearch() {
         const index = text.toLowerCase().indexOf(queryLower);
 
         if (index !== -1) {
-          const start = Math.max(0, index - 50);
-          const end = Math.min(text.length, index + query.length + 50);
+          const start = Math.max(0, index - 100);
+          const end = Math.min(text.length, index + query.length + 100);
           let snippet = text.substring(start, end);
 
           if (start > 0) snippet = '...' + snippet;
@@ -185,8 +185,8 @@ export function useFileSearch() {
       const index = text.toLowerCase().indexOf(queryLower);
 
       if (index !== -1) {
-        const start = Math.max(0, index - 30);
-        const end = Math.min(text.length, index + query.length + 30);
+        const start = Math.max(0, index - 100);
+        const end = Math.min(text.length, index + query.length + 100);
         let snippet = text.substring(start, end);
 
         if (start > 0) snippet = '...' + snippet;
