@@ -142,6 +142,9 @@
                   </template>
                 </q-select>
               </div>
+              <div class="col" v-if="supportsReasoning(model)">
+                <q-select filled dense label="Reasoning Effort" :options="reasoningEffortValues" v-model="reasoningEffort" options-dense />
+              </div>
             </div>
 
             <div class="q-mb-md"><q-icon name="mdi-creation-outline q-mb-xs" />  Cost estimation (using {{ model.name }})</div>
@@ -386,8 +389,18 @@
                 <q-card-section>
                   <q-select filled dense label="AI model" :options="models" v-model="model" option-label="name" option-value="id" options-dense />
                 </q-card-section>
+                <q-card-section v-if="supportsReasoning(model)">
+                  <div class="text-caption flex items-center q-mb-sm">
+                    <q-icon name="mdi-thought-bubble" size="15px" class="q-mr-xs" />
+                    Reasoning Effort:
+                  </div>
+                  <div>
+                    <q-btn-toggle unelevated no-caps class="bordered" label="Reasoning Effort" :options="reasoningEffortValuesLabeled" v-model="reasoningEffort" options-dense />
+                  </div>
+                </q-card-section>
                 <q-card-section v-if="promptStore.promptAgents && promptStore.promptAgents.length > 0">
                   <div class="text-caption flex items-center">
+                    <q-icon name="mdi-robot-outline" size="15px" class="q-mr-xs" />
                     Prompt Agents:
                   </div>
                   <q-list>
@@ -445,7 +458,12 @@
   import {onKeyStroke} from "@vueuse/core";
   import {getEditor, getEditorSelection} from "src/common/utils/editorUtils";
   import PromptContextSelector from 'components/Common/PromptSelector/PromptContextSelector.vue';
-  import {isImageGenerationModel} from "src/common/helpers/modelHelper";
+  import {
+    isImageGenerationModel,
+    reasoningEffortValues,
+    reasoningEffortValuesLabeled,
+    supportsReasoning
+  } from "src/common/helpers/modelHelper";
 
   const promptStore = usePromptStore();
   const fileStore = useFileStore();
@@ -461,6 +479,15 @@
     },
     set (value) {
       request.value.forceModelId = value.id;
+    }
+  });
+
+  const reasoningEffort = computed({
+    get () {
+      return request.value.reasoningEffort;
+    },
+    set (value) {
+      request.value.reasoningEffort = value;
     }
   });
 

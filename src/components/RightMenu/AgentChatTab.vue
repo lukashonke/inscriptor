@@ -336,7 +336,7 @@ const toolCallResults = computed(() => {
   const results = new Map();
 
   messages.forEach(msg => {
-    if (msg.role === 'function' && msg.toolCallId) {
+    if (msg.role === 'tool' && msg.toolCallId) {
       results.set(msg.toolCallId, msg.content);
     }
   });

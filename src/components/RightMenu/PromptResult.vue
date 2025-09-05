@@ -98,6 +98,7 @@
               <span>{{ promptResultTitle }}</span>
               <span v-if="promptResultModel?.length > 0"><q-icon name="mdi-chip"  />{{ promptResultModel }}</span>
               <span v-if="promptResultTemperature"><q-icon  name="mdi-thermometer-low" /> {{ promptResultTemperature }}</span>
+              <span v-if="promptResultReasoning"><q-icon  name="mdi-thought-bubble-outline" /> {{ promptResultReasoning }} reasoning</span>
             </q-badge>
           </div>
 
@@ -908,6 +909,7 @@
       prompt: prompt,
       forceModelId: promptClickData.forceModelId,
       forceTemperature: promptClickData.forceTemperature,
+      reasoningEffort: promptClickData.reasoningEffort,
       text: replaceParameterEditorText(promptResultText.value)
     }
 
@@ -1256,7 +1258,7 @@
     promptStore.finishPromptResult(props.promptResult);
   }
 
-  async function regeneratePrompt(event, removeCurrent = true, forceTemperature = null, forceModel = null) {
+  async function regeneratePrompt(event, removeCurrent = true, forceTemperature = null, forceModel = null, reasoningEffort = null) {
     event.stopPropagation();
     const promptStore = usePromptStore();
     const layoutStore = useLayoutStore();
@@ -1286,18 +1288,22 @@
       request.forceModelId = forceModel.id;
     }
 
+    if(reasoningEffort) {
+      request.reasoningEffort = reasoningEffort;
+    }
+
     if(appendMessages) {
       request.appendMessages = appendMessages;
     }
 
     if(event.ctrlKey) {
       //await promptStore.promptAgain(props.promptResult, appendMessages, promptAgainArgs);
-      await promptStore.promptAgain2(request);
+      await promptStore.promptAgain(request);
     } else {
 
       request.previewOnly = true;
 
-      const data = await promptStore.promptAgain2(request);
+      const data = await promptStore.promptAgain(request);
 
       data.isRegenerating = true;
       promptStore.currentPromptConfirmationRequest = request;
@@ -1340,6 +1346,14 @@
 
   const promptResultModel = computed(() => {
     return truncate(promptStore.getModel(props.promptResult.model?.id)?.name, 30);
+  });
+
+  const promptResultReasoning = computed(() => {
+    if(props.promptResult.reasoningEffort !== undefined && props.promptResult.reasoningEffort !== null) {
+      return props.promptResult.reasoningEffort;
+    }
+
+    return undefined;
   });
 
   const promptResultTemperature = computed(() => {

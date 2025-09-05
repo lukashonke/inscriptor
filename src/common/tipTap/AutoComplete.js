@@ -16,7 +16,7 @@ export const AutoCompletePlugin = Extension.create({
 
   addOptions() {
     return {
-      autocompleteClass: 'is-autocomplete',
+      autocompleteClass: 'is-autocomplete-widget',
       autocompleteValue: 'Write something …',
       showOnlyWhenEditable: true,
       showOnlyCurrent: true,
@@ -31,38 +31,43 @@ export const AutoCompletePlugin = Extension.create({
         props: {
           decorations: ({ doc, selection }) => {
             const active = this.editor.isEditable || !this.options.showOnlyWhenEditable
-            const { anchor } = selection
+            const { $cursor } = selection
             const decorations = []
 
-            if (!active) {
+            if (!active || !$cursor) {
               return null
             }
 
-            doc.descendants((node, pos) => {
-              const hasAnchor = anchor >= pos && anchor <= pos + node.nodeSize
-              const isShown = !node.isLeaf && !isNodeEmpty(node)
+            // Get the autocomplete text
+            let autocompleteText = ''
+            if (typeof this.options.autocompleteValue === 'function') {
+              autocompleteText = this.options.autocompleteValue({
+                editor: this.editor,
+                node: $cursor.parent,
+                pos: $cursor.pos,
+                hasAnchor: true,
+              })
+            } else {
+              autocompleteText = this.options.autocompleteValue
+            }
 
-              if ((hasAnchor || !this.options.showOnlyCurrent) && isShown) {
-                const classes = [this.options.autocompleteClass]
+            // Only create decoration if there's autocomplete text
+            if (autocompleteText && autocompleteText.trim().length > 0) {
+              // Create a widget decoration at the cursor position
+              const widget = document.createElement('span')
+              widget.className = this.options.autocompleteClass
+              widget.textContent = autocompleteText
+              widget.style.color = '#adb5bd'
+              widget.style.pointerEvents = 'none'
+              widget.style.userSelect = 'none'
+              
+              const decoration = Decoration.widget($cursor.pos, widget, {
+                side: 1, // Place widget after cursor position
+                marks: []
+              })
 
-                const decoration = Decoration.node(pos, pos + node.nodeSize, {
-                  class: classes.join(' '),
-                  'data-placeholder':
-                    typeof this.options.autocompleteValue === 'function'
-                      ? this.options.autocompleteValue({
-                        editor: this.editor,
-                        node,
-                        pos,
-                        hasAnchor,
-                      })
-                      : this.options.autocompleteValue,
-                })
-
-                decorations.push(decoration)
-              }
-
-              return this.options.includeChildren
-            })
+              decorations.push(decoration)
+            }
 
             return DecorationSet.create(doc, decorations)
           },

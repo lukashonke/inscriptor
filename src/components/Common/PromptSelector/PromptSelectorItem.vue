@@ -76,6 +76,53 @@
                   </q-menu>
                 </q-item>
 
+                <q-item clickable v-ripple v-if="supportsReasoning(model)">
+                  <q-item-section side>
+                    <q-icon name="mdi-thought-bubble-outline" size="xs" />
+                  </q-item-section>
+                  <q-item-section>Prompt with reasoning effort...</q-item-section>
+                  <q-item-section side>
+                    <q-icon name="keyboard_arrow_right" />
+                  </q-item-section>
+
+                  <q-menu anchor="top end" self="top start">
+                    <q-list>
+                      <q-item
+                        @click="promptWithReasoningEffort(prompt, 'minimal')"
+                        dense
+                        clickable
+                      >
+                        <q-item-section>Minimal Reasoning</q-item-section>
+                      </q-item>
+
+                      <q-item
+                        @click="promptWithReasoningEffort(prompt, 'low')"
+                        dense
+                        clickable
+                      >
+                        <q-item-section>Low Reasoning</q-item-section>
+                      </q-item>
+
+                      <q-item
+                        @click="promptWithReasoningEffort(prompt, 'medium')"
+                        dense
+                        clickable
+                      >
+                        <q-item-section>Medium Reasoning</q-item-section>
+                      </q-item>
+
+                      <q-item
+                        @click="promptWithReasoningEffort(prompt, 'high')"
+                        dense
+                        clickable
+                      >
+                        <q-item-section>High Reasoning</q-item-section>
+                      </q-item>
+
+                    </q-list>
+                  </q-menu>
+                </q-item>
+
                 <q-item clickable v-ripple>
                   <q-item-section side>
                     <q-icon name="mdi-creation-outline" size="xs" />
@@ -294,6 +341,7 @@ import {usePromptStore} from "stores/prompt-store";
 import {Dialog} from "quasar";
 import {useLayoutStore} from "stores/layout-store";
 import {truncate} from "src/common/utils/textUtils";
+import {supportsReasoning} from 'src/common/helpers/modelHelper';
 
 const props = defineProps({
   prompt: {
@@ -322,6 +370,10 @@ function promptClick(prompt) {
 
 function promptUsingModel(prompt, model) {
   emit('promptClick', { prompt: prompt?.prompt ?? prompt, forceModelId: model.id });
+}
+
+function promptWithReasoningEffort(prompt, reasoningEffort) {
+  emit('promptClick', { prompt: prompt?.prompt ?? prompt, reasoningEffort: reasoningEffort });
 }
 
 function promptWithTemperature(prompt, temperature) {

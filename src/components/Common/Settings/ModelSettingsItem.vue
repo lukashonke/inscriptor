@@ -114,6 +114,15 @@
               </div>
             </template>
 
+            <div class="row" v-if="supportsReasoning(model)">
+              <div class="col">
+                <q-select dense borderless filled label="Default Reasoning Effort" v-model="defaultReasoningEffort" :options="reasoningEffortValues" />
+              </div>
+              <div class="col-auto items-center flex">
+                <HelpIcon :tooltip="$t('tooltips.parameters.reasoningEffort')"></HelpIcon>
+              </div>
+            </div>
+
             <div class="row">
               <div class="col">
                 <q-input dense filled label="Default Prompt Result Number" v-model="promptTimes" type="number" />
@@ -278,7 +287,7 @@ import {formatNumber} from "src/common/utils/textUtils";
 import CodeEditor from "components/Common/Editors/CodeEditor.vue";
 import {getCloudModelApiKey} from "src/common/utils/modelUtils";
 import {useCurrentUser} from "vuefire";
-import {isImageGenerationModel} from "src/common/helpers/modelHelper";
+import {isImageGenerationModel, reasoningEffortValues, supportsReasoning} from "src/common/helpers/modelHelper";
 
 const promptStore = usePromptStore();
 const layoutStore = useLayoutStore();
@@ -474,6 +483,13 @@ const promptTimes = computed({
   get: () => props.model.promptTimes,
   set: (value) => {
     promptStore.updateModel(props.model, {promptTimes: value});
+  }
+});
+
+const defaultReasoningEffort = computed({
+  get: () => props.model.defaultReasoningEffort,
+  set: (value) => {
+    promptStore.updateModel(props.model, {defaultReasoningEffort: value});
   }
 });
 

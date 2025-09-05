@@ -197,6 +197,9 @@
                   <div class="col">
                     <q-select filled dense v-model="promptStyle" label="Prompt UI Style" :options="promptStyles" v-if="showPromptUiStyle" options-dense/>
                   </div>
+                  <div class="col" v-if="supportsReasoning(model)">
+                    <q-select filled dense v-model="reasoningEffort" label="Reasoning Effort" :options="reasoningEffortValues" options-dense/>
+                  </div>
                   <div class="col-auto" v-if="hasResultsSeparator || promptStyle === 'brainstorm' || promptStyle === 'brainstorm-ui'">
                     <q-input dense filled label="Results separator" v-model="resultsSeparator" autogrow />
                   </div>
@@ -750,7 +753,7 @@ import {
   currentAndChildrenFileSummaryPromptContext
 } from "src/common/resources/promptContexts";
 import SimplePromptContextSelector from 'components/Common/Settings/SimplePromptContextSelector.vue';
-import {isImageGenerationModel} from "src/common/helpers/modelHelper";
+import {isImageGenerationModel, reasoningEffortValues, supportsReasoning} from "src/common/helpers/modelHelper";
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
@@ -1247,6 +1250,13 @@ const overrideTemperature = computed({
   set: (value) => {
     console.log(value);
     promptStore.updatePrompt(props.prompt, {overrideTemperature: value});
+  }
+});
+
+const reasoningEffort = computed({
+  get: () => props.prompt.reasoningEffort,
+  set: (value) => {
+    promptStore.updatePrompt(props.prompt, {reasoningEffort: value});
   }
 });
 

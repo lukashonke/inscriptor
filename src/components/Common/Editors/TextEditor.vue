@@ -937,6 +937,12 @@ function areAutocompleteInputsSame(input1, input2) {
 function shouldRunAutocomplete() {
   if(!editor.value) return false;
 
+  // Check if editor is focused
+  if(!editor.value.view.hasFocus()) {
+    console.log('Autocomplete not triggered: editor not focused');
+    return false;
+  }
+
   const selectedText = getSelectedText();
   if(selectedText && selectedText.length > 0) {
     //console.log('Autocomplete not triggered: selected text');
@@ -954,8 +960,6 @@ function shouldRunAutocomplete() {
       }
     }
   }
-
-
 
   // existing autocomplete input
   if(editorStore.autoCompleteTextInput) {
@@ -1025,10 +1029,12 @@ async function runAutocomplete() {
       //console.log('Autocomplete started', autocompleteInput);
 
       const result = await executePromptClick2(request);
-      if(!result) return;
+      if(!result) {
+        return;
+      }
 
       // sleep 1s
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      //await new Promise(resolve => setTimeout(resolve, 1000));
 
       // input has changed
       if(!areAutocompleteInputsSame(createAutocompleteInput(), autocompleteInput)) {
@@ -1328,6 +1334,7 @@ async function promptClick(promptClickData, forceAllFileText) {
     text: text,
     forceModelId: promptClickData.forceModelId,
     forceTemperature: promptClickData.forceTemperature,
+    reasoningEffort: promptClickData.reasoningEffort,
   }
 
   await executePromptClick2(request);
