@@ -40,8 +40,19 @@
         </q-list>
       </q-btn-dropdown>
     </div>
-    <div class="col q-gutter-x-sm flex items-center">
-      <div class="row full-width">
+    <div class="col q-gutter-y-sm flex items-center">
+        <div class="col flex justify-center">
+          <q-input
+            v-model="generateMoreLikeInput"
+            dense
+            filled
+            label="Generate more like..."
+            placeholder="Optional: describe what kind of ideas you want"
+            style="max-width: 400px; width: 100%"
+            :disable="isGenerating"
+            clearable
+          />
+        </div>
         <div class="col flex justify-center q-gutter-x-sm" >
           <q-btn @click="generate(false)" icon="mdi-creation-outline" color="accent" label="Generate more" :loading="isGenerating">
             <template v-slot:loading>
@@ -55,7 +66,6 @@
             </template>
           </q-btn>
         </div>
-      </div>
     </div>
     <div class="col flex items-center justify-end">
       <div class="row full-width justify-end q-gutter-x-md">
@@ -239,6 +249,7 @@ const props = defineProps({
 const layoutStore = useLayoutStore();
 
 const parametersDialogOpen = ref(false);
+const generateMoreLikeInput = ref('');
 
 const isGenerating = ref(false);
 // Number of columns for masonry layout
@@ -310,6 +321,9 @@ async function restart() {
 
 }
 
+  // Clear the "generate more like" input when restarting
+  generateMoreLikeInput.value = '';
+
   await executePromptClick2(newRequest);
 
   layoutStore.promptUiDialogOpen = false;
@@ -332,11 +346,18 @@ async function generate(replace = true) {
     }
     replaceVariables(newRequest, uiData.value.ideas);
 
+    // Append optional "generate more like" instruction if provided
+    if (generateMoreLikeInput.value && generateMoreLikeInput.value.trim()) {
+      newRequest.userPrompt += `\nMore specific focus: ${generateMoreLikeInput.value.trim()}.`;
+    }
+
     const onOutput = (fullText, newText, isFinished, isError, request, result) => {
       processOutput(fullText, uiData.value.pendingNewIdeas);
     };
 
     newRequest.onOutput = onOutput;
+
+    debugger;
 
     await executePromptClick2(newRequest);
 
@@ -355,6 +376,9 @@ async function generate(replace = true) {
     }
 
     updatePromptResultText();
+
+    // Clear the "generate more like" input after successful generation
+    generateMoreLikeInput.value = '';
   } finally {
     isGenerating.value = false;
   }
