@@ -40,30 +40,42 @@
         </q-list>
       </q-btn-dropdown>
     </div>
-    <div class="col q-gutter-x-sm flex items-center">
-      <div class="row full-width">
+    <div class="col flex justify-center">
+      <q-input
+        v-model="generateMoreLikeInput"
+        dense
+        filled
+        label="Generate more like..."
+        placeholder="Optional: describe what kind of ideas you want"
+        style="max-width: 400px; width: 100%"
+        :disable="isGenerating"
+        @keyup.enter="generate(false)"
+        clearable
+      />
+    </div>
+    <div class="col q-gutter-y-sm flex items-center">
         <div class="col flex justify-center q-gutter-x-sm" >
-          <q-btn @click="generate(false)" icon="mdi-creation-outline" color="accent" label="Generate more" :loading="isGenerating">
+          <q-btn @click="generate(false)" icon="mdi-creation-outline" color="accent" label="Generate" :loading="isGenerating">
             <template v-slot:loading>
               <q-spinner-dots />
             </template>
           </q-btn>
 
-          <q-btn @click="restart()" icon="mdi-restart" color="negative" label="Restart" no-caps :disable="isGenerating">
+          <q-btn @click="restart()" icon="mdi-restart" color="negative" label="Restart" flat no-caps :disable="isGenerating">
             <template v-slot:loading>
               <q-spinner-dots />
             </template>
           </q-btn>
         </div>
-      </div>
     </div>
     <div class="col flex items-center justify-end">
       <div class="row full-width justify-end q-gutter-x-md">
         <div class="col-auto flex items-center">
-          <q-btn-toggle :options="[{value: 'grid', label: 'Grid', icon: 'mdi-view-grid'},{value: 'list', label: 'List', icon: 'mdi-view-sequential'}]" :model-value="viewMode" @update:model-value="setViewMode" unelevated no-caps class="bordered" toggle-color="primary" padding="xs md" />
+          <span class="q-mx-xs">Layout</span>
+          <q-btn-toggle :options="[{value: 'grid', icon: 'mdi-view-grid'},{value: 'list', icon: 'mdi-view-sequential'}]" :model-value="viewMode" @update:model-value="setViewMode" unelevated no-caps class="bordered" toggle-color="primary" padding="xs sm" />
         </div>
         <div class="col-auto flex items-center" v-if="viewMode === 'grid'">
-          <span class="q-mx-xs">Columns:</span>
+          <span class="q-mx-xs">Columns</span>
           <q-btn-toggle :options="[{value: 3, label: 3},{value: 4, label: 4},{value: 5, label: 5}]" :model-value="columnCount" @update:model-value="setColumnCount" unelevated no-caps class="bordered" toggle-color="primary" padding="xs sm" id="aiSwitch" />
         </div>
       </div>
@@ -239,6 +251,7 @@ const props = defineProps({
 const layoutStore = useLayoutStore();
 
 const parametersDialogOpen = ref(false);
+const generateMoreLikeInput = ref('');
 
 const isGenerating = ref(false);
 // Number of columns for masonry layout
@@ -310,6 +323,9 @@ async function restart() {
 
 }
 
+  // Clear the "generate more like" input when restarting
+  generateMoreLikeInput.value = '';
+
   await executePromptClick2(newRequest);
 
   layoutStore.promptUiDialogOpen = false;
@@ -331,6 +347,11 @@ async function generate(replace = true) {
       initialiseVariables(newRequest);
     }
     replaceVariables(newRequest, uiData.value.ideas);
+
+    // Append optional "generate more like" instruction if provided
+    if (generateMoreLikeInput.value && generateMoreLikeInput.value.trim()) {
+      newRequest.userPrompt += `\nMore specific focus: ${generateMoreLikeInput.value.trim()}.`;
+    }
 
     const onOutput = (fullText, newText, isFinished, isError, request, result) => {
       processOutput(fullText, uiData.value.pendingNewIdeas);
@@ -355,6 +376,9 @@ async function generate(replace = true) {
     }
 
     updatePromptResultText();
+
+    // Clear the "generate more like" input after successful generation
+    generateMoreLikeInput.value = '';
   } finally {
     isGenerating.value = false;
   }
