@@ -359,8 +359,6 @@ async function generate(replace = true) {
 
     newRequest.onOutput = onOutput;
 
-    debugger;
-
     await executePromptClick2(newRequest);
 
     if (replace) {
