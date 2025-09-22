@@ -162,7 +162,7 @@ export const usePromptStore = defineStore('prompts', {
 
           for (const run of request.prompt.runs) {
 
-            const newRequest = cloneRequest(request);
+            const newRequest = cloneRequest(request, true);
 
             if(run.changeModel === true) {
               newRequest.forceModelId = run.changeModelValue;
@@ -185,7 +185,7 @@ export const usePromptStore = defineStore('prompts', {
               newRequest.userPrompt = userPrompt;
             }
 
-            if (request.abortController.signal.aborted) {
+            if (request.abortController?.signal.aborted) {
               return null;
             }
 

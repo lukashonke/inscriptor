@@ -32,20 +32,23 @@
         </div>
 
         <q-list separator bordered v-if="projectType === 'cloud'" style="max-height: 500px; overflow-y: auto">
-          <q-item v-for="(project, index) in projects" :key="index" :active="isCloudProjectLoaded(project)" clickable :title="project.projectId">
+          <q-item v-for="(project, index) in projects" :key="index" :active="isCloudProjectLoaded(project)" clickable :title="project.projectId" class="">
             <q-item-section>
               <q-item-label class="text-subtitle2" v-if="fileStore.projectId !== project.projectId" @click="loadProject(project.projectId)">
                   {{ project.projectName }}
-                <q-badge color="accent" v-if="isCloudProjectLoaded(project)" label="Loaded" />
+                <q-badge color="accent" v-if="isCloudProjectLoaded(project)" label="Opened" />
               </q-item-label>
               <q-item-label class="text-subtitle2" v-else>
                   {{ project.projectName }}
-                <q-badge color="accent" v-if="isCloudProjectLoaded(project)" label="Loaded" />
+                <q-badge color="accent" v-if="isCloudProjectLoaded(project)" label="Opened" />
+              </q-item-label>
+              <q-item-label caption>
+                Last opened: {{ new Date(project.lastOpened).toLocaleString() }}
               </q-item-label>
             </q-item-section>
-            <q-item-section top side>
-              <div class="text-grey-8 q-gutter-xs">
-                <q-btn-dropdown class="gt-xs q-mr-md" padding="xs sm" size="12px" flat dense color="primary" label="Open" icon="mdi-folder-open-outline" @click="loadProject(project.projectId)" v-if="fileStore.projectId !== project.projectId" split :loading="loadingProject === project.projectId">
+            <q-item-section top side class="flex items-center">
+              <div class="text-grey-8 q-gutter-xs flex items-center">
+                <q-btn-dropdown class="gt-xs q-mr-md flex items-center" padding="sm sm" size="12px" flat dense color="primary" label="Open" icon="mdi-folder-open-outline" @click="loadProject(project.projectId)" v-if="fileStore.projectId !== project.projectId" split :loading="loadingProject === project.projectId">
                   <q-list>
                     <q-item clickable v-ripple dense @click="downloadProject(project.projectId)">
                       <q-item-section side>
@@ -59,13 +62,10 @@
                   </q-list>
                 </q-btn-dropdown>
 
-                <q-btn class="gt-xs" size="12px" flat dense icon="mdi-sync"  @click="doSyncCurrentProjectToCloud()" v-if="fileStore.projectId === project.projectId && !fileStore.projectSettings?.syncToCloud"/>
-                <q-btn size="12px" flat dense icon="mdi-delete-outline" color="negative" @click="removeProjectFromCloud(project.projectId)" v-if="!isCloudProjectLoaded(project) || fileStore.projectSettings?.syncToCloud"/>
+                <q-btn class="gt-xs" size="12px" flat dense icon="mdi-sync" padding="sm sm" @click="doSyncCurrentProjectToCloud()" v-if="fileStore.projectId === project.projectId && !fileStore.projectSettings?.syncToCloud"/>
+                <q-btn size="12px" flat dense icon="mdi-delete-outline" padding="sm sm" color="negative" @click="removeProjectFromCloud(project.projectId)" v-if="!isCloudProjectLoaded(project) || fileStore.projectSettings?.syncToCloud"/>
               </div>
             </q-item-section>
-            <q-tooltip :delay="700">
-              Last opened: {{ new Date(project.lastOpened).toLocaleString() }}
-            </q-tooltip>
           </q-item>
 
           <q-item v-if="projects.length === 0 && !user.isAnonymous">
@@ -106,7 +106,7 @@
               <q-item-section>
                 <q-item-label class="text-subtitle2">
                   {{ project }}
-                  <q-badge color="accent" v-if="isLocalProjectLoaded(project)" label="Loaded" />
+                  <q-badge color="accent" v-if="isLocalProjectLoaded(project)" label="Opened" />
                 </q-item-label>
               </q-item-section>
 

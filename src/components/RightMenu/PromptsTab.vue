@@ -43,7 +43,7 @@
               leave-active-class="animated fadeOut delay-1s"
             >
               <div v-if="promptResult.isGenerating" class="menu-subtitle q-ml-xs q-my-lg">
-                <q-spinner-ios></q-spinner-ios> <span>{{ (promptResult.isGenerating) ? 'generating prompts...' : 'generated' }}</span>
+                <q-spinner-ios></q-spinner-ios> <span>{{ (promptResult.isGenerating) ? 'generating...' : 'generated' }}</span>
                 <q-btn dense @click="promptStore.stopPrompt(promptResult)" label="Abort" size="sm" class="no-margin q-py-none" color="negative"/>
               </div>
 

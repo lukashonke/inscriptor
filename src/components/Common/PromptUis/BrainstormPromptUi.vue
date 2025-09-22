@@ -40,7 +40,7 @@
         </q-list>
       </q-btn-dropdown>
     </div>
-    <div class="col flex justify-center">
+    <div class="col flex justify-end">
       <q-input
         v-model="generateMoreLikeInput"
         dense
@@ -53,8 +53,8 @@
         clearable
       />
     </div>
-    <div class="col q-gutter-y-sm flex items-center">
-        <div class="col flex justify-center q-gutter-x-sm" >
+    <div class="col q-gutter-y-sm flex items-center justify-start">
+        <div class="col flex justify-start q-gutter-x-md" >
           <q-btn @click="generate(false)" icon="mdi-creation-outline" color="accent" label="Generate" :loading="isGenerating">
             <template v-slot:loading>
               <q-spinner-dots />
