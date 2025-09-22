@@ -54,6 +54,11 @@
               </q-badge>
             </template>
 
+            <div class="" v-if="getImageThumbmailUrl(file)" style="width: 20px;">
+              <q-img :src="getImageThumbmailUrl(file)" width="20" height="24" fit="contain" class="rounded-borders">
+              </q-img>
+            </div>
+
             <template v-if="file.settings?.contextType">
               <q-badge :color="file.settings.contextType.color + '-1'" :text-color="file.settings.contextType.color + '-7'" rounded class="q-ml-xs" style="font-size: 0.7rem;">
                 <template v-if="isMainRowHovered">
@@ -126,6 +131,7 @@ import {useElementHover} from "@vueuse/core";
 import {usePromptStore} from "stores/prompt-store";
 import {truncate} from "src/common/utils/textUtils";
 import FileListRowContextMenu from "components/Common/Files/FileListRowContextMenu.vue";
+import {getImageThumbmailUrl} from 'src/common/helpers/imageHelper';
 
 const fileStore = useFileStore();
 const layoutStore = useLayoutStore();
