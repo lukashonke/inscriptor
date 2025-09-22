@@ -14,7 +14,7 @@
 
       </q-item-section>
       <q-item-section>
-        <div class="row">
+        <div class="row items-center">
           <div class="col">
             <q-input v-model="listItem.label" label="name" filled dense/>
           </div>
@@ -25,10 +25,10 @@
             <q-btn icon="mdi-delete-outline" flat color="red" @click="promptStore.removeListItem(list, listItem)" />
           </div>
           <div class="col-auto">
-            <q-btn icon="mdi-arrow-up-thin" dense flat color="primary" @click="promptStore.moveListItemUp(list, listItem)" />
+            <q-btn icon="mdi-arrow-up-thin" flat color="primary" @click="promptStore.moveListItemUp(list, listItem)" />
           </div>
           <div class="col-auto">
-            <q-btn icon="mdi-arrow-down-thin" dense flat color="primary" @click="promptStore.moveListItemDown(list, listItem)" />
+            <q-btn icon="mdi-arrow-down-thin" flat color="primary" @click="promptStore.moveListItemDown(list, listItem)" />
           </div>
         </div>
       </q-item-section>

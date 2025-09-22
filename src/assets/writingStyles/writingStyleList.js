@@ -14,6 +14,8 @@ export const writingStyles = [
 
 **Theme and Motives**: Flexible, focusing on clarity and engagement without leaning too heavily on any specific style. Universal themes that resonate across demographics.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -46,6 +48,8 @@ Outside, the city hummed with its usual energy, oblivious to the small revolutio
 **Content Organization**: Flexible structure that follows thought process rather than rigid format. Headers for navigation but not overly formal. Mix of paragraph text, bullet points, and informal notes. Notes and side comments are fine.
 
 **Theme and Purpose**: Getting ideas across clearly without corporate stuffiness. Building understanding through approachable explanation. Documenting thoughts in progress. Creating collaborative, inclusive communication.
+
+$NarrativePOV $NarrativeTense
 
 =====
 
@@ -87,6 +91,8 @@ Bottom line: We're in good shape, but let's stay flexible on the details.
 
 **Strategic Focus**: Results-oriented language emphasizing ROI and value. Risk acknowledgment with mitigation strategies. Clear recommendations backed by analysis. Alignment with organizational objectives. Forward-looking while grounded in current realities.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -123,6 +129,8 @@ The total investment requirement is $750,000, distributed across infrastructure 
 **Engagement Techniques**: Hook readers immediately with compelling openings. Use questions, statistics, and relatable scenarios. Include clear CTAs. Break up text with visuals, lists, and formatting. Make content shareable and memorable.
 
 **Tone and Voice**: Friendly, informative, and value-focused. Speaks directly to reader's needs and pain points. Balances authority with approachability. Maintains brand consistency while being human.
+
+$NarrativePOV $NarrativeTense
 
 =====
 
@@ -165,6 +173,8 @@ Your future self will thank you.
 
 **Authenticity Markers**: Acknowledge limitations where appropriate. Use genuine testimonials and stories. Avoid hyperbole and impossible promises. Include personality and occasional humor. Let passion for product shine through naturally.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -204,6 +214,8 @@ Look, we're not saying this will turn you into Hemingway overnight. But if you'r
 
 **Theme and Motives**: Explores universal human experiences—identity, loss, connection, meaning. Themes develop naturally through character actions and observations rather than explicit statements. Often open endings that let readers draw their own conclusions.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -238,6 +250,8 @@ The photograph remained between them, a bridge and a chasm both.
 **Dialogue Style**: Crisp, purposeful exchanges that reveal information and advance plot simultaneously. Characters speak in distinct voices with minimal dialogue tags. Interruptions, overlapping conversations, and unfinished sentences create realistic urgency.
 
 **Theme and Motives**: Good versus evil with clear stakes. Themes of justice, survival, and moral compromise under pressure. Heroes are flawed but ultimately sympathetic. Villains are competent and genuinely threatening.
+
+$NarrativePOV $NarrativeTense
 
 =====
 
@@ -288,6 +302,8 @@ Chen was waiting in the situation room, satellite feeds covering every wall. "Fo
 
 **Theme and Motives**: Identity, belonging, first love, family dynamics, friendship, and finding your place in the world. Addresses real issues teens face—mental health, social pressure, family problems—with hope and authenticity. Coming-of-age themes treated with respect and nuance.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -334,6 +350,8 @@ A story where I figure out who I really am when everything I thought mattered fa
 **Dialogue Style**: Sharp, economical exchanges where everyone's working an angle. Characters speak in code, saying one thing while meaning another. Wisecracks and verbal sparring as weapons. Period-appropriate slang that doesn't feel forced.
 
 **Theme and Motives**: Corruption, moral ambiguity, the thin line between justice and revenge. Everyone's guilty of something. The protagonist operates by a personal code in a world where institutional justice has failed. Redemption is possible but always costs more than expected.
+
+$NarrativePOV $NarrativeTense
 
 =====
 
@@ -396,6 +414,8 @@ Nathan Cross was either very lost or very dead. In this town, sometimes they wer
 
 **Theme and Motives**: Exploration of what makes us human in the face of technological change. Ethics of scientific advancement. The universe as both hostile and magnificent. Individual choice in vast systems. Hope through human ingenuity and cooperation.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -442,6 +462,8 @@ Sarah opened a secure channel to Mission Control. "Houston, this is Horizon Stat
 **Dialogue Style**: Quick, bantering exchanges with sexual tension disguised as verbal sparring. Characters have distinct comedic voices. Misunderstandings and miscommunications drive plot. Subtext where characters say one thing but mean another, obvious to readers.
 
 **Theme and Motives**: Love conquers pride, fear, and misunderstandings. Personal growth through romantic challenge. Family and friendship as both obstacles and support. The idea that the right person helps you become your best self. Happy endings are mandatory.
+
+$NarrativePOV $NarrativeTense
 
 =====
 
@@ -513,6 +535,8 @@ But the game wasn't over yet.
 
 **Theme and Motives**: Fear of the unknown, loss of control, corruption of the familiar. The horror of ordinary life twisted slightly wrong. Isolation—physical, emotional, or existential. The thin boundary between sanity and madness. Sometimes evil wins.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -582,6 +606,8 @@ The children in apartment 3B started laughing again on Thursday.
 
 **Theme and Motives**: Universal human experiences viewed through historical lens. How individual lives intersect with major events. Social change and resistance to it. The past as mirror to present. Finding personal agency within historical constraints.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -637,6 +663,8 @@ But Shanghai, she'd heard, had need of English governesses who weren't afraid of
 
 **Theme and Motives**: Power and its corruption, destiny versus free will, the price of heroism, the nature of good and evil. Coming-of-age within epic stakes. Environmental and cultural themes woven through worldbuilding. Hope persisting in darkness.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -690,6 +718,8 @@ As if in answer, the runestone at his throat began to burn.
 
 **Theme and Motives**: Focused on plot progression, character arcs, and immersive storytelling. Themes emerge naturally through events and character choices rather than heavy-handed exposition. Every scene should advance plot or develop character, preferably both.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -725,6 +755,8 @@ As she stumbled past him into the warmth of the lighthouse, Thomas couldn't shak
 
 **Theme and Motives**: Communicates ideas or stories in an accessible way for broad audiences. Makes complex topics feel simple and approachable. Often includes personal anecdotes and relatable examples. Aims to connect with readers on a human level.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -758,6 +790,8 @@ Six months later? Jake's running three times a week and actually enjoying it. Al
 
 **Theme and Motives**: Captures the essence of settings, emotions, or characters through deep sensory exploration. Makes readers feel they are experiencing the scene firsthand. Often more concerned with beauty and atmosphere than plot progression.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -788,6 +822,8 @@ But he was already turning away, his footsteps crushing the gravel path with a f
 **Dialogue Style**: Incorporates testimonials and expert quotes. Uses hypothetical scenarios ("Imagine if..."). Anticipates and addresses counterarguments. Direct quotes add credibility and human element.
 
 **Theme and Motives**: Moves readers from awareness to action. Presents problems with achievable solutions. Appeals to shared values and common goals. Creates sense of urgency without despair.
+
+$NarrativePOV $NarrativeTense
 
 =====
 
@@ -828,6 +864,8 @@ Join us. Not tomorrow. Not next week. Now. Because the cost of waiting isn't jus
 
 **Theme and Motives**: Educates and informs with maximum clarity. Breaks complex topics into digestible chunks. Follows logical structure: introduction, explanation, examples, summary. Aims for reader understanding, not entertainment.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -862,6 +900,8 @@ This process has practical applications across numerous fields. In healthcare, m
 **Dialogue Style**: Direct quotes from sources with clear attribution. Alternates between paraphrase and quotes. Uses partial quotes for impact. Always identifies speakers and their relevance/authority.
 
 **Theme and Motives**: Reports facts with strict objectivity. Provides context without editorializing. Multiple sources for balance. Answers reader questions efficiently. Transparency about what's known and unknown.
+
+$NarrativePOV $NarrativeTense
 
 =====
 
@@ -902,6 +942,8 @@ Construction could begin as early as next spring, according to city planning off
 
 **Theme and Motives**: Entertainment first, but often sneaks in truth through humor. Makes difficult topics approachable. Celebrates human absurdity. Uses laughter to create connection. Never punches down.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -940,6 +982,8 @@ By Day 7, I'd made progress. I was now waking up at 9:59 AM instead of 10. Rome 
 **Dialogue Style**: Characters speak in fragments and implications. Subtext over text. What's not said matters more. Dialogue tags minimal or absent. Conversations feel overheard rather than explained.
 
 **Theme and Motives**: Life's fundamental experiences—love, loss, survival—examined without ornamentation. Truth through simplicity. The profound in the mundane. Reader completes the emotional picture.
+
+$NarrativePOV $NarrativeTense
 
 =====
 
@@ -1018,6 +1062,8 @@ The phone rang. Neither of them moved to answer it.
 
 **Theme and Motives:** Explores the human condition through particular experiences. Questions of identity, memory, time, mortality. Art as a way of understanding existence. Beauty and truth intertwined. The particular illuminating the universal.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -1053,6 +1099,8 @@ Time, in this room, had taken on the quality of amber - golden, viscous, preserv
 
 **Theme and Motives:** Advances knowledge through systematic investigation. Questions assumptions and builds on prior research. Acknowledges limitations and suggests next steps. Values precision, replicability, and intellectual honesty.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -1083,6 +1131,8 @@ These findings necessitate a reconceptualization of digital wellness interventio
 **Dialogue Style**: Characters speak in distinct, memorable voices that children can easily distinguish. Natural child dialogue that sounds authentic without inappropriate content. Adult characters model good communication. Dialogue advances plot while teaching social skills.
 
 **Theme and Motives**: Universal childhood experiences—friendship, fear, discovery, growing up. Gentle moral lessons woven through story rather than heavy-handed preaching. Celebrates imagination, curiosity, and resilience. Problems are age-appropriate with satisfying resolutions. Always ends with hope.
+
+$NarrativePOV $NarrativeTense
 
 =====
 
@@ -1143,6 +1193,8 @@ And that's how Stardust became the first official hamster student at Willowbrook
 
 **Theme and Motives**: Exposes societal flaws, institutional failures, and human pretensions through humor. Challenges complacency and conventional wisdom. Often focuses on power imbalances, social inequality, or moral hypocrisy. Aims to provoke thought and potentially inspire change through laughter.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -1200,6 +1252,8 @@ Janet smiled and poured her a cup of thoroughly unoptimized coffee.
 
 **Theme and Motives**: Explores contemporary issues through personal stories—identity in the digital age, modern relationships, work-life balance, social change, cultural diversity. Universal human experiences viewed through a current lens.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -1235,6 +1289,8 @@ And despite everything—the notifications, the deadlines, the constant ping of 
 
 **Theme and Motives**: Focuses on character transformation, self-discovery, relationships, and personal growth. How characters change through challenges and choices. The complexity of human motivation and the journey toward self-understanding.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -1269,6 +1325,8 @@ The resignation letter disappeared into the digital ether, and Sarah realized sh
 **Dialogue Style**: Purposeful exchanges that advance plot and reveal information efficiently. Characters speak naturally but conversations move story forward. Quick banter, urgent exchanges, and dialogue that builds tension.
 
 **Theme and Motives**: External conflict drives internal growth. Themes emerge through action and consequence rather than introspection. Character development happens through choices made under pressure and responses to challenges.
+
+$NarrativePOV $NarrativeTense
 
 =====
 
@@ -1309,6 +1367,8 @@ Five minutes. She'd make it in four.
 
 **Theme and Motives**: Explores fundamental questions about existence, meaning, identity, and human nature. How characters understand themselves and their place in the world. The search for truth and understanding through personal experience.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -1341,6 +1401,8 @@ Maybe that was the point. Maybe the courage wasn't in having a perfect plan, but
 **Conflict and Resolution**: Creates meaningful tension through internal struggles, community challenges, or past hurts that require genuine healing. Conflict feels authentic and relatable—job loss, family struggles, personal insecurities, overcoming fear—but focuses on how people grow and support each other through difficulties. Resolutions feel earned rather than easy, showing characters actively choosing hope, forgiveness, and positive change.
 
 **Theme and Motives**: Hope triumphing over adversity through human connection, the transformative power of kindness and community, personal growth and second chances, love in its many forms. How small acts of compassion create ripple effects of positive change. The belief that people can heal, grow, and find purpose through supporting one another. Universal themes of belonging, forgiveness, resilience, and discovering unexpected strength in difficult times.
+
+$NarrativePOV $NarrativeTense
 
 =====
 
@@ -1381,6 +1443,8 @@ Tom watched Marcus carefully position another tie around the tomato vine and rea
 
 **Theme and Motives**: How environment shapes character and emotion. The relationship between internal and external landscapes. Setting as a reflection of psychological states. The power of place to influence story and meaning.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -1415,6 +1479,8 @@ Eleanor smiled for the first time in months. This was exactly what she had been 
 **Dialogue Techniques**: Long, realistic conversations that move the plot forward and show who characters really are. Use interruptions, people talking over each other, and unfinished thoughts to make it feel real. Characters often have different goals in the same conversation, which reveals their priorities. Pay attention to subtext—what people don't say is often as important as what they do. Include natural speech patterns like pauses, repeated words, and verbal habits.
 
 **Theme and Motives**: Explore relationships and character dynamics through how people interact and behave. Show how people communicate, misunderstand each other, connect, and fight, especially when they're vulnerable. Focus on the gap between what people say and what they really mean. Reveal power dynamics through who talks when and how. Show human connection and disconnection through dialogue choices and responses.
+
+$NarrativePOV $NarrativeTense
 
 =====
 
@@ -1497,6 +1563,8 @@ Outside, a car door slammed. Their neighbor getting ready for work. Normal peopl
 
 **Theme and Motives**: Universal themes that resonate across cultures and time periods—love, loss, growth, redemption, belonging, courage. Clear story arc with character transformation that feels genuine. Moral and emotional clarity without being heavy-handed or preachy. Stories that feel both familiar and fresh, comfortable yet compelling. Delivers emotional satisfaction through earned character victories and meaningful growth.
 
+$NarrativePOV $NarrativeTense
+
 =====
 
 Example snippets:
@@ -1537,6 +1605,8 @@ Maybe, he thought, picking up his coffee again, people were like that too. Maybe
 **Engagement Techniques**: Opens with hooks that stop scrolling immediately. Uses questions, controversial statements, or surprising facts. Includes clear calls-to-action (like, share, comment). Creates community through inclusive language and shared experiences.
 
 **Platform Adaptation**: Twitter/X: Thread-friendly with numbered points and continuity. Instagram: Visual storytelling with caption space optimization. TikTok: Script format with timing cues. LinkedIn: Professional but personable tone with industry relevance.
+
+$NarrativePOV $NarrativeTense
 
 =====
 
@@ -1635,6 +1705,8 @@ What's the worst example of corporate jargon you've seen? Share it below 👇
 **Technical Elements**: Proper scene headings (INT./EXT. LOCATION - TIME). Character introductions in ALL CAPS on first appearance. Parentheticals used sparingly for essential direction only. Transitions (CUT TO:, FADE IN:) when necessary for storytelling.
 
 **Visual Storytelling**: Show don't tell through action and dialogue. Camera-conscious writing that suggests shots without being prescriptive. Conflict-driven scenes that advance plot and reveal character simultaneously. Efficient storytelling within format constraints.
+
+$NarrativePOV $NarrativeTense
 
 =====
 

@@ -13,6 +13,11 @@
     background-color: rgba(72, 83, 197, 1);
   }
 
+  .bg-accent-opaque {
+    background-color: rgb(227, 227, 241, 0.5);
+    border-radius: 6px !important;
+  }
+
   .gradient-variation-1 {
     background: linear-gradient(135deg, #ffffff 80%, #ededf8 100%);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
@@ -344,7 +349,7 @@
     color: #adb5bd !important;
   }
 
-  // New inline autocomplete widget styles for day mode  
+  // New inline autocomplete widget styles for day mode
   .is-autocomplete-widget {
     color: #adb5bd !important;
   }

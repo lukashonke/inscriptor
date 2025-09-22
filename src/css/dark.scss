@@ -7,6 +7,10 @@
     background-color: rgba(54, 60, 149, 1);
   }
 
+  .bg-accent-opaque {
+    background-color: rgba(54, 60, 149, 0.1);
+  }
+
   .gradient-variation-1 {
     background: linear-gradient(135deg, #2a2a2a 80%, #353535 100%) !important;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.3) !important;

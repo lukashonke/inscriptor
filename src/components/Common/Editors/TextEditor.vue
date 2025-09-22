@@ -260,6 +260,17 @@
         <q-btn size="11px" dense flat icon="code"  @click="editor.chain().focus().toggleCodeBlock().run()" :class="{ 'text-grey-5': !editor.isActive('codeBlock'), 'text-primary': editor.isActive('codeBlock') }"/>
       </div>
 
+      <q-separator vertical class="q-ml-sm" />
+
+      <div class="col-auto q-ml-sm">
+        <q-btn size="11px" dense flat icon="mdi-undo" @click="editor.chain().focus().undo().run()" :disabled="!editor.can().chain().focus().undo().run()" class="text-primary" />
+      </div>
+      <div class="col-auto">
+        <q-btn size="11px" dense flat icon="mdi-redo" @click="editor.chain().focus().redo().run()" :disabled="!editor.can().chain().focus().redo().run()" class="text-primary" />
+      </div>
+
+      <q-separator vertical class="q-ml-sm" />
+
       <div class="col text-grey-5 text-caption flex items-center justify-center no-wrap ellipsis q-mx-md" ref="fileInfo">
 
         <span v-if="!fileInfoHover"><q-icon name="info_outline"></q-icon></span>
@@ -277,99 +288,101 @@
         <q-chip dense v-if="fileStore.projectSettings.syncToCloud && promptStore.currentCharsCount >= layoutStore.getMaxFileSize()" color="negative" text-color="white" label="Max file size for your subscription plan reached." icon="mdi-exclamation-thick" class="text-caption" clickable @click="layoutStore.showUserDialog" />
       </div>
 
-      <div class="col-auto">
-        <q-btn size="11px" id="togglePrompts" dense flat icon="mdi-creation-outline" class="text-accent" :class="{ 'text-primary': showPrompts }">
-          <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" anchor="bottom start">
-            <q-card v-show="showPrompts">
-              <PromptSelector prompt-types="insert" @promptClick="promptClick" />
+      <div class="col-auto bg-accent-opaque row rounded-borders q-px-sm">
+        <div class="col-auto">
+          <q-btn size="11px" id="togglePrompts" dense flat  icon="mdi-creation-outline" class="text-accent" :class="{ 'text-primary': showPrompts }">
+            <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" anchor="bottom start">
+              <q-card v-show="showPrompts">
+                <PromptSelector prompt-types="insert" @promptClick="promptClick" />
+              </q-card>
+            </q-popup-proxy>
+            <q-tooltip  :delay="1000">
+              AI prompts
+            </q-tooltip>
+          </q-btn>
+        </div>
+
+        <div class="col-auto q-ml-sm" v-if="promptStore.projectAgents.length > 0" ref="agentSelectorButton" id="agentSelector">
+          <q-btn
+            v-if="!isAgentActive"
+            size="11px"
+            dense
+            flat
+            :icon="agentIcon"
+            :class="agentButtonClass"
+            :disable="isAgentActive"
+          >
+            <!-- Spinner overlay when processing -->
+            <q-spinner-oval
+              v-if="agentState === 'processing'"
+              size="16px"
+              color="orange"
+              class="absolute-center"
+            />
+
+            <q-menu v-if="!isAgentActive">
+              <q-list>
+                <q-item v-for="agent in promptStore.projectAgents" :key="agent.id" clickable v-close-popup @click="runProjectAgent(agent)">
+                  <q-item-section>
+                    <q-item-label class="flex items-center text-caption">
+                      <q-icon :name="(promptStore.getPromptById(agent.promptId)?.icon?.length > 0) ? promptStore.getPromptById(agent.promptId).icon : 'mdi-robot-outline'" :color="(promptStore.getPromptById(agent.promptId)?.color?.length > 0) ? promptStore.getPromptById(agent.promptId).color : undefined" size="15px" class="q-mr-sm" />
+                      {{ agent.title }}
+                    </q-item-label>
+                    <q-item-label caption>{{ agent.description }}</q-item-label>
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+
+            <q-tooltip :delay="1000">
+              {{ agentTooltip }}
+            </q-tooltip>
+          </q-btn>
+
+          <!-- Stop button when agent is active -->
+          <q-btn
+            v-if="isAgentActive"
+            size="11px"
+            dense
+            flat
+            icon="mdi-stop"
+            class="text-negative q-ml-xs"
+            @click="stopAgentProcessing"
+            no-caps
+            style="min-width: 120px;"
+          >
+            Stop AI Agent<AnimatedDots :speed="300" fixed-width="10px" />
+          </q-btn>
+
+          <q-popup-proxy
+            :model-value="agentSelectorButtonHovered"
+            v-if="aiAgentStore.agentStatus"
+            :offset="[10, 10]"
+          >
+            <q-card style="min-width: 300px; max-width: 400px;">
+              <q-card-section class="q-pb-sm">
+                <div class="text-subtitle2 text-weight-bold q-mb-sm">
+                  {{ aiAgentStore.projectAgent?.title || 'AI Agent' }}
+                </div>
+                <div class="text-body2 text-grey-8">
+                  {{ aiAgentStore.agentStatus }}
+                </div>
+              </q-card-section>
+
+              <q-card-section class="" style="max-height: 600px; ">
+                <div class="text-caption text-weight-medium q-mb-sm">History:</div>
+                <div v-for="(action, index) in aiAgentStore.agentActionHistory.slice().reverse()"
+                     :key="index"
+                     class="q-mb-sm text-body2"
+                >
+                  <span class="text-caption text-grey-6">{{ action.timestamp }}</span>
+                  <span class="text-caption q-ml-sm">{{ action.action }}</span>
+                  <span class="text-caption q-ml-sm" v-if="action.reasoning">({{ action.reasoning }})</span>
+                </div>
+              </q-card-section>
             </q-card>
           </q-popup-proxy>
-          <q-tooltip  :delay="1000">
-            AI prompts
-          </q-tooltip>
-        </q-btn>
-      </div>
-
-      <div class="col-auto" v-if="promptStore.projectAgents.length > 0" ref="agentSelectorButton" id="agentSelector">
-        <q-btn
-          v-if="!isAgentActive"
-          size="11px"
-          dense
-          flat
-          :icon="agentIcon"
-          :class="agentButtonClass"
-          :disable="isAgentActive"
-        >
-          <!-- Spinner overlay when processing -->
-          <q-spinner-oval
-            v-if="agentState === 'processing'"
-            size="16px"
-            color="orange"
-            class="absolute-center"
-          />
-
-          <q-menu v-if="!isAgentActive">
-            <q-list>
-              <q-item v-for="agent in promptStore.projectAgents" :key="agent.id" clickable v-close-popup @click="runProjectAgent(agent)">
-                <q-item-section>
-                  <q-item-label class="flex items-center text-caption">
-                    <q-icon :name="(promptStore.getPromptById(agent.promptId)?.icon?.length > 0) ? promptStore.getPromptById(agent.promptId).icon : 'mdi-robot-outline'" :color="(promptStore.getPromptById(agent.promptId)?.color?.length > 0) ? promptStore.getPromptById(agent.promptId).color : undefined" size="15px" class="q-mr-sm" />
-                    {{ agent.title }}
-                  </q-item-label>
-                  <q-item-label caption>{{ agent.description }}</q-item-label>
-                </q-item-section>
-              </q-item>
-            </q-list>
-          </q-menu>
-
-          <q-tooltip :delay="1000">
-            {{ agentTooltip }}
-          </q-tooltip>
-        </q-btn>
-
-        <!-- Stop button when agent is active -->
-        <q-btn
-          v-if="isAgentActive"
-          size="11px"
-          dense
-          flat
-          icon="mdi-stop"
-          class="text-negative q-ml-xs"
-          @click="stopAgentProcessing"
-          no-caps
-          style="min-width: 120px;"
-        >
-          Stop AI Agent<AnimatedDots :speed="300" fixed-width="10px" />
-        </q-btn>
-
-        <q-popup-proxy
-          :model-value="agentSelectorButtonHovered"
-          v-if="aiAgentStore.agentStatus"
-          :offset="[10, 10]"
-        >
-          <q-card style="min-width: 300px; max-width: 400px;">
-            <q-card-section class="q-pb-sm">
-              <div class="text-subtitle2 text-weight-bold q-mb-sm">
-                {{ aiAgentStore.projectAgent?.title || 'AI Agent' }}
-              </div>
-              <div class="text-body2 text-grey-8">
-                {{ aiAgentStore.agentStatus }}
-              </div>
-            </q-card-section>
-
-            <q-card-section class="" style="max-height: 600px; ">
-              <div class="text-caption text-weight-medium q-mb-sm">History:</div>
-              <div v-for="(action, index) in aiAgentStore.agentActionHistory.slice().reverse()"
-                   :key="index"
-                   class="q-mb-sm text-body2"
-              >
-                <span class="text-caption text-grey-6">{{ action.timestamp }}</span>
-                <span class="text-caption q-ml-sm">{{ action.action }}</span>
-                <span class="text-caption q-ml-sm" v-if="action.reasoning">({{ action.reasoning }})</span>
-              </div>
-            </q-card-section>
-          </q-card>
-        </q-popup-proxy>
+        </div>
       </div>
 
       <div class="col-auto q-ml-md">
@@ -386,13 +399,6 @@
             Toggle Automatic Text Corrections
           </q-tooltip>
         </q-btn>
-      </div>
-
-      <div class="col-auto">
-        <q-btn size="11px" dense flat icon="mdi-undo" @click="editor.chain().focus().undo().run()" :disabled="!editor.can().chain().focus().undo().run()" class="text-primary" />
-      </div>
-      <div class="col-auto">
-        <q-btn size="11px" dense flat icon="mdi-redo" @click="editor.chain().focus().redo().run()" :disabled="!editor.can().chain().focus().redo().run()" class="text-primary" />
       </div>
 
     </q-card>

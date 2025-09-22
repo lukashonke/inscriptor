@@ -180,14 +180,15 @@
           <q-space />
           <q-btn icon="close" flat round dense v-close-popup />
         </div>
-        <q-tooltip class="q-px-md text-italic" v-if="prompt.description" :delay="500">
-          Prompt Description: {{ prompt.description }}
+        <q-tooltip class="q-px-md text-italic bg-accent text-white" v-if="prompt.description" :delay="500">
+          {{ prompt.description }}
         </q-tooltip>
       </q-card-section>
 
-      <q-card-section class="q-py-sm q-px-md" v-if="prompt.guide && prompt.guide.length > 0">
-        <div class="q-px-md text-italic" >
-          Tip: {{ prompt.guide }}
+      <q-card-section class="q-pt-none q-pb-lg q-px-md" v-if="prompt.guide && prompt.guide.length > 0">
+        <div class="q-px-md text-italic float-right text-grey-7" >
+          <q-icon name="mdi-lightbulb-outline" class="" size="14px" />
+          {{ prompt.guide }}
         </div>
       </q-card-section>
 
@@ -218,9 +219,7 @@
 
 
       <template v-if="prompt.info?.tags?.includes('input')">
-        <q-separator class="q-mt-sm" />
-        <q-card-section class="q-px-md q-pt-sm">
-
+        <q-card-section class="q-px-md q-pt-none">
           <div class="bordered rounded-borders q-mt-sm" flat :class="{'bg-grey-1': request.agent}">
             <div class="cursor-pointer context-selector q-px-md q-py-md">
               <div class="row">

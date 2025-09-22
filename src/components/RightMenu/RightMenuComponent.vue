@@ -59,7 +59,7 @@
         </q-card-section>
         <q-card-section class="q-py-sm">
           <q-img v-if="file.imageUrl" :src="file.imageUrl" class="full-width" ref="fileImg" style="max-height: 400px;" fit="contain">
-            <div class="absolute all-pointer-events q-gutter-y-xs no-padding flex column" style="" v-if="imageHovered">
+            <div class="absolute all-pointer-events q-gutter-y-xs no-padding flex column " style="" v-if="imageHovered">
               <q-btn  flat size="12px" icon="mdi-upload"  @click="uploadImage">
                 <q-tooltip>
                   Replace image
