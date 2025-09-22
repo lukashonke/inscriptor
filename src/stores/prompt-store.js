@@ -3056,7 +3056,7 @@ export const usePromptStore = defineStore('prompts', {
 
       this.statuses = [
         { label: 'To do', color: 'grey' },
-        { label: 'First Draft', color: 'blue-grey' },
+        { label: 'First Draft', color: 'black' },
         { label: 'Revised Draft', color: 'brown' },
         { label: 'Final Draft', color: 'blue' },
         { label: 'Done', color: 'green' },

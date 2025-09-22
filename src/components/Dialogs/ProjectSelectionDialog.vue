@@ -43,7 +43,11 @@
                 <q-badge color="accent" v-if="isCloudProjectLoaded(project)" label="Opened" />
               </q-item-label>
               <q-item-label caption>
-                Last opened: {{ new Date(project.lastOpened).toLocaleString() }}
+                <span class="flex items-center">
+                  <q-icon name="mdi-calendar-blank-outline" size="12px" class="q-mr-xs" />
+                  {{ new Date(project.lastOpened).toLocaleString() }}
+                  <q-tooltip :delay="700">Last opened: {{ new Date(project.lastOpened).toLocaleString() }}</q-tooltip>
+                </span>
               </q-item-label>
             </q-item-section>
             <q-item-section top side class="flex items-center">
