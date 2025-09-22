@@ -3,4 +3,3 @@ export function getImageThumbmailUrl(file) {
     return null;
   return file.imageUrl.replace(".png", "-thumbnail.png");
 }
-+
