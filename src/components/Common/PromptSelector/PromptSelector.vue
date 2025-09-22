@@ -1,26 +1,6 @@
 <template>
   <div class="row" style="width: 550px;">
     <div class="col-auto right-border" :class="layoutStore.darkMode ? 'bg-dark' : 'bg-grey-1'" id="promptSelectorCategories">
-      <div class="row">
-        <div class="col full-width">
-          <q-btn
-            no-caps
-            size="12px"
-            label="New Prompt"
-            icon="mdi-creation-outline"
-            :class="[
-              layoutStore.darkMode
-                ? (currentPromptCategory === '-custom-' ? 'bg-grey-1' : '')
-                : ('bg-primary' + (currentPromptCategory === '-custom-' ? '-1' : '-0')),
-              layoutStore.darkMode ? 'text-white' : 'text-accent'
-            ]"
-            class="full-width items-start"
-            unelevated
-            @click="currentPromptCategory = '-custom-'">
-          </q-btn>
-        </div>
-      </div>
-      <q-separator class=""/>
       <div v-if="promptStore.getStickyPrompts(fileStore.selectedFile) && promptStore.getStickyPrompts(fileStore.selectedFile).length > 0" class="row">
         <div class="col full-width">
           <q-btn
@@ -37,6 +17,26 @@
             class="full-width items-start"
             unelevated
             @click="currentPromptCategory = '-pinned-'">
+          </q-btn>
+        </div>
+      </div>
+      <q-separator class=""/>
+      <div class="row">
+        <div class="col full-width">
+          <q-btn
+            no-caps
+            size="12px"
+            label="New Prompt"
+            icon="mdi-creation-outline"
+            :class="[
+              layoutStore.darkMode
+                ? (currentPromptCategory === '-custom-' ? 'bg-grey-1' : '')
+                : ('bg-primary' + (currentPromptCategory === '-custom-' ? '-1' : '-0')),
+              layoutStore.darkMode ? 'text-white' : 'text-accent'
+            ]"
+            class="full-width items-start"
+            unelevated
+            @click="currentPromptCategory = '-custom-'">
           </q-btn>
         </div>
       </div>
@@ -301,7 +301,7 @@ function promptClick(promptClickData) {
 const currentPromptCategory = ref('');
 
 onMounted(() => {
-  currentPromptCategory.value = '-custom-';
+  currentPromptCategory.value = (promptStore.getStickyPrompts(fileStore.selectedFile) && promptStore.getStickyPrompts(fileStore.selectedFile).length > 0) ? '-pinned-' : '-custom-';
 });
 
 const categories = computed(() => {

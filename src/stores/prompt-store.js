@@ -690,6 +690,23 @@ export const usePromptStore = defineStore('prompts', {
         }
       }
 
+      // Function to resolve variables one level deep
+      function resolveVariablesOneLevel(text, variables) {
+        if (!text || typeof text !== 'string') return text;
+
+        return text.replace(/\$([A-Za-z][A-Za-z0-9_]*)/g, (match, variableName) => {
+          const foundVariable = variables.find(v => v.title === variableName);
+          if (!foundVariable) return match;
+
+          // If variable has null, undefined, or empty value, replace with empty string
+          if (foundVariable.value === null || foundVariable.value === undefined || foundVariable.value === '') {
+            return '';
+          }
+
+          return foundVariable.value;
+        });
+      }
+
       for (const variable of fileStore.variables) {
         if(variable.value === null || variable.value === undefined || variable.value === '') {
           if(systemPrompt.includes('$' + variable.title)
@@ -702,17 +719,19 @@ export const usePromptStore = defineStore('prompts', {
           }
         }
 
-        systemPrompt = systemPrompt.replace('$' + variable.title, variable.value);
-        userPrompt = userPrompt.replace('$' + variable.title, variable.value);
+        let variableValue = resolveVariablesOneLevel(variable.value, fileStore.variables);
+
+        systemPrompt = systemPrompt.replace('$' + variable.title, variableValue);
+        userPrompt = userPrompt.replace('$' + variable.title, variableValue);
         if(assistantPrompt) {
-          assistantPrompt = assistantPrompt.replace('$' + variable.title, variable.value);
+          assistantPrompt = assistantPrompt.replace('$' + variable.title, variableValue);
         }
         if(userPrompt2) {
-          userPrompt2 = userPrompt2.replace('$' + variable.title, variable.value);
+          userPrompt2 = userPrompt2.replace('$' + variable.title, variableValue);
         }
         if(request.agentMessages) {
           for (const agentMessage of request.agentMessages) {
-            agentMessage.text = agentMessage.text.replace('$' + variable.title, variable.value);
+            agentMessage.text = agentMessage.text.replace('$' + variable.title, variableValue);
           }
         }
       }

@@ -16,10 +16,6 @@
 
             <q-card>
               <q-card-section>
-                <span class="text-subtitle2">{{file.title}} file settings</span>
-              </q-card-section>
-              <q-separator />
-              <q-card-section>
                 <FileSettings :file="file" />
               </q-card-section>
               <q-separator />
