@@ -210,6 +210,18 @@
       "value": "The user's preferred writing style has not been specified yet.",
       "description": "Describe the style of writing you prefer. Be as specific as possible. A well described writing style will result in much more personalised AI generated text. See examples.",
       "undeletable": true
+    },
+    {
+      "title": "NarrativePOV",
+      "value": "Write in 3rd person perspective.",
+      "description": "The point of view from which your story is told",
+      "undeletable": true
+    },
+    {
+      "title": "NarrativeTense",
+      "value": "Use past tense consistently throughout.",
+      "description": "The primary tense used in your narrative",
+      "undeletable": true
     }
   ],
   "contextTypes": [
