@@ -551,6 +551,7 @@ function toggleAiBubbleMenu() {
 
 function toggleAutoComplete() {
   autoCompleteEnabled.value = !autoCompleteEnabled.value;
+  editorStore.setAutoCompleteText('');
 }
 
 function toggleAutomaticCorrections() {
