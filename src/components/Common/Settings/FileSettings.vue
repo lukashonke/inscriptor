@@ -49,6 +49,21 @@
       </div>
 
     </div>
+
+    <div class="q-mt-lg" v-if="!hideChildrenSettings">
+      <div class="row">
+        <span class="menu-subtitle q-mr-sm col">1st level child icon</span>
+        <IconPicker v-model="childLevel1Icon" color="black" default-icon="mdi-file-outline" size="xs" class="col"/>
+      </div>
+      <div class="row">
+        <span class="menu-subtitle q-mr-sm col">2nd level child icon</span>
+        <IconPicker v-model="childLevel2Icon" color="black" default-icon="mdi-file-outline" size="xs" class="col"/>
+      </div>
+      <div class="row">
+        <span class="menu-subtitle q-mr-sm col">3rd level child icon</span>
+        <IconPicker v-model="childLevel3Icon" color="black" default-icon="mdi-file-outline" size="xs" class="col "/>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -57,12 +72,17 @@ import {useLayoutStore} from "stores/layout-store";
 import {computed} from "vue";
 import {useFileStore} from "stores/file-store";
 import {usePromptStore} from "stores/prompt-store";
+import IconPicker from 'components/Common/IconPicker.vue';
 
 const props = defineProps({
   file: {
     type: Object,
     required: false,
   },
+  hideChildrenSettings: {
+    type: Boolean,
+    default: false,
+  }
 });
 
 const layoutStore = useLayoutStore();
@@ -114,6 +134,20 @@ const windowWidth = computed({
   set: (value) => fileStore.updateFileSettings(props.file, {windowWidth: value}),
 });
 
+const childLevel1Icon = computed({
+  get: () => props.file.settings?.childLevel1Icon,
+  set: (value) => fileStore.updateFileSettings(props.file, {childLevel1Icon: value}),
+});
+
+const childLevel2Icon = computed({
+  get: () => props.file.settings?.childLevel2Icon,
+  set: (value) => fileStore.updateFileSettings(props.file, {childLevel2Icon: value}),
+});
+
+const childLevel3Icon = computed({
+  get: () => props.file.settings?.childLevel3Icon,
+  set: (value) => fileStore.updateFileSettings(props.file, {childLevel3Icon: value}),
+});
 
 </script>
 

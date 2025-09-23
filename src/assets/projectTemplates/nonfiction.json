@@ -5,7 +5,7 @@
       "title": "Manuscript",
       "content": "",
       "order": 0,
-      "icon": "mdi-movie",
+      "icon": "mdi-book-open-variant",
       "expanded": true,
       "synopsis": "",
       "note": "",
@@ -14,6 +14,8 @@
       "view": "text",
       "parentId": null,
       "settings": {
+        "childLevel1Icon": "mdi-book-variant",
+        "childLevel2Icon": "mdi-book-outline",
         "contextType": {
           "label": "Manuscript",
           "color": "blue-grey"
@@ -25,7 +27,7 @@
       "title": "Foreword",
       "content": "",
       "order": 0,
-      "icon": "mdi-file-outline",
+      "icon": "mdi-book-variant",
       "expanded": false,
       "synopsis": "",
       "note": "",
@@ -45,7 +47,7 @@
       "title": "Chapter",
       "content": "<p></p>",
       "order": 2,
-      "icon": "mdi-file-outline",
+      "icon": "mdi-book-outline",
       "expanded": false,
       "synopsis": "",
       "note": "",
@@ -65,7 +67,7 @@
       "title": "Chapter Section",
       "content": "",
       "order": 0,
-      "icon": "mdi-file-outline",
+      "icon": "mdi-book-outline",
       "expanded": false,
       "synopsis": "",
       "note": "",
@@ -89,6 +91,9 @@
       "parentId": null,
       "isStatic": true,
       "settings": {
+        "childLevel1Icon": "mdi-account-box-outline",
+        "childLevel2Icon": "mdi-account-box-outline",
+        "childLevel3Icon": "mdi-account-box-outline",
         "contextType": {
           "label": "Characters",
           "color": "blue"
@@ -110,6 +115,9 @@
       "parentId": null,
       "isStatic": true,
       "settings": {
+        "childLevel1Icon": "mdi-map-marker",
+        "childLevel2Icon": "mdi-map-marker",
+        "childLevel3Icon": "mdi-map-marker",
         "contextType": {
           "label": "Places",
           "color": "brown"
@@ -131,6 +139,9 @@
       "parentId": null,
       "isStatic": true,
       "settings": {
+        "childLevel1Icon": "mdi-note-outline",
+        "childLevel2Icon": "mdi-note-outline",
+        "childLevel3Icon": "mdi-note-outline",
         "contextType": {
           "label": "Notes",
           "color": "yellow"
@@ -142,7 +153,7 @@
       "title": "Ideas",
       "content": "",
       "order": 3,
-      "icon": "mdi-lightbulb-outline",
+      "icon": "mdi-lightbulb-multiple-outline",
       "expanded": false,
       "synopsis": "",
       "note": "",
@@ -152,6 +163,9 @@
       "parentId": null,
       "isStatic": true,
       "settings": {
+        "childLevel1Icon": "mdi-lightbulb-outline",
+        "childLevel2Icon": "mdi-lightbulb-outline",
+        "childLevel3Icon": "mdi-lightbulb-outline"
       }
     },
     {
@@ -159,7 +173,7 @@
       "title": "Research",
       "content": "",
       "order": 4,
-      "icon": "mdi-account-school",
+      "icon": "mdi-school-outline",
       "expanded": false,
       "synopsis": "",
       "note": "",

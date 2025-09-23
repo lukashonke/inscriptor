@@ -110,8 +110,22 @@ export const useFileStore = defineStore('files', {
         file.settings = JSON.parse(JSON.stringify(promptStore.defaultFileTemplate.settings));
       }
 
+      if (file.settings?.childLevel1Icon) {
+        file.settings.childLevel1Icon = undefined;
+      }
+      if (file.settings?.childLevel2Icon) {
+        file.settings.childLevel2Icon = undefined;
+      }
+      if (file.settings?.childLevel3Icon) {
+        file.settings.childLevel3Icon = undefined;
+      }
+
       if(template) {
         file.content = template.content;
+
+        if(template.synopsis) {
+          file.synopsis = template.synopsis;
+        }
       }
 
       this.files.push(file);
@@ -125,9 +139,33 @@ export const useFileStore = defineStore('files', {
         }
       }
 
+      this.setIconFromParentSettings(file);
+
       this.setDirty(file);
 
       return file;
+    },
+    setIconFromParentSettings(file) {
+      if (!file.parent) {
+        return; // No parent, nothing to inherit
+      }
+
+      let currentParent = file.parent;
+      let level = 1;
+
+      // Check up to 3 levels of parents
+      while (currentParent && level <= 3) {
+        const iconProperty = `childLevel${level}Icon`;
+
+        if (currentParent.settings?.[iconProperty]) {
+          file.icon = currentParent.settings[iconProperty];
+          this.setDirty(file);
+          return; // Found icon, stop searching
+        }
+
+        currentParent = currentParent.parent;
+        level++;
+      }
     },
     refreshOrders(files) {
       // Find and remove trash bin if present
@@ -229,6 +267,11 @@ export const useFileStore = defineStore('files', {
 
       let targetParent = parentId ? this.getFile(parentId) : null;
       let sourcePageCollection = file.parent ? file.parent.children : this.files;
+
+      // copy context type from the new parent
+      if(targetParent && targetParent.settings?.contextType && targetParent.settings.contextType !== file.settings?.contextType) {
+        this.updateFileSettings(file, { contextType: targetParent.settings.contextType });
+      }
 
       // remove
       const index = sourcePageCollection.indexOf(file);
@@ -575,6 +618,21 @@ export const useFileStore = defineStore('files', {
 
       if(args.windowWidth !== undefined) {
         file.settings.windowWidth = args.windowWidth;
+        this.setDirty(file);
+      }
+
+      if(args.childLevel1Icon !== undefined) {
+        file.settings.childLevel1Icon = args.childLevel1Icon;
+        this.setDirty(file);
+      }
+
+      if(args.childLevel2Icon !== undefined) {
+        file.settings.childLevel2Icon = args.childLevel2Icon;
+        this.setDirty(file);
+      }
+
+      if(args.childLevel3Icon !== undefined) {
+        file.settings.childLevel3Icon = args.childLevel3Icon;
         this.setDirty(file);
       }
 

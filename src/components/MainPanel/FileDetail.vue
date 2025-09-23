@@ -13,17 +13,15 @@
       <div class="col-auto flex items-center ">
         <q-btn flat icon="mdi-dots-horizontal" >
           <q-popup-proxy >
-
             <q-card>
               <q-card-section>
                 <FileSettings :file="file" />
               </q-card-section>
               <q-separator />
               <q-card-section>
-                <q-btn icon="mdi-open-in-new" @click="makeTemplate" label="Create template from this file" color="secondary" />
+                <q-btn icon="mdi-open-in-new" flat @click="makeTemplate" label="Create template from this file" color="primary" no-caps />
               </q-card-section>
             </q-card>
-
           </q-popup-proxy>
         </q-btn>
       </div>

@@ -154,7 +154,7 @@
 
       </q-item>
 
-      <q-item clickable>
+      <!--<q-item clickable>
         <q-item-section avatar>
           <q-icon name="mdi-content-copy"/>
         </q-item-section>
@@ -176,8 +176,7 @@
             </q-item>
           </q-list>
         </q-menu>
-
-      </q-item>
+      </q-item>-->
 
       <q-item clickable v-close-popup @click="exportFile">
         <q-item-section avatar>

@@ -87,7 +87,7 @@
       <div class="bordered">
         <q-expansion-item label="Default File Settings" caption="Default settings applied to all new files." v-model="layoutStore.settingsDefaultFileSettingsOpened">
           <div class="q-pa-md">
-            <FileSettings :file="promptStore.defaultFileTemplate" />
+            <FileSettings :file="promptStore.defaultFileTemplate" hide-children-settings/>
           </div>
         </q-expansion-item>
       </div>

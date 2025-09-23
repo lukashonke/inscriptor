@@ -3,7 +3,7 @@
     <q-menu style="height: 300px">
       <div class="row">
         <div class="col">
-          <q-input filled dense :model-value="modelValue" @update:model-value="choose" />
+          <q-input filled dense :model-value="modelValue" @update:model-value="choose" clearable />
         </div>
       </div>
       <div class="row">

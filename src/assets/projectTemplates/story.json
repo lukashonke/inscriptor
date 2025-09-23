@@ -5,7 +5,7 @@
       "title": "Manuscript",
       "content": "",
       "order": 0,
-      "icon": "mdi-movie-outline",
+      "icon": "mdi-book-open-variant",
       "expanded": true,
       "synopsis": "",
       "note": "",
@@ -14,6 +14,8 @@
       "view": "text",
       "parentId": null,
       "settings": {
+        "childLevel1Icon": "mdi-book-variant",
+        "childLevel2Icon": "mdi-book-outline",
         "contextType": {
           "label": "Manuscript",
           "color": "blue-grey"
@@ -25,7 +27,7 @@
       "title": "Act 1",
       "content": "",
       "order": 0,
-      "icon": "mdi-file-outline",
+      "icon": "mdi-book-variant",
       "expanded": true,
       "synopsis": "",
       "note": "",
@@ -45,7 +47,7 @@
       "title": "Act 2",
       "content": "",
       "order": 1,
-      "icon": "mdi-file-outline",
+      "icon": "mdi-book-variant",
       "expanded": false,
       "synopsis": "",
       "note": "",
@@ -65,7 +67,7 @@
       "title": "Act 3",
       "content": "<p></p>",
       "order": 2,
-      "icon": "mdi-file-outline",
+      "icon": "mdi-book-variant",
       "expanded": false,
       "synopsis": "",
       "note": "",
@@ -85,7 +87,7 @@
       "title": "Chapter 1",
       "content": "",
       "order": 0,
-      "icon": "mdi-file-outline",
+      "icon": "mdi-book-outline",
       "expanded": false,
       "synopsis": "",
       "note": "",
@@ -115,6 +117,9 @@
       "parentId": null,
       "isStatic": true,
       "settings": {
+        "childLevel1Icon": "mdi-account-box-outline",
+        "childLevel2Icon": "mdi-account-box-outline",
+        "childLevel3Icon": "mdi-account-box-outline",
         "contextType": {
           "label": "Characters",
           "color": "blue"
@@ -136,6 +141,9 @@
       "parentId": null,
       "isStatic": true,
       "settings": {
+        "childLevel1Icon": "mdi-map-marker",
+        "childLevel2Icon": "mdi-map-marker",
+        "childLevel3Icon": "mdi-map-marker",
         "contextType": {
           "label": "Places",
           "color": "brown"
@@ -147,7 +155,7 @@
       "title": "Notes",
       "content": "",
       "order": 3,
-      "icon": "mdi-note-outline",
+      "icon": "mdi-note-multiple-outline",
       "expanded": false,
       "synopsis": "",
       "note": "",
@@ -157,6 +165,9 @@
       "parentId": null,
       "isStatic": true,
       "settings": {
+        "childLevel1Icon": "mdi-note-outline",
+        "childLevel2Icon": "mdi-note-outline",
+        "childLevel3Icon": "mdi-note-outline",
         "contextType": {
           "label": "Notes",
           "color": "yellow"
@@ -168,7 +179,7 @@
       "title": "Research",
       "content": "",
       "order": 4,
-      "icon": "mdi-account-school",
+      "icon": "mdi-school-outline",
       "expanded": false,
       "synopsis": "",
       "note": "",
