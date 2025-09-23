@@ -226,7 +226,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
       const editorStore = useEditorStore();
 
       // Skip decoration for position markers since there's no paragraph to highlight
-      if (item.nodeId === '__START__' || item.nodeId === '__END__') {
+      if (item.nodeId === '__END__') {
         return;
       }
 
@@ -288,16 +288,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
       } else if (operationType === 'add') {
         // Handle special position markers
         const nodeId = this.confirmationWidgetData?.nodeId;
-        let insertPos;
-
-        if (nodeId === '__START__') {
-          insertPos = 0;
-        } else if (nodeId === '__END__') {
-          insertPos = editorStore.editor.state.doc.content.size;
-        } else {
-          // Regular paragraph insertion
-          insertPos = position === 'before' ? from : to;
-        }
+        let insertPos = position === 'before' ? from : to;
 
         // Convert markdown to HTML for proper formatting
         const htmlContent = markdownToHtml(data.aiSuggestion);
@@ -812,6 +803,25 @@ export const useAiAgentStore = defineStore('ai-agent', {
             reasoning: toolResult.reasoning,
             preview: toolResult.newContent ? toolResult.newContent.substring(0, 100) + (toolResult.newContent.length > 100 ? '...' : '') : 'Remove paragraph'
           });
+
+          // Check for auto-approval on empty documents
+          const editorStore = useEditorStore();
+          if (toolResult.action === 'add' && this.isDocumentEmpty(editorStore.editor)) {
+            // Auto-approve: directly execute insertion for empty document
+            await this.executeDirectInsertionForEmptyDocument(toolResult);
+
+            this.addActionToHistory('✅ Auto-approved addition to empty document', {
+              type: 'auto_approved',
+              action: toolResult.action,
+              paragraphId: this.projectAgentCurrentProcessingParagraphItem.nodeId,
+              reasoning: 'Document was empty, no user confirmation needed'
+            });
+
+            // Continue to next paragraph processing
+            await this.processNextParagraph(agent);
+            return;
+          }
+
           this.updateAgentStatus('Waiting for user confirmation...');
 
           if(createNewWidget || !this.confirmationWidgetData) {
@@ -820,9 +830,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
             let displayText = this.projectAgentCurrentProcessingParagraphItem.text;
 
             // Handle special position markers
-            if (nodeId === '__START__') {
-              displayText = 'Insert at document start';
-            } else if (nodeId === '__END__') {
+            if (nodeId === '__END__') {
               displayText = 'Insert at document end';
             }
 
@@ -896,8 +904,6 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
             this.confirmationWidgetData = null;
           }
-
-          const editorStore = useEditorStore();
 
           editorStore.clearAllAgentDecorations();
           this.currentConfirmationPromise = null;
@@ -989,29 +995,6 @@ export const useAiAgentStore = defineStore('ai-agent', {
       if (!editor) return null;
 
       const doc = editor.state.doc;
-
-      // Handle special position markers
-      if (nodeId === '__START__') {
-        return {
-          node: null,
-          pos: 0,
-          from: 0,
-          to: 0,
-          text: '__START__',
-          nodeId: '__START__'
-        };
-      }
-
-      if (nodeId === '__END__') {
-        return {
-          node: null,
-          pos: doc.content.size,
-          from: doc.content.size,
-          to: doc.content.size,
-          text: '__END__',
-          nodeId: '__END__'
-        };
-      }
 
       // Handle regular paragraph nodeIds
       let foundItem = null;
@@ -1233,7 +1216,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
                 },
                 nodeId: {
                   type: "string",
-                  description: "For modify/remove: The ID of the paragraph to modify/remove. For add: The ID of the paragraph to insert relative to"
+                  description: "For modify/remove: The ID of the paragraph to modify/remove. For add: The ID of the paragraph to insert relative to. Special values: '__END__' (insert at document end) - Useful also when the document is empty."
                 },
                 newContent: {
                   type: "string",
@@ -1360,6 +1343,39 @@ export const useAiAgentStore = defineStore('ai-agent', {
               required: []
             }
           }
+        },
+        {
+          type: "function",
+          function: {
+            name: "createFile",
+            description: "Create a new file in the project with optional content, summary, and organization settings.",
+            parameters: {
+              type: "object",
+              properties: {
+                title: {
+                  type: "string",
+                  description: "The title/name for the new file"
+                },
+                content: {
+                  type: "string",
+                  description: "Optional initial content for the file"
+                },
+                summary: {
+                  type: "string",
+                  description: "Optional summary/synopsis for the file"
+                },
+                parentId: {
+                  type: "string",
+                  description: "Optional ID of the parent file to create this file as a child"
+                },
+                contextType: {
+                  type: "string",
+                  description: "Optional context type for organizing the file (e.g., 'Manuscript', 'Characters', 'Places', 'Notes', 'Research')"
+                }
+              },
+              required: ["title"]
+            }
+          }
         }
       ];
     },
@@ -1386,23 +1402,25 @@ export const useAiAgentStore = defineStore('ai-agent', {
         return { error: `Missing newContent for ${action} action` };
       }
 
-      if (action === 'add' && !position) {
+      if (action === 'add' && !position && nodeId !== '__END__') {
         return { error: "Missing position for add action" };
       }
 
       // Handle special position markers
-      if (nodeId === '__START__' || nodeId === '__END__') {
-        const targetNode = this.findParagraphByNodeId(nodeId);
-        if (!targetNode) {
-          return { error: `Failed to determine ${nodeId} position` };
+      if (nodeId === '__END__') {
+        // Find the last paragraph instead of using position marker
+        const editorStore = useEditorStore();
+        const lastParagraph = this.findLastParagraph(editorStore.editor);
+        if (!lastParagraph) {
+          return { error: "No paragraphs found in document for __END__ positioning" };
         }
 
         return {
           success: true,
           action,
-          targetNode,
+          targetNode: lastParagraph,  // Use actual last paragraph
           newContent,
-          position,
+          position: 'after',  // Always insert after the last paragraph
           reasoning
         };
       }
@@ -1457,6 +1475,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
           return await this.executeAIPromptTool(args);
         case 'getAllContextTypes':
           return this.executeGetAllContextTypesTool();
+        case 'createFile':
+          return this.executeCreateFileTool(args);
         default:
           return { error: `Unknown tool: ${toolName}` };
       }
@@ -2002,6 +2022,128 @@ export const useAiAgentStore = defineStore('ai-agent', {
         content: output
       };
     },
+    executeCreateFileTool(args) {
+      const { title, content, summary, parentId, contextType } = args;
+
+      if (!title || !title.trim()) {
+        return { error: "title parameter is required and cannot be empty" };
+      }
+
+      const fileStore = useFileStore();
+      const promptStore = usePromptStore();
+
+      try {
+        // Find parent file if parentId is provided
+        let parent = null;
+        if (parentId) {
+          parent = fileStore.getFile(parentId);
+          if (!parent) {
+            return { error: `Parent file with ID ${parentId} not found` };
+          }
+        }
+
+        // Create template object if content or contextType is provided
+        let template = null;
+        if (content || contextType) {
+          template = {};
+
+          if (content) {
+            template.content = markdownToHtml(content);
+          } else {
+            template.content = '';
+          }
+
+          if (contextType) {
+            // Find the context type in promptStore
+            const contextTypeObj = promptStore.contextTypes.find(ct => ct.label === contextType);
+            if (contextTypeObj) {
+              template.settings = {
+                contextType: contextTypeObj
+              };
+            }
+          }
+        }
+
+        if (summary && summary.trim()) {
+          template.synopsis = summary;
+        }
+
+        // Create the file using fileStore.addFile
+        const newFile = fileStore.addFile(title.trim(), parent, template);
+
+        if (!newFile) {
+          return { error: "Failed to create file. You may have reached the maximum number of files allowed." };
+        }
+
+        return {
+          success: true,
+          content: `Successfully created file "${newFile.title}" with ID: ${newFile.id}`
+        };
+
+      } catch (error) {
+        return {
+          error: `Failed to create file: ${error.message}`
+        };
+      }
+    },
+    isDocumentEmpty(editor) {
+      if (!editor) return true;
+
+      const doc = editor.state.doc;
+
+      // Check if document has no paragraphs or only empty paragraphs
+      let hasContent = false;
+      doc.nodesBetween(0, doc.content.size, (node) => {
+        if (node.type.name === 'paragraph' && node.textContent.trim().length > 0) {
+          hasContent = true;
+          return false; // Stop iteration
+        }
+      });
+
+      return !hasContent;
+    },
+    findLastParagraph(editor) {
+      if (!editor) return null;
+
+      const doc = editor.state.doc;
+      let lastParagraph = null;
+
+      // Traverse document to find the last paragraph
+      doc.nodesBetween(0, doc.content.size, (node, pos) => {
+        if (node.type.name === 'paragraph') {
+          const from = pos;
+          const to = pos + node.nodeSize;
+          const text = editorTextBetween(doc, { from, to }, '\\n', '\\n');
+
+          lastParagraph = {
+            node,
+            pos,
+            from,
+            to,
+            text: text.trim(),
+            nodeId: node.attrs.id
+          };
+        }
+      });
+
+      return lastParagraph;
+    },
+    async executeDirectInsertionForEmptyDocument(toolResult) {
+      // This function should ONLY be called when document is empty
+      const editorStore = useEditorStore();
+      const htmlContent = markdownToHtml(toolResult.newContent);
+
+      // For empty documents, always insert at position 0 (start)
+      // since there's no existing content to position relative to
+      const insertPos = 0;
+
+      // Execute insertion
+      editorStore.editor
+        .chain()
+        .focus()
+        .insertContentAt(insertPos, htmlContent)
+        .run();
+    },
 
     // Agent Chat Tab actions
     createAgentChat() {
@@ -2403,14 +2545,23 @@ export const useAiAgentStore = defineStore('ai-agent', {
         };
       }
 
+      // Check for auto-approval on empty documents
+      if (toolResult.action === 'add' && this.isDocumentEmpty(editorStore.editor)) {
+        // Auto-approve: directly execute insertion for empty document
+        await this.executeDirectInsertionForEmptyDocument(toolResult);
+
+        return {
+          success: true,
+          content: 'Content added to empty document (auto-approved)'
+        };
+      }
+
       // Set up confirmation widget for chat agent
       const nodeId = this.projectAgentCurrentProcessingParagraphItem.nodeId;
       let displayText = this.projectAgentCurrentProcessingParagraphItem.text;
 
       // Handle special position markers
-      if (nodeId === '__START__') {
-        displayText = 'Insert at document start';
-      } else if (nodeId === '__END__') {
+      if (nodeId === '__END__') {
         displayText = 'Insert at document end';
       }
 

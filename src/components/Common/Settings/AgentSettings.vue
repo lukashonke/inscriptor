@@ -421,6 +421,12 @@ const aiChatTools = [
     label: 'Set File Summary',
     description: 'Update file synopsis/summary',
     icon: 'mdi-file-edit-outline'
+  },
+  {
+    name: 'createFile',
+    label: 'Create File',
+    description: 'Create new files in the project',
+    icon: 'mdi-file-plus-outline'
   }
 ];
 

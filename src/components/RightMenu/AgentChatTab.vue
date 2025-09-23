@@ -124,7 +124,7 @@
             />
 
             <!-- Batch Tool Approval Widget (moved here, after messages) -->
-            <div v-if="aiAgentStore.pendingToolBatch" class="row q-mt-md">
+            <div v-if="aiAgentStore.pendingToolBatch" class="row q-mt-sm">
               <div class="batch-approval-message chat-assistant-message agent-awaiting-confirmation-simple">
                 <div class="chat-message-header">
                   <span class="chat-message-role">AI:</span>
@@ -568,7 +568,8 @@ function getToolIcon(toolName) {
     'search': 'mdi-magnify',
     'setFileSummary': 'mdi-file-edit-outline',
     'getAllContextTypes': 'mdi-shape-outline',
-    'modifyParagraph': 'mdi-pencil-outline'
+    'modifyParagraph': 'mdi-pencil-outline',
+    'createFile': 'mdi-file-plus-outline'
   };
   return icons[toolName] || 'mdi-tools';
 }
@@ -584,7 +585,8 @@ function getToolFriendlyName(tool) {
     'search': 'Search',
     'setFileSummary': 'Set File Summary',
     'getAllContextTypes': 'Get Context Types',
-    'modifyParagraph': 'Modify Paragraph'
+    'modifyParagraph': 'Modify Paragraph',
+    'createFile': 'Create File'
   };
   return names[tool.function.name] || tool.function.name;
 }
@@ -640,6 +642,15 @@ function getToolDescription(tool) {
 
     case 'getAllContextTypes':
       return 'Get available context types in project';
+
+    case 'createFile':
+      const title = args.title || 'Untitled';
+      const contextType = args.contextType;
+      let createDesc = `Create "${title}"`;
+      if (contextType) {
+        createDesc += ` in ${contextType}`;
+      }
+      return createDesc;
 
     default:
       return `Execute ${name} tool`;

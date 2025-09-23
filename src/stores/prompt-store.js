@@ -3063,15 +3063,16 @@ export const usePromptStore = defineStore('prompts', {
       ];
 
       this.toolApprovalSettings = {
-        readFile: true,           // Most tools auto-approved by default
-        search: true,
-        listProjectFiles: true,
+        readFile: false,
+        search: false,
+        listProjectFiles: false,
         getCurrentDocument: false,
         getAvailableAIPrompts: false,
         getAllContextTypes: false,
-        executeAIPrompt: true,     // High-impact tools require approval
-        modifyParagraph: false,     // Keep current behavior
-        setFileSummary: true
+        executeAIPrompt: true,
+        modifyParagraph: false,
+        setFileSummary: true,
+        createFile: true,
       };
 
       this.diffsShowRemoved = false;

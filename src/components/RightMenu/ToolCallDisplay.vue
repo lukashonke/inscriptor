@@ -90,7 +90,8 @@ const toolFriendlyNames = {
   'readFile': 'Read File',
   'search': 'Search Project Files',
   'setFileSummary': 'Set File Summary',
-  'getAllContextTypes': 'Get Available Context Types'
+  'getAllContextTypes': 'Get Available Context Types',
+  'createFile': 'Create New File'
 };
 
 const toolName = computed(() => {
@@ -165,6 +166,18 @@ const toolName = computed(() => {
         }
         return 'AI wants to: List Project Files';
 
+      case 'createFile':
+        const title = args.title;
+        const createContextType = args.contextType;
+        let createDesc = `AI wants to: Create File`;
+        if (title) {
+          createDesc += ` - "${title}"`;
+        }
+        if (createContextType) {
+          createDesc += ` (${createContextType})`;
+        }
+        return createDesc;
+
       default:
         break;
     }
@@ -215,6 +228,8 @@ const toolIcon = computed(() => {
     return 'mdi-file-edit-outline';
   } else if (technicalName === 'getAllContextTypes') {
     return 'mdi-tag-multiple-outline';
+  } else if (technicalName === 'createFile') {
+    return 'mdi-file-plus-outline';
   }
   return 'mdi-tools';
 });
@@ -258,6 +273,8 @@ const toolColor = computed(() => {
     return 'amber';
   } else if (technicalName === 'getAllContextTypes') {
     return 'pink';
+  } else if (technicalName === 'createFile') {
+    return 'cyan';
   }
   return 'grey';
 });
