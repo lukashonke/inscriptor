@@ -535,6 +535,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
         const result = await promptStore.promptMultiple(newRequest);
         return result;
       } catch (error) {
+        console.log(error);
         // Log error
         this.addActionToHistory('⚠️ Error in prompt execution', {
           type: 'prompt_error',
@@ -658,6 +659,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
         //TODO bug - even if user aborts, it still waits to complete this before continuing with the next paragraph
         this.confirmationWidgetData.promptResult = await this.executeProjectAgentPrompt(onInitialOutput);
       } catch (error) {
+        console.log(error);
         // Log error for project agent
         this.addActionToHistory('⚠️ Error occurred', {
           type: 'error',
@@ -697,6 +699,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
         await this.processIndependentAgentResult(result, true);
 
       } catch (error) {
+        console.log(error);
         // Log error
         this.addActionToHistory('⚠️ Error occurred', {
           type: 'error',
@@ -755,6 +758,14 @@ export const useAiAgentStore = defineStore('ai-agent', {
         this.clearProjectAgent();
         return;
       }
+
+      // Add the original assistant message with tool_calls to chat history
+      // This is required by OpenAI before any tool response messages
+      this.independentAgentChatHistory.push({
+        type: 'assistant',
+        text: message.content || '',
+        toolCalls: message.tool_calls
+      });
 
       for (const toolCall of message.tool_calls) {
         // Get the first tool call
@@ -857,12 +868,6 @@ export const useAiAgentStore = defineStore('ai-agent', {
           }
 
           this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'awaiting_confirmation');
-
-          // Add to chat history
-          this.independentAgentChatHistory.push({
-            type: 'assistant',
-            text: `Used tool: modifyParagraph\nTarget: ${this.projectAgentCurrentProcessingParagraphItem.nodeId}\nReasoning: ${toolResult.reasoning}`
-          });
 
           let promiseResolve;
           const confirmationPromise = new Promise((resolve) => {

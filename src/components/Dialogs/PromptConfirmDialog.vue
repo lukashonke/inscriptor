@@ -200,6 +200,9 @@
               <template v-if="request.agent.searchPrefix && request.agent.searchPrefix.length > 0">
                 All paragraphs starting with "{{ request.agent.searchPrefix }}" in the current file, processed one by one.
               </template>
+              <template v-else-if="request.agent.isIndependent">
+                AI chooses which paragraphs to modify
+              </template>
               <template v-else>
                 All paragraphs in the current file, processed one by one
               </template>
