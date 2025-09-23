@@ -225,6 +225,11 @@ export const useAiAgentStore = defineStore('ai-agent', {
     manageParagraphDecoration(item, state) {
       const editorStore = useEditorStore();
 
+      // Skip decoration for position markers since there's no paragraph to highlight
+      if (item.nodeId === '__START__' || item.nodeId === '__END__') {
+        return;
+      }
+
       switch (state) {
         case 'pending':
           editorStore.addAgentDecoration(item.from, item.to, 'pending');
@@ -281,8 +286,19 @@ export const useAiAgentStore = defineStore('ai-agent', {
           })
           .run();
       } else if (operationType === 'add') {
-        // Insert new paragraph at specified position
-        const insertPos = position === 'before' ? from : to;
+        // Handle special position markers
+        const nodeId = this.confirmationWidgetData?.nodeId;
+        let insertPos;
+
+        if (nodeId === '__START__') {
+          insertPos = 0;
+        } else if (nodeId === '__END__') {
+          insertPos = editorStore.editor.state.doc.content.size;
+        } else {
+          // Regular paragraph insertion
+          insertPos = position === 'before' ? from : to;
+        }
+
         // Convert markdown to HTML for proper formatting
         const htmlContent = markdownToHtml(data.aiSuggestion);
         editorStore.editor
@@ -800,11 +816,21 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
           if(createNewWidget || !this.confirmationWidgetData) {
             // Set up confirmation widget for independent agent
+            const nodeId = this.projectAgentCurrentProcessingParagraphItem.nodeId;
+            let displayText = this.projectAgentCurrentProcessingParagraphItem.text;
+
+            // Handle special position markers
+            if (nodeId === '__START__') {
+              displayText = 'Insert at document start';
+            } else if (nodeId === '__END__') {
+              displayText = 'Insert at document end';
+            }
+
             this.confirmationWidgetData = {
               agentTitle: this.projectAgent.title,
               paragraphRange: { from: this.projectAgentCurrentProcessingParagraphItem.from, to: this.projectAgentCurrentProcessingParagraphItem.to },
-              originalText: this.projectAgentCurrentProcessingParagraphItem.text,
-              nodeId:  this.projectAgentCurrentProcessingParagraphItem.nodeId,
+              originalText: displayText,
+              nodeId: nodeId,
               conversationMessages: [...this.independentAgentChatHistory],
               isStreaming: false,
               originalAiSuggestion: toolResult.newContent || '',
@@ -963,6 +989,31 @@ export const useAiAgentStore = defineStore('ai-agent', {
       if (!editor) return null;
 
       const doc = editor.state.doc;
+
+      // Handle special position markers
+      if (nodeId === '__START__') {
+        return {
+          node: null,
+          pos: 0,
+          from: 0,
+          to: 0,
+          text: '__START__',
+          nodeId: '__START__'
+        };
+      }
+
+      if (nodeId === '__END__') {
+        return {
+          node: null,
+          pos: doc.content.size,
+          from: doc.content.size,
+          to: doc.content.size,
+          text: '__END__',
+          nodeId: '__END__'
+        };
+      }
+
+      // Handle regular paragraph nodeIds
       let foundItem = null;
 
       doc.nodesBetween(0, doc.content.size, (node, pos) => {
@@ -1339,7 +1390,24 @@ export const useAiAgentStore = defineStore('ai-agent', {
         return { error: "Missing position for add action" };
       }
 
-      // Find the target paragraph
+      // Handle special position markers
+      if (nodeId === '__START__' || nodeId === '__END__') {
+        const targetNode = this.findParagraphByNodeId(nodeId);
+        if (!targetNode) {
+          return { error: `Failed to determine ${nodeId} position` };
+        }
+
+        return {
+          success: true,
+          action,
+          targetNode,
+          newContent,
+          position,
+          reasoning
+        };
+      }
+
+      // Find the target paragraph for regular nodeIds
       const targetNode = this.findParagraphByNodeId(nodeId);
       if (!targetNode) {
         return { error: `Paragraph with ID ${nodeId} not found` };
@@ -2336,14 +2404,24 @@ export const useAiAgentStore = defineStore('ai-agent', {
       }
 
       // Set up confirmation widget for chat agent
+      const nodeId = this.projectAgentCurrentProcessingParagraphItem.nodeId;
+      let displayText = this.projectAgentCurrentProcessingParagraphItem.text;
+
+      // Handle special position markers
+      if (nodeId === '__START__') {
+        displayText = 'Insert at document start';
+      } else if (nodeId === '__END__') {
+        displayText = 'Insert at document end';
+      }
+
       this.confirmationWidgetData = {
         agentTitle: 'AI Agent Chat',
         paragraphRange: {
           from: this.projectAgentCurrentProcessingParagraphItem.from,
           to: this.projectAgentCurrentProcessingParagraphItem.to
         },
-        originalText: this.projectAgentCurrentProcessingParagraphItem.text,
-        nodeId: this.projectAgentCurrentProcessingParagraphItem.nodeId,
+        originalText: displayText,
+        nodeId: nodeId,
         conversationMessages: [],
         isStreaming: false,
         originalAiSuggestion: toolResult.newContent || '',
