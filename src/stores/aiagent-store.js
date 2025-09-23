@@ -1123,7 +1123,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "getCurrentDocument",
-            description: "Get the current document content with paragraph IDs and a list of all child files. Each paragraph is formatted as [nodeId]: content. Also shows the file hierarchy with metadata for all child files. Call this before making changes to the current file to ensure proper position.",
+            description: "Get the current user opened document content with paragraph IDs and a list of all child files. Each paragraph is formatted as [nodeId]: content. Also shows the file hierarchy with metadata for all child files. CALL this before making changes to the current file to ensure proper position.",
             parameters: {
               type: "object",
               properties: {
@@ -1205,7 +1205,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "modifyParagraph",
-            description: "Modify, add, or remove paragraphs in the current document",
+            description: "Modify, add, or remove paragraphs in the CURRENTLY OPENED document - use this to modify the file user has currently opened.",
             parameters: {
               type: "object",
               properties: {
@@ -1240,13 +1240,13 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "setFileSummary",
-            description: "Set the summary for a file. If no fileId is provided, sets the summary for the current active file. Prefer this tool to appending summary paragraphs to the documents.",
+            description: "Set the summary for any file. If no fileId is provided, sets the summary for the currently opened file. (Prefer this tool to appending summary paragraphs to the documents - it sets the summary to file's metadata instead of modifying its content)",
             parameters: {
               type: "object",
               properties: {
                 fileId: {
                   type: "string",
-                  description: "The ID of the file to set the summary for. If not provided, uses the current active file."
+                  description: "The ID of the file to set the summary for. If not provided, uses the currently opened file."
                 },
                 summary: {
                   type: "string",
@@ -1261,7 +1261,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "search",
-            description: "Search through all project files using exact or fuzzy matching. By default, searches in all fields (title, content, and summary) across all context types for comprehensive results. Only provide optional parameters if you need to narrow the search scope.",
+            description: "Search through all project files using exact or fuzzy matching. By default, searches in all fields (title, content, and summary) across all context types for comprehensive results. Provide optional parameters if you need to narrow the search scope.",
             parameters: {
               type: "object",
               properties: {
