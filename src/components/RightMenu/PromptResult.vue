@@ -1236,6 +1236,7 @@
 
       const newUrl = await uploadImage(idToken, props.promptResult.images[0], useCurrentUser().value.uid);
       fileStore.selectedFile.imageUrl = newUrl;
+      fileStore.setDirty(fileStore.selectedFile);
     } catch (error) {
       return;
     }

@@ -388,7 +388,7 @@
       <div class="col-auto q-ml-md">
         <q-btn size="11px" dense flat icon="mdi-alpha-a-box" @click="toggleAiBubbleMenu" class="" :class="{ 'text-primary': aiBubbleMenu, 'text-grey-5': !aiBubbleMenu }">
           <q-tooltip>
-            Toggle AI bubble menu
+            Toggle Inline AI bubble menu
           </q-tooltip>
         </q-btn>
       </div>
@@ -396,7 +396,15 @@
       <div class="col-auto">
         <q-btn size="11px" dense flat icon="mdi-alpha-g-box" @click="toggleAutomaticCorrections" class="" :class="{ 'text-primary': automaticCorrections, 'text-grey-5': !automaticCorrections }">
           <q-tooltip>
-            Toggle Automatic Text Corrections
+            Toggle Display Grammar Errors
+          </q-tooltip>
+        </q-btn>
+      </div>
+
+      <div class="col-auto">
+        <q-btn size="11px" dense flat icon="mdi-alpha-c-box" @click="toggleAutoComplete" class="" :class="{ 'text-primary': autoCompleteEnabled, 'text-grey-5': !autoCompleteEnabled }">
+          <q-tooltip>
+            Toggle AI Auto complete
           </q-tooltip>
         </q-btn>
       </div>
@@ -535,8 +543,14 @@ const quickSelectionPromptShown = ref(false);
 
 const aiBubbleMenu = ref(true);
 
+const autoCompleteEnabled = ref(true);
+
 function toggleAiBubbleMenu() {
   aiBubbleMenu.value = !aiBubbleMenu.value;
+}
+
+function toggleAutoComplete() {
+  autoCompleteEnabled.value = !autoCompleteEnabled.value;
 }
 
 function toggleAutomaticCorrections() {
@@ -942,6 +956,7 @@ function areAutocompleteInputsSame(input1, input2) {
 
 function shouldRunAutocomplete() {
   if(!editor.value) return false;
+  if(!autoCompleteEnabled.value) return false;
 
   // Check if editor is focused
   if(!editor.value.view.hasFocus()) {
