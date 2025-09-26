@@ -10,7 +10,7 @@ import {
 } from "src/common/utils/fileUtils";
 import {open, save} from '@tauri-apps/plugin-dialog';
 import {readTextFile, writeTextFile} from "@tauri-apps/plugin-fs";
-import {tokenise} from "src/common/utils/textUtils";
+import {htmlToMarkdown, tokenise} from "src/common/utils/textUtils";
 import {usePromptStore} from "stores/prompt-store";
 import {md5} from "src/common/utils/hashUtils";
 import {
@@ -679,8 +679,14 @@ export const useFileStore = defineStore('files', {
       const files = this.getContextFiles(contextLabel);
       let text = '';
       for (const file of files) {
-        text += this.getFileNameWithPath(file) + ':\n' + file.content + '\n\n';
-        text += '\n-----\n';
+        text += '### FILE ' + this.getFileNameAndFileNameWithPath(file) + ':\n';
+        const content = htmlToMarkdown(file.content);
+        if(content.trim().length > 0) {
+          text += content;
+        } else {
+          text += '(empty file)';
+        }
+        text += '\n\n';
       }
       return text;
     },
@@ -688,7 +694,14 @@ export const useFileStore = defineStore('files', {
       const files = this.getContextFiles(contextLabel);
       let text = '';
       for (const file of files) {
-        text += file.title + ':\n' + file.synopsis + '\n\n';
+        text += '### FILE ' + this.getFileNameAndFileNameWithPath(file) + ' (SUMMARY):\n';
+        const synopsis = file.synopsis ?? ''
+        if(synopsis.trim().length > 0) {
+          text += synopsis;
+        } else {
+          text += '(no summary)';
+        }
+        text += '\n\n';
       }
       return text;
     },
@@ -1318,14 +1331,24 @@ export const useFileStore = defineStore('files', {
       file.imageUrl = imageUrl;
       this.setDirty(file);
     },
-    getFileNameWithPath(file) {
+    getFileNameAndFileNameWithPath(file) {
       if(!file) {
         return null;
       }
       if(file.parent) {
-        return this.getFileNameWithPath(file.parent) + ' / ' + file.title;
+        return file.title + ' in "' + this.getFileNameWithPath(file.parent) + '/' + file.title + '"';
       } else {
         return file.title;
+      }
+    },
+    getFileNameWithPath(file, appendFileName = true) {
+      if(!file) {
+        return null;
+      }
+      if(file.parent) {
+        return this.getFileNameWithPath(file.parent) + appendFileName ? ('/' + file.title) : '';
+      } else {
+        return appendFileName ? file.title : "";
       }
     },
     ensureTrashBinExists() {

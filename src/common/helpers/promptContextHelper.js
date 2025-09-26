@@ -24,7 +24,8 @@ export function transformContextIdsToContextObjects(contextIds) {
             contextType: 'Variable',
             parameters: variableName,
             color: 'brown',
-            description: `Content from variable ${variableName}`
+            description: `Content from variable ${variableName}`,
+            order: 500
           });
         }
       }
@@ -40,7 +41,8 @@ export function transformContextIdsToContextObjects(contextIds) {
             contextType: 'Context Type Summary',
             parameters: contextTypeName,
             color: contextType.color || 'deep-purple',
-            description: `Summaries from all pages with context type ${contextTypeName}`
+            description: `Summaries from all pages with context type ${contextTypeName}`,
+            order: 1000
           });
         }
       }
@@ -56,7 +58,8 @@ export function transformContextIdsToContextObjects(contextIds) {
             contextType: 'Context Type',
             parameters: contextTypeName,
             color: contextType.color || 'purple',
-            description: `Full content from all pages with context type ${contextTypeName}`
+            description: `Full content from all pages with context type ${contextTypeName}`,
+            order: 1000
           });
         }
       }
@@ -86,4 +89,19 @@ export function transformContextIdsToContextObjects(contextIds) {
   }
 
   return contextTypes;
+}
+
+export function getOrderedContextTypes(contextTypes) {
+  // Order context types by their order property (ascending)
+  // If no order property exists, default to 0
+
+  if (!contextTypes || !Array.isArray(contextTypes)) {
+    return [];
+  }
+
+  return contextTypes.sort((a, b) => {
+    const orderA = a.order || 0;
+    const orderB = b.order || 0;
+    return orderA - orderB;
+  });
 }

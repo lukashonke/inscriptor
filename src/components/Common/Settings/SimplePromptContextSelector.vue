@@ -1,5 +1,5 @@
 <template>
-  <div class="bordered rounded-borders" flat style="min-width: 300px; max-width: 600px;">
+  <div class="bordered rounded-borders" flat style="min-width: 500px; max-width: 500px;">
     <div class="cursor-pointer context-selector q-px-md q-py-md">
       <div class="row" v-if="title">
         <div class="col text-subtitle2 flex items-center">
@@ -201,7 +201,8 @@ const updateSelectedContexts = () => {
         contextType: 'Variable',
         parameters: variableName,
         color: 'brown',
-        description: `Content from variable ${variableName}`
+        description: `Content from variable ${variableName}`,
+        order: 500
       };
     }
 
@@ -215,7 +216,8 @@ const updateSelectedContexts = () => {
         contextType: 'Context Type Summary',
         parameters: contextTypeName,
         color: contextType?.color || 'deep-purple',
-        description: `Summaries from all pages with context type ${contextTypeName}`
+        description: `Summaries from all pages with context type ${contextTypeName}`,
+        order: 1000
       };
     }
 
@@ -229,7 +231,8 @@ const updateSelectedContexts = () => {
         contextType: 'Context Type',
         parameters: contextTypeName,
         color: contextType?.color || 'purple',
-        description: `Full content from all pages with context type ${contextTypeName}`
+        description: `Full content from all pages with context type ${contextTypeName}`,
+        order: 1000
       };
     }
 
@@ -242,7 +245,8 @@ const updateSelectedContexts = () => {
         contextType: 'Previous Characters',
         parameters: parseInt(characterCount),
         color: previousCharactersPromptContext.color,
-        description: `${characterCount} characters preceding your selected text`
+        description: `${characterCount} characters preceding your selected text`,
+        order: 9000
       };
     }
 
@@ -263,7 +267,8 @@ const updateSelectedContexts = () => {
       label: contextId,
       contextType: 'Unknown',
       color: 'grey',
-      description: 'Unknown context type'
+      description: 'Unknown context type',
+      order: 0
     };
   }).filter(Boolean);
 };
@@ -286,7 +291,8 @@ const variableContexts = computed(() => {
     contextType: 'Variable',
     parameters: variable.title,
     color: 'brown',
-    description: `Content from variable ${variable.title}`
+    description: `Content from variable ${variable.title}`,
+    order: 500
   }));
 });
 
@@ -301,7 +307,8 @@ const contextTypeContexts = computed(() => {
       contextType: 'Context Type Summary',
       parameters: contextType.label,
       color: contextType.color || 'deep-purple',
-      description: `Summaries from all pages with context type ${contextType.label}`
+      description: `Summaries from all pages with context type ${contextType.label}`,
+      order: 1000
     });
 
     contexts.push({
@@ -310,7 +317,8 @@ const contextTypeContexts = computed(() => {
       contextType: 'Context Type',
       parameters: contextType.label,
       color: contextType.color || 'purple',
-      description: `Full content from all pages with context type ${contextType.label}`
+      description: `Full content from all pages with context type ${contextType.label}`,
+      order: 1000
     });
   });
 

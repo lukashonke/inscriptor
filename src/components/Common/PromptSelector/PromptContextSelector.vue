@@ -357,7 +357,8 @@ const contextTypePromptContext = computed(() => {
       contextType: 'Context Type Summary',
       parameters: contextType.label,
       color: contextType.color ?? 'deep-purple',
-      description: 'Summaries from all pages with Context Type ' + contextType.label
+      description: 'Summaries from all pages with Context Type ' + contextType.label,
+      order: 1000
     });
 
     retValue.push({
@@ -366,7 +367,8 @@ const contextTypePromptContext = computed(() => {
       contextType: 'Context Type',
       parameters: contextType.label,
       color: contextType.color ?? 'purple',
-      description: 'Content from all pages with Context Type ' + contextType.label
+      description: 'Content from all pages with Context Type ' + contextType.label,
+      order: 1000
     });
   }
 
@@ -380,7 +382,8 @@ const variablesPromptContext = computed(() => {
     contextType: 'Variable',
     parameters: c.title,
     color: 'brown',
-    description: 'Content from variable ' + c.title
+    description: 'Content from variable ' + c.title,
+    order: 500
   }));
 })
 
@@ -397,7 +400,8 @@ function confirmAddFileContext(option) {
       contextType: 'File',
       parameters: data.file.id,
       color: 'blue',
-      description: 'All text from file ' + data.file.title
+      description: 'All text from file ' + data.file.title,
+      order: 900
     }
   } else if(option === 'fileSummary') {
     context = {
@@ -406,7 +410,8 @@ function confirmAddFileContext(option) {
       contextType: 'File Summary',
       parameters: data.file.id,
       color: 'blue',
-      description: 'Summary of file ' + data.file.title
+      description: 'Summary of file ' + data.file.title,
+      order: 900
     }
   } else if(option === 'fileChildren') {
     context = {
@@ -415,7 +420,8 @@ function confirmAddFileContext(option) {
       contextType: 'File and Children',
       parameters: data.file.id,
       color: 'blue',
-      description: 'File ' + data.file.title + ' and its children '
+      description: 'File ' + data.file.title + ' and its children ',
+      order: 900
     }
   } else if(option === 'fileChildrenSummary') {
     context = {
@@ -424,7 +430,8 @@ function confirmAddFileContext(option) {
       contextType: 'File and Children Summary',
       parameters: data.file.id,
       color: 'blue',
-      description: 'Summaries of the file '+ data.file.title + ' and its children '
+      description: 'Summaries of the file '+ data.file.title + ' and its children ',
+      order: 900
     }
   }
 
