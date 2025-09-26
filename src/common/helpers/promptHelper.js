@@ -76,8 +76,6 @@ export async function executePromptClick2(request) {
       || (!request.forceBypassMoreParameters && request.prompt.promptType !== 'selectionAnalysis' && (request.prompt.promptType !== 'chat' || (model.args?.targetLanguages && !request.prompt.targetLanguage)))
     );
 
-  debugger;
-
   if(!showMoreParametersWindow && request.prompt.info?.tags?.includes("context")) {
     const previousPromptContext = promptStore.getSavedPromptRunData(request.prompt, 'lastContext');
 
@@ -237,7 +235,6 @@ async function executePrompt2(request) {
   }
 
   const context = [...promptStore.promptContext];
-  debugger; // TODO context types are passed as strings, they are also list and not fed into promptStore.promptContext
   const userInputs = [...promptStore.promptUserInputs];
 
   if(request.appendContext) {
