@@ -33,6 +33,7 @@ import {chatTabId, getPromptTabId, promptTabId} from 'src/common/resources/tabs'
 import {usePromptAgentStore} from 'stores/promptagent-store';
 import {url} from 'boot/axios';
 import {hasTemperature, hasTopP, supportsReasoning} from 'src/common/helpers/modelHelper';
+import {transformContextIdsToContextObjects} from 'src/common/helpers/promptContextHelper';
 
 export const usePromptStore = defineStore('prompts', {
   state: () => ({
@@ -302,7 +303,6 @@ export const usePromptStore = defineStore('prompts', {
 
         // Create an array of promises to execute all prompts in parallel
         const promptPromises = prompts.map(prompt => {
-          debugger;
           const request = {
             prompt: prompt,
             text: text,
@@ -310,7 +310,7 @@ export const usePromptStore = defineStore('prompts', {
             forceBypassMoreParameters: true,
             forceShowContextSelection: false,
             promptSource: 'selectionAnalysis',
-            contextTypes: prompt.analysisPrompt?.contextTypes ?? [],
+            contextTypes: transformContextIdsToContextObjects(prompt.analysisPrompt?.contextTypes ?? []),
           };
 
           return executePromptClick2(request);
