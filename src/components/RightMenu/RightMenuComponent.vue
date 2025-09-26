@@ -176,8 +176,11 @@
                               <q-btn flat dense icon="mdi-arrow-down" @click="promptStore.moveAnalysisPrompt(prompt, 1)" />
                               <q-btn flat dense icon="mdi-cog-outline" >
                                 <q-menu>
-                                  <q-list dense>
+                                  <q-list>
                                     <q-item>
+                                      <q-item-section side >
+                                        <q-checkbox :model-value="prompt.runOnSelection" @update:model-value="(val) => promptStore.updateAnalysisPrompt(prompt, {runOnSelection: val})" />
+                                      </q-item-section>
                                       <q-item-section>
                                         <q-item-label>Can be run from Text Selection</q-item-label>
                                         <q-item-label caption>
@@ -186,9 +189,6 @@
                                             When you select text in editor, there's AI Analysis button. If this is checked, then this prompt will run when you click this button. Usage: create different sets for analysis, eg. one for grammar check and verifications and one for rewriting the prose.
                                           </q-tooltip>
                                         </q-item-label>
-                                      </q-item-section>
-                                      <q-item-section side >
-                                        <q-checkbox :model-value="prompt.runOnSelection" @update:model-value="(val) => promptStore.updateAnalysisPrompt(prompt, {runOnSelection: val})" />
                                       </q-item-section>
                                     </q-item>
                                   </q-list>
