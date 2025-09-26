@@ -136,7 +136,7 @@
 
           <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length > 0">
             <div class="row">
-              <div class="col-auto flex items-center q-pr-md">
+              <div class="col flex items-center q-pr-md">
                 <q-btn @click="promptStore.promptSelectionAnalysisPrompts" icon="mdi-chart-timeline-variant-shimmer" color="accent" :label="analyseLabel" no-caps :loading="promptStore.selectionAnalysisRunning" v-if="canAnalyse" style="min-width: 220px;"/>
                 <span v-else class="text-grey-8">
                   No text selected, please select text to analyse.
@@ -145,9 +145,9 @@
               <div class="col justify-end flex">
                 <q-btn :label="analysisPrompts.length + ' prompts active'" flat color="accent"  icon-right="mdi-chevron-down" no-caps>
                   <q-popup-proxy>
-                    <q-card style="width: 600px">
+                    <q-card style="width: 600px; " class="">
 
-                      <q-list v-if="analysisPrompts" dense class="full-width q-mb-sm">
+                      <q-list v-if="analysisPrompts" dense class="full-width q-mb-sm scroll-y" style="max-height: 600px;">
                         <q-item v-for="(prompt, i) in analysisPrompts" :key="i" dense class="full-width">
                           <q-item-section side>
                             <div class="text-grey-8 q-gutter-xs flex items-center">
@@ -165,21 +165,35 @@
                           <q-item-section side class="flex items-center">
                             <div class="text-grey-8 q-gutter-xs flex items-center">
                               <q-btn flat no-caps icon="mdi-book-outline" dense>
-                                <q-menu>
-                                  <SimplePromptContextSelector v-model="prompt.contextTypes" />
+                                <q-menu max-width="800px">
+                                  <SimplePromptContextSelector v-model="prompt.contextTypes" :title="'Choose context for ' + getPromptNameById(prompt.promptId) + ' prompt'" icon="mdi-pen" output-context-as-objects/>
                                 </q-menu>
                                 <q-tooltip :delay="500">
-                                  Set Context
+                                  Set Context for this prompt
                                 </q-tooltip>
                               </q-btn>
-
-                              <q-checkbox label="Run from Context Menu" flat dense round :model-value="prompt.runOnSelection" @update:model-value="(val) => promptStore.updateAnalysisPrompt(prompt, {runOnSelection: val})"  >
-                                <q-tooltip :delay="500">
-                                  Triggers automatically when you select a text
-                                </q-tooltip>
-                              </q-checkbox>
                               <q-btn flat dense icon="mdi-arrow-up" @click="promptStore.moveAnalysisPrompt(prompt, - 1)"  />
                               <q-btn flat dense icon="mdi-arrow-down" @click="promptStore.moveAnalysisPrompt(prompt, 1)" />
+                              <q-btn flat dense icon="mdi-cog-outline" >
+                                <q-menu>
+                                  <q-list dense>
+                                    <q-item>
+                                      <q-item-section>
+                                        <q-item-label>Can be run from Text Selection</q-item-label>
+                                        <q-item-label caption>
+                                          Select any text, click 'AI Analysis' -> this prompt runs
+                                          <q-tooltip :delay="500" max-width="400px">
+                                            When you select text in editor, there's AI Analysis button. If this is checked, then this prompt will run when you click this button. Usage: create different sets for analysis, eg. one for grammar check and verifications and one for rewriting the prose.
+                                          </q-tooltip>
+                                        </q-item-label>
+                                      </q-item-section>
+                                      <q-item-section side >
+                                        <q-checkbox :model-value="prompt.runOnSelection" @update:model-value="(val) => promptStore.updateAnalysisPrompt(prompt, {runOnSelection: val})" />
+                                      </q-item-section>
+                                    </q-item>
+                                  </q-list>
+                                </q-menu>
+                              </q-btn>
                               <q-btn flat dense icon="mdi-delete" @click="promptStore.removeAnalysisPrompt(prompt)" color="negative" />
                             </div>
                           </q-item-section>
@@ -187,7 +201,7 @@
                       </q-list>
 
                       <div v-if="addPromptVisible">
-                        <q-select clearable options-dense v-model="addPrompt" label="Add prompt" outlined dense filled :options="availableAnalysisPrompts" @update:model-value="(val) => addAnalysisPrompt(val)"/>
+                        <PromptPicker v-model="addPrompt" :prompts="availableAnalysisPrompts" @update:model-value="(val) => addAnalysisPrompt(val)" placeholder="Add prompt..."></PromptPicker>
                       </div>
                       <div v-else>
                         <q-btn square flat class="full-width" icon="mdi-plus" @click="addPromptVisible = true" />
@@ -260,8 +274,8 @@
   import AgentChatTab from 'components/RightMenu/AgentChatTab.vue';
   import {getSelectedText} from 'src/common/utils/editorUtils';
   import {useAiAgentStore} from 'stores/aiagent-store';
-  import PromptContextSelector from "components/Common/PromptSelector/PromptContextSelector.vue";
   import SimplePromptContextSelector from "components/Common/Settings/SimplePromptContextSelector.vue";
+  import PromptPicker from 'components/Common/PromptPicker.vue';
 
   const promptStore = usePromptStore();
   const aiAgentStore = useAiAgentStore();

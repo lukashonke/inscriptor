@@ -1,25 +1,25 @@
 <template>
-  <div class="bordered rounded-borders" flat>
+  <div class="bordered rounded-borders" flat style="min-width: 300px; max-width: 600px;">
     <div class="cursor-pointer context-selector q-px-md q-py-md">
-      <div class="row">
+      <div class="row" v-if="title">
         <div class="col text-subtitle2 flex items-center">
-          <q-icon name="mdi-robot-outline" class="q-mr-xs" />
-          Agent Context Configuration
+          <q-icon :name="icon" class="q-mr-xs" v-if="icon"/>
+          {{ title }}
         </div>
         <div class="col-auto"><q-icon name="keyboard_arrow_down" size="sm" /></div>
       </div>
 
       <template v-if="selectedContexts.length > 0">
         <template v-for="context in selectedContexts" :key="context.id">
-          <q-chip 
-            :color="context.color + '-3'" 
-            removable 
+          <q-chip
+            :color="context.color + '-3'"
+            removable
             @remove="removeContext(context)"
             class="q-ma-xs"
           >
             {{ context.label }}
-            <q-badge 
-              :color="contextWarning(context).color" 
+            <q-badge
+              :color="contextWarning(context).color"
               v-if="contextWarning(context)"
               class="q-ml-xs"
             >
@@ -36,7 +36,7 @@
       </template>
       <template v-else>
         <div class="text-grey-6 q-mt-sm">
-          No context selected for agent execution
+          No context selected
           <q-tooltip :delay="500">
             Select contexts that will be automatically included when agents use this prompt.
           </q-tooltip>
@@ -51,16 +51,16 @@
                 <div class="text-subtitle2 q-mb-md">Basic Context Types:</div>
                 <div class="row q-gutter-sm">
                   <template v-for="context in basicContexts" :key="context.id">
-                    <q-chip 
-                      :text-color="getContextChipFontColor(context)" 
-                      :color="getContextChipColor(context)" 
-                      :icon="getContextChipIcon(context)" 
-                      :clickable="isContextAllowed(context)" 
+                    <q-chip
+                      :text-color="getContextChipFontColor(context)"
+                      :color="getContextChipColor(context)"
+                      :icon="getContextChipIcon(context)"
+                      :clickable="isContextAllowed(context)"
                       @click="context.id === previousCharactersPromptContext.id ? null : toggleContext(context)"
                       class="q-ma-xs"
                     >
                       {{ context.label }} &nbsp;
-                      
+
                       <!-- Previous Characters dropdown menu -->
                       <q-btn
                         v-if="context.id === previousCharactersPromptContext.id"
@@ -90,7 +90,7 @@
                           </q-list>
                         </q-menu>
                       </q-btn>
-                      
+
                       <q-tooltip color="primary" :delay="500">
                         <div>{{ context.description }}</div>
                         <div v-if="contextWarning(context)" class="text-orange">
@@ -104,11 +104,11 @@
                 <div class="text-subtitle2 q-mt-md q-mb-md">Variables:</div>
                 <div class="row q-gutter-sm">
                   <template v-for="context in variableContexts" :key="context.id">
-                    <q-chip 
-                      :text-color="getContextChipFontColor(context)" 
-                      :color="getContextChipColor(context)" 
-                      :icon="getContextChipIcon(context)" 
-                      :clickable="isContextAllowed(context)" 
+                    <q-chip
+                      :text-color="getContextChipFontColor(context)"
+                      :color="getContextChipColor(context)"
+                      :icon="getContextChipIcon(context)"
+                      :clickable="isContextAllowed(context)"
                       @click="toggleContext(context)"
                       class="q-ma-xs"
                     >
@@ -123,11 +123,11 @@
                 <div class="text-subtitle2 q-mt-md q-mb-md">Context Types:</div>
                 <div class="row q-gutter-sm">
                   <template v-for="context in contextTypeContexts" :key="context.id">
-                    <q-chip 
-                      :text-color="getContextChipFontColor(context)" 
-                      :color="getContextChipColor(context)" 
-                      :icon="getContextChipIcon(context)" 
-                      :clickable="isContextAllowed(context)" 
+                    <q-chip
+                      :text-color="getContextChipFontColor(context)"
+                      :color="getContextChipColor(context)"
+                      :icon="getContextChipIcon(context)"
+                      :clickable="isContextAllowed(context)"
                       @click="toggleContext(context)"
                       class="q-ma-xs"
                     >
@@ -172,7 +172,15 @@ const props = defineProps({
   modelValue: {
     type: Array,
     default: () => []
-  }
+  },
+  title: {
+    type: String,
+    default: 'Agent Context Configuration'
+  },
+  icon: {
+    type: String,
+    default: 'mdi-robot-outline'
+  },
 });
 
 const emit = defineEmits(['update:modelValue']);
@@ -196,7 +204,7 @@ const updateSelectedContexts = () => {
         description: `Content from variable ${variableName}`
       };
     }
-    
+
     // Handle Context Type Summary contexts
     if (contextId.startsWith('Context Type Summary ')) {
       const contextTypeName = contextId.replace('Context Type Summary ', '');
@@ -210,7 +218,7 @@ const updateSelectedContexts = () => {
         description: `Summaries from all pages with context type ${contextTypeName}`
       };
     }
-    
+
     // Handle Context Type full content contexts
     if (contextId.startsWith('Context Type ')) {
       const contextTypeName = contextId.replace('Context Type ', '');
@@ -224,7 +232,7 @@ const updateSelectedContexts = () => {
         description: `Full content from all pages with context type ${contextTypeName}`
       };
     }
-    
+
     // Handle Previous Characters contexts with parameters
     if (contextId.startsWith('Previous Text ')) {
       const characterCount = contextId.replace('Previous Text ', '');
@@ -237,18 +245,18 @@ const updateSelectedContexts = () => {
         description: `${characterCount} characters preceding your selected text`
       };
     }
-    
+
     // Handle standard contexts
     const standardContext = allPromptContexts.find(c => c.id === contextId);
     if (standardContext) {
       return standardContext;
     }
-    
+
     // Handle currentAndChildrenFileSummaryPromptContext
     if (contextId === currentAndChildrenFileSummaryPromptContext.id) {
       return currentAndChildrenFileSummaryPromptContext;
     }
-    
+
     // Unknown context
     return {
       id: contextId,
@@ -285,7 +293,7 @@ const variableContexts = computed(() => {
 // Context type contexts
 const contextTypeContexts = computed(() => {
   const contexts = [];
-  
+
   promptStore.contextTypes.forEach(contextType => {
     contexts.push({
       id: `Context Type Summary ${contextType.label}`,
@@ -295,7 +303,7 @@ const contextTypeContexts = computed(() => {
       color: contextType.color || 'deep-purple',
       description: `Summaries from all pages with context type ${contextType.label}`
     });
-    
+
     contexts.push({
       id: `Context Type ${contextType.label}`,
       label: `${contextType.label} (full text)`,
@@ -305,7 +313,7 @@ const contextTypeContexts = computed(() => {
       description: `Full content from all pages with context type ${contextType.label}`
     });
   });
-  
+
   return contexts;
 });
 
@@ -330,7 +338,7 @@ const toggleContext = (context, parametersValue = undefined) => {
 // Add context
 const addContext = (context, parametersValue = undefined) => {
   let contextId = context.id;
-  
+
   // For Previous Characters context, include the parameter in the ID
   if (context === previousCharactersPromptContext && parametersValue) {
     contextId = `${context.id} ${parametersValue}`;
@@ -365,17 +373,17 @@ const isContextAllowed = (context) => {
     const selection = getEditorSelection();
     return selection && !selection.empty;
   }
-  
+
   if (context === currentFilePromptContext) {
     const currentFile = fileStore.selectedFile;
     return currentFile && currentFile.content && removeHtmlTags(currentFile.content).trim() !== '';
   }
-  
+
   if (context === currentFileSummaryPromptContext) {
     const currentFile = fileStore.selectedFile;
     return currentFile && currentFile.synopsis && currentFile.synopsis.trim() !== '';
   }
-  
+
   if (context === previousCharactersPromptContext) {
     const editor = getEditor();
     if (!editor) {
@@ -399,7 +407,7 @@ const isContextAllowed = (context) => {
       return false;
     }
   }
-  
+
   return true;
 };
 
@@ -411,21 +419,21 @@ const contextWarning = (context) => {
       return { color: 'red-3', warning: 'No text selected.' };
     }
   }
-  
+
   if (context.id === currentFilePromptContext.id) {
     const currentFile = fileStore.selectedFile;
     if (!currentFile || !currentFile.content || removeHtmlTags(currentFile.content).trim() === '') {
       return { color: 'red-3', warning: 'Current file has no text.' };
     }
   }
-  
+
   if (context.id === currentFileSummaryPromptContext.id) {
     const currentFile = fileStore.selectedFile;
     if (!currentFile || !currentFile.synopsis || currentFile.synopsis.trim() === '') {
       return { color: 'red-3', warning: 'Current file has no synopsis.' };
     }
   }
-  
+
   if (context.id === previousCharactersPromptContext.id) {
     const editor = getEditor();
     if (!editor) {
@@ -449,16 +457,16 @@ const contextWarning = (context) => {
       return { color: 'red-3', warning: 'No text before selection.' };
     }
   }
-  
+
   // Warning for potentially large contexts
   if (context.contextType === 'Context Type') {
     return { color: 'orange-3', warning: 'May be very large - includes full documents.' };
   }
-  
+
   if (context.contextType === 'Context Type Summary') {
     return { color: 'orange-3', warning: 'May include many file summaries.' };
   }
-  
+
   return null;
 };
 
@@ -467,7 +475,7 @@ const getContextChipColor = (context) => {
   if (!isContextAllowed(context)) {
     return 'grey-3';
   }
-  
+
   return containsContext(context) ? (context.color + '-4') : (context.color + '-1');
 };
 
@@ -475,7 +483,7 @@ const getContextChipIcon = (context) => {
   if (!isContextAllowed(context)) {
     return 'block';
   }
-  
+
   return containsContext(context) ? 'check' : 'add';
 };
 
@@ -483,7 +491,7 @@ const getContextChipFontColor = (context) => {
   if (!isContextAllowed(context)) {
     return 'grey-4';
   }
-  
+
   return 'black';
 };
 </script>
