@@ -164,6 +164,15 @@
                           </q-item-section>
                           <q-item-section side class="flex items-center">
                             <div class="text-grey-8 q-gutter-xs flex items-center">
+                              <q-btn flat no-caps icon="mdi-book-outline" dense>
+                                <q-menu>
+                                  <SimplePromptContextSelector v-model="prompt.contextTypes" />
+                                </q-menu>
+                                <q-tooltip :delay="500">
+                                  Set Context
+                                </q-tooltip>
+                              </q-btn>
+
                               <q-checkbox label="Run from Context Menu" flat dense round :model-value="prompt.runOnSelection" @update:model-value="(val) => promptStore.updateAnalysisPrompt(prompt, {runOnSelection: val})"  >
                                 <q-tooltip :delay="500">
                                   Triggers automatically when you select a text
@@ -251,6 +260,8 @@
   import AgentChatTab from 'components/RightMenu/AgentChatTab.vue';
   import {getSelectedText} from 'src/common/utils/editorUtils';
   import {useAiAgentStore} from 'stores/aiagent-store';
+  import PromptContextSelector from "components/Common/PromptSelector/PromptContextSelector.vue";
+  import SimplePromptContextSelector from "components/Common/Settings/SimplePromptContextSelector.vue";
 
   const promptStore = usePromptStore();
   const aiAgentStore = useAiAgentStore();

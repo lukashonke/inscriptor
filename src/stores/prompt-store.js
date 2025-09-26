@@ -281,7 +281,8 @@ export const usePromptStore = defineStore('prompts', {
         .filter(ap => ap.enabled)
         .filter(ap => !onlyPromptsToRunOnSelect || ap.runOnSelection === true)
         .map(ap => {
-          return [...this.selectionAnalysisPrompts, ...this.selectionPrompts].find(p => p.id === ap.promptId && p.enabled);
+          const prompt = [...this.selectionAnalysisPrompts, ...this.selectionPrompts].find(p => p.id === ap.promptId && p.enabled);
+          return { ...prompt, analysisPrompt: ap }
         })
         .filter(p => p !== undefined);
 
@@ -301,13 +302,15 @@ export const usePromptStore = defineStore('prompts', {
 
         // Create an array of promises to execute all prompts in parallel
         const promptPromises = prompts.map(prompt => {
+          debugger;
           const request = {
             prompt: prompt,
             text: text,
             allowParallel: true,
             forceBypassMoreParameters: true,
             forceShowContextSelection: false,
-            promptSource: 'selectionAnalysis'
+            promptSource: 'selectionAnalysis',
+            contextTypes: prompt.analysisPrompt?.contextTypes ?? [],
           };
 
           return executePromptClick2(request);
