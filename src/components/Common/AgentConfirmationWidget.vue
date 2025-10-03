@@ -94,6 +94,9 @@
               @input="handleInput"
               @blur="finishEditing"
             ></div>
+            <template v-if="widgetData.isStreaming">
+              <q-spinner-ios /> generating <AnimatedDots />
+            </template>
           </div>
         </div>
       </q-card-section>
@@ -312,6 +315,7 @@ import {diffStrings, markdownToHtml} from 'src/common/utils/textUtils'
 import { useFileStore } from 'stores/file-store'
 import PromptResult from 'components/RightMenu/PromptResult.vue';
 import {useAiAgentStore} from 'stores/aiagent-store';
+import AnimatedDots from 'components/Common/AnimatedDots.vue';
 
 const props = defineProps({
   widgetData: {
@@ -546,7 +550,7 @@ function getPositionDescription() {
   }
 
   // Streaming cursor animation
-  .streaming-cursor {
+  :deep(.streaming-cursor) {
     animation: blink 1s infinite;
     color: var(--q-accent);
     font-weight: bold;

@@ -79,7 +79,7 @@
                 <q-skeleton v-else animation="fade"/>
               </q-popup-proxy>
               <q-tooltip  :delay="1000">
-                Run Analysis using {{ promptStore.analysisPromptsSettings.prompts.length }} prompts
+                Run Analysis using {{ promptStore.analysisPromptsSettings.prompts.filter(p => p.enabled && p.runOnSelection).length }} prompts
               </q-tooltip>
             </q-btn>
 

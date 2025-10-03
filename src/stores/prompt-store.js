@@ -33,6 +33,7 @@ import {chatTabId, getPromptTabId, promptTabId} from 'src/common/resources/tabs'
 import {usePromptAgentStore} from 'stores/promptagent-store';
 import {url} from 'boot/axios';
 import {hasTemperature, hasTopP, supportsReasoning} from 'src/common/helpers/modelHelper';
+import {getOrderedContextTypes, transformContextIdsToContextObjects} from 'src/common/helpers/promptContextHelper';
 
 export const usePromptStore = defineStore('prompts', {
   state: () => ({
@@ -281,7 +282,8 @@ export const usePromptStore = defineStore('prompts', {
         .filter(ap => ap.enabled)
         .filter(ap => !onlyPromptsToRunOnSelect || ap.runOnSelection === true)
         .map(ap => {
-          return [...this.selectionAnalysisPrompts, ...this.selectionPrompts].find(p => p.id === ap.promptId && p.enabled);
+          const prompt = [...this.selectionAnalysisPrompts, ...this.selectionPrompts].find(p => p.id === ap.promptId && p.enabled);
+          return { ...prompt, analysisPrompt: ap }
         })
         .filter(p => p !== undefined);
 
@@ -307,7 +309,8 @@ export const usePromptStore = defineStore('prompts', {
             allowParallel: true,
             forceBypassMoreParameters: true,
             forceShowContextSelection: false,
-            promptSource: 'selectionAnalysis'
+            promptSource: 'selectionAnalysis',
+            contextTypes: transformContextIdsToContextObjects(prompt.analysisPrompt?.contextTypes ?? []),
           };
 
           return executePromptClick2(request);
@@ -765,11 +768,11 @@ export const usePromptStore = defineStore('prompts', {
           if(inputType.id === 'Current File') {
             if(text && text.length > 0) {
               if(request.userInputs.length > 1) {
-                userInputValue += fileStore.getFileNameWithPath(fileStore.selectedFile) + ' Text: ';
+                userInputValue += '## File ' + fileStore.getFileNameAndFileNameWithPath(fileStore.selectedFile) + ' Text: \n';
               }
               userInputValue += convertHtmlToText(text);
               if(request.userInputs.length > 1) {
-                userInputValue += '\n-----\n';
+                userInputValue += '\n\n';
               }
             }
           } else if(inputType.id === 'Selected Text') {
@@ -777,18 +780,18 @@ export const usePromptStore = defineStore('prompts', {
 
             if(selectedTextReplace && selectedTextReplace.length > 0) {
               if(request.userInputs.length > 1) {
-                userInputValue += 'Selected Text inside ' + (fileStore.getFileNameWithPath(fileStore.selectedFile)) + ': ';
+                userInputValue += '## ' + 'Selected Text inside File ' + (fileStore.getFileNameAndFileNameWithPath(fileStore.selectedFile)) + ':  \n';
               }
               userInputValue += convertHtmlToText(selectedTextReplace);
 
               if(request.userInputs.length > 1) {
-                userInputValue += '\n-----\n';
+                userInputValue += '\n\n';
               }
             }
           } else if(inputType.contextType === 'Custom Input') {
-            userInputValue += convertHtmlToText(inputType.value);
+            userInputValue += '## Additional input: \n ' + convertHtmlToText(inputType.value) + ' \n';
             if(request.userInputs.length > 1) {
-              userInputValue += '\n-----\n';
+              userInputValue += '\n\n';
             }
           }
         }
@@ -808,23 +811,16 @@ export const usePromptStore = defineStore('prompts', {
           prefixWithContextWord = false;
         }
 
-        /*const hasText = userPrompt.includes('$text') || systemPrompt.includes('$text');
-        const hasSelection = userPrompt.includes('$selection') || systemPrompt.includes('$selection')
-        const hasTextOrSelection = userPrompt.includes('$textOrSelection') || systemPrompt.includes('$textOrSelection')
-        const hasTextBefore = userPrompt.includes('$textBefore') || systemPrompt.includes('$textBefore')
-                              || userPrompt.includes('$text2000Before') || systemPrompt.includes('$text2000Before')
-                              || userPrompt.includes('$text1000Before') || systemPrompt.includes('$text1000Before')
-                              || userPrompt.includes('$text500Before') || systemPrompt.includes('$text500Before')*/
+        let ordererdContext = getOrderedContextTypes(request.contextTypes);
 
-
-        for (const contextType of request.contextTypes) {
+        for (const contextType of ordererdContext) {
           if(contextType.id === 'Current File' || contextType.id === 'Current & Children Files') {
             if(text && text.length > 0) {
-              if(request.contextTypes.length > 1) {
-                context += 'CURRENT FILE (' + fileStore.getFileNameWithPath(fileStore.selectedFile) + ') TEXT: \n';
+              if(ordererdContext.length > 1) {
+                context += '## CURRENT (user-selected) FILE (' + fileStore.getFileNameAndFileNameWithPath(fileStore.selectedFile) + ') TEXT: \n';
               }
               context += convertHtmlToText(text);
-              context += '\n\n-----\n\n';
+              context += '\n\n';
             }
 
             if(contextType.id === 'Current & Children Files') {
@@ -834,9 +830,9 @@ export const usePromptStore = defineStore('prompts', {
                     const childText = convertHtmlToText(child.content);
 
                     if(childText && childText.length > 0) {
-                      context += 'CHILD FILE ' + fileStore.getFileNameWithPath(child) + ' TEXT: \n';
+                      context += '### CHILD FILE ' + fileStore.getFileNameAndFileNameWithPath(child) + ' TEXT: \n';
                       context += childText;
-                      context += '\n\n-----\n\n';
+                      context += '\n\n';
                     }
 
                     addChildrenFunc(child);
@@ -848,21 +844,21 @@ export const usePromptStore = defineStore('prompts', {
             }
           } else if(contextType.id === 'Selected Text') {
             if(selectedText && selectedText.length > 0) {
-              if(request.contextTypes.length > 1) {
-                context += 'SELECTED TEXT INSIDE FILE ' + (fileStore.getFileNameWithPath(fileStore.selectedFile)) + ': \n';
+              if(ordererdContext.length > 1) {
+                context += '## USER-SELECTED TEXT INSIDE CURRENTLY SELECTED FILE ' + (fileStore.getFileNameAndFileNameWithPath(fileStore.selectedFile)) + ': \n';
               }
               context += convertHtmlToText(selectedText);
-              context += '\n\n-----\n\n';
+              context += '\n\n';
             }
           } else if(contextType.contextType === 'Dynamic' && contextType.value) {
-            context += '' + contextType.label + ':\n';
+            context += '## ' + contextType.label + ':\n';
             context += convertHtmlToText(contextType.value);
-            context += '\n\n-----\n\n';
+            context += '\n\n';
           } else if(contextType.id === 'Current File Summary' || contextType.id === 'Current & Children File Summary') {
             const contextValue = fileStore.selectedFile?.synopsis ?? '';
             if(contextValue && contextValue.length > 0) {
-              context += 'CURRENT FILE SUMMARY ' + fileStore.getFileNameWithPath(fileStore.selectedFile) + ': ' + convertHtmlToText(contextValue);
-              context += '\n\n-----\n\n';
+              context += '## CURRENT FILE (SUMMARY) ' + fileStore.getFileNameAndFileNameWithPath(fileStore.selectedFile) + ': ' + convertHtmlToText(contextValue);
+              context += '\n\n';
             }
 
             if(contextType.id === 'Current & Children File Summary') {
@@ -872,9 +868,9 @@ export const usePromptStore = defineStore('prompts', {
                     const childText = child.synopsis ?? '';
 
                     if(childText && childText.length > 0) {
-                      context += 'CHILD FILE SUMMARY (' + fileStore.getFileNameWithPath(child) + '):\n';
+                      context += '### CHILD FILE (SUMMARY) (' + fileStore.getFileNameAndFileNameWithPath(child) + '):\n';
                       context += convertHtmlToText(childText);
-                      context += '\n\n-----\n\n';
+                      context += '\n\n';
                     }
 
                     addChildrenFunc(child);
@@ -890,8 +886,8 @@ export const usePromptStore = defineStore('prompts', {
               const charactersToTake = contextType.parameters;
               const previousCharacters = getTextBeforeKeepingWordsIntact(textBefore, charactersToTake);
 
-              context += 'PREVIOUS TEXT: \n\n' + convertHtmlToText(previousCharacters);
-              context += '\n\n-----\n\n';
+              context += '## PREVIOUS TEXT (TO USER-SELECTED TEXT): \n' + convertHtmlToText(previousCharacters);
+              context += '\n\n';
 
               //contextTextMessages.push({type: 'assistant', text: previousCharacters});
             }
@@ -900,9 +896,9 @@ export const usePromptStore = defineStore('prompts', {
             const contextValue = fileStore.getContextText(contextType.parameters);
 
             if(contextValue && contextValue.length > 0) {
-              context += 'CONTEXT ' + contextType.parameters + ': \n';
-              context += convertHtmlToText(contextValue);
-              context += '\n-----\n';
+              context += '## CONTEXT "' + contextType.parameters + '": \n';
+              context += contextValue;
+              context += '\n\n';
             }
           } else if(contextType.contextType === 'File' || contextType.contextType === 'File and Children') {
             const fileId = contextType.parameters;
@@ -912,9 +908,9 @@ export const usePromptStore = defineStore('prompts', {
               const fileText = convertHtmlToText(file.content);
 
               if(fileText && fileText.length > 0) {
-                context += 'FILE ' + fileStore.getFileNameWithPath(file) + ' TEXT: \n';
+                context += '## FILE ' + fileStore.getFileNameAndFileNameWithPath(file) + ' TEXT: \n';
                 context += fileText;
-                context += '\n-----\n';
+                context += '\n\n';
               }
 
               if(contextType.contextType === 'File and Children') {
@@ -924,9 +920,9 @@ export const usePromptStore = defineStore('prompts', {
                       const childText = convertHtmlToText(child.content);
 
                       if(childText && childText.length > 0) {
-                        context += 'CHILD FILE ' + fileStore.getFileNameWithPath(child) + ' TEXT: \n';
+                        context += '### CHILD FILE ' + fileStore.getFileNameAndFileNameWithPath(child) + ' TEXT: \n';
                         context += childText;
-                        context += '\n-----\n';
+                        context += '\n\n';
                       }
 
                       addChildrenFunc(child);
@@ -947,9 +943,9 @@ export const usePromptStore = defineStore('prompts', {
               const fileText = file.synopsis ?? '';
 
               if(fileText && fileText.length > 0) {
-                context += 'FILE SUMMARY ' + fileStore.getFileNameWithPath(file) + ':\n';
+                context += '## FILE SUMMARY ' + fileStore.getFileNameAndFileNameWithPath(file) + ':\n';
                 context += convertHtmlToText(fileText);
-                context += '\n\n-----\n\n';
+                context += '\n\n';
               }
 
               if(contextType.contextType === 'File and Children Summary') {
@@ -959,7 +955,7 @@ export const usePromptStore = defineStore('prompts', {
                       const childText = child.synopsis ?? '';
 
                       if(childText && childText.length > 0) {
-                        context += 'CHILD FILE SUMMARY ' + fileStore.getFileNameWithPath(child) + ':\n';
+                        context += '### CHILD FILE SUMMARY ' + fileStore.getFileNameAndFileNameWithPath(child) + ':\n';
                         context += convertHtmlToText(childText);
                         context += '\n\n-----\n\n';
                       }
@@ -976,16 +972,16 @@ export const usePromptStore = defineStore('prompts', {
             const contextValue = fileStore.getContextSummary(contextType.parameters);
 
             if(contextValue && contextValue.length > 0) {
-              context += 'CONTEXT SUMMARIES ' + contextType.parameters + ':\n';
-              context += convertHtmlToText(contextValue);
-              context += '\n\n-----\n\n';
+              context += '## CONTEXT "SUMMARIES"' + contextType.parameters + ':\n';
+              context += contextValue;
+              context += '\n\n';
             }
           } else if(contextType.contextType === "Variable") {
             const variable = fileStore.variables.find(v => v.title === contextType.parameters);
             const variableText = variable?.value ?? '';
 
             if(variableText && variableText.length > 0) {
-              context += variable.title + ': ' + convertHtmlToText(variableText);
+              context += '## VARIABLE ' + variable.title + ': ' + convertHtmlToText(variableText);
               context += '\n\n-----\n\n';
             }
           } else {
@@ -999,7 +995,7 @@ export const usePromptStore = defineStore('prompts', {
           if(context.trim() === '') {
             context = 'No context provided';
           }
-          replace('$context', () => '-----\nContext:\n' + context);
+          replace('$context', () => '\n# Context: \n' + context + ' \n\n');
         } else {
           replace('$context', () => context);
         }
