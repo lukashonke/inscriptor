@@ -1570,7 +1570,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           metadata.push(`Context: ${currentFile.settings.contextType.label}`);
         }
 
-        if (currentFile.state && currentFile.state.trim()) {
+        if (currentFile.state && currentFile.state.trim && currentFile.state.trim()) {
           metadata.push(`State: ${currentFile.state}`);
         }
 
@@ -1683,7 +1683,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
       }
 
       // Add state if set
-      if (file.state && file.state.trim()) {
+      if (file.state && file.state.trim && file.state.trim()) {
         metadata.push(`State: ${file.state}`);
       }
 
