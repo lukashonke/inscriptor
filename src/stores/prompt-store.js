@@ -62,10 +62,12 @@ export const usePromptStore = defineStore('prompts', {
 
     analysisEnabled: false,
     selectionAnalysisRunning: false,
+    brainstormPromptRunning: false,
     analysisPromptsSettings: {
       prompts: []
     },
     selectionPromptResults: [],
+    brainstormPromptResults: [],
 
     lastPrompts: [],
 
@@ -116,12 +118,17 @@ export const usePromptStore = defineStore('prompts', {
 
     diffsShowRemoved: false,
     lastPromptUpdate: Date.now(),
+
+    brainstormingPrompt: null,
+    brainstormPromptContext: []
+
   }),
   getters: {
     selectionPrompts: (state) => state.prompts.filter(p => (p.promptType === "selection" || p.promptType === "general") && p.enabled),
     insertPrompts: (state) => state.prompts.filter(p => (p.promptType === "insert" || p.promptType === "general") && p.enabled),
     selectionAnalysisPrompts: (state) => state.prompts.filter(p => p.promptType === "selectionAnalysis" && p.enabled).filter(p => true),
     selectionAnalysisAvailablePrompts: (state) => state.prompts.filter(p => (p.promptType === "selectionAnalysis" || p.promptType === "selection" || p.promptType === "general") && p.enabled).filter(p => true),
+    brainstormingPrompts: (state) => state.prompts.filter(p => p.promptStyle === "brainstorm" && p.enabled),
   },
   actions: {
     initialise() {
@@ -273,6 +280,40 @@ export const usePromptStore = defineStore('prompts', {
 
       return true;
     },
+    async promptBrainstormPrompt() {
+      if(!this.brainstormingPrompt) {
+        return;
+      }
+
+      if(this.brainstormPromptRunning) {
+        return;
+      }
+
+      const prompt = this.getPromptById(this.brainstormingPrompt.value);
+
+      this.brainstormPromptRunning = true;
+
+      const layoutStore = useLayoutStore();
+      layoutStore.notifyNewBrainstorming();
+
+      try {
+        this.clearBrainstormPromptResults();
+
+        const request = {
+          prompt: prompt,
+          text: '',
+          allowParallel: false,
+          forceBypassMoreParameters: true,
+          forceShowContextSelection: false,
+          promptSource: 'brainstorm',
+          contextTypes: transformContextIdsToContextObjects(this.brainstormPromptContext ?? []),
+        };
+
+        await executePromptClick2(request);
+      } finally {
+        this.brainstormPromptRunning = false;
+      }
+    },
     async promptSelectionAnalysisPrompts(force, onlyPromptsToRunOnSelect = false) {
       if(getEditorSelection()?.empty ?? true) {
         return;
@@ -324,6 +365,9 @@ export const usePromptStore = defineStore('prompts', {
     },
     clearSelectionAnalysisPrompts() {
       this.selectionPromptResults = [];
+    },
+    clearBrainstormPromptResults() {
+      this.brainstormPromptResults = [];
     },
     canPromptRequest(request) {
       const model = this.getModelFromRequest(request);
@@ -2150,6 +2194,9 @@ export const usePromptStore = defineStore('prompts', {
       if(request.prompt.promptType === 'selectionAnalysis' || request.promptSource === 'selectionAnalysis') {
         this.selectionPromptResults.push(pr);
         pr = this.selectionPromptResults[this.selectionPromptResults.length - 1];
+      } else if (request.promptSource === 'brainstorm') {
+        this.brainstormPromptResults.push(pr);
+        pr = this.brainstormPromptResults[this.brainstormPromptResults.length - 1];
       } else if (request.prompt.promptType === 'chat') {
         let results = this.getTabData(chatTabId).promptResultsHistory[this.getTabData(chatTabId).promptResultsIndex];
 
@@ -2983,6 +3030,8 @@ export const usePromptStore = defineStore('prompts', {
         defaultCustomPromptInstructions: this.defaultCustomPromptInstructions,
         toolApprovalSettings: this.toolApprovalSettings,
         diffsShowRemoved: this.diffsShowRemoved,
+        brainstormingPrompt: this.brainstormingPrompt,
+        brainstormPromptContext: this.brainstormPromptContext,
       }
 
       return aiSettings;
@@ -3022,6 +3071,9 @@ export const usePromptStore = defineStore('prompts', {
       this.analysisPromptsSettings = {
         prompts: []
       };
+
+      this.brainstormingPrompt = null;
+      this.brainstormPromptContext = [];
 
       this.promptAgents = [];
 
@@ -3279,6 +3331,14 @@ export const usePromptStore = defineStore('prompts', {
         for(const template of aiSettings.fileTemplates) {
           this.fileTemplates.push(template);
         }
+      }
+
+      if(aiSettings.brainstormingPrompt) {
+        this.brainstormingPrompt = aiSettings.brainstormingPrompt;
+      }
+
+      if(aiSettings.brainstormPromptContext) {
+        this.brainstormPromptContext = [...aiSettings.brainstormPromptContext];
       }
 
       if(aiSettings.analysisPromptsSettings) {

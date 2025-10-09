@@ -125,6 +125,7 @@
             </template>
           </q-btn-toggle>
         </div>
+
         <q-card flat v-if="promptStore.analysisEnabled" class="bg-transparent">
 
           <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length === 0">
@@ -230,7 +231,6 @@
                   </transition>
                 </div>
 
-
               </div>
             </div>
             <q-btn outline @click="promptStore.promptSelectionAnalysisPrompts" icon="mdi-sync" class="q-mt-md" color="green" size="sm"/>
@@ -245,6 +245,45 @@
             <div>You have not selected any analysis prompts, so no analysis will be performed.</div>
           </q-card-section>
 
+        </q-card>
+        <q-card flat v-if="layoutStore.currentRightMenuView === 'brainstorm'" class="bg-transparent">
+          <q-card-section>
+            <PromptPicker v-model="promptStore.brainstormingPrompt" :prompts="availableBrainstormingPrompts" placeholder="Set prompt for Brainstorming"></PromptPicker>
+            <div v-if="promptStore.brainstormingPrompt" class="row justify-between q-mt-sm">
+              <q-btn @click="promptStore.promptBrainstormPrompt" icon="mdi-head-snowflake-outline" color="accent" label="Brainstorm" no-caps :loading="promptStore.brainstormPromptRunning" style="min-width: 220px;"/>
+              {{promptStore.getPromptById(promptStore.brainstormingPrompt.value).parameters}}
+              <q-btn flat no-caps icon="mdi-book-outline" dense label="Context">
+                <q-menu max-width="800px">
+                  <SimplePromptContextSelector v-model="promptStore.brainstormPromptContext" title="Set Brainstorming Context" icon="mdi-book-outline" output-context-as-objects/>
+                </q-menu>
+                <q-tooltip :delay="500">
+                  Set Context for this prompt
+                </q-tooltip>
+              </q-btn>
+            </div>
+            <div >
+              <q-linear-progress indeterminate v-if="promptStore.brainstormPromptRunning" class="q-mt-xs"/>
+            </div>
+          </q-card-section>
+
+          <q-card-section v-if="brainstormPromptResults.length > 0" class="q-pt-sm">
+            <div class="q-gutter-y-sm">
+              <div v-for="(promptResult, index) in brainstormPromptResults" :key="index">
+
+                <div>
+                  <transition
+                    appear
+                    enter-active-class="animated fadeInDown slower"
+                    leave-active-class="animated fadeOut delay-1s"
+                  >
+                    <PromptResult :promptResult="promptResult" is-selection-analysis disable-followup-actions/>
+                  </transition>
+                </div>
+
+              </div>
+            </div>
+            <q-btn outline @click="promptStore.promptBrainstormPrompt" icon="mdi-sync" class="q-mt-md" color="green" size="sm"/>
+          </q-card-section>
         </q-card>
         <PromptsTab v-if="layoutStore.currentRightMenuView === 'prompts'"/>
         <AgentChatTab v-if="layoutStore.currentRightMenuView === 'agentChat'"/>
@@ -270,7 +309,7 @@
   import {useCurrentUser} from "vuefire";
   import {uint8ArrayToBase64} from "src/common/utils/textUtils";
   import {useElementHover} from "@vueuse/core";
-  import {chatTabId, promptTabId, agentChatTabId} from 'src/common/resources/tabs';
+  import {chatTabId, promptTabId, agentChatTabId, brainstormTabId} from 'src/common/resources/tabs';
   import AgentChatTab from 'components/RightMenu/AgentChatTab.vue';
   import {getSelectedText} from 'src/common/utils/editorUtils';
   import {useAiAgentStore} from 'stores/aiagent-store';
@@ -300,6 +339,7 @@
 
   const views = [
     {label: 'Prompts', value: 'prompts', icon: 'mdi-creation-outline', slot: 'prompts' },
+    {label: 'Brainstorm', value: 'brainstorm', icon: 'mdi-head-snowflake-outline', slot: 'brainstorm' },
     {label: 'Chat', value: 'agentChat', icon: 'mdi-robot', slot: 'chat' },
     {label: 'Analysis', value: 'analysis', icon: 'mdi-chart-timeline-variant-shimmer', slot: 'analysis' },
   ];
@@ -310,6 +350,9 @@
       currentTab.value = promptTabId;
     } else if(newValue === 'analysis') {
       promptStore.analysisEnabled = true;
+    } else if(newValue === 'brainstorm') {
+      promptStore.analysisEnabled = false;
+      currentTab.value = brainstormTabId;
     } else if(newValue === 'chat') {
       promptStore.analysisEnabled = false;
       currentTab.value = chatTabId;
@@ -332,6 +375,17 @@
   });
 
   const availableAnalysisPrompts = computed(() => [...promptStore.selectionAnalysisPrompts, ...promptStore.selectionPrompts]
+    .map(p => {
+      const promptModel = promptStore.getModel(p.modelId);
+
+      return {
+        label: p.title + ' (' + promptModel?.name + ')',
+        value: p.id,
+      };
+    }).sort((a, b) => a.label.localeCompare(b.label))
+  );
+
+  const availableBrainstormingPrompts = computed(() => [...promptStore.brainstormingPrompts]
     .map(p => {
       const promptModel = promptStore.getModel(p.modelId);
 
@@ -394,6 +448,10 @@
         fileStore.setDirty(file.value);
       }
     }
+  });
+
+  const brainstormPromptResults = computed(() => {
+    return promptStore.brainstormPromptResults ?? [];
   });
 
   const selectionPromptResults = computed(() => {
