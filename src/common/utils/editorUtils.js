@@ -80,7 +80,7 @@ export function getSelectedHtml() {
 }
 
 export function getSelectedMarkdown() {
-  const html = getSelectedHtml();
+  const html = getSelectedHtml() || '';
   return htmlToMarkdown(html);
 }
 

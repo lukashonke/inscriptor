@@ -280,7 +280,7 @@ export const usePromptStore = defineStore('prompts', {
 
       return true;
     },
-    async promptBrainstormPrompt() {
+    async promptBrainstormPrompt(parametersValue = []) {
       if(!this.brainstormingPrompt) {
         return;
       }
@@ -299,14 +299,17 @@ export const usePromptStore = defineStore('prompts', {
       try {
         this.clearBrainstormPromptResults();
 
+        const text = getSelectedMarkdown() || '';
+
         const request = {
           prompt: prompt,
-          text: '',
+          text: text,
           allowParallel: false,
           forceBypassMoreParameters: true,
           forceShowContextSelection: false,
           promptSource: 'brainstorm',
           contextTypes: transformContextIdsToContextObjects(this.brainstormPromptContext ?? []),
+          parametersValue: parametersValue,
         };
 
         await executePromptClick2(request);
@@ -2235,9 +2238,24 @@ export const usePromptStore = defineStore('prompts', {
     removePromptResult(pr) {
       this.stopPrompt(pr);
 
-      const results = this.getTabData(getPromptTabId(pr.prompt.promptType)).promptResultsHistory[this.getTabData(getPromptTabId(pr.prompt.promptType)).promptResultsIndex];
-      results.splice(results.indexOf(pr), 1);
+      // Try to remove from brainstorm results
+      const brainstormIndex = this.brainstormPromptResults.indexOf(pr);
+      if (brainstormIndex !== -1) {
+        this.brainstormPromptResults.splice(brainstormIndex, 1);
+      }
 
+      // Try to remove from selection analysis results
+      const selectionIndex = this.selectionPromptResults.indexOf(pr);
+      if (selectionIndex !== -1) {
+        this.selectionPromptResults.splice(selectionIndex, 1);
+      }
+
+      // Try to remove from regular tab history
+      const results = this.getTabData(getPromptTabId(pr.prompt.promptType)).promptResultsHistory[this.getTabData(getPromptTabId(pr.prompt.promptType)).promptResultsIndex];
+      const index = results.indexOf(pr);
+      if (index !== -1) {
+        results.splice(index, 1);
+      }
     },
     setCurrentTabResultsIndex(tabId, index) {
       this.getTabData(tabId).promptResultsIndex = index;
