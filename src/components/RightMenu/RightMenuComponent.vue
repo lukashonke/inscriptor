@@ -120,11 +120,20 @@
               <q-badge floating color="accent" :class="layoutStore.newChatClass" v-if="aiAgentStore.agentChats.chats?.length > 1">{{aiAgentStore.agentChats.chats?.length}}</q-badge>
             </template>
 
+            <template v-slot:brainstorm>
+              <q-badge floating color="accent" :class="layoutStore.newBrainstormClass" v-if="brainstormPromptResults?.length > 0">{{brainstormPromptResults?.length}}</q-badge>
+            </template>
+
             <template v-slot:analysis>
               <q-badge floating color="accent" :class="layoutStore.newAnalysisClass" v-if="selectionPromptResults?.length > 0">{{selectionPromptResults?.length}}</q-badge>
             </template>
+
+            <template v-slot:suggest>
+              <q-badge floating color="accent" :class="layoutStore.newSuggestClass" v-if="suggestPromptResults?.length > 0">{{suggestPromptResults?.length}}</q-badge>
+            </template>
           </q-btn-toggle>
         </div>
+
         <q-card flat v-if="promptStore.analysisEnabled" class="bg-transparent">
 
           <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length === 0">
@@ -230,7 +239,6 @@
                   </transition>
                 </div>
 
-
               </div>
             </div>
             <q-btn outline @click="promptStore.promptSelectionAnalysisPrompts" icon="mdi-sync" class="q-mt-md" color="green" size="sm"/>
@@ -245,6 +253,147 @@
             <div>You have not selected any analysis prompts, so no analysis will be performed.</div>
           </q-card-section>
 
+        </q-card>
+        <q-card flat v-if="layoutStore.currentRightMenuView === 'brainstorm'" class="bg-transparent">
+          <q-card-section v-if="promptStore.brainstormingPrompt" class="">
+            <div class="row justify-between q-gutter-x-sm items-center">
+              <div class="col-auto">
+                <q-btn @click="promptStore.promptBrainstormPrompt(brainstormParametersValue)" icon="mdi-head-snowflake-outline" color="accent" label="Brainstorm" no-caps :loading="promptStore.brainstormPromptRunning" style="min-width: 220px;"/>
+              </div>
+              <div class="col">
+                <PromptPicker v-model="promptStore.brainstormingPrompt" :prompts="availableBrainstormingPrompts" placeholder="Set prompt for Brainstorming"></PromptPicker>
+              </div>
+              <div class="col-auto">
+                <q-btn flat no-caps icon="mdi-book-outline" dense label="Context">
+                  <q-menu max-width="800px">
+                    <SimplePromptContextSelector v-model="promptStore.brainstormPromptContext" title="Set Brainstorming Context" icon="mdi-book-outline" output-context-as-objects/>
+                  </q-menu>
+                  <q-tooltip :delay="500">
+                    Set Context for this prompt
+                  </q-tooltip>
+                </q-btn>
+              </div>
+              <div class="col-auto" v-if="brainstormParametersValue.length > 0">
+                <q-btn flat no-caps dense :icon="brainstormParametersExpanded ? 'mdi-chevron-down' : 'mdi-chevron-right'" @click="brainstormParametersExpanded = !brainstormParametersExpanded">
+                  <q-badge floating v-if="brainstormParametersValue.length > 0">{{ brainstormParametersValue.length }}</q-badge>
+                  <q-tooltip :delay="500">
+                    {{ brainstormParametersExpanded ? 'Hide' : 'Show' }} parameters
+                  </q-tooltip>
+                </q-btn>
+              </div>
+            </div>
+          </q-card-section>
+          <q-card-section v-else>
+              <PromptPicker v-model="promptStore.brainstormingPrompt" :prompts="availableBrainstormingPrompts" placeholder="Select prompt for Brainstorming..."></PromptPicker>
+          </q-card-section>
+
+          <q-card-section v-if="brainstormParametersValue.length > 0 && brainstormParametersExpanded" class="q-pt-none q-gutter-y-md">
+            <div v-for="parameter in brainstormParametersValue" :key="parameter.name">
+              <template v-if="parameter.type === 'Select'">
+                <q-select dense filled v-model="parameter.value" :options="parameter.values" :label="parameter.name"></q-select>
+              </template>
+              <template v-if="parameter.type === 'Text'">
+                <p class="text-subtitle2 q-mb-none" v-if="parameter.hint?.length > 0">
+                  {{ parameter.hint }}
+                  <span v-if="parameter.required" class="text-red-4">*</span>
+                </p>
+                <div class="row">
+                  <div class="col">
+                    <CodeEditor v-model="parameter.value" :parameters="[]"/>
+                  </div>
+                  <div v-if="parameter.examples && parameter.examples.length > 0" class="col-auto q-ml-sm flex items-center">
+                    <q-btn class="text-secondary" no-caps dense icon-right="expand_more" flat label="Examples">
+                      <q-popup-proxy>
+                        <q-card style="width: 400px;">
+                          <q-card-section>
+                            <q-chip v-for="(text, index) in separateTextByComma(parameter.examples)" :key="index"
+                                    class="text-caption" :label="text" dense clickable @click="parameter.value = text" color="blue-grey-1">
+                            </q-chip>
+                          </q-card-section>
+                        </q-card>
+                      </q-popup-proxy>
+                    </q-btn>
+                  </div>
+                </div>
+              </template>
+            </div>
+          </q-card-section>
+
+          <q-card-section v-if="promptStore.brainstormingPrompt && brainstormPromptResults?.length === 0" class="text-center">
+            <div v-if="brainstormParametersValue.length > 0 && !brainstormParametersExpanded">
+              <q-btn flat label="Expand parameters" dense no-caps @click="brainstormParametersExpanded = true" />
+            </div>
+            <div>Click 'Brainstorm' to start.</div>
+          </q-card-section>
+
+          <q-card-section v-if="brainstormPromptResults.length > 0" class="q-pt-xs">
+            <div class="q-gutter-y-sm">
+              <div v-for="(promptResult, index) in brainstormPromptResults" :key="index">
+                <div>
+                  <transition
+                    appear
+                    enter-active-class="animated fadeInDown slower"
+                    leave-active-class="animated fadeOut delay-1s"
+                  >
+                    <PromptResult :promptResult="promptResult" is-selection-analysis disable-followup-actions />
+                  </transition>
+                </div>
+              </div>
+            </div>
+            <div class="row justify-between">
+              <q-btn outline @click="promptStore.promptBrainstormPrompt(brainstormParametersValue)" icon="mdi-sync" class="q-mt-md" color="green" size="sm"/>
+              <q-btn outline @click="promptStore.clearBrainstormPromptResults()" icon="mdi-close" class="q-mt-md" color="negative" size="sm"/>
+            </div>
+          </q-card-section>
+        </q-card>
+        <q-card flat v-if="layoutStore.currentRightMenuView === 'suggest'" class="bg-transparent">
+          <q-card-section v-if="promptStore.suggestingPrompt" class="">
+            <div class="row justify-between q-gutter-x-sm items-center">
+              <div class="col-auto">
+                <q-btn @click="promptStore.promptSuggestPrompt()" icon="mdi-lightbulb-on-outline" color="accent" label="Suggest" no-caps :loading="promptStore.suggestPromptRunning" style="min-width: 220px;"/>
+              </div>
+              <div class="col">
+                <PromptPicker v-model="promptStore.suggestingPrompt" :prompts="availableSuggestingPrompts" placeholder="Set prompt for Suggestions"></PromptPicker>
+              </div>
+              <div class="col-auto">
+                <q-btn flat no-caps icon="mdi-book-outline" dense label="Context">
+                  <q-menu max-width="800px">
+                    <SimplePromptContextSelector v-model="promptStore.suggestPromptContext" title="Set Suggestion Context" icon="mdi-book-outline" output-context-as-objects/>
+                  </q-menu>
+                  <q-tooltip :delay="500">
+                    Set Context for this prompt
+                  </q-tooltip>
+                </q-btn>
+              </div>
+            </div>
+          </q-card-section>
+          <q-card-section v-else>
+              <PromptPicker v-model="promptStore.suggestingPrompt" :prompts="availableSuggestingPrompts" placeholder="Select prompt for Suggestions..."></PromptPicker>
+          </q-card-section>
+
+          <q-card-section v-if="promptStore.suggestingPrompt && suggestPromptResults?.length === 0" class="text-center">
+            <div>Suggestions will auto-run when you switch to this tab.</div>
+          </q-card-section>
+
+          <q-card-section v-if="suggestPromptResults.length > 0" class="q-pt-xs">
+            <div class="q-gutter-y-sm">
+              <div v-for="(promptResult, index) in suggestPromptResults" :key="index">
+                <div>
+                  <transition
+                    appear
+                    enter-active-class="animated fadeInDown slower"
+                    leave-active-class="animated fadeOut delay-1s"
+                  >
+                    <PromptResult :promptResult="promptResult" is-selection-analysis disable-followup-actions />
+                  </transition>
+                </div>
+              </div>
+            </div>
+            <div class="row justify-between">
+              <q-btn outline @click="promptStore.promptSuggestPrompt()" icon="mdi-sync" class="q-mt-md" color="green" size="sm"/>
+              <q-btn outline @click="promptStore.clearSuggestPromptResults()" icon="mdi-close" class="q-mt-md" color="negative" size="sm"/>
+            </div>
+          </q-card-section>
         </q-card>
         <PromptsTab v-if="layoutStore.currentRightMenuView === 'prompts'"/>
         <AgentChatTab v-if="layoutStore.currentRightMenuView === 'agentChat'"/>
@@ -270,12 +419,13 @@
   import {useCurrentUser} from "vuefire";
   import {uint8ArrayToBase64} from "src/common/utils/textUtils";
   import {useElementHover} from "@vueuse/core";
-  import {chatTabId, promptTabId, agentChatTabId} from 'src/common/resources/tabs';
+  import {chatTabId, promptTabId, agentChatTabId, brainstormTabId, suggestTabId} from 'src/common/resources/tabs';
   import AgentChatTab from 'components/RightMenu/AgentChatTab.vue';
   import {getSelectedText} from 'src/common/utils/editorUtils';
   import {useAiAgentStore} from 'stores/aiagent-store';
   import SimplePromptContextSelector from "components/Common/Settings/SimplePromptContextSelector.vue";
   import PromptPicker from 'components/Common/PromptPicker.vue';
+  import CodeEditor from "components/Common/Editors/CodeEditor.vue";
 
   const promptStore = usePromptStore();
   const aiAgentStore = useAiAgentStore();
@@ -288,6 +438,12 @@
 
   const addPromptVisible = ref(false);
   const addPrompt = ref(null);
+  const brainstormParametersValue = ref([]);
+  const brainstormParametersExpanded = ref(true);
+
+  // Track last suggest generation to avoid unnecessary re-runs
+  const lastSuggestFileId = ref(null);
+  const lastSuggestFileContent = ref(null);
 
   const imageHovered = useElementHover(fileImg);
 
@@ -298,11 +454,28 @@
     }
   })
 
-  const views = [
-    {label: 'Prompts', value: 'prompts', icon: 'mdi-creation-outline', slot: 'prompts' },
-    {label: 'Chat', value: 'agentChat', icon: 'mdi-robot', slot: 'chat' },
-    {label: 'Analysis', value: 'analysis', icon: 'mdi-chart-timeline-variant-shimmer', slot: 'analysis' },
-  ];
+  const views = computed(() => {
+    const allViews = [
+      {label: 'Prompts', value: 'prompts', icon: 'mdi-creation-outline', slot: 'prompts' },
+      {label: 'Chat', value: 'agentChat', icon: 'mdi-robot', slot: 'chat' },
+      {label: 'Brainstorm', value: 'brainstorm', icon: 'mdi-head-snowflake-outline', slot: 'brainstorm' },
+      {label: 'Analysis', value: 'analysis', icon: 'mdi-chart-timeline-variant-shimmer', slot: 'analysis' },
+      {label: 'Suggest', value: 'suggest', icon: 'mdi-lightbulb-on-outline', slot: 'suggest' },
+    ];
+
+    // Filter out tabs with no available prompts
+    let filteredViews = allViews;
+
+    if (availableBrainstormingPrompts.value.length === 0) {
+      filteredViews = filteredViews.filter(v => v.value !== 'brainstorm');
+    }
+
+    if (availableSuggestingPrompts.value.length === 0) {
+      filteredViews = filteredViews.filter(v => v.value !== 'suggest');
+    }
+
+    return filteredViews;
+  });
 
   watch(() => layoutStore.currentRightMenuView, (newValue) => {
     if(newValue === 'prompts') {
@@ -310,6 +483,23 @@
       currentTab.value = promptTabId;
     } else if(newValue === 'analysis') {
       promptStore.analysisEnabled = true;
+    } else if(newValue === 'brainstorm') {
+      promptStore.analysisEnabled = false;
+      currentTab.value = brainstormTabId;
+    } else if(newValue === 'suggest') {
+      promptStore.analysisEnabled = false;
+      currentTab.value = suggestTabId;
+      // Auto-execute suggest prompt when switching to this tab
+      // Only run if file has changed since last suggest
+      if(promptStore.suggestingPrompt && !promptStore.suggestPromptRunning) {
+        const currentFileId = fileStore.selectedFile?.id;
+        const currentFileContent = fileStore.selectedFile?.content;
+
+        // Only auto-run if file has changed or this is the first run
+        if(currentFileId !== lastSuggestFileId.value || currentFileContent !== lastSuggestFileContent.value) {
+          promptStore.promptSuggestPrompt();
+        }
+      }
     } else if(newValue === 'chat') {
       promptStore.analysisEnabled = false;
       currentTab.value = chatTabId;
@@ -332,6 +522,28 @@
   });
 
   const availableAnalysisPrompts = computed(() => [...promptStore.selectionAnalysisPrompts, ...promptStore.selectionPrompts]
+    .map(p => {
+      const promptModel = promptStore.getModel(p.modelId);
+
+      return {
+        label: p.title + ' (' + promptModel?.name + ')',
+        value: p.id,
+      };
+    }).sort((a, b) => a.label.localeCompare(b.label))
+  );
+
+  const availableBrainstormingPrompts = computed(() => [...promptStore.brainstormingPrompts]
+    .map(p => {
+      const promptModel = promptStore.getModel(p.modelId);
+
+      return {
+        label: p.title + ' (' + promptModel?.name + ')',
+        value: p.id,
+      };
+    }).sort((a, b) => a.label.localeCompare(b.label))
+  );
+
+  const availableSuggestingPrompts = computed(() => [...promptStore.suggestingPrompts]
     .map(p => {
       const promptModel = promptStore.getModel(p.modelId);
 
@@ -394,6 +606,14 @@
         fileStore.setDirty(file.value);
       }
     }
+  });
+
+  const brainstormPromptResults = computed(() => {
+    return promptStore.brainstormPromptResults ?? [];
+  });
+
+  const suggestPromptResults = computed(() => {
+    return promptStore.suggestPromptResults ?? [];
   });
 
   const selectionPromptResults = computed(() => {
@@ -519,6 +739,43 @@
 
     return "";
   }
+
+  function separateTextByComma(text) {
+    return text.split(',')?.map(t => t.trim()) ?? [];
+  }
+
+  // Watch for brainstorming prompt changes and initialize parameters
+  watch(() => promptStore.brainstormingPrompt, (newPrompt) => {
+    brainstormParametersValue.value = [];
+    if (newPrompt?.value) {
+      const prompt = promptStore.getPromptById(newPrompt.value);
+      if (prompt?.parameters) {
+        for (const param of prompt.parameters) {
+          brainstormParametersValue.value.push({
+            name: param.name,
+            type: param.type,
+            value: param.default,
+            hint: param.hint,
+            required: param.required,
+            prefixWith: param.prefixWith,
+            suffixWith: param.suffixWith,
+            examples: param.examples,
+            values: [...(param.values || [])],
+            prompt: prompt,
+          });
+        }
+      }
+    }
+  });
+
+  // Track when suggest prompt finishes to save file state
+  watch(() => promptStore.suggestPromptRunning, (isRunning, wasRunning) => {
+    // When suggest finishes running (was true, now false)
+    if(wasRunning && !isRunning && fileStore.selectedFile) {
+      lastSuggestFileId.value = fileStore.selectedFile.id;
+      lastSuggestFileContent.value = fileStore.selectedFile.content;
+    }
+  });
 
 </script>
 

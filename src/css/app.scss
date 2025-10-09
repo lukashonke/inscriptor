@@ -114,15 +114,14 @@ body {
   user-select: none;
 }
 
-.prompt-brainstorm-idea {
-  p {
-    margin-bottom: 0 !important;
-  }
+.prompt-brainstorm-idea p {
+  padding-bottom: 0px !important;
+  margin-bottom: 0px !important;
 }
 
 .prompt-brainstorm-actions {
   visibility: hidden;
-  max-height: 40px;
+  max-height: 25px;
   overflow: hidden;
   opacity: 0;
   transition: all 0.3s ease;
@@ -130,7 +129,7 @@ body {
 
 *:hover > .prompt-brainstorm-actions {
   visibility: visible;
-  max-height: 40px; /* Adjust based on your content height */
+  height: 25px; /* Adjust based on your content height */
   opacity: 1;
 }
 
@@ -244,6 +243,12 @@ textarea::-webkit-scrollbar-button {
 .no-p-margin {
   p:not(li > p):not(ul p):not(ol p) {
     margin: 0 0 8px 0 !important;
+  }
+}
+
+.no-p-margin-0 {
+  p:not(li > p):not(ul p):not(ol p) {
+    margin: 0 0 0px 0 !important;
   }
 }
 

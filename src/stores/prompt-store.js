@@ -62,10 +62,14 @@ export const usePromptStore = defineStore('prompts', {
 
     analysisEnabled: false,
     selectionAnalysisRunning: false,
+    brainstormPromptRunning: false,
+    suggestPromptRunning: false,
     analysisPromptsSettings: {
       prompts: []
     },
     selectionPromptResults: [],
+    brainstormPromptResults: [],
+    suggestPromptResults: [],
 
     lastPrompts: [],
 
@@ -116,12 +120,21 @@ export const usePromptStore = defineStore('prompts', {
 
     diffsShowRemoved: false,
     lastPromptUpdate: Date.now(),
+
+    brainstormingPrompt: null,
+    brainstormPromptContext: [],
+
+    suggestingPrompt: null,
+    suggestPromptContext: []
+
   }),
   getters: {
     selectionPrompts: (state) => state.prompts.filter(p => (p.promptType === "selection" || p.promptType === "general") && p.enabled),
     insertPrompts: (state) => state.prompts.filter(p => (p.promptType === "insert" || p.promptType === "general") && p.enabled),
     selectionAnalysisPrompts: (state) => state.prompts.filter(p => p.promptType === "selectionAnalysis" && p.enabled).filter(p => true),
     selectionAnalysisAvailablePrompts: (state) => state.prompts.filter(p => (p.promptType === "selectionAnalysis" || p.promptType === "selection" || p.promptType === "general") && p.enabled).filter(p => true),
+    brainstormingPrompts: (state) => state.prompts.filter(p => p.promptStyle === "brainstorm" && p.enabled),
+    suggestingPrompts: (state) => state.prompts.filter(p => p.promptStyle === "brainstorm" && p.enabled),
   },
   actions: {
     initialise() {
@@ -273,6 +286,43 @@ export const usePromptStore = defineStore('prompts', {
 
       return true;
     },
+    async promptBrainstormPrompt(parametersValue = []) {
+      if(!this.brainstormingPrompt) {
+        return;
+      }
+
+      if(this.brainstormPromptRunning) {
+        return;
+      }
+
+      const prompt = this.getPromptById(this.brainstormingPrompt.value);
+
+      this.brainstormPromptRunning = true;
+
+      const layoutStore = useLayoutStore();
+      layoutStore.notifyNewBrainstorming();
+
+      try {
+        this.clearBrainstormPromptResults();
+
+        const text = getSelectedMarkdown() || '';
+
+        const request = {
+          prompt: prompt,
+          text: text,
+          allowParallel: false,
+          forceBypassMoreParameters: true,
+          forceShowContextSelection: false,
+          promptSource: 'brainstorm',
+          contextTypes: transformContextIdsToContextObjects(this.brainstormPromptContext ?? []),
+          parametersValue: parametersValue,
+        };
+
+        await executePromptClick2(request);
+      } finally {
+        this.brainstormPromptRunning = false;
+      }
+    },
     async promptSelectionAnalysisPrompts(force, onlyPromptsToRunOnSelect = false) {
       if(getEditorSelection()?.empty ?? true) {
         return;
@@ -324,6 +374,49 @@ export const usePromptStore = defineStore('prompts', {
     },
     clearSelectionAnalysisPrompts() {
       this.selectionPromptResults = [];
+    },
+    clearBrainstormPromptResults() {
+      this.brainstormPromptResults = [];
+    },
+    async promptSuggestPrompt() {
+      if(!this.suggestingPrompt) {
+        return;
+      }
+
+      if(this.suggestPromptRunning) {
+        return;
+      }
+
+      const prompt = this.getPromptById(this.suggestingPrompt.value);
+
+      this.suggestPromptRunning = true;
+
+      const layoutStore = useLayoutStore();
+      layoutStore.notifyNewSuggest();
+
+      try {
+        this.clearSuggestPromptResults();
+
+        const text = getAllMarkdown() || '';
+
+        const request = {
+          prompt: prompt,
+          text: text,
+          allowParallel: false,
+          forceBypassMoreParameters: true,
+          forceShowContextSelection: false,
+          promptSource: 'suggest',
+          contextTypes: transformContextIdsToContextObjects(this.suggestPromptContext ?? []),
+          parametersValue: [],
+        };
+
+        await executePromptClick2(request);
+      } finally {
+        this.suggestPromptRunning = false;
+      }
+    },
+    clearSuggestPromptResults() {
+      this.suggestPromptResults = [];
     },
     canPromptRequest(request) {
       const model = this.getModelFromRequest(request);
@@ -2150,6 +2243,12 @@ export const usePromptStore = defineStore('prompts', {
       if(request.prompt.promptType === 'selectionAnalysis' || request.promptSource === 'selectionAnalysis') {
         this.selectionPromptResults.push(pr);
         pr = this.selectionPromptResults[this.selectionPromptResults.length - 1];
+      } else if (request.promptSource === 'brainstorm') {
+        this.brainstormPromptResults.push(pr);
+        pr = this.brainstormPromptResults[this.brainstormPromptResults.length - 1];
+      } else if (request.promptSource === 'suggest') {
+        this.suggestPromptResults.push(pr);
+        pr = this.suggestPromptResults[this.suggestPromptResults.length - 1];
       } else if (request.prompt.promptType === 'chat') {
         let results = this.getTabData(chatTabId).promptResultsHistory[this.getTabData(chatTabId).promptResultsIndex];
 
@@ -2188,9 +2287,30 @@ export const usePromptStore = defineStore('prompts', {
     removePromptResult(pr) {
       this.stopPrompt(pr);
 
-      const results = this.getTabData(getPromptTabId(pr.prompt.promptType)).promptResultsHistory[this.getTabData(getPromptTabId(pr.prompt.promptType)).promptResultsIndex];
-      results.splice(results.indexOf(pr), 1);
+      // Try to remove from brainstorm results
+      const brainstormIndex = this.brainstormPromptResults.indexOf(pr);
+      if (brainstormIndex !== -1) {
+        this.brainstormPromptResults.splice(brainstormIndex, 1);
+      }
 
+      // Try to remove from suggest results
+      const suggestIndex = this.suggestPromptResults.indexOf(pr);
+      if (suggestIndex !== -1) {
+        this.suggestPromptResults.splice(suggestIndex, 1);
+      }
+
+      // Try to remove from selection analysis results
+      const selectionIndex = this.selectionPromptResults.indexOf(pr);
+      if (selectionIndex !== -1) {
+        this.selectionPromptResults.splice(selectionIndex, 1);
+      }
+
+      // Try to remove from regular tab history
+      const results = this.getTabData(getPromptTabId(pr.prompt.promptType)).promptResultsHistory[this.getTabData(getPromptTabId(pr.prompt.promptType)).promptResultsIndex];
+      const index = results.indexOf(pr);
+      if (index !== -1) {
+        results.splice(index, 1);
+      }
     },
     setCurrentTabResultsIndex(tabId, index) {
       this.getTabData(tabId).promptResultsIndex = index;
@@ -2983,6 +3103,10 @@ export const usePromptStore = defineStore('prompts', {
         defaultCustomPromptInstructions: this.defaultCustomPromptInstructions,
         toolApprovalSettings: this.toolApprovalSettings,
         diffsShowRemoved: this.diffsShowRemoved,
+        brainstormingPrompt: this.brainstormingPrompt,
+        brainstormPromptContext: this.brainstormPromptContext,
+        suggestingPrompt: this.suggestingPrompt,
+        suggestPromptContext: this.suggestPromptContext,
       }
 
       return aiSettings;
@@ -3022,6 +3146,12 @@ export const usePromptStore = defineStore('prompts', {
       this.analysisPromptsSettings = {
         prompts: []
       };
+
+      this.brainstormingPrompt = null;
+      this.brainstormPromptContext = [];
+
+      this.suggestingPrompt = null;
+      this.suggestPromptContext = [];
 
       this.promptAgents = [];
 
@@ -3279,6 +3409,22 @@ export const usePromptStore = defineStore('prompts', {
         for(const template of aiSettings.fileTemplates) {
           this.fileTemplates.push(template);
         }
+      }
+
+      if(aiSettings.brainstormingPrompt) {
+        this.brainstormingPrompt = aiSettings.brainstormingPrompt;
+      }
+
+      if(aiSettings.brainstormPromptContext) {
+        this.brainstormPromptContext = [...aiSettings.brainstormPromptContext];
+      }
+
+      if(aiSettings.suggestingPrompt) {
+        this.suggestingPrompt = aiSettings.suggestingPrompt;
+      }
+
+      if(aiSettings.suggestPromptContext) {
+        this.suggestPromptContext = [...aiSettings.suggestPromptContext];
       }
 
       if(aiSettings.analysisPromptsSettings) {

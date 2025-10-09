@@ -91,7 +91,8 @@ const toolFriendlyNames = {
   'search': 'Search Project Files',
   'setFileSummary': 'Set File Summary',
   'getAllContextTypes': 'Get Available Context Types',
-  'createFile': 'Create New File'
+  'createFile': 'Create New File',
+  'modifyParagraph': 'Modify Paragraph',
 };
 
 const toolName = computed(() => {

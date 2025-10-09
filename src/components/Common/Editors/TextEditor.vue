@@ -257,7 +257,66 @@
       </div>
 
       <div class="col-auto">
+        <q-btn size="11px" dense flat icon="mdi-unfold-more-horizontal"  @click="!editor.isActive('details') ? editor.chain().focus().setDetails().run() : editor.chain().focus().unsetDetails().run()" :class="{ 'text-grey-5': !editor.isActive('details'), 'text-primary': editor.isActive('details') }">
+          <q-tooltip :delay="500">
+            Make collapsible
+          </q-tooltip>
+        </q-btn>
+      </div>
+
+
+      <div class="col-auto">
         <q-btn size="11px" dense flat icon="code"  @click="editor.chain().focus().toggleCodeBlock().run()" :class="{ 'text-grey-5': !editor.isActive('codeBlock'), 'text-primary': editor.isActive('codeBlock') }"/>
+      </div>
+
+      <div class="col-auto">
+        <q-btn size="11px" dense flat icon="mdi-image" class="text-grey-5">
+          <q-popup-proxy v-model="imageUploadPopupOpen" >
+            <q-card style="min-width: 400px;">
+              <q-card-section>
+                <div class="text-subtitle2 q-mb-md">Insert Image</div>
+
+                <div class="q-gutter-y-md">
+                  <q-btn
+                    flat
+                    no-caps
+                    color="primary"
+                    icon="mdi-image-outline"
+                    label="Upload from File"
+                    class="full-width"
+                    @click="handleUploadImageFromFile"
+                    :loading="uploadingImage"
+                  />
+
+                  <q-separator />
+
+                  <div>
+                    <q-input
+                      v-model="imageUrlInput"
+                      label="Enter URL to image..."
+                      dense
+                      outlined
+                      placeholder="https://example.com/image.jpg"
+                      @keyup.enter="handleUploadImageFromUrl"
+                    >
+                      <template v-slot:append>
+                        <q-btn
+                          flat
+                          dense
+                          icon="mdi-upload"
+                          color="primary"
+                          @click="handleUploadImageFromUrl"
+                          :loading="uploadingImage"
+                          :disable="!imageUrlInput || imageUrlInput.trim().length === 0"
+                        />
+                      </template>
+                    </q-input>
+                  </div>
+                </div>
+              </q-card-section>
+            </q-card>
+          </q-popup-proxy>
+        </q-btn>
       </div>
 
       <q-separator vertical class="q-ml-sm" />
@@ -515,6 +574,9 @@ import {useAiAgentStore} from "stores/aiagent-store";
 import AgentConfirmationWidget from 'src/components/Common/AgentConfirmationWidget.vue';
 import AnimatedDots from 'src/components/Common/AnimatedDots.vue';
 import {UniqueID} from '@tiptap/extension-unique-id';
+import {uploadImageFromFile, uploadImageFromUrl} from 'src/common/helpers/imageHelper';
+import {useCurrentUser} from 'vuefire';
+import { Details, DetailsContent, DetailsSummary } from '@tiptap/extension-details'
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
@@ -544,6 +606,10 @@ const quickSelectionPromptShown = ref(false);
 const aiBubbleMenu = ref(true);
 
 const autoCompleteEnabled = ref(true);
+
+const imageUploadPopupOpen = ref(false);
+const imageUrlInput = ref('');
+const uploadingImage = ref(false);
 
 function toggleAiBubbleMenu() {
   aiBubbleMenu.value = !aiBubbleMenu.value;
@@ -820,6 +886,14 @@ const editor = useEditor({
     Underline,
     Italic,
     Bold,
+    Details.configure({
+      persist: true,
+      HTMLAttributes: {
+        class: 'details',
+      },
+    }),
+    DetailsContent,
+    DetailsSummary,
     HorizontalRule,
     UniqueID.configure({
       types: ['heading', 'paragraph'],
@@ -1436,6 +1510,55 @@ function stopAgentProcessing() {
     aiAgentStore.stopAgentProcessing();
   } catch (error) {
     console.error('Failed to stop agent processing:', error);
+  }
+}
+
+async function handleUploadImageFromFile() {
+  const user = useCurrentUser();
+  if (!user.value) {
+    console.error('No user logged in');
+    return;
+  }
+
+  try {
+    uploadingImage.value = true;
+    const imageUrl = await uploadImageFromFile(user.value);
+
+    if (imageUrl) {
+      editor.value.chain().focus().setImage({ src: imageUrl }).run();
+      imageUploadPopupOpen.value = false;
+    }
+  } catch (error) {
+    console.error('Failed to upload image:', error);
+  } finally {
+    uploadingImage.value = false;
+  }
+}
+
+async function handleUploadImageFromUrl() {
+  const user = useCurrentUser();
+  if (!user.value) {
+    console.error('No user logged in');
+    return;
+  }
+
+  if (!imageUrlInput.value || !imageUrlInput.value.trim()) {
+    return;
+  }
+
+  try {
+    uploadingImage.value = true;
+    const imageUrl = await uploadImageFromUrl(user.value, imageUrlInput.value);
+
+    if (imageUrl) {
+      editor.value.chain().focus().setImage({ src: imageUrl }).run();
+      imageUploadPopupOpen.value = false;
+      imageUrlInput.value = '';
+    }
+  } catch (error) {
+    console.error('Failed to upload image from URL:', error);
+  } finally {
+    uploadingImage.value = false;
   }
 }
 
