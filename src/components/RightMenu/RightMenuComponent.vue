@@ -279,6 +279,9 @@
               </div>
             </div>
           </q-card-section>
+          <q-card-section v-else>
+              <PromptPicker v-model="promptStore.brainstormingPrompt" :prompts="availableBrainstormingPrompts" placeholder="Select prompt for Brainstorming..."></PromptPicker>
+          </q-card-section>
 
           <q-card-section v-if="brainstormParametersValue.length > 0 && brainstormParametersExpanded" class="q-pt-none q-gutter-y-md">
             <div v-for="parameter in brainstormParametersValue" :key="parameter.name">

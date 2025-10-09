@@ -257,6 +257,15 @@
       </div>
 
       <div class="col-auto">
+        <q-btn size="11px" dense flat icon="mdi-unfold-more-horizontal"  @click="!editor.isActive('details') ? editor.chain().focus().setDetails().run() : editor.chain().focus().unsetDetails().run()" :class="{ 'text-grey-5': !editor.isActive('details'), 'text-primary': editor.isActive('details') }">
+          <q-tooltip :delay="500">
+            Make collapsible
+          </q-tooltip>
+        </q-btn>
+      </div>
+
+
+      <div class="col-auto">
         <q-btn size="11px" dense flat icon="code"  @click="editor.chain().focus().toggleCodeBlock().run()" :class="{ 'text-grey-5': !editor.isActive('codeBlock'), 'text-primary': editor.isActive('codeBlock') }"/>
       </div>
 
@@ -567,6 +576,7 @@ import AnimatedDots from 'src/components/Common/AnimatedDots.vue';
 import {UniqueID} from '@tiptap/extension-unique-id';
 import {uploadImageFromFile, uploadImageFromUrl} from 'src/common/helpers/imageHelper';
 import {useCurrentUser} from 'vuefire';
+import { Details, DetailsContent, DetailsSummary } from '@tiptap/extension-details'
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
@@ -876,6 +886,14 @@ const editor = useEditor({
     Underline,
     Italic,
     Bold,
+    Details.configure({
+      persist: true,
+      HTMLAttributes: {
+        class: 'details',
+      },
+    }),
+    DetailsContent,
+    DetailsSummary,
     HorizontalRule,
     UniqueID.configure({
       types: ['heading', 'paragraph'],
