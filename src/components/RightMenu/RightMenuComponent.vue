@@ -441,6 +441,10 @@
   const brainstormParametersValue = ref([]);
   const brainstormParametersExpanded = ref(true);
 
+  // Track last suggest generation to avoid unnecessary re-runs
+  const lastSuggestFileId = ref(null);
+  const lastSuggestFileContent = ref(null);
+
   const imageHovered = useElementHover(fileImg);
 
   const currentTab = computed({
@@ -486,8 +490,15 @@
       promptStore.analysisEnabled = false;
       currentTab.value = suggestTabId;
       // Auto-execute suggest prompt when switching to this tab
+      // Only run if file has changed since last suggest
       if(promptStore.suggestingPrompt && !promptStore.suggestPromptRunning) {
-        promptStore.promptSuggestPrompt();
+        const currentFileId = fileStore.selectedFile?.id;
+        const currentFileContent = fileStore.selectedFile?.content;
+
+        // Only auto-run if file has changed or this is the first run
+        if(currentFileId !== lastSuggestFileId.value || currentFileContent !== lastSuggestFileContent.value) {
+          promptStore.promptSuggestPrompt();
+        }
       }
     } else if(newValue === 'chat') {
       promptStore.analysisEnabled = false;
@@ -754,6 +765,15 @@
           });
         }
       }
+    }
+  });
+
+  // Track when suggest prompt finishes to save file state
+  watch(() => promptStore.suggestPromptRunning, (isRunning, wasRunning) => {
+    // When suggest finishes running (was true, now false)
+    if(wasRunning && !isRunning && fileStore.selectedFile) {
+      lastSuggestFileId.value = fileStore.selectedFile.id;
+      lastSuggestFileContent.value = fileStore.selectedFile.content;
     }
   });
 
