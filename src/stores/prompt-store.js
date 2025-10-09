@@ -63,11 +63,13 @@ export const usePromptStore = defineStore('prompts', {
     analysisEnabled: false,
     selectionAnalysisRunning: false,
     brainstormPromptRunning: false,
+    suggestPromptRunning: false,
     analysisPromptsSettings: {
       prompts: []
     },
     selectionPromptResults: [],
     brainstormPromptResults: [],
+    suggestPromptResults: [],
 
     lastPrompts: [],
 
@@ -120,7 +122,10 @@ export const usePromptStore = defineStore('prompts', {
     lastPromptUpdate: Date.now(),
 
     brainstormingPrompt: null,
-    brainstormPromptContext: []
+    brainstormPromptContext: [],
+
+    suggestingPrompt: null,
+    suggestPromptContext: []
 
   }),
   getters: {
@@ -129,6 +134,7 @@ export const usePromptStore = defineStore('prompts', {
     selectionAnalysisPrompts: (state) => state.prompts.filter(p => p.promptType === "selectionAnalysis" && p.enabled).filter(p => true),
     selectionAnalysisAvailablePrompts: (state) => state.prompts.filter(p => (p.promptType === "selectionAnalysis" || p.promptType === "selection" || p.promptType === "general") && p.enabled).filter(p => true),
     brainstormingPrompts: (state) => state.prompts.filter(p => p.promptStyle === "brainstorm" && p.enabled),
+    suggestingPrompts: (state) => state.prompts.filter(p => p.promptStyle === "brainstorm" && p.enabled),
   },
   actions: {
     initialise() {
@@ -371,6 +377,46 @@ export const usePromptStore = defineStore('prompts', {
     },
     clearBrainstormPromptResults() {
       this.brainstormPromptResults = [];
+    },
+    async promptSuggestPrompt() {
+      if(!this.suggestingPrompt) {
+        return;
+      }
+
+      if(this.suggestPromptRunning) {
+        return;
+      }
+
+      const prompt = this.getPromptById(this.suggestingPrompt.value);
+
+      this.suggestPromptRunning = true;
+
+      const layoutStore = useLayoutStore();
+      layoutStore.notifyNewSuggest();
+
+      try {
+        this.clearSuggestPromptResults();
+
+        const text = getAllMarkdown() || '';
+
+        const request = {
+          prompt: prompt,
+          text: text,
+          allowParallel: false,
+          forceBypassMoreParameters: true,
+          forceShowContextSelection: false,
+          promptSource: 'suggest',
+          contextTypes: transformContextIdsToContextObjects(this.suggestPromptContext ?? []),
+          parametersValue: [],
+        };
+
+        await executePromptClick2(request);
+      } finally {
+        this.suggestPromptRunning = false;
+      }
+    },
+    clearSuggestPromptResults() {
+      this.suggestPromptResults = [];
     },
     canPromptRequest(request) {
       const model = this.getModelFromRequest(request);
@@ -2200,6 +2246,9 @@ export const usePromptStore = defineStore('prompts', {
       } else if (request.promptSource === 'brainstorm') {
         this.brainstormPromptResults.push(pr);
         pr = this.brainstormPromptResults[this.brainstormPromptResults.length - 1];
+      } else if (request.promptSource === 'suggest') {
+        this.suggestPromptResults.push(pr);
+        pr = this.suggestPromptResults[this.suggestPromptResults.length - 1];
       } else if (request.prompt.promptType === 'chat') {
         let results = this.getTabData(chatTabId).promptResultsHistory[this.getTabData(chatTabId).promptResultsIndex];
 
@@ -2242,6 +2291,12 @@ export const usePromptStore = defineStore('prompts', {
       const brainstormIndex = this.brainstormPromptResults.indexOf(pr);
       if (brainstormIndex !== -1) {
         this.brainstormPromptResults.splice(brainstormIndex, 1);
+      }
+
+      // Try to remove from suggest results
+      const suggestIndex = this.suggestPromptResults.indexOf(pr);
+      if (suggestIndex !== -1) {
+        this.suggestPromptResults.splice(suggestIndex, 1);
       }
 
       // Try to remove from selection analysis results
@@ -3050,6 +3105,8 @@ export const usePromptStore = defineStore('prompts', {
         diffsShowRemoved: this.diffsShowRemoved,
         brainstormingPrompt: this.brainstormingPrompt,
         brainstormPromptContext: this.brainstormPromptContext,
+        suggestingPrompt: this.suggestingPrompt,
+        suggestPromptContext: this.suggestPromptContext,
       }
 
       return aiSettings;
@@ -3092,6 +3149,9 @@ export const usePromptStore = defineStore('prompts', {
 
       this.brainstormingPrompt = null;
       this.brainstormPromptContext = [];
+
+      this.suggestingPrompt = null;
+      this.suggestPromptContext = [];
 
       this.promptAgents = [];
 
@@ -3357,6 +3417,14 @@ export const usePromptStore = defineStore('prompts', {
 
       if(aiSettings.brainstormPromptContext) {
         this.brainstormPromptContext = [...aiSettings.brainstormPromptContext];
+      }
+
+      if(aiSettings.suggestingPrompt) {
+        this.suggestingPrompt = aiSettings.suggestingPrompt;
+      }
+
+      if(aiSettings.suggestPromptContext) {
+        this.suggestPromptContext = [...aiSettings.suggestPromptContext];
       }
 
       if(aiSettings.analysisPromptsSettings) {

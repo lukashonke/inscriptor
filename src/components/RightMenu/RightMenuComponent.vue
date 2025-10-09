@@ -127,6 +127,10 @@
             <template v-slot:analysis>
               <q-badge floating color="accent" :class="layoutStore.newAnalysisClass" v-if="selectionPromptResults?.length > 0">{{selectionPromptResults?.length}}</q-badge>
             </template>
+
+            <template v-slot:suggest>
+              <q-badge floating color="accent" :class="layoutStore.newSuggestClass" v-if="suggestPromptResults?.length > 0">{{suggestPromptResults?.length}}</q-badge>
+            </template>
           </q-btn-toggle>
         </div>
 
@@ -342,6 +346,55 @@
             </div>
           </q-card-section>
         </q-card>
+        <q-card flat v-if="layoutStore.currentRightMenuView === 'suggest'" class="bg-transparent">
+          <q-card-section v-if="promptStore.suggestingPrompt" class="">
+            <div class="row justify-between q-gutter-x-sm items-center">
+              <div class="col-auto">
+                <q-btn @click="promptStore.promptSuggestPrompt()" icon="mdi-lightbulb-on-outline" color="accent" label="Suggest" no-caps :loading="promptStore.suggestPromptRunning" style="min-width: 220px;"/>
+              </div>
+              <div class="col">
+                <PromptPicker v-model="promptStore.suggestingPrompt" :prompts="availableSuggestingPrompts" placeholder="Set prompt for Suggestions"></PromptPicker>
+              </div>
+              <div class="col-auto">
+                <q-btn flat no-caps icon="mdi-book-outline" dense label="Context">
+                  <q-menu max-width="800px">
+                    <SimplePromptContextSelector v-model="promptStore.suggestPromptContext" title="Set Suggestion Context" icon="mdi-book-outline" output-context-as-objects/>
+                  </q-menu>
+                  <q-tooltip :delay="500">
+                    Set Context for this prompt
+                  </q-tooltip>
+                </q-btn>
+              </div>
+            </div>
+          </q-card-section>
+          <q-card-section v-else>
+              <PromptPicker v-model="promptStore.suggestingPrompt" :prompts="availableSuggestingPrompts" placeholder="Select prompt for Suggestions..."></PromptPicker>
+          </q-card-section>
+
+          <q-card-section v-if="promptStore.suggestingPrompt && suggestPromptResults?.length === 0" class="text-center">
+            <div>Suggestions will auto-run when you switch to this tab.</div>
+          </q-card-section>
+
+          <q-card-section v-if="suggestPromptResults.length > 0" class="q-pt-xs">
+            <div class="q-gutter-y-sm">
+              <div v-for="(promptResult, index) in suggestPromptResults" :key="index">
+                <div>
+                  <transition
+                    appear
+                    enter-active-class="animated fadeInDown slower"
+                    leave-active-class="animated fadeOut delay-1s"
+                  >
+                    <PromptResult :promptResult="promptResult" is-selection-analysis disable-followup-actions />
+                  </transition>
+                </div>
+              </div>
+            </div>
+            <div class="row justify-between">
+              <q-btn outline @click="promptStore.promptSuggestPrompt()" icon="mdi-sync" class="q-mt-md" color="green" size="sm"/>
+              <q-btn outline @click="promptStore.clearSuggestPromptResults()" icon="mdi-close" class="q-mt-md" color="negative" size="sm"/>
+            </div>
+          </q-card-section>
+        </q-card>
         <PromptsTab v-if="layoutStore.currentRightMenuView === 'prompts'"/>
         <AgentChatTab v-if="layoutStore.currentRightMenuView === 'agentChat'"/>
       </div>
@@ -366,7 +419,7 @@
   import {useCurrentUser} from "vuefire";
   import {uint8ArrayToBase64} from "src/common/utils/textUtils";
   import {useElementHover} from "@vueuse/core";
-  import {chatTabId, promptTabId, agentChatTabId, brainstormTabId} from 'src/common/resources/tabs';
+  import {chatTabId, promptTabId, agentChatTabId, brainstormTabId, suggestTabId} from 'src/common/resources/tabs';
   import AgentChatTab from 'components/RightMenu/AgentChatTab.vue';
   import {getSelectedText} from 'src/common/utils/editorUtils';
   import {useAiAgentStore} from 'stores/aiagent-store';
@@ -397,12 +450,28 @@
     }
   })
 
-  const views = [
-    {label: 'Prompts', value: 'prompts', icon: 'mdi-creation-outline', slot: 'prompts' },
-    {label: 'Chat', value: 'agentChat', icon: 'mdi-robot', slot: 'chat' },
-    {label: 'Brainstorm', value: 'brainstorm', icon: 'mdi-head-snowflake-outline', slot: 'brainstorm' },
-    {label: 'Analysis', value: 'analysis', icon: 'mdi-chart-timeline-variant-shimmer', slot: 'analysis' },
-  ];
+  const views = computed(() => {
+    const allViews = [
+      {label: 'Prompts', value: 'prompts', icon: 'mdi-creation-outline', slot: 'prompts' },
+      {label: 'Chat', value: 'agentChat', icon: 'mdi-robot', slot: 'chat' },
+      {label: 'Brainstorm', value: 'brainstorm', icon: 'mdi-head-snowflake-outline', slot: 'brainstorm' },
+      {label: 'Analysis', value: 'analysis', icon: 'mdi-chart-timeline-variant-shimmer', slot: 'analysis' },
+      {label: 'Suggest', value: 'suggest', icon: 'mdi-lightbulb-on-outline', slot: 'suggest' },
+    ];
+
+    // Filter out tabs with no available prompts
+    let filteredViews = allViews;
+
+    if (availableBrainstormingPrompts.value.length === 0) {
+      filteredViews = filteredViews.filter(v => v.value !== 'brainstorm');
+    }
+
+    if (availableSuggestingPrompts.value.length === 0) {
+      filteredViews = filteredViews.filter(v => v.value !== 'suggest');
+    }
+
+    return filteredViews;
+  });
 
   watch(() => layoutStore.currentRightMenuView, (newValue) => {
     if(newValue === 'prompts') {
@@ -413,6 +482,13 @@
     } else if(newValue === 'brainstorm') {
       promptStore.analysisEnabled = false;
       currentTab.value = brainstormTabId;
+    } else if(newValue === 'suggest') {
+      promptStore.analysisEnabled = false;
+      currentTab.value = suggestTabId;
+      // Auto-execute suggest prompt when switching to this tab
+      if(promptStore.suggestingPrompt && !promptStore.suggestPromptRunning) {
+        promptStore.promptSuggestPrompt();
+      }
     } else if(newValue === 'chat') {
       promptStore.analysisEnabled = false;
       currentTab.value = chatTabId;
@@ -446,6 +522,17 @@
   );
 
   const availableBrainstormingPrompts = computed(() => [...promptStore.brainstormingPrompts]
+    .map(p => {
+      const promptModel = promptStore.getModel(p.modelId);
+
+      return {
+        label: p.title + ' (' + promptModel?.name + ')',
+        value: p.id,
+      };
+    }).sort((a, b) => a.label.localeCompare(b.label))
+  );
+
+  const availableSuggestingPrompts = computed(() => [...promptStore.suggestingPrompts]
     .map(p => {
       const promptModel = promptStore.getModel(p.modelId);
 
@@ -512,6 +599,10 @@
 
   const brainstormPromptResults = computed(() => {
     return promptStore.brainstormPromptResults ?? [];
+  });
+
+  const suggestPromptResults = computed(() => {
+    return promptStore.suggestPromptResults ?? [];
   });
 
   const selectionPromptResults = computed(() => {

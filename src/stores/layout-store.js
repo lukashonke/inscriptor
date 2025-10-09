@@ -117,6 +117,7 @@ export const useLayoutStore = defineStore('layout', {
     newAnalysisClass: '',
     newChatClass: '',
     newBrainstormClass: '',
+    newSuggestClass: '',
   }),
   getters: {
     getIsDragAndDropping: (state) => state.isDragAndDropping,
@@ -408,6 +409,14 @@ export const useLayoutStore = defineStore('layout', {
         this.newBrainstormClass = 'animate-pulse';
         setTimeout(() => {
           this.newBrainstormClass = '';
+        }, 500);
+      }
+    },
+    notifyNewSuggest() {
+      if(this.newSuggestClass === '') {
+        this.newSuggestClass = 'animate-pulse';
+        setTimeout(() => {
+          this.newSuggestClass = '';
         }, 500);
       }
     },

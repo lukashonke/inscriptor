@@ -44,7 +44,7 @@
 
   <transition appear enter-active-class="animated fadeIn slow" leave-active-class="animated fadeOut">
 
-    <q-card :class="[isReactionToAnotherPrompt ? 'q-ml-md' : '', isPreviousPromptResult ? 'gradient-variation-3' : 'gradient-variation-1']" class="hoverable-card idea-card  q-pa-xs no-p-margin" @click="onCardClick" :style="{ cursor: collapsed ? 'pointer' : 'default' }">
+    <q-card :class="[isReactionToAnotherPrompt ? 'q-ml-md' : '', isPreviousPromptResult ? 'gradient-variation-3' : 'gradient-variation-1']" class="hoverable-card idea-card  q-pa-xs no-p-margin-0" @click="onCardClick" :style="{ cursor: collapsed ? 'pointer' : 'default' }">
       <div class="prompt-actions" :class="type === 'inline' ? '' : 'sticky-top'">
         <div class="row no-wrap ellipsis">
           <div class="col-auto">
@@ -239,7 +239,7 @@
                     <q-btn @click="promptBrainstormValueTree.splice(index, 1)" flat size="sm" class="float-right" icon="mdi-close" color="negative" dense />
                     <span v-html="markdownToHtml(idea.text)"></span>
 
-                    <div class="full-width flex q-mb-sm prompt-brainstorm-actions">
+                    <div class="full-width flex prompt-brainstorm-actions">
                       <template v-if="!idea.loading">
                         <q-btn flat padding="xs xs" no-caps color="primary" size="sm" icon="mdi-creation-outline" label="Expand" @click="promptTreeRespond(idea, 'Create ideas that are building on this idea')" class="q-mr-md"/>
                         <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Similar" @click="promptTreeRespond(idea, 'Create ideas similar to this idea')"  class="q-mr-md"/>
