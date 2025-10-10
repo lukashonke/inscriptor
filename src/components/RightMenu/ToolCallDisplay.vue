@@ -27,27 +27,44 @@
         <q-slide-transition>
           <div v-show="expanded" class="q-mt-sm">
             <!-- Special diff rendering for editDocument -->
-            <div v-if="isEditDocument && editDocumentDiff" class="edit-document-diff q-pa-sm bg-grey-2 rounded-borders">
-              <div class="text-caption text-grey-8 q-mb-sm">
-                <q-icon name="mdi-file-compare" size="xs" class="q-mr-xs" />
-                Changes to be made:
+            <div v-if="isEditDocument && editDocumentDiff" class="edit-document-diff row">
+              <!-- Before section -->
+              <div class="diff-section q-mb-sm">
+                <div class="diff-section-header bg-red-1 q-pa-xs">
+                  <span class="text-caption text-weight-bold">Before:</span>
+                </div>
+                <div class="diff-content bg-grey-1">
+                  <div
+                    v-for="(part, index) in beforeDiffParts"
+                    :key="'before-' + index"
+                    class="diff-part"
+                    :class="{
+                      'diff-removed': part.removed
+                    }"
+                  >{{ part.value }}</div>
+                </div>
               </div>
-              <div class="diff-content">
-                <div
-                  v-for="(part, index) in editDocumentDiff"
-                  :key="index"
-                  class="diff-part"
-                  :class="{
-                    'diff-added': part.added,
-                    'diff-removed': part.removed,
-                    'diff-unchanged': !part.added && !part.removed
-                  }"
-                >{{ part.value }}</div>
+
+              <!-- After section -->
+              <div class="diff-section">
+                <div class="diff-section-header bg-green-1 q-pa-xs">
+                  <span class="text-caption text-weight-bold">After:</span>
+                </div>
+                <div class="diff-content bg-grey-1">
+                  <div
+                    v-for="(part, index) in afterDiffParts"
+                    :key="'after-' + index"
+                    class="diff-part"
+                    :class="{
+                      'diff-added': part.added
+                    }"
+                  >{{ part.value }}</div>
+                </div>
               </div>
             </div>
 
             <!-- Regular parameters for non-editDocument tools -->
-            <div v-if="hasParameters" class="tool-parameters q-pa-sm bg-grey-2 rounded-borders">
+            <div v-if="hasParameters && !editDocumentDiff" class="tool-parameters q-pa-sm bg-grey-2 rounded-borders">
               <div class="text-caption text-grey-8 q-mb-xs">Parameters:</div>
               <pre class="tool-params-pre">{{ formattedArguments }}</pre>
             </div>
@@ -446,6 +463,22 @@ const editDocumentArgs = computed(() => {
     return null;
   }
 });
+
+// Computed property for "Before" section - shows unchanged + removed parts
+const beforeDiffParts = computed(() => {
+  if (!editDocumentDiff.value) return [];
+
+  // Filter to show only unchanged and removed parts
+  return editDocumentDiff.value.filter(part => !part.added);
+});
+
+// Computed property for "After" section - shows unchanged + added parts
+const afterDiffParts = computed(() => {
+  if (!editDocumentDiff.value) return [];
+
+  // Filter to show only unchanged and added parts
+  return editDocumentDiff.value.filter(part => !part.removed);
+});
 </script>
 
 <style scoped>
@@ -499,18 +532,41 @@ body.body--dark .tool-result {
   font-size: 0.85em;
 }
 
-.diff-content {
-  background-color: white;
+.diff-section {
   border: 1px solid #e0e0e0;
   border-radius: 4px;
+  overflow: hidden;
+}
+
+body.body--dark .diff-section {
+  border-color: #444;
+}
+
+.diff-section-header {
+  padding: 4px 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+body.body--dark .diff-section-header {
+  border-bottom-color: #444;
+}
+
+body.body--dark .diff-section-header.bg-red-1 {
+  background-color: #3d1f1f !important;
+}
+
+body.body--dark .diff-section-header.bg-green-1 {
+  background-color: #1f3d1f !important;
+}
+
+.diff-content {
   padding: 8px;
-  max-height: 400px;
+  max-height: 300px;
   overflow-y: auto;
 }
 
 body.body--dark .diff-content {
-  background-color: #1a1a1a;
-  border-color: #444;
+  background-color: #1a1a1a !important;
 }
 
 .diff-part {
@@ -521,7 +577,6 @@ body.body--dark .diff-content {
 
 .diff-added {
   background-color: #c8e6c9;
-  color: #1b5e20;
   padding: 2px 0;
 }
 
@@ -532,21 +587,19 @@ body.body--dark .diff-added {
 
 .diff-removed {
   background-color: #ffcdd2;
-  color: #b71c1c;
-  text-decoration: line-through;
   padding: 2px 0;
 }
 
 body.body--dark .diff-removed {
-  background-color: #5c1a1a;
-  color: #ef9a9a;
+  background-color: #423538;
+  color: #d6a5a5 !important;
 }
 
 .diff-unchanged {
   color: inherit;
 }
 
-body.body--dark .edit-document-diff {
-  background-color: #1a1a1a;
+body.body--dark .diff-content.bg-grey-1 {
+  background-color: #2a2a2a !important;
 }
 </style>
