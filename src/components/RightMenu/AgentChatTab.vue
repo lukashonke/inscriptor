@@ -110,6 +110,8 @@
                   <ToolCallDisplay
                     :toolCall="toolCall"
                     :toolResult="getToolResult(toolCall)"
+                    :isPending="isToolPending(toolCall)"
+                    :isSelected="isToolSelected(toolCall)"
                   />
                 </div>
               </div>
@@ -660,6 +662,18 @@ function getToolDescription(tool) {
     default:
       return `Execute ${name} tool`;
   }
+}
+
+// Check if a tool call is pending approval
+function isToolPending(toolCall) {
+  if (!toolCall?.id || !aiAgentStore.pendingToolBatch) return false;
+  return aiAgentStore.pendingToolBatch.some(t => t.id === toolCall.id);
+}
+
+// Check if a tool call is selected for execution
+function isToolSelected(toolCall) {
+  if (!toolCall?.id || !aiAgentStore.selectedTools) return false;
+  return aiAgentStore.selectedTools.includes(toolCall.id);
 }
 </script>
 

@@ -1,5 +1,5 @@
 <template>
-  <div class="tool-call-display">
+  <div class="tool-call-display" :class="{ 'pending-approval': isPending }">
     <q-card flat bordered class="">
       <q-card-section class="q-pa-sm">
         <div class="row items-center q-gutter-x-sm">
@@ -12,6 +12,25 @@
           <div class="col">
             <q-space />
           </div>
+
+          <!-- Approval controls (only show when pending) -->
+          <template v-if="isPending">
+            <div class="col-auto">
+              <q-btn
+                flat
+                dense
+                round
+                :icon="isSelected ? 'mdi-close' : 'mdi-check'"
+                :color="isSelected ? 'negative' : 'positive'"
+                size="sm"
+                @click="toggleSelection()"
+              >
+                <q-tooltip v-if="isSelected">Skip execution of this tool</q-tooltip>
+                <q-tooltip v-if="!isSelected">Approve and execute this tool</q-tooltip>
+              </q-btn>
+            </div>
+          </template>
+
           <div class="col-auto">
             <q-btn
               flat
@@ -100,6 +119,7 @@ import { ref, computed } from 'vue';
 import { truncate, diffStrings, htmlToMarkdown } from 'src/common/utils/textUtils';
 import { useFileStore } from 'src/stores/file-store';
 import { usePromptStore } from 'src/stores/prompt-store';
+import { useAiAgentStore } from 'src/stores/aiagent-store';
 
 const props = defineProps({
   toolCall: {
@@ -109,11 +129,20 @@ const props = defineProps({
   toolResult: {
     type: String,
     default: null
+  },
+  isPending: {
+    type: Boolean,
+    default: false
+  },
+  isSelected: {
+    type: Boolean,
+    default: false
   }
 });
 
 const fileStore = useFileStore();
 const promptStore = usePromptStore();
+const aiAgentStore = useAiAgentStore();
 
 const expanded = ref(false);
 const resultExpanded = ref(false);
@@ -479,6 +508,42 @@ const afterDiffParts = computed(() => {
   // Filter to show only unchanged and added parts
   return editDocumentDiff.value.filter(part => !part.removed);
 });
+
+// Approval methods
+function toggleSelection() {
+  if (props.toolCall?.id) {
+    aiAgentStore.toggleTool(props.toolCall.id);
+  }
+}
+
+function setSelection(val) {
+  if (props.toolCall?.id) {
+    aiAgentStore.setTool(props.toolCall.id, val);
+  }
+}
+
+function approveThis() {
+  if (props.toolCall?.id) {
+    // Ensure this tool is selected
+    if (!props.isSelected) {
+      aiAgentStore.toggleTool(props.toolCall.id);
+    }
+    // Execute only this tool (by filtering selectedTools to just this one)
+    const previousSelection = [...aiAgentStore.selectedTools];
+    aiAgentStore.selectedTools = [props.toolCall.id];
+    aiAgentStore.executeBatch();
+    // Note: executeBatch will clear the batch, so we don't need to restore selection
+  }
+}
+
+function rejectThis() {
+  if (props.toolCall?.id) {
+    // Unselect this tool
+    if (props.isSelected) {
+      aiAgentStore.toggleTool(props.toolCall.id);
+    }
+  }
+}
 </script>
 
 <style scoped>
@@ -491,8 +556,26 @@ const afterDiffParts = computed(() => {
   border-radius: 8px;
 }
 
+.tool-call-display.pending-approval {
+  background-color: rgba(78, 93, 212, 0.05);
+  animation: agent-pulse-purple 2s ease-in-out infinite;
+}
+
 body.body--dark .tool-call-display {
   border-radius: 8px;
+}
+
+body.body--dark .tool-call-display.pending-approval {
+  background-color: rgba(100, 181, 246, 0.12);
+}
+
+@keyframes agent-pulse-purple {
+  0%, 100% {
+    background-color: rgba(78, 93, 212, 0.05);
+  }
+  50% {
+    background-color: rgba(78, 93, 212, 0.12);
+  }
 }
 
 .tool-parameters {

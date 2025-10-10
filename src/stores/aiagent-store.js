@@ -2479,6 +2479,16 @@ export const useAiAgentStore = defineStore('ai-agent', {
       this.batchApprovalResolve = null;
     },
 
+    setTool(toolId, val) {
+      if (!val && this.selectedTools.includes(toolId)) {
+        this.selectedTools = this.selectedTools.filter(id => id !== toolId);
+      }
+
+      if (val && !this.selectedTools.includes(toolId)) {
+        this.selectedTools.push(toolId);
+      }
+    },
+
     toggleTool(toolId) {
       if (this.selectedTools.includes(toolId)) {
         this.selectedTools = this.selectedTools.filter(id => id !== toolId);
