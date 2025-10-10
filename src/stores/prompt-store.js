@@ -442,7 +442,7 @@ export const usePromptStore = defineStore('prompts', {
 
       return true;
     },
-    constructPromptInput(request) {
+    constructPromptInput(request, useRawHtml = false) {
       const fileStore = useFileStore();
 
       let forceMessages = undefined;
@@ -844,14 +844,12 @@ export const usePromptStore = defineStore('prompts', {
       if(request.agentMessages) {
         for (const agentMessage of request.agentMessages) {
           agentMessage.text = replaceMentionEditorText(agentMessage.text);
-
         }
       }
 
       if(!promptResultInput || promptResultInput.length === 0) {
         promptResultInput = userPrompt;
       }
-
 
       let userInputValue = null;
 
@@ -1217,7 +1215,7 @@ export const usePromptStore = defineStore('prompts', {
       pr.abortController = request.abortController;
       request.pr = pr;
 
-      const input = this.constructPromptInput(request);
+      const input = this.constructPromptInput(request, request.useRawHtml);
 
       this.checkBeforePrompting(input, request);
 

@@ -2251,7 +2251,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
           tools: this.getChatAgentTools(),
           silent: true,
           contextTypes: [], // Chat agent will get context through tools
-          abortController: new AbortController()
+          abortController: new AbortController(),
+          useRawHtml: true
         };
 
         // Store the request for abort capability
@@ -2374,7 +2375,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
             tools: this.getChatAgentTools(),
             silent: true,
             contextTypes: [], // Chat agent will get context through tools
-            abortController: new AbortController()
+            abortController: new AbortController(),
+            useRawHtml: true
           };
 
           // Update the stored request for abort capability
