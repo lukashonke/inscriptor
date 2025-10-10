@@ -165,6 +165,7 @@ const toolFriendlyNames = {
 
 const toolName = computed(() => {
   const technicalName = props.toolCall?.function?.name;
+  const prefix = 'AI wants to:';
 
   try {
     const args = JSON.parse(props.toolCall?.function?.arguments || '{}');
@@ -176,12 +177,12 @@ const toolName = computed(() => {
         const position = args.position;
         switch (action) {
           case 'add':
-            return position ? `AI wants to: Add Paragraph (${position})` : 'AI wants to: Add Paragraph';
+            return position ? `${prefix} Add Paragraph (${position})` : `${prefix} Add Paragraph`;
           case 'remove':
-            return 'AI wants to: Remove Paragraph';
+            return `${prefix} Remove Paragraph`;
           case 'modify':
           default:
-            return 'AI wants to: Modify Paragraph';
+            return `${prefix} Modify Paragraph`;
         }
 
       case 'readFile':
@@ -190,15 +191,15 @@ const toolName = computed(() => {
         if (fileId) {
           const file = fileStore.getFile(fileId);
           const fileTitle = file?.title || `${fileId.substring(0, 8)}...`;
-          return `AI wants to: Read File - ${fileTitle} (${readType})`;
+          return `${prefix} Read File - ${fileTitle} (${readType})`;
         }
-        return `AI wants to: Read File (${readType})`;
+        return `${prefix} Read File (${readType})`;
 
       case 'search':
         const searchQuery = args.searchQuery;
         const contextType = args.contextType;
         const searchType = args.searchType || 'all';
-        let searchDesc = `AI wants to: Search`;
+        let searchDesc = `${prefix} Search`;
         if (searchQuery) {
           searchDesc += ` - "${searchQuery}"`;
         }
@@ -215,30 +216,30 @@ const toolName = computed(() => {
         if (promptId) {
           const prompt = promptStore.prompts.find(p => p.id === promptId);
           const promptTitle = prompt?.title || promptId;
-          return `AI wants to: Execute AI Prompt - ${promptTitle}`;
+          return `${prefix} Execute AI Prompt - ${promptTitle}`;
         }
-        return 'AI wants to: Execute AI Prompt';
+        return `${prefix} Execute AI Prompt`;
 
       case 'setFileSummary':
         const summaryFileId = args.fileId;
         if (summaryFileId) {
           const file = fileStore.getFile(summaryFileId);
           const fileTitle = file?.title || `${summaryFileId.substring(0, 8)}...`;
-          return `AI wants to: Set File Summary - ${fileTitle}`;
+          return `${prefix} Set File Summary - ${fileTitle}`;
         }
-        return 'AI wants to: Set File Summary (current file)';
+        return `${prefix} Set File Summary (current file)`;
 
       case 'listProjectFiles':
         const listContextType = args.contextType;
         if (listContextType) {
-          return `AI wants to: List Project Files - ${listContextType}`;
+          return `${prefix} List Project Files - ${listContextType}`;
         }
-        return 'AI wants to: List Project Files';
+        return `${prefix} List Project Files`;
 
       case 'createFile':
         const title = args.title;
         const createContextType = args.contextType;
-        let createDesc = `AI wants to: Create File`;
+        let createDesc = `${prefix} Create File`;
         if (title) {
           createDesc += ` - "${title}"`;
         }
@@ -252,9 +253,9 @@ const toolName = computed(() => {
         if (editFileId) {
           const file = fileStore.getFile(editFileId);
           const fileTitle = file?.title || `${editFileId.substring(0, 8)}...`;
-          return `AI wants to: Edit Document - ${fileTitle}`;
+          return `${prefix} Edit Document - ${fileTitle}`;
         }
-        return 'AI wants to: Edit Document (current file)';
+        return `${prefix} Edit Document (current file)`;
 
       default:
         break;
@@ -264,7 +265,7 @@ const toolName = computed(() => {
   }
 
   const baseName = toolFriendlyNames[technicalName] || technicalName || 'Unknown Tool';
-  return `AI wants to: ${baseName}`;
+  return `${prefix} ${baseName}`;
 });
 
 const toolIcon = computed(() => {
