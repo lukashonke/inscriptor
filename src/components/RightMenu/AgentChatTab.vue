@@ -568,7 +568,7 @@ function getToolIcon(toolName) {
     'search': 'mdi-magnify',
     'setFileSummary': 'mdi-file-edit-outline',
     'getAllContextTypes': 'mdi-shape-outline',
-    'modifyParagraph': 'mdi-pencil-outline',
+    'editDocument': 'mdi-file-edit',
     'createFile': 'mdi-file-plus-outline'
   };
   return icons[toolName] || 'mdi-tools';
@@ -585,7 +585,7 @@ function getToolFriendlyName(tool) {
     'search': 'Search',
     'setFileSummary': 'Set File Summary',
     'getAllContextTypes': 'Get Context Types',
-    'modifyParagraph': 'Modify Paragraph',
+    'editDocument': 'Edit Document',
     'createFile': 'Create File'
   };
   return names[tool.function.name] || tool.function.name;
@@ -627,9 +627,14 @@ function getToolDescription(tool) {
       }
       return 'Execute AI prompt';
 
-    case 'modifyParagraph':
-      const action = args.action || 'modify';
-      return `${action.charAt(0).toUpperCase() + action.slice(1)} paragraph in document`;
+    case 'editDocument':
+      const editFileId = args.fileId;
+      if (editFileId && fileStore.getFile) {
+        const file = fileStore.getFile(editFileId);
+        const fileTitle = file?.title || `${editFileId.substring(0, 8)}...`;
+        return `Edit text in "${fileTitle}"`;
+      }
+      return 'Edit text in current file';
 
     case 'setFileSummary':
       return args.fileId ? 'Update file summary' : 'Update current file summary';

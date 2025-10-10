@@ -3196,9 +3196,9 @@ export const usePromptStore = defineStore('prompts', {
         getAvailableAIPrompts: false,
         getAllContextTypes: false,
         executeAIPrompt: true,
-        modifyParagraph: false,
         setFileSummary: true,
         createFile: true,
+        editDocument: true,
       };
 
       this.diffsShowRemoved = false;

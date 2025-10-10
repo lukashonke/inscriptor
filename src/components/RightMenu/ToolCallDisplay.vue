@@ -26,6 +26,27 @@
 
         <q-slide-transition>
           <div v-show="expanded" class="q-mt-sm">
+            <!-- Special diff rendering for editDocument -->
+            <div v-if="isEditDocument && editDocumentDiff" class="edit-document-diff q-pa-sm bg-grey-2 rounded-borders">
+              <div class="text-caption text-grey-8 q-mb-sm">
+                <q-icon name="mdi-file-compare" size="xs" class="q-mr-xs" />
+                Changes to be made:
+              </div>
+              <div class="diff-content">
+                <div
+                  v-for="(part, index) in editDocumentDiff"
+                  :key="index"
+                  class="diff-part"
+                  :class="{
+                    'diff-added': part.added,
+                    'diff-removed': part.removed,
+                    'diff-unchanged': !part.added && !part.removed
+                  }"
+                >{{ part.value }}</div>
+              </div>
+            </div>
+
+            <!-- Regular parameters for non-editDocument tools -->
             <div v-if="hasParameters" class="tool-parameters q-pa-sm bg-grey-2 rounded-borders">
               <div class="text-caption text-grey-8 q-mb-xs">Parameters:</div>
               <pre class="tool-params-pre">{{ formattedArguments }}</pre>
@@ -59,7 +80,7 @@
 
 <script setup>
 import { ref, computed } from 'vue';
-import { truncate } from 'src/common/utils/textUtils';
+import { truncate, diffStrings, htmlToMarkdown } from 'src/common/utils/textUtils';
 import { useFileStore } from 'src/stores/file-store';
 import { usePromptStore } from 'src/stores/prompt-store';
 
@@ -93,6 +114,7 @@ const toolFriendlyNames = {
   'getAllContextTypes': 'Get Available Context Types',
   'createFile': 'Create New File',
   'modifyParagraph': 'Modify Paragraph',
+  'editDocument': 'Edit Document',
 };
 
 const toolName = computed(() => {
@@ -179,6 +201,15 @@ const toolName = computed(() => {
         }
         return createDesc;
 
+      case 'editDocument':
+        const editFileId = args.fileId;
+        if (editFileId) {
+          const file = fileStore.getFile(editFileId);
+          const fileTitle = file?.title || `${editFileId.substring(0, 8)}...`;
+          return `AI wants to: Edit Document - ${fileTitle}`;
+        }
+        return 'AI wants to: Edit Document (current file)';
+
       default:
         break;
     }
@@ -231,6 +262,8 @@ const toolIcon = computed(() => {
     return 'mdi-tag-multiple-outline';
   } else if (technicalName === 'createFile') {
     return 'mdi-file-plus-outline';
+  } else if (technicalName === 'editDocument') {
+    return 'mdi-file-edit';
   }
   return 'mdi-tools';
 });
@@ -276,6 +309,8 @@ const toolColor = computed(() => {
     return 'pink';
   } else if (technicalName === 'createFile') {
     return 'cyan';
+  } else if (technicalName === 'editDocument') {
+    return 'orange';
   }
   return 'grey';
 });
@@ -365,6 +400,52 @@ const resultStatusColor = computed(() => {
       return 'blue';
   }
 });
+
+// Computed properties for editDocument diff rendering
+const isEditDocument = computed(() => {
+  return props.toolCall?.function?.name === 'editDocument';
+});
+
+const editDocumentDiff = computed(() => {
+  if (!isEditDocument.value) return null;
+
+  try {
+    const args = JSON.parse(props.toolCall?.function?.arguments || '{}');
+    let oldString = args.old_string || '';
+    let newString = args.new_string || '';
+
+    if (!oldString && !newString) return null;
+
+    // Try to convert HTML to markdown for better display
+    try {
+      oldString = htmlToMarkdown(oldString);
+      newString = htmlToMarkdown(newString);
+    } catch (conversionError) {
+      // If conversion fails, use original HTML strings
+      console.warn('Failed to convert HTML to markdown for diff display:', conversionError);
+    }
+
+    const diff = diffStrings(oldString, newString);
+    return diff;
+  } catch (e) {
+    return null;
+  }
+});
+
+const editDocumentArgs = computed(() => {
+  if (!isEditDocument.value) return null;
+
+  try {
+    const args = JSON.parse(props.toolCall?.function?.arguments || '{}');
+    return {
+      oldString: args.old_string || '',
+      newString: args.new_string || '',
+      fileId: args.fileId
+    };
+  } catch (e) {
+    return null;
+  }
+});
 </script>
 
 <style scoped>
@@ -410,5 +491,62 @@ body.body--dark .tool-parameters {
 
 body.body--dark .tool-result {
   background-color: #1a2332;
+}
+
+/* Diff rendering styles for editDocument */
+.edit-document-diff {
+  font-family: monospace;
+  font-size: 0.85em;
+}
+
+.diff-content {
+  background-color: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  padding: 8px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+body.body--dark .diff-content {
+  background-color: #1a1a1a;
+  border-color: #444;
+}
+
+.diff-part {
+  display: inline;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.diff-added {
+  background-color: #c8e6c9;
+  color: #1b5e20;
+  padding: 2px 0;
+}
+
+body.body--dark .diff-added {
+  background-color: #2d5016;
+  color: #a5d6a7;
+}
+
+.diff-removed {
+  background-color: #ffcdd2;
+  color: #b71c1c;
+  text-decoration: line-through;
+  padding: 2px 0;
+}
+
+body.body--dark .diff-removed {
+  background-color: #5c1a1a;
+  color: #ef9a9a;
+}
+
+.diff-unchanged {
+  color: inherit;
+}
+
+body.body--dark .edit-document-diff {
+  background-color: #1a1a1a;
 }
 </style>
