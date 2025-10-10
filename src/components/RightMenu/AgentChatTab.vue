@@ -130,18 +130,24 @@
               <div class="batch-approval-message chat-assistant-message agent-awaiting-confirmation-simple">
                 <div class="chat-message-header">
                   <span class="chat-message-role">AI:</span>
-                  <span class="text-caption">wants to use {{ aiAgentStore.pendingToolBatch.length }} tool(s)</span>
+                  <span v-if="isSingleToolApproval" class="text-caption">wants to use a tool</span>
+                  <span v-else class="text-caption">
+                    wants to use {{ aiAgentStore.pendingToolBatch.length }} tools
+                  </span>
                 </div>
                 <div class="chat-message-content">
-                  <!-- Tool List with Individual Checkboxes -->
+                  <!-- Tool List -->
                   <div class="tool-list q-mt-sm">
                     <div
                       v-for="tool in aiAgentStore.pendingToolBatch"
                       :key="tool.id"
-                      class="tool-item q-pa-sm q-mb-xs rounded-borders"                 >
+                      class="tool-item q-pa-sm q-mb-xs rounded-borders"
+                      :class="{ 'tool-item-selected': aiAgentStore.selectedTools.includes(tool.id) }"
+                    >
                       <div class="flex items-center">
-                        <!-- Individual tool checkbox -->
+                        <!-- Checkbox for multiple tools only -->
                         <q-checkbox
+                          v-if="!isSingleToolApproval"
                           :model-value="aiAgentStore.selectedTools.includes(tool.id)"
                           @update:model-value="aiAgentStore.toggleTool(tool.id)"
                           class="q-mr-sm"
@@ -155,58 +161,67 @@
                             </span>
                           </div>
                         </q-checkbox>
-                      </div>
 
+                        <!-- Single tool: show without checkbox -->
+                        <div v-else class="flex items-center">
+                          <q-icon :name="getToolIcon(tool.function.name)" class="q-mr-xs" size="xs" />
+                          <span class="text-caption">{{ getToolFriendlyName(tool) }}</span>
+                          <span class="text-caption text-grey-7 q-ml-sm">
+                            {{ getToolDescription(tool) }}
+                          </span>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
                   <!-- Action buttons -->
                   <div class="batch-actions q-mt-sm">
                     <div class="row q-gutter-sm">
-                      <!-- Batch Controls -->
-                      <div class="col-auto">
-                        <q-btn
-                          flat
-                          dense
-                          @click="aiAgentStore.selectAll"
-                          label="Select All"
-                          no-caps
-                          size="sm"
-                          class="text-caption"
-                        />
-                      </div>
-                      <div class="col-auto">
-                        <q-btn
-                          flat
-                          dense
-                          no-caps
-                          @click="aiAgentStore.selectNone"
-                          label="Select None"
-                          size="sm"
-                          class="text-caption"
-                        />
-                      </div>
+                      <!-- Batch Controls (only for multiple tools) -->
+                      <template v-if="!isSingleToolApproval">
+                        <div class="col-auto">
+                          <q-btn
+                            flat
+                            dense
+                            @click="aiAgentStore.selectAll"
+                            label="Select All"
+                            no-caps
+                            size="sm"
+                            class="text-caption"
+                          />
+                        </div>
+                        <div class="col-auto">
+                          <q-btn
+                            flat
+                            dense
+                            no-caps
+                            @click="aiAgentStore.selectNone"
+                            label="Select None"
+                            size="sm"
+                            class="text-caption"
+                          />
+                        </div>
+                      </template>
 
                       <div class="col"></div>
 
-                      <!-- Execute/Cancel -->
+                      <!-- Execute/Refuse -->
                       <div class="col-auto">
                         <q-btn
                           flat
                           color="negative"
                           @click="aiAgentStore.cancelBatch"
-                          label="Cancel"
+                          label="Refuse"
                           size="sm"
                         />
                       </div>
                       <div class="col-auto">
                         <q-btn
                           color="accent"
-                          style="width: 130px;"
                           @click="aiAgentStore.executeBatch"
-                          :label="aiAgentStore.selectedTools.length === aiAgentStore.pendingToolBatch.length ? 'Allow All' : 'Allow Selected'"
+                          :label="isSingleToolApproval ? 'Allow' : (selectedToolCount === aiAgentStore.pendingToolBatch.length ? `Allow All (${selectedToolCount})` : `Allow Selected (${selectedToolCount})`)"
                           size="sm"
-                          :disable="aiAgentStore.selectedTools.length === 0"
+                          :disable="selectedToolCount === 0"
                         />
                       </div>
                     </div>
@@ -443,6 +458,14 @@ const currentPromptName = computed(() => {
   return prompt?.title || null;
 });
 
+// Batch approval computed properties
+const isSingleToolApproval = computed(() => {
+  return aiAgentStore.pendingToolBatch && aiAgentStore.pendingToolBatch.length === 1;
+});
+
+const selectedToolCount = computed(() => {
+  return aiAgentStore.selectedTools ? aiAgentStore.selectedTools.length : 0;
+});
 
 // Methods
 async function onInputKey(e) {
@@ -733,6 +756,9 @@ body.body--dark .file-indicator {
 
 .batch-approval-message .tool-item:hover {
   background-color: rgba(0, 0, 0, 0.05);
+}
+
+.batch-approval-message .tool-item-selected {
 }
 
 .batch-approval-message .batch-actions {
