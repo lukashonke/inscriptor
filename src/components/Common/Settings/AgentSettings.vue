@@ -427,7 +427,19 @@ const aiChatTools = [
     label: 'Create File',
     description: 'Create new files in the project',
     icon: 'mdi-file-plus-outline'
+  },
+  {
+    name: 'editDocument',
+    label: 'Edit File',
+    description: 'Modifies a file in the project',
+    icon: 'mdi-file-edit'
   }
+  /*{ // this tool is not included in approval UI settings as it's always approved via the confirmation widget
+    name: 'modifyParagraph',
+    label: 'Modify File',
+    description: 'Modifies a file in the project',
+    icon: 'mdi-file-edit'
+  }*/
 ];
 
 function addPromptAgent() {

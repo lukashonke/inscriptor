@@ -895,9 +895,10 @@ const editor = useEditor({
     DetailsContent,
     DetailsSummary,
     HorizontalRule,
-    UniqueID.configure({
+    /*UniqueID.configure({
+      generateID: ({ node }) => `${node.type.name}-${uuidv4()}`,
       types: ['heading', 'paragraph'],
-    }),
+    }),*/
     CodeBlock,
     CharacterCount.configure({
       limit: characterLimit.value,

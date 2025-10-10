@@ -111,25 +111,65 @@
 
       <div class="fit ai-panel scroll">
         <div class="text-center q-mt-md q-mb-md">
-          <q-btn-toggle :options="views" v-model="layoutStore.currentRightMenuView" unelevated no-caps class=" bordered inscriptor-highlight-btn" toggle-color="primary" padding="xs md" id="aiSwitch" >
+          <q-btn-toggle :options="views" v-model="layoutStore.currentRightMenuView" unelevated no-caps class="bordered inscriptor-highlight-btn" toggle-color="primary" padding="xs md" id="aiSwitch" >
             <template v-slot:prompts>
-              <q-badge floating color="accent" :class="layoutStore.newPromptClass" v-if="promptStore.getTabData(promptTabId)?.promptResultsHistory.length > 0">{{promptStore.getTabData(promptTabId)?.promptResultsHistory.length}}</q-badge>
+              <div class="col row full-width">
+                <div class="col column items-center justify-center">
+                  <q-icon name="mdi-creation-outline" size="20px" />
+                  <span>
+                    Prompts
+                    <q-badge floating color="accent" :class="layoutStore.newPromptClass" v-if="promptStore.getTabData(promptTabId)?.promptResultsHistory.length > 0">{{promptStore.getTabData(promptTabId)?.promptResultsHistory.length}}</q-badge>
+                  </span>
+                </div>
+              </div>
             </template>
 
             <template v-slot:chat>
-              <q-badge floating color="accent" :class="layoutStore.newChatClass" v-if="aiAgentStore.agentChats.chats?.length > 1">{{aiAgentStore.agentChats.chats?.length}}</q-badge>
+              <div class="row full-width">
+                <div class="col column items-center justify-center">
+                  <q-icon name="mdi-robot" size="20px"  />
+                  <span>
+                    Chat
+                    <q-badge floating color="accent" :class="layoutStore.newChatClass" v-if="aiAgentStore.agentChats.chats?.length > 1">{{aiAgentStore.agentChats.chats?.length}}</q-badge>
+                  </span>
+                </div>
+              </div>
             </template>
 
             <template v-slot:brainstorm>
-              <q-badge floating color="accent" :class="layoutStore.newBrainstormClass" v-if="brainstormPromptResults?.length > 0">{{brainstormPromptResults?.length}}</q-badge>
+              <div class="row full-width">
+                <div class="col column items-center justify-center">
+                  <q-icon name="mdi-head-snowflake-outline" size="20px"  />
+                  <span>
+                    Brainstorm
+                    <q-badge floating color="accent" :class="layoutStore.newBrainstormClass" v-if="brainstormPromptResults?.length > 0">{{brainstormPromptResults?.length}}</q-badge>
+                  </span>
+                </div>
+              </div>
             </template>
 
             <template v-slot:analysis>
-              <q-badge floating color="accent" :class="layoutStore.newAnalysisClass" v-if="selectionPromptResults?.length > 0">{{selectionPromptResults?.length}}</q-badge>
+              <div class="row full-width">
+                <div class="col column items-center justify-center">
+                  <q-icon name="mdi-chart-timeline-variant-shimmer" size="20px"  />
+                  <span>
+                    Analyse
+                    <q-badge floating color="accent" :class="layoutStore.newAnalysisClass" v-if="selectionPromptResults?.length > 0">{{selectionPromptResults?.length}}</q-badge>
+                  </span>
+                </div>
+              </div>
             </template>
 
             <template v-slot:suggest>
-              <q-badge floating color="accent" :class="layoutStore.newSuggestClass" v-if="suggestPromptResults?.length > 0">{{suggestPromptResults?.length}}</q-badge>
+              <div class="row full-width">
+                <div class="col column items-center justify-center">
+                  <q-icon name="mdi-lightbulb-on-outline" size="20px"  />
+                  <span>
+                    Suggest
+                    <q-badge floating color="accent" :class="layoutStore.newSuggestClass" v-if="suggestPromptResults?.length > 0">{{suggestPromptResults?.length}}</q-badge>
+                  </span>
+                </div>
+              </div>
             </template>
           </q-btn-toggle>
         </div>
@@ -456,11 +496,11 @@
 
   const views = computed(() => {
     const allViews = [
-      {label: 'Prompts', value: 'prompts', icon: 'mdi-creation-outline', slot: 'prompts' },
-      {label: 'Chat', value: 'agentChat', icon: 'mdi-robot', slot: 'chat' },
-      {label: 'Brainstorm', value: 'brainstorm', icon: 'mdi-head-snowflake-outline', slot: 'brainstorm' },
-      {label: 'Analysis', value: 'analysis', icon: 'mdi-chart-timeline-variant-shimmer', slot: 'analysis' },
-      {label: 'Suggest', value: 'suggest', icon: 'mdi-lightbulb-on-outline', slot: 'suggest' },
+      {value: 'prompts', slot: 'prompts' },
+      {value: 'agentChat', slot: 'chat' },
+      {value: 'brainstorm', slot: 'brainstorm' },
+      {value: 'analysis', slot: 'analysis' },
+      { value: 'suggest', slot: 'suggest' },
     ];
 
     // Filter out tabs with no available prompts

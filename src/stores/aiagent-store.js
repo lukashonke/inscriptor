@@ -1129,7 +1129,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "getCurrentDocument",
-            description: "Get the current user opened document content with paragraph IDs and a list of all child files. Each paragraph is formatted as [nodeId]: content. Also shows the file hierarchy with metadata for all child files. CALL this before making changes to the current file to ensure proper position.",
+            description: "Get the current user opened document content as RAW HTML and a list of all child files. ⚠️ IMPORTANT: Returns content with HTML tags (e.g., <p>, <br>, <strong>, etc.). You MUST account for these tags when using editDocument tool. Also shows the file hierarchy with metadata for all child files. \n\nℹ️ NOTE: This returns the same content as readFile when targeting the currently opened file. Don't call both for the current document - use getCurrentDocument for the active file.",
             parameters: {
               type: "object",
               properties: {
@@ -1179,7 +1179,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "readFile",
-            description: "Read the content of a specific file in the project. Can read full content or just summary. Use the file ID from listProjectFiles (shown as 'ID: abc123' in the brackets). Also shows all child files with their metadata.",
+            description: "Read the content of a specific file in the project as RAW HTML. ⚠️ IMPORTANT: Returns content with HTML tags (e.g., <p>, <br>, <strong>, etc.). You MUST account for these tags when using editDocument tool. Can read full content or just summary. Use the file ID from listProjectFiles (shown as 'ID: abc123' in the brackets). Also shows all child files with their metadata.\n\nℹ️ NOTE: For the currently opened file, use getCurrentDocument instead - both return the same data but getCurrentDocument is more direct for the active file.",
             parameters: {
               type: "object",
               properties: {
@@ -1210,43 +1210,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
         {
           type: "function",
           function: {
-            name: "modifyParagraph",
-            description: "Modify, add, or remove paragraphs in the CURRENTLY OPENED document - use this to modify the file user has currently opened.",
-            parameters: {
-              type: "object",
-              properties: {
-                action: {
-                  type: "string",
-                  description: "The type of action to perform",
-                  enum: ["modify", "add", "remove"]
-                },
-                nodeId: {
-                  type: "string",
-                  description: "For modify/remove: The ID of the paragraph to modify/remove. For add: The ID of the paragraph to insert relative to. Special values: '__END__' (insert at document end) - Useful also when the document is empty."
-                },
-                newContent: {
-                  type: "string",
-                  description: "For modify/add: The content for the paragraph"
-                },
-                position: {
-                  type: "string",
-                  description: "For add action: Where to insert the new paragraph",
-                  enum: ["before", "after"]
-                },
-                reasoning: {
-                  type: "string",
-                  description: "Explanation of why this change is being made"
-                }
-              },
-              required: ["action", "nodeId", "reasoning"]
-            }
-          }
-        },
-        {
-          type: "function",
-          function: {
             name: "setFileSummary",
-            description: "Set the summary for any file. If no fileId is provided, sets the summary for the currently opened file. (Prefer this tool to appending summary paragraphs to the documents - it sets the summary to file's metadata instead of modifying its content)",
+            description: "Set the summary (also called synopsis) for any file. If no fileId is provided, sets the summary for the currently opened file. (Prefer this tool to appending summary paragraphs to the documents - it sets the summary to file's metadata instead of modifying its content)",
             parameters: {
               type: "object",
               properties: {
@@ -1283,7 +1248,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
                 },
                 contextType: {
                   type: "string",
-                  description: "Optional filter to only search files of a specific context type (e.g., 'Manuscript', 'Characters', 'Places', 'Notes', 'Research'). Leave empty/undefined to search across all context types. Do not use 'all' as a value."
+                  description: "Optional filter to only search files of a specific context type (e.g., 'Manuscript', 'Characters', 'Places', 'Notes', 'Research'). Context types are used to organize the user project's files by their main purpose. Leave empty/undefined to search across all context types. Do not use 'all' as a value."
                 },
                 fuzzySearch: {
                   type: "boolean",
@@ -1309,7 +1274,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "getAvailableAIPrompts",
-            description: "Get a list of available AI prompts that can be executed for text generation and other tasks. Returns prompts with their titles and descriptions so you can choose the most appropriate one.",
+            description: "Get a list of available AI prompts that can be executed for text generation and other tasks by you - the AI agent. Returns prompts with their titles and descriptions so you can choose the most appropriate one.",
             parameters: {
               type: "object",
               properties: {},
@@ -1364,7 +1329,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
                 },
                 content: {
                   type: "string",
-                  description: "Optional initial content for the file"
+                  description: "Optional initial content for the file as HTML. Use allowed HTML tags: <p> (paragraphs), <h1>/<h2>/<h3> (headings), <strong> (bold), <em> (italic), <br> (line break), <ul>/<ol>/<li> (lists), <pre>/<code> (code blocks). Keep nesting simple - avoid deeply nested structures. Example: '<p>Hello world</p><h2>Section</h2><p>Text with <strong>bold</strong> and <em>italic</em>.</p><ul><li><p>Item 1</p></li><li><p>Item 2</p></li></ul>'"
                 },
                 summary: {
                   type: "string",
@@ -1380,6 +1345,31 @@ export const useAiAgentStore = defineStore('ai-agent', {
                 }
               },
               required: ["title"]
+            }
+          }
+        },
+        {
+          type: "function",
+          function: {
+            name: "editDocument",
+            description: "🚨 CRITICAL: FILES CONTAIN HTML TAGS - YOU MUST INCLUDE ALL TAGS IN old_string AND new_string 🚨\n\nEdit any file by finding and replacing text. Files are stored as HTML with tags like <p>, <br>, <strong>, etc.\n\n⚠️ MANDATORY HTML REQUIREMENT:\nWhen you read a file and see: <p>Hello world</p>\nYour old_string MUST be: \"<p>Hello world</p>\" (WITH the <p> and </p> tags)\nNOT: \"Hello world\" (this will FAIL - missing tags!)\n\nALWAYS copy the EXACT HTML including opening/closing tags from readFile/getCurrentDocument output.\n\n📋 HOW TO USE THIS TOOL:\n1. FIRST: Read the file with readFile/getCurrentDocument to see the EXACT HTML\n2. COPY: Copy the HTML text including ALL tags (<p>, </p>, etc.) exactly as shown\n3. INCLUDE CONTEXT: Add 3-5 lines before and after (with their HTML tags) to make it unique\n4. PASTE: Use that EXACT HTML (with all tags) as your old_string\n\n❌ COMMON MISTAKES THAT CAUSE FAILURES:\n• Forgetting to include <p> and </p> tags around text\n• Stripping HTML tags from the text\n• Not including enough surrounding context\n• Not matching whitespace/line breaks exactly\n\n✅ CORRECT EXAMPLE:\nFile contains: <p>First sentence.</p><p>Second sentence.</p>\nold_string: \"<p>First sentence.</p><p>Second sentence.</p>\"\n\n❌ WRONG EXAMPLE:\nFile contains: <p>First sentence.</p><p>Second sentence.</p>\nold_string: \"First sentence.\\nSecond sentence.\" ← WILL FAIL! Missing HTML tags!",
+            parameters: {
+              type: "object",
+              properties: {
+                fileId: {
+                  type: "string",
+                  description: "The ID of the file to edit. If not provided, edits the currently opened file."
+                },
+                old_string: {
+                  type: "string",
+                  description: "⚠️ MUST INCLUDE HTML TAGS! The exact text to find WITH all HTML tags (<p>, </p>, <br>, etc.). Copy directly from readFile/getCurrentDocument output including all tags. Include 3-5 lines of context before and after (with their tags) to ensure uniqueness. Example: If file shows \"<p>Text here</p>\", use \"<p>Text here</p>\" NOT \"Text here\"."
+                },
+                new_string: {
+                  type: "string",
+                  description: "⚠️ MUST INCLUDE HTML TAGS! The replacement text WITH all HTML tags you want. Example: \"<p>New text</p>\" NOT \"New text\". This completely replaces old_string."
+                }
+              },
+              required: ["old_string", "new_string"]
             }
           }
         }
@@ -1469,8 +1459,6 @@ export const useAiAgentStore = defineStore('ai-agent', {
           return this.executeListProjectFilesTool(args);
         case 'readFile':
           return this.executeReadFileTool(args);
-        case 'modifyParagraph':
-          return this.executeModifyParagraphTool(args);
         case 'setFileSummary':
           return this.executeSetFileSummaryTool(args);
         case 'search':
@@ -1483,6 +1471,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
           return this.executeGetAllContextTypesTool();
         case 'createFile':
           return this.executeCreateFileTool(args);
+        case 'editDocument':
+          return await this.executeEditDocumentTool(args);
         default:
           return { error: `Unknown tool: ${toolName}` };
       }
@@ -1586,9 +1576,9 @@ export const useAiAgentStore = defineStore('ai-agent', {
         output += '\nDOCUMENT CONTENT:\n';
       }
 
-      const documentContent = this.generateFullFileWithNodeIds();
+      const documentContent = currentFile ? (currentFile.content || '') : '';
 
-      if (!documentContent) {
+      if (!documentContent || !documentContent.trim()) {
         output += "The document is empty.";
       } else {
         output += documentContent;
@@ -1977,7 +1967,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           template = {};
 
           if (content) {
-            template.content = markdownToHtml(content);
+            template.content = content;
           } else {
             template.content = '';
           }
@@ -2012,6 +2002,80 @@ export const useAiAgentStore = defineStore('ai-agent', {
       } catch (error) {
         return {
           error: `Failed to create file: ${error.message}`
+        };
+      }
+    },
+    async executeEditDocumentTool(args) {
+      const { fileId, old_string, new_string } = args;
+
+      // Validate required parameters
+      if (!old_string) {
+        return { error: "old_string parameter is required" };
+      }
+
+      if (!new_string) {
+        return { error: "new_string parameter is required" };
+      }
+
+      const fileStore = useFileStore();
+
+      // Get target file
+      let targetFile;
+      if (fileId) {
+        targetFile = fileStore.getFile(fileId);
+        if (!targetFile) {
+          return { error: `File with ID ${fileId} not found` };
+        }
+      } else {
+        targetFile = fileStore.selectedFile;
+        if (!targetFile) {
+          return { error: "No file specified and no active file available" };
+        }
+      }
+
+      try {
+        // Work with raw HTML content
+        let fileContent = targetFile.content || '';
+
+        // Count occurrences of old_string
+        const occurrences = [];
+        let searchIndex = 0;
+        while ((searchIndex = fileContent.indexOf(old_string, searchIndex)) !== -1) {
+          occurrences.push(searchIndex);
+          searchIndex += 1; // Move forward to find next occurrence
+        }
+
+        // Check uniqueness
+        if (occurrences.length === 0) {
+          return {
+            error: `Could not find the specified text in file "${targetFile.title}". The old_string does not match any content in the file. Make sure the text matches exactly, including whitespace, punctuation, and line breaks. Tip: Use the readFile tool first to see the exact content.`
+          };
+        }
+
+        if (occurrences.length > 1) {
+          return {
+            error: `The old_string matches ${occurrences.length} different locations in file "${targetFile.title}". You must provide more surrounding context (3-5 lines before and after) to uniquely identify which specific instance you want to change. Make each old_string unique by including enough context.`
+          };
+        }
+
+        // Exactly one match - perform replacement
+        const updatedContent = fileContent.replace(old_string, new_string);
+
+        // Update file content
+        targetFile.content = updatedContent;
+
+        // Mark file as dirty for cloud sync
+        fileStore.setDirty(targetFile);
+
+        return {
+          success: true,
+          content: `Successfully edited file "${targetFile.title}". The specified text has been replaced.`
+        };
+
+      } catch (error) {
+        console.error('Error in executeEditDocumentTool:', error);
+        return {
+          error: `Failed to edit file: ${error.message}`
         };
       }
     },
@@ -2187,7 +2251,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
           tools: this.getChatAgentTools(),
           silent: true,
           contextTypes: [], // Chat agent will get context through tools
-          abortController: new AbortController()
+          abortController: new AbortController(),
+          useRawHtml: true
         };
 
         // Store the request for abort capability
@@ -2310,7 +2375,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
             tools: this.getChatAgentTools(),
             silent: true,
             contextTypes: [], // Chat agent will get context through tools
-            abortController: new AbortController()
+            abortController: new AbortController(),
+            useRawHtml: true
           };
 
           // Update the stored request for abort capability
@@ -2413,6 +2479,16 @@ export const useAiAgentStore = defineStore('ai-agent', {
       this.pendingToolBatch = null;
       this.selectedTools = [];
       this.batchApprovalResolve = null;
+    },
+
+    setTool(toolId, val) {
+      if (!val && this.selectedTools.includes(toolId)) {
+        this.selectedTools = this.selectedTools.filter(id => id !== toolId);
+      }
+
+      if (val && !this.selectedTools.includes(toolId)) {
+        this.selectedTools.push(toolId);
+      }
     },
 
     toggleTool(toolId) {
