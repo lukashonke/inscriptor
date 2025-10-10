@@ -1211,7 +1211,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "modifyParagraph",
-            description: "Modify, add, or remove paragraphs in the CURRENTLY OPENED document - use this to modify the file user has currently opened.",
+            description: "Modify, add, or remove paragraphs in the CURRENTLY OPENED file in the project. 'modify' = replace existing content in-place, 'add' = insert new paragraph, 'remove' = delete paragraph. ⚠️ To replace/improve text, use 'modify' action - don't add new content then forget to remove the old one.",
             parameters: {
               type: "object",
               properties: {
