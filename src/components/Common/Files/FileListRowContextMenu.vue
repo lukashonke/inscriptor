@@ -44,6 +44,13 @@
         <q-item-section>Rename</q-item-section>
       </q-item>
 
+      <q-item clickable v-close-popup @click.prevent="cloneFile(file, $event)">
+        <q-item-section avatar>
+          <q-icon name="mdi-content-copy"/>
+        </q-item-section>
+        <q-item-section>Clone</q-item-section>
+      </q-item>
+
       <q-item clickable v-if="fileTemplates?.length > 0 && fileStore.checkCanHaveChildren(file)">
         <q-item-section avatar>
           <q-icon name="mdi-plus"/>
@@ -286,6 +293,17 @@ function renameFile(file, event) {
       fileStore.setDirty(file);
     }
   });
+
+  if(event) {
+    event.stopPropagation();
+  }
+}
+
+async function cloneFile(file, event) {
+  const clonedFile = await fileStore.cloneFile(file);
+  if (clonedFile) {
+    fileStore.selectFile(clonedFile, true);
+  }
 
   if(event) {
     event.stopPropagation();

@@ -370,6 +370,7 @@ export function cloneRequest(request, copyAbortController = false) {
     parametersValue: request.parametersValue ? [...request.parametersValue] : null,
 
     reasoningEffort: request.reasoningEffort,
+    useRawHtml: request.useRawHtml,
   }
 }
 

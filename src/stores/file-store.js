@@ -145,6 +145,80 @@ export const useFileStore = defineStore('files', {
 
       return file;
     },
+    async cloneFile(sourceFile) {
+      const layoutStore = useLayoutStore();
+
+      // Check file limit
+      if (this.projectSettings?.syncToCloud && flattenFiles(this.files).length >= layoutStore.getMaxFiles()) {
+        Notify.create({
+          message: 'You have reached the maximum number of files allowed for your subscription level.',
+          color: 'warning',
+          position: 'top',
+          actions: [
+            { label: 'Upgrade', color: 'white', handler: () => { layoutStore.showUserDialog(); } }
+          ],
+          timeout: 3000,
+        });
+        return null;
+      }
+
+      // Create new file with new ID
+      const clonedFile = createFile(sourceFile.title + ' (Copy)');
+
+      // Copy all properties from source file
+      clonedFile.content = sourceFile.content;
+      clonedFile.synopsis = sourceFile.synopsis;
+      clonedFile.note = sourceFile.note;
+      clonedFile.icon = sourceFile.icon;
+      clonedFile.imageUrl = sourceFile.imageUrl;
+      clonedFile.view = sourceFile.view;
+
+      // Deep copy settings
+      if (sourceFile.settings) {
+        clonedFile.settings = JSON.parse(JSON.stringify(sourceFile.settings));
+      }
+
+      // Copy state
+      if (sourceFile.state) {
+        clonedFile.state = JSON.parse(JSON.stringify(sourceFile.state));
+      }
+
+      // Copy labels
+      if (sourceFile.labels && sourceFile.labels.length > 0) {
+        clonedFile.labels = JSON.parse(JSON.stringify(sourceFile.labels));
+      }
+
+      // Find the collection where the source file exists
+      let collection = sourceFile.parent ? sourceFile.parent.children : this.files;
+
+      // Find the index of the source file
+      const sourceIndex = collection.indexOf(sourceFile);
+
+      // Insert cloned file right after the source file
+      if (sourceIndex > -1) {
+        collection.splice(sourceIndex + 1, 0, clonedFile);
+      } else {
+        collection.push(clonedFile);
+      }
+
+      // Set parent relationship
+      clonedFile.parentId = sourceFile.parentId;
+      clonedFile.parent = sourceFile.parent;
+
+      // Refresh orders for proper indexing
+      this.refreshOrders(collection);
+
+      // Mark as dirty for saving
+      this.setDirty(clonedFile);
+
+      Notify.create({
+        message: `"${sourceFile.title}" has been cloned.`,
+        color: 'positive',
+        position: 'top'
+      });
+
+      return clonedFile;
+    },
     setIconFromParentSettings(file) {
       if (!file.parent) {
         return; // No parent, nothing to inherit

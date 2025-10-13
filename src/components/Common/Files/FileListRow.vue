@@ -54,8 +54,8 @@
               </q-badge>
             </template>
 
-            <div class="" v-if="getImageThumbmailUrl(file)" style="width: 20px;">
-              <q-img :src="getImageThumbmailUrl(file)" width="20" height="24" fit="contain" class="rounded-borders">
+            <div class="" v-if="getImageThumbmailUrl(file)" style="width: 26px; max-height: 26px; overflow: hidden">
+              <q-img :src="getImageThumbmailUrl(file)" fit="contain" class="rounded-borders">
               </q-img>
             </div>
 

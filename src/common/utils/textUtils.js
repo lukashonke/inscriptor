@@ -89,17 +89,20 @@ export function diffStrings(oldString, newString) {
 
 const fileMentionRegex = /<span class="mention" data-type="file" data-id="(.+)">.*<\/span>/g;
 
-export function replaceMentionEditorText(text) {
+export function replaceMentionEditorText(text, useRawHtml = false) {
   const fileStore = useFileStore();
 
-  // replace <p> and </p> with empty space
-  text = text.replace(/<p>/g, '');
-  text = text.replace(/<p class=\".*?\">/g, '');
-  text = text.replace(/<\/p>/g, '\n');
+  // If useRawHtml is false, strip HTML tags
+  if (!useRawHtml) {
+    // replace <p> and </p> with empty space
+    text = text.replace(/<p>/g, '');
+    text = text.replace(/<p class=\".*?\">/g, '');
+    text = text.replace(/<\/p>/g, '\n');
 
-  // replace <br> and <br/> with empty space
-  text = text.replace(/<br>/g, '');
-  text = text.replace(/<br\/>/g, '');
+    // replace <br> and <br/> with empty space
+    text = text.replace(/<br>/g, '');
+    text = text.replace(/<br\/>/g, '');
+  }
 
   // extract files using regex
   const fileMentions = [...text.matchAll(fileMentionRegex)];
@@ -108,14 +111,18 @@ export function replaceMentionEditorText(text) {
     const file = fileStore.getFile(fileId);
 
     let fileContent = file?.content ?? '';
-    // replace <p> and </p> with empty space
-    fileContent = fileContent.replace(/<p>/g, '');
-    fileContent = fileContent.replace(/<p class=\".*?\">/g, '');
-    fileContent = fileContent.replace(/<\/p>/g, '\n');
 
-    // replace <br> and <br/> with empty space
-    fileContent = fileContent.replace(/<br>/g, '');
-    fileContent = fileContent.replace(/<br\/>/g, '\n');
+    // If useRawHtml is false, strip HTML tags from file content
+    if (!useRawHtml) {
+      // replace <p> and </p> with empty space
+      fileContent = fileContent.replace(/<p>/g, '');
+      fileContent = fileContent.replace(/<p class=\".*?\">/g, '');
+      fileContent = fileContent.replace(/<\/p>/g, '\n');
+
+      // replace <br> and <br/> with empty space
+      fileContent = fileContent.replace(/<br>/g, '');
+      fileContent = fileContent.replace(/<br\/>/g, '\n');
+    }
 
     text = text.replace(fileMention[0], fileContent);
   }
@@ -123,7 +130,12 @@ export function replaceMentionEditorText(text) {
   return text;
 }
 
-export function replaceParameterEditorText(text) {
+export function replaceParameterEditorText(text, useRawHtml = false) {
+  // If useRawHtml is true, return text as-is without stripping HTML
+  if (useRawHtml) {
+    return text;
+  }
+
   // replace <p> and </p> with empty space - text is inline
   text = text.replace(/<p>/g, '');
   text = text.replace(/<p class=\".*?\">/g, '');
