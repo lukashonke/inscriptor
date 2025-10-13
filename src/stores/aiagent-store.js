@@ -2189,7 +2189,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
     updateAgentRunningState(isRunning) {
       this.agentChats.isAgentRunning = isRunning;
     },
-    async executeAgentPrompt(userMessage, selectedPrompt) {
+    async executeAgentPrompt(userMessage, selectedPrompt, reasoningEffort = null) {
       if (this.agentChats.isAgentRunning || !this.agentChats.activeChat) {
         return;
       }
@@ -2252,7 +2252,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
           silent: true,
           contextTypes: [], // Chat agent will get context through tools
           abortController: new AbortController(),
-          useRawHtml: true
+          useRawHtml: true,
+          reasoningEffort: reasoningEffort
         };
 
         // Store the request for abort capability
@@ -2277,7 +2278,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
         // Process tool calls if any
         if (message.tool_calls && message.tool_calls.length > 0) {
-          await this.processAgentToolCalls(message.tool_calls, assistantMessage.id, agentPrompt);
+          await this.processAgentToolCalls(message.tool_calls, assistantMessage.id, agentPrompt, reasoningEffort);
         }
 
       } catch (error) {
@@ -2292,7 +2293,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
       }
     },
 
-    async processAgentToolCalls(toolCalls, messageId, agentPrompt) {
+    async processAgentToolCalls(toolCalls, messageId, agentPrompt, reasoningEffort = null) {
       const promptStore = usePromptStore();
       const chat = this.agentChats.chats.find(c => c.id === this.agentChats.activeChat);
       if (!chat) return;
@@ -2376,7 +2377,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
             silent: true,
             contextTypes: [], // Chat agent will get context through tools
             abortController: new AbortController(),
-            useRawHtml: true
+            useRawHtml: true,
+            reasoningEffort: reasoningEffort
           };
 
           // Update the stored request for abort capability
@@ -2397,7 +2399,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
             // Process any new tool calls recursively
             if (message.tool_calls && message.tool_calls.length > 0) {
-              await this.processAgentToolCalls(message.tool_calls, newAssistantMessage.id, agentPrompt);
+              await this.processAgentToolCalls(message.tool_calls, newAssistantMessage.id, agentPrompt, reasoningEffort);
             }
           }
         } catch (error) {
