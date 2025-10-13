@@ -194,12 +194,49 @@ function handlePasteClick(event) {
   aiAgentStore.replaceParagraphWithContent(paragraphId, newContent.trim());
 }
 
+// Handle page link button clicks via event delegation
+function handlePageLinkClick(event) {
+  const pageLinkBtn = event.target.closest('.page-link-btn');
+  if (!pageLinkBtn) return;
+
+  event.stopPropagation();
+  event.preventDefault();
+
+  const fileId = pageLinkBtn.dataset.fileId;
+  if (!fileId) return;
+
+  // Look up the file by ID
+  const file = fileStore.getFile(fileId);
+
+  if (file) {
+    // Navigate to the file
+    fileStore.selectFile(file);
+
+    Notify.create({
+      message: `Opened "${file.title}"`,
+      color: 'positive',
+      position: 'top-right',
+      timeout: 1500,
+    });
+  } else {
+    // File not found
+    Notify.create({
+      message: 'Page not found',
+      color: 'warning',
+      position: 'top-right',
+      timeout: 2000,
+    });
+  }
+}
+
 // Add copy buttons when component mounts and updates
 onMounted(() => {
   addCopyButtonsToBlockquotes();
   // Add event listener for paste buttons
   if (componentRef.value) {
     componentRef.value.addEventListener('click', handlePasteClick);
+    // Add event listener for page link buttons
+    componentRef.value.addEventListener('click', handlePageLinkClick);
   }
 });
 
@@ -500,5 +537,46 @@ body.body--dark .chat-message-header {
 
 body.body--dark .text-grey-7 {
   color: rgba(255, 255, 255, 0.6);
+}
+
+/* Page link button styles */
+.chat-message-content :deep(.page-link-btn) {
+  display: inline-flex;
+  align-items: center;
+  background-color: rgba(79, 94, 214, 0.1);
+  color: rgba(79, 94, 214, 1);
+  padding: 2px 8px;
+  border-radius: 12px;
+  border: 1px solid rgba(79, 94, 214, 0.2);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.9em;
+  font-weight: 500;
+  margin: 2px 2px;
+  vertical-align: middle;
+}
+
+.chat-message-content :deep(.page-link-btn:hover) {
+  background-color: rgba(79, 94, 214, 0.2);
+  border-color: rgba(79, 94, 214, 0.4);
+}
+
+.chat-message-content :deep(.page-link-btn svg) {
+  flex-shrink: 0;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/* Dark mode page link styles */
+body.body--dark .chat-message-content :deep(.page-link-btn) {
+  background-color: rgba(107, 126, 214, 0.15);
+  color: rgba(144, 202, 249, 1);
+  border-color: rgba(107, 126, 214, 0.3);
+}
+
+body.body--dark .chat-message-content :deep(.page-link-btn:hover) {
+  background-color: rgba(107, 126, 214, 0.25);
+  border-color: rgba(107, 126, 214, 0.5);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 </style>
