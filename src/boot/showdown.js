@@ -16,7 +16,7 @@ function pageLinkPlugin(md) {
     return self.renderToken(tokens, idx, options);
   };
 
-  // Override link_open renderer to detect page: protocol
+  // Override link_open renderer to detect UUID patterns (file IDs)
   md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
     const token = tokens[idx];
     const hrefIndex = token.attrIndex('href');
@@ -24,9 +24,12 @@ function pageLinkPlugin(md) {
     if (hrefIndex >= 0) {
       const href = token.attrs[hrefIndex][1];
 
-      // Check if this is a page link
-      if (href.startsWith('page:')) {
-        const fileId = href.substring(5); // Remove 'page:' prefix
+      // Check if this is a UUID pattern (file ID)
+      // UUIDs are typically 36 characters with hyphens, but we'll be flexible
+      const uuidPattern = /^[a-f0-9\-]{36}$/i;
+
+      if (uuidPattern.test(href)) {
+        const fileId = href;
 
         // Return custom button HTML with data attribute
         return `<button class="page-link-btn" data-file-id="${md.utils.escapeHtml(fileId)}" title="Click to open this page">` +
@@ -44,10 +47,12 @@ function pageLinkPlugin(md) {
   md.renderer.rules.link_close = function (tokens, idx, options, env, self) {
     // Check if previous link_open was a page link by looking back
     let isPageLink = false;
+    const uuidPattern = /^[a-f0-9\-]{36}$/i;
+
     for (let i = idx - 1; i >= 0; i--) {
       if (tokens[i].type === 'link_open') {
         const hrefIndex = tokens[i].attrIndex('href');
-        if (hrefIndex >= 0 && tokens[i].attrs[hrefIndex][1].startsWith('page:')) {
+        if (hrefIndex >= 0 && uuidPattern.test(tokens[i].attrs[hrefIndex][1])) {
           isPageLink = true;
         }
         break;

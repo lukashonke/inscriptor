@@ -211,13 +211,6 @@ function handlePageLinkClick(event) {
   if (file) {
     // Navigate to the file
     fileStore.selectFile(file);
-
-    Notify.create({
-      message: `Opened "${file.title}"`,
-      color: 'positive',
-      position: 'top-right',
-      timeout: 1500,
-    });
   } else {
     // File not found
     Notify.create({
@@ -543,11 +536,11 @@ body.body--dark .text-grey-7 {
 .chat-message-content :deep(.page-link-btn) {
   display: inline-flex;
   align-items: center;
-  background-color: rgba(79, 94, 214, 0.1);
-  color: rgba(79, 94, 214, 1);
+  background-color: rgba(126, 126, 142, 0.1);
+  color: rgb(68, 68, 76);
   padding: 2px 8px;
   border-radius: 12px;
-  border: 1px solid rgba(79, 94, 214, 0.2);
+  border: 1px solid rgba(126, 126, 124, 0.2);
   cursor: pointer;
   transition: all 0.2s ease;
   font-size: 0.9em;
@@ -557,8 +550,8 @@ body.body--dark .text-grey-7 {
 }
 
 .chat-message-content :deep(.page-link-btn:hover) {
-  background-color: rgba(79, 94, 214, 0.2);
-  border-color: rgba(79, 94, 214, 0.4);
+  background-color: rgba(126, 126, 126, 0.2);
+  border-color: rgba(126, 126, 142, 0.4);
 }
 
 .chat-message-content :deep(.page-link-btn svg) {
