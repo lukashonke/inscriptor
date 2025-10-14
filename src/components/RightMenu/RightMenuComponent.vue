@@ -304,7 +304,7 @@
                 <PromptPicker v-model="promptStore.brainstormingPrompt" :prompts="availableBrainstormingPrompts" placeholder="Set prompt for Brainstorming"></PromptPicker>
               </div>
               <div class="col-auto">
-                <q-btn flat no-caps icon="mdi-book-outline" dense label="Context">
+                <q-btn no-caps icon="mdi-book-outline" label="Context" color="primary">
                   <q-menu max-width="800px">
                     <SimplePromptContextSelector v-model="promptStore.brainstormPromptContext" title="Set Brainstorming Context" icon="mdi-book-outline" output-context-as-objects/>
                   </q-menu>
@@ -396,7 +396,7 @@
                 <PromptPicker v-model="promptStore.suggestingPrompt" :prompts="availableSuggestingPrompts" placeholder="Set prompt for Suggestions"></PromptPicker>
               </div>
               <div class="col-auto">
-                <q-btn flat no-caps icon="mdi-book-outline" dense label="Context">
+                <q-btn no-caps icon="mdi-book-outline" label="Context" color="primary">
                   <q-menu max-width="800px">
                     <SimplePromptContextSelector v-model="promptStore.suggestPromptContext" title="Set Suggestion Context" icon="mdi-book-outline" output-context-as-objects/>
                   </q-menu>
