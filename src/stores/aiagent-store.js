@@ -40,7 +40,10 @@ export const useAiAgentStore = defineStore('ai-agent', {
     // Batch approval state
     pendingToolBatch: null,      // Current tools awaiting approval
     selectedTools: [],           // Array of selected tool IDs for execution
-    batchApprovalResolve: null   // Promise resolver for batch approval
+    batchApprovalResolve: null,  // Promise resolver for batch approval
+
+    // Tool execution limits
+    maxParallelToolCalls: 5      // Maximum number of tool calls to execute in a single turn
   }),
   getters: {
     agentState: (state) => {
@@ -1129,7 +1132,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "getCurrentDocument",
-            description: "Get the current user opened document content as RAW HTML and a list of all child files. ⚠️ IMPORTANT: Returns content with HTML tags (e.g., <p>, <br>, <strong>, etc.). You MUST account for these tags when using editDocument tool. Also shows the file hierarchy with metadata for all child files. \n\nℹ️ NOTE: This returns the same content as readFile when targeting the currently opened file. Don't call both for the current document - use getCurrentDocument for the active file.",
+            description: "Get the currently opened document content as RAW HTML and a list of all child files. ⚠️ IMPORTANT: Returns content with HTML tags (e.g., <p>, <br>, <strong>, etc.). You MUST account for these tags when using editDocument tool. Also shows the file hierarchy with metadata for all child files. \n\nℹ️ NOTE: This tool reads the currently opened file. To edit this file with editDocument, you MUST get its file ID first (displayed in the output). To read other files, use readFile with their file IDs.",
             parameters: {
               type: "object",
               properties: {
@@ -1179,7 +1182,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "readFile",
-            description: "Read the content of a specific file in the project as RAW HTML. ⚠️ IMPORTANT: Returns content with HTML tags (e.g., <p>, <br>, <strong>, etc.). You MUST account for these tags when using editDocument tool. Can read full content or just summary. Use the file ID from listProjectFiles (shown as 'ID: abc123' in the brackets). Also shows all child files with their metadata.\n\nℹ️ NOTE: For the currently opened file, use getCurrentDocument instead - both return the same data but getCurrentDocument is more direct for the active file.",
+            description: "Read the content of a specific file in the project as RAW HTML. ⚠️ IMPORTANT: Returns content with HTML tags (e.g., <p>, <br>, <strong>, etc.). You MUST account for these tags when using editDocument tool. Can read full content or just summary. Use the file ID from listProjectFiles (shown as 'ID: abc123' in the brackets). Also shows all child files with their metadata.\n\nℹ️ NOTE: Use this tool to read ANY file by its ID, including the currently opened file. If you want a shortcut for the current file specifically, use getCurrentDocument. The file ID is required for editDocument and setFileSummary tools.",
             parameters: {
               type: "object",
               properties: {
@@ -1211,20 +1214,20 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "setFileSummary",
-            description: "Set the summary (also called synopsis) for any file. If no fileId is provided, sets the summary for the currently opened file. (Prefer this tool to appending summary paragraphs to the documents - it sets the summary to file's metadata instead of modifying its content)",
+            description: "Set the summary (also called synopsis) for any file. Requires a file ID to specify which file to update. (Prefer this tool to appending summary paragraphs to the documents - it sets the summary to file's metadata instead of modifying its content)",
             parameters: {
               type: "object",
               properties: {
                 fileId: {
                   type: "string",
-                  description: "The ID of the file to set the summary for. If not provided, uses the currently opened file."
+                  description: "⚠️ REQUIRED: The ID of the file to set the summary for. Must provide a valid file ID."
                 },
                 summary: {
                   type: "string",
                   description: "The summary content to set for the file"
                 }
               },
-              required: ["summary"]
+              required: ["fileId", "summary"]
             }
           }
         },
@@ -1319,7 +1322,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "createFile",
-            description: "Create a new file in the project with optional content, summary, and organization settings.",
+            description: "Create a new file in the project.",
             parameters: {
               type: "object",
               properties: {
@@ -1352,13 +1355,13 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "editDocument",
-            description: "🚨 CRITICAL: FILES CONTAIN HTML TAGS - YOU MUST INCLUDE ALL TAGS IN old_string AND new_string 🚨\n\nEdit any file by finding and replacing text. Files are stored as HTML with tags like <p>, <br>, <strong>, etc.\n\n⚠️ MANDATORY HTML REQUIREMENT:\nWhen you read a file and see: <p>Hello world</p>\nYour old_string MUST be: \"<p>Hello world</p>\" (WITH the <p> and </p> tags)\nNOT: \"Hello world\" (this will FAIL - missing tags!)\n\nALWAYS copy the EXACT HTML including opening/closing tags from readFile/getCurrentDocument output.\n\n📋 HOW TO USE THIS TOOL:\n1. FIRST: Read the file with readFile/getCurrentDocument to see the EXACT HTML\n2. COPY: Copy the HTML text including ALL tags (<p>, </p>, etc.) exactly as shown\n3. INCLUDE CONTEXT: Add 3-5 lines before and after (with their HTML tags) to make it unique\n4. PASTE: Use that EXACT HTML (with all tags) as your old_string\n\n❌ COMMON MISTAKES THAT CAUSE FAILURES:\n• Forgetting to include <p> and </p> tags around text\n• Stripping HTML tags from the text\n• Not including enough surrounding context\n• Not matching whitespace/line breaks exactly\n\n✅ CORRECT EXAMPLE:\nFile contains: <p>First sentence.</p><p>Second sentence.</p>\nold_string: \"<p>First sentence.</p><p>Second sentence.</p>\"\n\n❌ WRONG EXAMPLE:\nFile contains: <p>First sentence.</p><p>Second sentence.</p>\nold_string: \"First sentence.\\nSecond sentence.\" ← WILL FAIL! Missing HTML tags!",
+            description: "🚨 CRITICAL: FILES CONTAIN HTML TAGS - YOU MUST INCLUDE ALL TAGS IN old_string AND new_string 🚨\n\nEdit any file by finding and replacing text. Files are stored as HTML with tags like <p>, <br>, <strong>, etc.\n\n⚠️ MANDATORY HTML REQUIREMENT:\nWhen you read a file and see: <p>Hello world</p>\nYour old_string MUST be: \"<p>Hello world</p>\" (WITH the <p> and </p> tags)\nNOT: \"Hello world\" (this will FAIL - missing tags!)\n\nALWAYS copy the EXACT HTML including opening/closing tags from readFile/getCurrentDocument output.\n\n📋 HOW TO USE THIS TOOL:\n1. FIRST: Read the target file with readFile to see the EXACT HTML (use getCurrentDocument only if editing the currently opened file)\n2. COPY: Copy the HTML text including ALL tags (<p>, </p>, etc.) exactly as shown\n3. INCLUDE CONTEXT: Add 3-5 lines before and after (with their HTML tags) to make it unique\n4. PASTE: Use that EXACT HTML (with all tags) as your old_string\n\n❌ COMMON MISTAKES THAT CAUSE FAILURES:\n• Forgetting to include <p> and </p> tags around text\n• Stripping HTML tags from the text\n• Not including enough surrounding context\n• Not matching whitespace/line breaks exactly\n\n✅ CORRECT EXAMPLE:\nFile contains: <p>First sentence.</p><p>Second sentence.</p>\nold_string: \"<p>First sentence.</p><p>Second sentence.</p>\"\n\n❌ WRONG EXAMPLE:\nFile contains: <p>First sentence.</p><p>Second sentence.</p>\nold_string: \"First sentence.\\nSecond sentence.\" ← WILL FAIL! Missing HTML tags!",
             parameters: {
               type: "object",
               properties: {
                 fileId: {
                   type: "string",
-                  description: "The ID of the file to edit. If not provided, edits the currently opened file."
+                  description: "⚠️ REQUIRED: The ID of the file to edit. Must provide a valid file ID from listProjectFiles or readFile. To edit the currently opened document, use getCurrentDocument first to get its content."
                 },
                 old_string: {
                   type: "string",
@@ -1369,7 +1372,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
                   description: "⚠️ MUST INCLUDE HTML TAGS! The replacement text WITH all HTML tags you want. Example: \"<p>New text</p>\" NOT \"New text\". This completely replaces old_string."
                 }
               },
-              required: ["old_string", "new_string"]
+              required: ["fileId", "old_string", "new_string"]
             }
           }
         }
@@ -1547,6 +1550,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
       // Add current file metadata
       if (currentFile) {
         output += `CURRENT FILE: ${currentFile.title}\n`;
+        output += `File ID: ${currentFile.id}\n`;
         output += `Path: ${fileStore.getFileNameWithPath(currentFile)}\n`;
 
         // Add file metadata
@@ -1730,25 +1734,20 @@ export const useAiAgentStore = defineStore('ai-agent', {
     executeSetFileSummaryTool(args) {
       const { fileId, summary } = args;
 
+      if (!fileId) {
+        return { error: "fileId parameter is required" };
+      }
+
       if (!summary) {
         return { error: "summary parameter is required" };
       }
 
       const fileStore = useFileStore();
-      let file;
 
-      if (fileId) {
-        // Use the provided fileId
-        file = fileStore.getFile(fileId);
-        if (!file) {
-          return { error: `File with ID ${fileId} not found` };
-        }
-      } else {
-        // Use the current active file
-        file = fileStore.selectedFile;
-        if (!file) {
-          return { error: "No file specified and no active file available" };
-        }
+      // Get the specified file
+      const file = fileStore.getFile(fileId);
+      if (!file) {
+        return { error: `File with ID ${fileId} not found` };
       }
 
       // Use the file store method to set the summary
@@ -2009,6 +2008,10 @@ export const useAiAgentStore = defineStore('ai-agent', {
       const { fileId, old_string, new_string } = args;
 
       // Validate required parameters
+      if (!fileId) {
+        return { error: "fileId parameter is required" };
+      }
+
       if (!old_string) {
         return { error: "old_string parameter is required" };
       }
@@ -2020,17 +2023,9 @@ export const useAiAgentStore = defineStore('ai-agent', {
       const fileStore = useFileStore();
 
       // Get target file
-      let targetFile;
-      if (fileId) {
-        targetFile = fileStore.getFile(fileId);
-        if (!targetFile) {
-          return { error: `File with ID ${fileId} not found` };
-        }
-      } else {
-        targetFile = fileStore.selectedFile;
-        if (!targetFile) {
-          return { error: "No file specified and no active file available" };
-        }
+      const targetFile = fileStore.getFile(fileId);
+      if (!targetFile) {
+        return { error: `File with ID ${fileId} not found` };
       }
 
       try {
