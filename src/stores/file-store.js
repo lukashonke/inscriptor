@@ -1248,10 +1248,6 @@ export const useFileStore = defineStore('files', {
         return { id: file.id, requestType: 'Upsert', file: file };
       });
 
-      for (const dirtyFile of dirtyFiles) {
-        dirtyFile.dirty = false;
-      }
-
       try {
         await this.saveProjectFiles(fileRequests);
 
