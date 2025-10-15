@@ -94,13 +94,29 @@
                     <q-input autogrow class="q-ml-sm text-caption" v-model="quickSelectionPromptInput" :shadow-text="quickSelectionPromptInput?.length === 0 ? 'enter command or question...' : ''" dense flat borderless autofocus @keydown="quickSelectionPromptKeydown"/>
                   </div>
                   <div class="col-auto flex items-center">
-                    <q-btn size="11px" dense flat no-caps padding="4px 6px" icon="mdi-close" color="primary" @click="quickSelectionPromptShown = false">
+                    <q-btn size="11px" dense flat no-caps padding="4px 6px" icon="mdi-close" color="primary" @click="quickSelectionPromptShown = false" />
+                    <q-btn v-if="quickSelectionCommandPrompts && quickSelectionCommandPrompts.length > 1" size="11px" dense flat no-caps padding="4px 6px" :icon="currentQuickSelectionPrompt?.icon || 'mdi-robot-outline'" color="primary">
+                      <q-menu>
+                        <q-list>
+                          <q-item v-for="prompt in quickSelectionCommandPrompts" :key="prompt.id" clickable v-close-popup @click="selectedQuickSelectionPrompt = prompt" :active="currentQuickSelectionPrompt?.id === prompt.id">
+                            <q-item-section avatar>
+                              <q-icon :name="prompt.icon || 'mdi-robot-outline'" :color="prompt.color" />
+                            </q-item-section>
+                            <q-item-section>
+                              <q-item-label class="text-caption">{{ prompt.title }}</q-item-label>
+                            </q-item-section>
+                          </q-item>
+                        </q-list>
+                      </q-menu>
+                      <q-tooltip :delay="1000">
+                        Select prompt
+                      </q-tooltip>
                     </q-btn>
                     <q-btn size="11px" dense flat no-caps padding="4px 6px" icon="mdi-dots-vertical" color="primary">
                       <q-popup-proxy transition-show="jump-down" transition-hide="fade" anchor="bottom left" self="top left" :offset="[0, 10]" @before-show="onOpenSelectionPromptSettings" @hide="onCloseSelectionPromptSettings">
                         <q-card class="" flat style="min-width: 400px; max-width: 500px;">
                           <q-card-section class="q-pb-none text-subtitle2">
-                            Quick Selection Prompt Settings
+                            Prompt Settings
                           </q-card-section>
                           <q-card-section>
                             <PromptContextSelector />
@@ -174,13 +190,29 @@
                     <q-input autogrow class="q-ml-sm text-caption" v-model="quickInlinePromptInput" :shadow-text="quickInlinePromptInput?.length === 0 ? 'enter command or question...' : ''" dense flat borderless autofocus @keydown="quickInlinePromptKeydown"/>
                   </div>
                   <div class="col-auto flex items-center">
-                    <q-btn size="11px" dense flat no-caps padding="4px 6px" icon="mdi-close" color="primary" @click="quickInlinePromptShown = false">
+                    <q-btn size="11px" dense flat no-caps padding="4px 6px" icon="mdi-close" color="primary" @click="quickInlinePromptShown = false" />
+                    <q-btn v-if="quickInlineCommandPrompts && quickInlineCommandPrompts.length > 1" size="11px" dense flat no-caps padding="4px 6px" :icon="currentQuickInlinePrompt?.icon || 'mdi-robot-outline'" color="primary">
+                      <q-menu>
+                        <q-list dense>
+                          <q-item v-for="prompt in quickInlineCommandPrompts" :key="prompt.id" clickable v-close-popup @click="selectedQuickInlinePrompt = prompt" :active="currentQuickInlinePrompt?.id === prompt.id">
+                            <q-item-section avatar>
+                              <q-icon :name="prompt.icon || 'mdi-robot-outline'" :color="prompt.color" />
+                            </q-item-section>
+                            <q-item-section>
+                              <q-item-label class="text-caption">{{ prompt.title }}</q-item-label>
+                            </q-item-section>
+                          </q-item>
+                        </q-list>
+                      </q-menu>
+                      <q-tooltip :delay="500">
+                        Select prompt
+                      </q-tooltip>
                     </q-btn>
                     <q-btn size="11px" dense flat no-caps padding="4px 6px" icon="mdi-dots-vertical" color="primary">
                       <q-popup-proxy transition-show="jump-down" transition-hide="fade" anchor="bottom left" self="top left" :offset="[0, 10]" @before-show="onOpenInlinePromptSettings" @hide="onCloseInlinePromptSettings">
                         <q-card class="" flat style="min-width: 400px; max-width: 500px;">
                           <q-card-section class="q-pb-none text-subtitle2">
-                            Quick Insert Prompt Settings
+                            Prompt Settings
                           </q-card-section>
                           <q-card-section>
                             <PromptContextSelector />
@@ -599,9 +631,11 @@ const spellcheck = ref('true');
 const wordFinderOpen = ref(false);
 const quickInlinePromptInput = ref('');
 const quickInlinePromptShown = ref(false);
+const selectedQuickInlinePrompt = ref(null);
 
 const quickSelectionPromptInput = ref('');
 const quickSelectionPromptShown = ref(false);
+const selectedQuickSelectionPrompt = ref(null);
 
 const aiBubbleMenu = ref(true);
 
@@ -639,58 +673,41 @@ function toggleAutomaticCorrections() {
 }
 
 function onOpenInlinePromptSettings() {
-  const prompts = quickInlineCommandPrompts.value;
+  const prompt = currentQuickInlinePrompt.value;
+  if (!prompt) return;
 
-  for (const prompt of prompts) {
-    const previousPromptContext = promptStore.getSavedPromptRunData(prompt, 'lastContext');
-
-    if(previousPromptContext) {
-      promptStore.promptContext = [...previousPromptContext];
-    } else {
-      promptStore.promptContext = [];
-    }
-
-    // only one
-    break;
+  const previousPromptContext = promptStore.getSavedPromptRunData(prompt, 'lastContext');
+  if(previousPromptContext) {
+    promptStore.promptContext = [...previousPromptContext];
+  } else {
+    promptStore.promptContext = [];
   }
 }
 
 function onCloseInlinePromptSettings() {
-  const prompts = quickInlineCommandPrompts.value;
+  const prompt = currentQuickInlinePrompt.value;
+  if (!prompt) return;
 
-  for (const prompt of prompts) {
-    promptStore.setSavedPromptRunData(prompt, 'lastContext', promptStore.promptContext ?? []);
-
-    // only one
-    break;
-  }
+  promptStore.setSavedPromptRunData(prompt, 'lastContext', promptStore.promptContext ?? []);
 }
 
 function onOpenSelectionPromptSettings() {
-  const prompts = quickSelectionCommandPrompts.value;
+  const prompt = currentQuickSelectionPrompt.value;
+  if (!prompt) return;
 
-  for (const prompt of prompts) {
-    const previousPromptContext = promptStore.getSavedPromptRunData(prompt, 'lastContext');
-    if(previousPromptContext) {
-      promptStore.promptContext = [...previousPromptContext];
-    } else {
-      promptStore.promptContext = [];
-    }
-
-    // only one
-    break;
+  const previousPromptContext = promptStore.getSavedPromptRunData(prompt, 'lastContext');
+  if(previousPromptContext) {
+    promptStore.promptContext = [...previousPromptContext];
+  } else {
+    promptStore.promptContext = [];
   }
 }
 
 function onCloseSelectionPromptSettings() {
-  const prompts = quickSelectionCommandPrompts.value;
+  const prompt = currentQuickSelectionPrompt.value;
+  if (!prompt) return;
 
-  for (const prompt of prompts) {
-    promptStore.setSavedPromptRunData(prompt, 'lastContext', promptStore.promptContext ?? []);
-
-    // only one
-    break;
-  }
+  promptStore.setSavedPromptRunData(prompt, 'lastContext', promptStore.promptContext ?? []);
 }
 
 function quickInlinePromptKeydown(e) {
@@ -1000,6 +1017,45 @@ const quickSelectionCommandPrompts = computed(() => {
   return getPredefinedPrompts('Quick Selection Prompt');
 })
 
+const currentQuickInlinePrompt = computed(() => {
+  const prompts = quickInlineCommandPrompts.value;
+  if (!prompts || prompts.length === 0) return null;
+
+  // If selected prompt exists in the list, use it, otherwise use first
+  if (selectedQuickInlinePrompt.value && prompts.find(p => p.id === selectedQuickInlinePrompt.value.id)) {
+    return selectedQuickInlinePrompt.value;
+  }
+
+  // Default to first prompt
+  return prompts[0];
+})
+
+const currentQuickSelectionPrompt = computed(() => {
+  const prompts = quickSelectionCommandPrompts.value;
+  if (!prompts || prompts.length === 0) return null;
+
+  // If selected prompt exists in the list, use it, otherwise use first
+  if (selectedQuickSelectionPrompt.value && prompts.find(p => p.id === selectedQuickSelectionPrompt.value.id)) {
+    return selectedQuickSelectionPrompt.value;
+  }
+
+  // Default to first prompt
+  return prompts[0];
+})
+
+// Watch for changes to available prompts and initialize selected prompt if needed
+watch(quickInlineCommandPrompts, (prompts) => {
+  if (prompts && prompts.length > 0 && !selectedQuickInlinePrompt.value) {
+    selectedQuickInlinePrompt.value = prompts[0];
+  }
+}, { immediate: true })
+
+watch(quickSelectionCommandPrompts, (prompts) => {
+  if (prompts && prompts.length > 0 && !selectedQuickSelectionPrompt.value) {
+    selectedQuickSelectionPrompt.value = prompts[0];
+  }
+}, { immediate: true })
+
 const autocompletePrompts = computed(() => {
   return getPredefinedPrompts('Auto Complete');
 })
@@ -1186,66 +1242,52 @@ async function triggerQuickPrompt(type, command) {
     return;
   }
 
-  if(type === 'inline') {
-    const prompts = quickInlineCommandPrompts.value;
+  quickCommandRunning.value = true;
 
-    quickCommandRunning.value = true;
+  try {
+    if(type === 'inline') {
+      const prompt = currentQuickInlinePrompt.value;
+      if (!prompt) return;
 
-    try {
-      for (const prompt of prompts) {
-        const onOutput = (fullText, newText, isFinished, isError, request, result) => {
-          quickCommandTemporaryResult.value = fullText;
-        };
+      const onOutput = (fullText, newText, isFinished, isError, request, result) => {
+        quickCommandTemporaryResult.value = fullText;
+      };
 
-        const request = {
-          prompt: prompt,
-          text: command,
-          clear: false,
-          forceBypassMoreParameters: true,
-          silent: true,
-          //userInputs: [selectedTextPromptInput],
-          onOutput: onOutput
-        }
-
-        const result = await executePromptClick2(request);
-
-        quickCommandTemporaryPromptResult.value = result;
-
-        break;
+      const request = {
+        prompt: prompt,
+        text: command,
+        clear: false,
+        forceBypassMoreParameters: true,
+        silent: true,
+        onOutput: onOutput
       }
-    } finally {
-      quickCommandRunning.value = false;
-    }
-  } else if(type === 'selection') {
-    const prompts = quickSelectionCommandPrompts.value;
 
-    quickCommandRunning.value = true;
+      const result = await executePromptClick2(request);
+      quickCommandTemporaryPromptResult.value = result;
 
-    try {
-      for (const prompt of prompts) {
-        const onOutput = (fullText, newText, isFinished, isError, request, result) => {
-          quickCommandTemporaryResult.value = fullText;
-        };
+    } else if(type === 'selection') {
+      const prompt = currentQuickSelectionPrompt.value;
+      if (!prompt) return;
 
-        const request = {
-          prompt: prompt,
-          text: command,
-          clear: false,
-          forceBypassMoreParameters: true,
-          silent: true,
-          userInputs: [selectedTextPromptInput],
-          onOutput: onOutput
-        }
+      const onOutput = (fullText, newText, isFinished, isError, request, result) => {
+        quickCommandTemporaryResult.value = fullText;
+      };
 
-        const result = await executePromptClick2(request);
-
-        quickCommandTemporaryPromptResult.value = result;
-
-        break;
+      const request = {
+        prompt: prompt,
+        text: command,
+        clear: false,
+        forceBypassMoreParameters: true,
+        silent: true,
+        userInputs: [selectedTextPromptInput],
+        onOutput: onOutput
       }
-    } finally {
-      quickCommandRunning.value = false;
+
+      const result = await executePromptClick2(request);
+      quickCommandTemporaryPromptResult.value = result;
     }
+  } finally {
+    quickCommandRunning.value = false;
   }
 }
 
