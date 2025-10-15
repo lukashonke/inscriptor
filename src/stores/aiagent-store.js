@@ -1499,7 +1499,11 @@ export const useAiAgentStore = defineStore('ai-agent', {
         }
 
         if (file.settings && file.settings.contextType && file.settings.contextType.label) {
-          metadata.push(`Context: ${file.settings.contextType.label}`);
+          metadata.push(`Context: '${file.settings.contextType.label}'`);
+        }
+
+        if (file.state && file.state.label) {
+          metadata.push(`State: ${file.state.label}`);
         }
 
         const wordCount = fileStore.getTextWords(file, true, false);
@@ -1511,6 +1515,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
         if (file.synopsis && file.synopsis.trim()) {
           const summaryWords = file.synopsis.trim().split(/\s+/).length;
           metadata.push(`Summary: ${summaryWords} words`);
+        }
+
+        // Add note word count if note exists
+        if (file.note && file.note.trim()) {
+          const noteWords = file.note.trim().split(/\s+/).length;
+          metadata.push(`Note: ${noteWords} words`);
         }
 
         if (file.children && file.children.length > 0) {
@@ -1561,11 +1571,11 @@ export const useAiAgentStore = defineStore('ai-agent', {
         }
 
         if (currentFile.settings && currentFile.settings.contextType && currentFile.settings.contextType.label) {
-          metadata.push(`Context: ${currentFile.settings.contextType.label}`);
+          metadata.push(`Context: '${currentFile.settings.contextType.label}'`);
         }
 
-        if (currentFile.state && currentFile.state.trim && currentFile.state.trim()) {
-          metadata.push(`State: ${currentFile.state}`);
+        if (currentFile.state && currentFile.state.label) {
+          metadata.push(`State: ${currentFile.state.label}`);
         }
 
         const wordCount = fileStore.getTextWords(currentFile, true, false);
@@ -1586,6 +1596,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
         output += "The document is empty.";
       } else {
         output += documentContent;
+      }
+
+      // Add file note if it exists
+      if (currentFile && currentFile.note && currentFile.note.trim()) {
+        output += '\n\nFILE NOTE:\n';
+        output += currentFile.note;
       }
 
       // Add children files information after content
@@ -1673,12 +1689,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
       // Add context type if set
       if (file.settings && file.settings.contextType && file.settings.contextType.label) {
-        metadata.push(`Context: ${file.settings.contextType.label}`);
+        metadata.push(`Context: '${file.settings.contextType.label}'`);
       }
 
       // Add state if set
-      if (file.state && file.state.trim && file.state.trim()) {
-        metadata.push(`State: ${file.state}`);
+      if (file.state && file.state.label) {
+        metadata.push(`State: ${file.state.label}`);
       }
 
       // Add word count
@@ -1690,6 +1706,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
       // Add icon if not default
       if (file.icon && file.icon !== 'mdi-file-outline') {
         metadata.push(`Icon: ${file.icon}`);
+      }
+
+      // Add note word count if note exists
+      if (file.note && file.note.trim()) {
+        const noteWords = file.note.trim().split(/\s+/).length;
+        metadata.push(`Note: ${noteWords} words`);
       }
 
       // Build output based on read type
@@ -1717,6 +1739,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
         } else {
           output += 'This file is empty.';
         }
+      }
+
+      // Add file note if it exists
+      if (file.note && file.note.trim()) {
+        output += '\n\nFILE NOTE:\n';
+        output += file.note;
       }
 
       // Add children files information if available
