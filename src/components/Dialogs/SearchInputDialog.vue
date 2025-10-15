@@ -24,7 +24,7 @@
         </q-list>
       </q-card-section>
 
-      <q-card-section v-if="fileNameResults.length > 0 || fileContentResults.length > 0">
+      <q-card-section v-if="fileNameResults.length > 0 || fileSynopsisResults.length > 0 || fileNoteResults.length > 0 || fileContentResults.length > 0">
         <q-list dense>
           <q-item v-for="result in fileNameResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)">
             <q-item-section side>
@@ -48,6 +48,44 @@
             </q-item-section>
           </q-item>
         </q-list>
+        <q-list dense>
+          <q-item v-for="result in fileSynopsisResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)">
+            <q-item-section side>
+              <q-icon :name="result.file.icon ?? 'mdi-file-document-outline'" :color="result.file.state?.color" class="no-padding no-margin" size="17px" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ result.file.title }}</q-item-label>
+            </q-item-section>
+            <q-item-section class="bg-grey-2">
+              <q-item-label ><div v-html="result.annotation"  /></q-item-label>
+            </q-item-section>
+            <q-item-section side class="text-caption">
+              Syn.
+              <q-tooltip :delay="500">
+                Contained in the synopsis of the file.
+              </q-tooltip>
+            </q-item-section>
+          </q-item>
+        </q-list>
+        <q-list dense>
+          <q-item v-for="result in fileNoteResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)">
+            <q-item-section side>
+              <q-icon :name="result.file.icon ?? 'mdi-file-document-outline'" :color="result.file.state?.color" class="no-padding no-margin" size="17px" />
+            </q-item-section>
+            <q-item-section>
+              <q-item-label>{{ result.file.title }}</q-item-label>
+            </q-item-section>
+            <q-item-section class="bg-yellow-2">
+              <q-item-label class=""><div v-html="result.annotation"  /></q-item-label>
+            </q-item-section>
+            <q-item-section side class="text-caption">
+              Note
+              <q-tooltip :delay="500">
+                Contained in the note of the file.
+              </q-tooltip>
+            </q-item-section>
+          </q-item>
+        </q-list>
       </q-card-section>
 
     </q-card>
@@ -65,6 +103,8 @@ const fileStore = useFileStore();
 const searchQuery = ref('');
 
 const fileNameResults = ref([]);
+const fileSynopsisResults = ref([]);
+const fileNoteResults = ref([]);
 const fileContentResults = ref([]);
 
 const noResults = ref(false);
@@ -78,6 +118,8 @@ watch(searchQuery, (v) => {
 function doSearch() {
   if(!searchQuery.value || searchQuery.value.length < 1) {
     fileNameResults.value = [];
+    fileSynopsisResults.value = [];
+    fileNoteResults.value = [];
     fileContentResults.value = [];
     noResults.value = false;
     return;
@@ -101,6 +143,52 @@ function doSearch() {
 
     for (const child of file.children ?? []) {
       filterFilesByTitles(child, results);
+    }
+  }
+
+  function filterFilesBySynopsis(file, results) {
+    const synopsis = file.synopsis || '';
+    const synopsisLower = synopsis.toLowerCase();
+    const queryLower = searchQuery.value.toLowerCase();
+    const index = synopsisLower.indexOf(queryLower);
+
+    if (index !== -1) {
+      const start = Math.max(0, index - 20);
+      const end = Math.min(synopsisLower.length, index + queryLower.length + 20);
+      const snippet = '...' + synopsis.substring(start, end) + '...';
+      const highlightedSnippet = snippet.replace(new RegExp(queryLower, 'gi'), (match) => `<span class="highlight">${match}</span>`);
+
+      results.push({
+        file: file,
+        annotation: highlightedSnippet
+      });
+    }
+
+    for (const child of file.children ?? []) {
+      filterFilesBySynopsis(child, results);
+    }
+  }
+
+  function filterFilesByNote(file, results) {
+    const note = file.note || '';
+    const noteLower = note.toLowerCase();
+    const queryLower = searchQuery.value.toLowerCase();
+    const index = noteLower.indexOf(queryLower);
+
+    if (index !== -1) {
+      const start = Math.max(0, index - 20);
+      const end = Math.min(noteLower.length, index + queryLower.length + 20);
+      const snippet = '...' + note.substring(start, end) + '...';
+      const highlightedSnippet = snippet.replace(new RegExp(queryLower, 'gi'), (match) => `<span class="highlight">${match}</span>`);
+
+      results.push({
+        file: file,
+        annotation: highlightedSnippet
+      });
+    }
+
+    for (const child of file.children ?? []) {
+      filterFilesByNote(child, results);
     }
   }
 
@@ -128,21 +216,29 @@ function doSearch() {
   }
 
   const resultsTitle = [];
+  const resultsSynopsis = [];
+  const resultsNote = [];
   const resultsContent = [];
 
   for(const file of fileStore.files) {
     filterFilesByTitles(file, resultsTitle);
+    filterFilesBySynopsis(file, resultsSynopsis);
+    filterFilesByNote(file, resultsNote);
     filterFilesByContent(file, resultsContent);
   }
 
   fileNameResults.value = [...resultsTitle]
+  fileSynopsisResults.value = [...resultsSynopsis]
+  fileNoteResults.value = [...resultsNote]
   fileContentResults.value = [...resultsContent]
 
   // limit 10 results
   fileNameResults.value = fileNameResults.value.slice(0, 10);
+  fileSynopsisResults.value = fileSynopsisResults.value.slice(0, 10);
+  fileNoteResults.value = fileNoteResults.value.slice(0, 10);
   fileContentResults.value = fileContentResults.value.slice(0, 10);
 
-  if(fileNameResults.value.length === 0 && fileContentResults.value.length === 0) {
+  if(fileNameResults.value.length === 0 && fileSynopsisResults.value.length === 0 && fileNoteResults.value.length === 0 && fileContentResults.value.length === 0) {
     noResults.value = true;
   } else {
     noResults.value = false;
