@@ -42,7 +42,7 @@
 </template>
 
 <script setup>
-import {computed, onBeforeMount, onMounted, watch} from 'vue';
+import {computed, onBeforeMount, onMounted, onUnmounted, watch} from 'vue';
 import {useFileStore} from "stores/file-store";
 import AppToolbar from "components/Toolbar/AppToolbar.vue";
 import {useLayoutStore} from "stores/layout-store";
@@ -148,6 +148,13 @@ watch(user, async (currentUser, previousUser) => {
   }
 })
 
+// Browser history navigation handler
+function handlePopState(event) {
+  if (event.state && event.state.fileId) {
+    fileStore.selectFileFromHistory(event.state.fileId);
+  }
+}
+
 onMounted(async () => {
 
   const currentUser = await getCurrentUser();
@@ -216,10 +223,27 @@ onMounted(async () => {
   if(!layoutStore.loginDialogOpen && window.location.hash.includes('upgrade')) {
     layoutStore.userInfoDialogOpen = true;
   }
+
+  // Initialize browser history with current file
+  if (fileStore.selectedFile) {
+    try {
+      window.history.replaceState({ fileId: fileStore.selectedFile.id }, '', '');
+    } catch (e) {
+      console.error('Failed to initialize history state:', e);
+    }
+  }
+
+  // Register popstate listener for browser back/forward navigation
+  window.addEventListener('popstate', handlePopState);
 });
 
 onBeforeMount(async () => {
   promptStore.initialise();
+});
+
+onUnmounted(() => {
+  // Cleanup popstate listener
+  window.removeEventListener('popstate', handlePopState);
 });
 
 if(layoutStore.runsInDesktopApp()) {

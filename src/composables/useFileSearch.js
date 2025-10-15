@@ -59,6 +59,7 @@ export function useFileSearch() {
         title: file.title,
         content: file.content || '',
         synopsis: file.synopsis || '',
+        note: file.note || '',
         fullPath: fullPath,
         originalFile: file
       });
@@ -96,17 +97,19 @@ export function useFileSearch() {
       case 'title': return ['title'];
       case 'content': return ['content'];
       case 'synopsis': return ['synopsis'];
+      case 'note': return ['note'];
       case 'all':
-      default: return ['title', 'content', 'synopsis'];
+      default: return ['title', 'content', 'synopsis', 'note'];
     }
   }
 
   function determineMatchType(matches) {
     if (!matches || matches.length === 0) return 'unknown';
 
-    // Priority: title > synopsis > content
+    // Priority: title > synopsis > note > content
     if (matches.some(m => m.key === 'title')) return 'title';
     if (matches.some(m => m.key === 'synopsis')) return 'synopsis';
+    if (matches.some(m => m.key === 'note')) return 'note';
     if (matches.some(m => m.key === 'content')) return 'content';
 
     return matches[0].key;
@@ -180,7 +183,7 @@ export function useFileSearch() {
     }
 
     // Fallback: try to find query in any field
-    for (const field of ['title', 'synopsis', 'content']) {
+    for (const field of ['title', 'synopsis', 'note', 'content']) {
       const text = file[field] || '';
       const index = text.toLowerCase().indexOf(queryLower);
 

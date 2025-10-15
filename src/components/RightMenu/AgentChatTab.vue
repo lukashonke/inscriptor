@@ -89,6 +89,22 @@
                       </q-select>
                     </div>
                   </div>
+                  <template v-if="promptForAgentChatId && supportsReasoning(promptStore.getModel(promptStore.currentModelForAgentChatId))">
+                    <div class="row text-caption q-mt-md">
+                      Reasoning Effort:
+                    </div>
+                    <div class="row">
+                      <div class="col">
+                        <q-btn-toggle
+                          unelevated
+                          no-caps
+                          class="bordered"
+                          :options="reasoningEffortOptions"
+                          v-model="reasoningEffortForAgentChat"
+                        />
+                      </div>
+                    </div>
+                  </template>
                 </q-card-section>
               </q-card>
             </div>
@@ -303,6 +319,23 @@
                       </q-select>
                     </div>
                   </div>
+                  <template v-if="promptForAgentChatId && supportsReasoning(promptStore.getModel(promptStore.currentModelForAgentChatId))">
+                    <div class="row text-caption q-mt-md">
+                      <q-icon name="mdi-thought-bubble" size="15px" class="q-mr-xs" />
+                      Reasoning Effort:
+                    </div>
+                    <div class="row">
+                      <div class="col">
+                        <q-btn-toggle
+                          unelevated
+                          no-caps
+                          class="bordered"
+                          :options="reasoningEffortOptions"
+                          v-model="reasoningEffortForAgentChat"
+                        />
+                      </div>
+                    </div>
+                  </template>
                 </q-card-section>
               </q-slide-transition>
 
@@ -324,7 +357,7 @@ import { Dialog } from 'quasar';
 import ToolCallDisplay from './ToolCallDisplay.vue';
 import AgentPromptResult from './AgentPromptResult.vue';
 import FileDetailItem from 'components/Common/Files/FileDetailItem.vue';
-import {isImageGenerationModel} from 'src/common/helpers/modelHelper';
+import {isImageGenerationModel, reasoningEffortValuesLabeled, supportsReasoning} from 'src/common/helpers/modelHelper';
 import {useLayoutStore} from 'stores/layout-store';
 
 const aiAgentStore = useAiAgentStore();
@@ -443,6 +476,8 @@ const promptForAgentChatId = computed({
     if (selectedPrompt) {
       promptStore.currentModelForAgentChatId = selectedPrompt.modelId;
       promptStore.currentPromptForAgentChatId = value.value;
+      // Reset reasoning effort when prompt changes
+      promptStore.currentReasoningEffortForAgentChat = null;
     }
   }
 });
@@ -456,6 +491,24 @@ const currentModelName = computed(() => {
 const currentPromptName = computed(() => {
   const prompt = promptStore.prompts.find(p => p.id === promptStore.currentPromptForAgentChatId);
   return prompt?.title || null;
+});
+
+// Reasoning effort options with "Unset" as default
+const reasoningEffortOptions = computed(() => {
+  return [
+    { label: 'Default', value: null },
+    ...reasoningEffortValuesLabeled
+  ];
+});
+
+// Reasoning effort computed property
+const reasoningEffortForAgentChat = computed({
+  get: () => {
+    return promptStore.currentReasoningEffortForAgentChat;
+  },
+  set: (value) => {
+    promptStore.currentReasoningEffortForAgentChat = value;
+  }
 });
 
 // Batch approval computed properties
@@ -492,7 +545,7 @@ async function sendMessage() {
 
   const message = inputText.value.trim();
 
-  await aiAgentStore.executeAgentPrompt(message, prompt);
+  await aiAgentStore.executeAgentPrompt(message, prompt, promptStore.currentReasoningEffortForAgentChat);
 
   // Clear input and restore focus after the async operation
   inputText.value = '';

@@ -5,6 +5,69 @@ import { useAiAgentStore } from 'stores/aiagent-store'
 import { useEditorStore } from 'stores/editor-store'
 import { usePromptStore } from 'stores/prompt-store'
 
+// Plugin to handle page links with special page: protocol
+function pageLinkPlugin(md) {
+  // Store original link renderer
+  const defaultLinkOpenRender = md.renderer.rules.link_open || function(tokens, idx, options, env, self) {
+    return self.renderToken(tokens, idx, options);
+  };
+
+  const defaultLinkCloseRender = md.renderer.rules.link_close || function(tokens, idx, options, env, self) {
+    return self.renderToken(tokens, idx, options);
+  };
+
+  // Override link_open renderer to detect UUID patterns (file IDs)
+  md.renderer.rules.link_open = function (tokens, idx, options, env, self) {
+    const token = tokens[idx];
+    const hrefIndex = token.attrIndex('href');
+
+    if (hrefIndex >= 0) {
+      const href = token.attrs[hrefIndex][1];
+
+      // Check if this is a UUID pattern (file ID)
+      // UUIDs are typically 36 characters with hyphens, but we'll be flexible
+      const uuidPattern = /^[a-f0-9\-]{36}$/i;
+
+      if (uuidPattern.test(href)) {
+        const fileId = href;
+
+        // Return custom button HTML with data attribute
+        return `<button class="page-link-btn" data-file-id="${md.utils.escapeHtml(fileId)}" title="Click to open this page">` +
+               `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="16" height="16" style="margin-right: 4px;">` +
+               `<path d="M13,9H18.5L13,3.5V9M6,2H14L20,8V20A2,2 0 0,1 18,22H6C4.89,22 4,21.1 4,20V4C4,2.89 4.89,2 6,2M15,18V16H6V18H15M18,14V12H6V14H18Z" fill="currentColor"/>` +
+               `</svg>`;
+      }
+    }
+
+    // For regular links, use default renderer
+    return defaultLinkOpenRender(tokens, idx, options, env, self);
+  };
+
+  // Override link_close renderer
+  md.renderer.rules.link_close = function (tokens, idx, options, env, self) {
+    // Check if previous link_open was a page link by looking back
+    let isPageLink = false;
+    const uuidPattern = /^[a-f0-9\-]{36}$/i;
+
+    for (let i = idx - 1; i >= 0; i--) {
+      if (tokens[i].type === 'link_open') {
+        const hrefIndex = tokens[i].attrIndex('href');
+        if (hrefIndex >= 0 && uuidPattern.test(tokens[i].attrs[hrefIndex][1])) {
+          isPageLink = true;
+        }
+        break;
+      }
+    }
+
+    if (isPageLink) {
+      return '</button>';
+    }
+
+    // For regular links, use default renderer
+    return defaultLinkCloseRender(tokens, idx, options, env, self);
+  };
+}
+
 // Plugin to handle prose blocks with paragraph IDs and diffs
 function proseBlockPlugin(md) {
   // Override fence renderer for code blocks
@@ -117,6 +180,9 @@ export default boot(({ app }) => {
   mdRenderer = markdownit({
 
   });
+
+  // Use the page link plugin
+  mdRenderer.use(pageLinkPlugin);
 
   // Use the prose block plugin
   mdRenderer.use(proseBlockPlugin);

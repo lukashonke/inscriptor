@@ -45,6 +45,7 @@ export const usePromptStore = defineStore('prompts', {
 
     currentModelForAgentChatId: null,
     currentPromptForAgentChatId: null,
+    currentReasoningEffortForAgentChat: null,
 
     etag: null,
     tabs: [],
@@ -3085,6 +3086,7 @@ export const usePromptStore = defineStore('prompts', {
         currentChatInsertUserQueries: this.currentChatInsertUserQueries,
         currentModelForAgentChatId: this.currentModelForAgentChatId,
         currentPromptForAgentChatId: this.currentPromptForAgentChatId,
+        currentReasoningEffortForAgentChat: this.currentReasoningEffortForAgentChat,
         currentDataPath: this.currentDataPath,
         currentModelPath: this.currentModelPath,
         defaultFileTemplate: this.defaultFileTemplate,
@@ -3119,7 +3121,8 @@ export const usePromptStore = defineStore('prompts', {
       this.currentChatInsertUserQueries = true;
 
       this.currentPromptForAgentChatId = null;
-      this.currentPromptForAgentChatId = null;
+      this.currentModelForAgentChatId = null;
+      this.currentReasoningEffortForAgentChat = null;
 
       this.etag = null;
 
@@ -3278,6 +3281,10 @@ export const usePromptStore = defineStore('prompts', {
 
       if(aiSettings.currentPromptForAgentChatId) {
         this.currentPromptForAgentChatId = aiSettings.currentPromptForAgentChatId;
+      }
+
+      if(aiSettings.currentReasoningEffortForAgentChat) {
+        this.currentReasoningEffortForAgentChat = aiSettings.currentReasoningEffortForAgentChat;
       }
 
       if(aiSettings.currentChatInsertUserQueries !== undefined) {

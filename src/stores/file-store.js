@@ -627,7 +627,8 @@ export const useFileStore = defineStore('files', {
 
       return wordsCount + " words";
     },
-    selectFile(file, focusTitleInput) {
+    selectFile(file, focusTitleInput, fromHistory = false) {
+      const previousFile = this.selectedFile;
       this.selectedFile = file;
 
       if(focusTitleInput) {
@@ -647,6 +648,15 @@ export const useFileStore = defineStore('files', {
 
       if(file && !file.dirty) {
         this.loadFileFromCloud(file.id);
+      }
+
+      // Push to browser history for navigation
+      if (file && !fromHistory && previousFile?.id !== file.id) {
+        try {
+          window.history.pushState({ fileId: file.id }, '', '');
+        } catch (e) {
+          console.error('Failed to push history state:', e);
+        }
       }
     },
     async loadFileFromCloud(fileId) {
@@ -995,6 +1005,15 @@ export const useFileStore = defineStore('files', {
 
       // Clean up files older than 14 days from trash bin
       await this.cleanupOldDeletedFiles();
+
+      // Initialize browser history with the first file
+      if (this.selectedFile) {
+        try {
+          window.history.replaceState({ fileId: this.selectedFile.id }, '', '');
+        } catch (e) {
+          console.error('Failed to initialize history in loadProject:', e);
+        }
+      }
     },
     getProjectData(excludeFiles = false) {
       return {
@@ -1229,10 +1248,6 @@ export const useFileStore = defineStore('files', {
         return { id: file.id, requestType: 'Upsert', file: file };
       });
 
-      for (const dirtyFile of dirtyFiles) {
-        dirtyFile.dirty = false;
-      }
-
       try {
         await this.saveProjectFiles(fileRequests);
 
@@ -1443,6 +1458,19 @@ export const useFileStore = defineStore('files', {
       this.files.push(trashBinFile);
       this.initialiseParents(this.files, null);
       return trashBinFile;
+    },
+    // Navigate to file from browser history
+    selectFileFromHistory(fileId) {
+      if (!fileId) return;
+
+      const file = this.getFile(fileId);
+      if (!file) {
+        console.warn('File not found in history:', fileId);
+        return;
+      }
+
+      // Pass fromHistory=true to prevent pushing to history again
+      this.selectFile(file, false, true);
     },
   }
 });

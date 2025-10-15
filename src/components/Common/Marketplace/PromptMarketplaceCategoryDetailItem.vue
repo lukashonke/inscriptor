@@ -339,7 +339,24 @@
             }
 
             if(itemDetail.data.settingsOverrides.promptForChat) {
-            }promptStore.currentPromptForChatId = itemDetail.data.settingsOverrides.promptForChat;
+              promptStore.currentPromptForChatId = itemDetail.data.settingsOverrides.promptForChat;
+            }
+
+            if(itemDetail.data.settingsOverrides.brainstormingPrompt) {
+              const prompt = promptStore.getPromptById(itemDetail.data.settingsOverrides.brainstormingPrompt);
+              promptStore.brainstormingPrompt = {
+                label: prompt.title,
+                value: prompt.id,
+              };
+            }
+
+            if(itemDetail.data.settingsOverrides.suggestPrompt) {
+              const prompt = promptStore.getPromptById(itemDetail.data.settingsOverrides.suggestPrompt);
+              promptStore.suggestingPrompt = {
+                label: prompt.title,
+                value: prompt.id,
+              };
+            }
           }
         }
       });
