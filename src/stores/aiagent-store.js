@@ -1550,65 +1550,123 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
       return output;
     },
+    // Helper method to format file output for agent tools
+    formatFileOutputForAgent(file, fileStore, options = {}) {
+      const {
+        isCurrentFile = false,
+        readType = 'full',
+        includeChildFileSummaries = false,
+        maxSummaryLength = 100,
+        includeFileId = true,
+        includeIcon = false,
+        metadataFormat = 'inline', // 'inline' or 'multiline'
+        addChildrenUsageNote = false
+      } = options;
+
+      let output = '';
+
+      // Add file header
+      if (isCurrentFile) {
+        output += `CURRENT FILE: ${file.title}\n`;
+        if (includeFileId) {
+          output += `File ID: ${file.id}\n`;
+        }
+      } else {
+        output += `FILE: ${file.title}\n`;
+      }
+
+      // Add file path
+      const filePath = fileStore.getFileNameWithPath(file);
+      output += `Path: ${filePath}\n`;
+
+      // Build file metadata
+      const metadata = [];
+
+      if (file.labels && file.labels.length > 0) {
+        const labelNames = file.labels.map(label => typeof label === 'string' ? label : label.label).join(', ');
+        metadata.push(`Labels: ${labelNames}`);
+      }
+
+      if (file.settings && file.settings.contextType && file.settings.contextType.label) {
+        metadata.push(`Context: '${file.settings.contextType.label}'`);
+      }
+
+      if (file.state && file.state.label) {
+        metadata.push(`State: ${file.state.label}`);
+      }
+
+      const wordCount = fileStore.getTextWords(file, true, false);
+      if (wordCount) {
+        metadata.push(metadataFormat === 'inline' ? `Word Count: ${wordCount}` : `Word Count: ${wordCount}`);
+      }
+
+      if (includeIcon && file.icon && file.icon !== 'mdi-file-outline') {
+        metadata.push(`Icon: ${file.icon}`);
+      }
+
+      if (metadata.length > 0) {
+        output += metadata.join(metadataFormat === 'inline' ? ' | ' : '\n') + '\n';
+      }
+
+      output += '\n';
+
+      // Add content based on read type
+      if (readType === 'summary') {
+        output += 'SUMMARY:\n';
+        if (file.synopsis && file.synopsis.trim()) {
+          output += file.synopsis;
+        } else {
+          output += 'No summary available for this file.';
+        }
+      } else {
+        // Full content
+        output += isCurrentFile ? 'DOCUMENT CONTENT:\n' : 'CONTENT:\n';
+        if (file.content && file.content.trim()) {
+          output += file.content;
+        } else {
+          output += isCurrentFile ? 'The document is empty.' : 'This file is empty.';
+        }
+      }
+
+      // Add file note if it exists
+      if (file.note && file.note.trim()) {
+        output += '\n\nFILE NOTE:\n';
+        output += file.note;
+      }
+
+      // Add children files information if available
+      if (file.children && file.children.length > 0) {
+        output += '\n\nCHILDREN FILES:\n';
+        output += this.formatFileTreeForAgent(file.children, fileStore, 0, "", includeChildFileSummaries, maxSummaryLength);
+        if (addChildrenUsageNote) {
+          output += `\nTo read any child file, use: readFile({"fileId": "<child_id>", "readType": "full" or "summary"})`;
+        }
+      }
+
+      return output;
+    },
     executeGetCurrentDocumentTool(args) {
       const { includeChildFileSummaries = false, maxSummaryLength = 100 } = args || {};
       const fileStore = useFileStore();
       const currentFile = fileStore.selectedFile;
 
-      let output = '';
-
-      // Add current file metadata
-      if (currentFile) {
-        output += `CURRENT FILE: ${currentFile.title}\n`;
-        output += `File ID: ${currentFile.id}\n`;
-        output += `Path: ${fileStore.getFileNameWithPath(currentFile)}\n`;
-
-        // Add file metadata
-        const metadata = [];
-        if (currentFile.labels && currentFile.labels.length > 0) {
-          const labelNames = currentFile.labels.map(label => typeof label === 'string' ? label : label.label).join(', ');
-          metadata.push(`Labels: ${labelNames}`);
-        }
-
-        if (currentFile.settings && currentFile.settings.contextType && currentFile.settings.contextType.label) {
-          metadata.push(`Context: '${currentFile.settings.contextType.label}'`);
-        }
-
-        if (currentFile.state && currentFile.state.label) {
-          metadata.push(`State: ${currentFile.state.label}`);
-        }
-
-        const wordCount = fileStore.getTextWords(currentFile, true, false);
-        if (wordCount) {
-          metadata.push(`Word Count: ${wordCount}`);
-        }
-
-        if (metadata.length > 0) {
-          output += metadata.join(' | ') + '\n';
-        }
-
-        output += '\nDOCUMENT CONTENT:\n';
+      if (!currentFile) {
+        return {
+          success: true,
+          content: 'No file is currently open.'
+        };
       }
 
-      const documentContent = currentFile ? (currentFile.content || '') : '';
-
-      if (!documentContent || !documentContent.trim()) {
-        output += "The document is empty.";
-      } else {
-        output += documentContent;
-      }
-
-      // Add file note if it exists
-      if (currentFile && currentFile.note && currentFile.note.trim()) {
-        output += '\n\nFILE NOTE:\n';
-        output += currentFile.note;
-      }
-
-      // Add children files information after content
-      if (currentFile && currentFile.children && currentFile.children.length > 0) {
-        output += `\n\nCHILDREN FILES:\n`;
-        output += this.formatFileTreeForAgent(currentFile.children, fileStore, 0, "", includeChildFileSummaries, maxSummaryLength);
-      }
+      const output = this.formatFileOutputForAgent(currentFile, fileStore, {
+        isCurrentFile: true,
+        readType: 'full',
+        includeChildFileSummaries,
+        maxSummaryLength,
+        includeFileId: true,
+        includeIcon: true,
+        metadataFormat: 'inline',
+        addChildrenUsageNote: true
+      });
 
       return {
         success: true,
@@ -1675,84 +1733,16 @@ export const useAiAgentStore = defineStore('ai-agent', {
         return { error: `File with ID ${fileId} not found` };
       }
 
-      // Build file metadata
-      const metadata = [];
-
-      // Add file path
-      const filePath = fileStore.getFileNameWithPath(file);
-
-      // Add labels if any
-      if (file.labels && file.labels.length > 0) {
-        const labelNames = file.labels.map(label => typeof label === 'string' ? label : label.label).join(', ');
-        metadata.push(`Labels: ${labelNames}`);
-      }
-
-      // Add context type if set
-      if (file.settings && file.settings.contextType && file.settings.contextType.label) {
-        metadata.push(`Context: '${file.settings.contextType.label}'`);
-      }
-
-      // Add state if set
-      if (file.state && file.state.label) {
-        metadata.push(`State: ${file.state.label}`);
-      }
-
-      // Add word count
-      const wordCount = fileStore.getTextWords(file, true, false);
-      if (wordCount) {
-        metadata.push(`Word Count: ${wordCount}`);
-      }
-
-      // Add icon if not default
-      if (file.icon && file.icon !== 'mdi-file-outline') {
-        metadata.push(`Icon: ${file.icon}`);
-      }
-
-      // Add note word count if note exists
-      if (file.note && file.note.trim()) {
-        const noteWords = file.note.trim().split(/\s+/).length;
-        metadata.push(`Note: ${noteWords} words`);
-      }
-
-      // Build output based on read type
-      let output = `FILE: ${file.title}\n`;
-      output += `Path: ${filePath}\n`;
-
-      if (metadata.length > 0) {
-        output += metadata.join('\n') + '\n';
-      }
-
-      output += '\n';
-
-      if (readType === 'summary') {
-        output += 'SUMMARY:\n';
-        if (file.synopsis && file.synopsis.trim()) {
-          output += file.synopsis;
-        } else {
-          output += 'No summary available for this file.';
-        }
-      } else {
-        // Default to full content
-        output += 'CONTENT:\n';
-        if (file.content && file.content.trim()) {
-          output += file.content;
-        } else {
-          output += 'This file is empty.';
-        }
-      }
-
-      // Add file note if it exists
-      if (file.note && file.note.trim()) {
-        output += '\n\nFILE NOTE:\n';
-        output += file.note;
-      }
-
-      // Add children files information if available
-      if (file.children && file.children.length > 0) {
-        output += '\n\nCHILDREN FILES:\n';
-        output += this.formatFileTreeForAgent(file.children, fileStore, 0, "", includeChildFileSummaries, maxSummaryLength);
-        output += `\nTo read any child file, use: readFile({"fileId": "<child_id>", "readType": "full" or "summary"})`;
-      }
+      const output = this.formatFileOutputForAgent(file, fileStore, {
+        isCurrentFile: false,
+        readType,
+        includeChildFileSummaries,
+        maxSummaryLength,
+        includeFileId: false,
+        includeIcon: true,
+        metadataFormat: 'multiline',
+        addChildrenUsageNote: true
+      });
 
       return {
         success: true,
