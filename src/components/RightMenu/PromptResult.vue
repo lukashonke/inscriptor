@@ -32,8 +32,16 @@
       <div class="chat-message chat-user-message q-mt-md" style="">
         <div class="chat-message-header">
           <span class="chat-message-role">You:</span>
+          <q-btn
+            flat
+            dense
+            size="sm"
+            :icon="userPromptExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+            @click="toggleUserPromptExpanded()"
+            class="q-ml-xs"
+          />
         </div>
-        <div class="chat-message-content">
+        <div class="chat-message-content" :class="{ 'chat-message-content-collapsed': !userPromptExpanded }">
           <contenteditable tag="span" ref="userPromptInput" contenteditable="true" v-model="promptResultInput" :no-html="false">
           </contenteditable>
         </div>
@@ -188,11 +196,22 @@
               <div v-if="!appendMessagesExpanded" class="chat-message chat-user-message q-my-sm" @click="appendMessagesExpanded = true">
                 <div class="chat-message-header">
                   <span class="chat-message-role">You:</span>
-                  <span class="chat-message-time">
+
+                  <span>
+                    <span class="chat-message-time">
                     <q-btn icon="mdi-expand-all-outline" size="sm" @click="appendMessagesExpanded = true" color="primary" flat dense no-caps />
                   </span>
+                    <q-btn
+                      flat
+                      dense
+                      size="sm"
+                      :icon="lastAppendMessageExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+                      @click.stop="toggleLastAppendMessageExpanded()"
+                      class="q-ml-sm"
+                    />
+                  </span>
                 </div>
-                <div class="chat-message-content">
+                <div class="chat-message-content" :class="{ 'chat-message-content-collapsed': !lastAppendMessageExpanded }">
                   {{ lastUserAppendMessage.text }}
                 </div>
               </div>
@@ -215,8 +234,16 @@
                     <div class="chat-message chat-user-message q-my-sm">
                       <div class="chat-message-header">
                         <span class="chat-message-role">You:</span>
+                        <q-btn
+                          flat
+                          dense
+                          size="sm"
+                          :icon="message.contentExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+                          @click="toggleAppendMessageExpanded(message)"
+                          class="q-ml-xs"
+                        />
                       </div>
-                      <div class="chat-message-content">
+                      <div class="chat-message-content" :class="{ 'chat-message-content-collapsed': !message.contentExpanded }">
                         <span v-html="message.text" />
                       </div>
                     </div>
@@ -650,6 +677,8 @@
   const reactExpanded = ref(false);
   const appendMessagesExpanded = ref(false);
   const replyLoading = ref(false);
+  const userPromptExpanded = ref(false);
+  const lastAppendMessageExpanded = ref(false);
 
   const collapsed = computed({
     get: () => {
@@ -1102,6 +1131,21 @@
     }
   }
 
+  function toggleUserPromptExpanded() {
+    userPromptExpanded.value = !userPromptExpanded.value;
+  }
+
+  function toggleLastAppendMessageExpanded() {
+    lastAppendMessageExpanded.value = !lastAppendMessageExpanded.value;
+  }
+
+  function toggleAppendMessageExpanded(message) {
+    if (!message.hasOwnProperty('contentExpanded')) {
+      message.contentExpanded = false;
+    }
+    message.contentExpanded = !message.contentExpanded;
+  }
+
   const copying = ref(false);
 
   async function insert() {
@@ -1439,6 +1483,12 @@
   }
   h1 {
     font-size: 1.3rem;
+  }
+
+  .chat-message-content-collapsed {
+    max-height: 40px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
   }
 
 </style>
