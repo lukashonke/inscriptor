@@ -2554,6 +2554,9 @@ export const usePromptStore = defineStore('prompts', {
       if(args.hiddenInPromptSelector !== undefined) {
         prompt.settings.hiddenInPromptSelector = args.hiddenInPromptSelector;
       }
+      if(args.pinnedGlobally !== undefined) {
+        prompt.settings.pinnedGlobally = args.pinnedGlobally;
+      }
       if(args.temperature !== undefined) {
         prompt.settings.temperature = args.temperature;
       }
@@ -3664,13 +3667,15 @@ export const usePromptStore = defineStore('prompts', {
       return file.settings?.stickyPrompts !== undefined && file.settings.stickyPrompts.length > 0;
     },
     getStickyPrompts(file) {
+      const globallyPinnedPrompts = this.prompts.filter(p => p.enabled && p.settings?.pinnedGlobally === true) ?? [];
+
       if(!file.settings?.stickyPrompts) {
-        return [];
+        return globallyPinnedPrompts;
       }
 
       const enabledPrompts = this.prompts.filter(p => p.enabled);
 
-      return enabledPrompts.filter(p => file.settings.stickyPrompts.includes(p.id));
+      return [...enabledPrompts.filter(p => file.settings.stickyPrompts.includes(p.id)), ...globallyPinnedPrompts];
     },
     getTabData(tabId) {
       if(!tabId) {

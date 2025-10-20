@@ -476,6 +476,10 @@
                           <HelpIcon :tooltip="$t('tooltips.parameters.hasResultsSeparator')"></HelpIcon>
                         </div>
                         <div class="col" />
+                        <div class="col-auto">
+                          <q-checkbox v-model="pinnedGlobally" dense label="Pinned in all files" />
+                          <HelpIcon :tooltip="$t('tooltips.parameters.pinnedGlobally')"></HelpIcon>
+                        </div>
                         <div class="col-auto" v-if="showHiddenInPromptSelector">
                           <q-checkbox v-model="hiddenInPromptSelector" dense label="Hidden in prompt selector" />
                           <HelpIcon :tooltip="$t('tooltips.parameters.hiddenInPromptSelector')"></HelpIcon>
@@ -1240,6 +1244,13 @@ const hiddenInPromptSelector = computed({
   get: () => props.prompt.settings.hiddenInPromptSelector ?? false,
   set: (value) => {
     promptStore.updatePrompt(props.prompt, {hiddenInPromptSelector: value});
+  }
+});
+
+const pinnedGlobally = computed({
+  get: () => props.prompt.settings.pinnedGlobally ?? false,
+  set: (value) => {
+    promptStore.updatePrompt(props.prompt, {pinnedGlobally: value});
   }
 });
 
