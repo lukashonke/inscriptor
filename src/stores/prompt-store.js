@@ -192,8 +192,8 @@ export const usePromptStore = defineStore('prompts', {
               let userPrompt = run.userPrompt;
 
               for (const runResult of runResults) {
-                systemPrompt = systemPrompt.replace('$output.' + runResult.runName, runResult.result?.originalText ?? '');
-                userPrompt = userPrompt.replace('$output.' + runResult.runName, runResult.result?.originalText ?? '');
+                systemPrompt = systemPrompt.replaceAll('$output.' + runResult.runName, runResult.result?.originalText ?? '');
+                userPrompt = userPrompt.replaceAll('$output.' + runResult.runName, runResult.result?.originalText ?? '');
               }
 
               newRequest.systemPrompt = systemPrompt;
@@ -551,7 +551,7 @@ export const usePromptStore = defineStore('prompts', {
         inputIsText = true;
 
         if(request.text && request.text.includes('$$$replaceUserPrompt$$$')) {
-          request.text = request.text.replace('$$$replaceUserPrompt$$$', '');
+          request.text = request.text.replaceAll('$$$replaceUserPrompt$$$', '');
           userPrompt = request.text;
         }
 
@@ -564,22 +564,22 @@ export const usePromptStore = defineStore('prompts', {
         }
       }
 
-      systemPrompt = systemPrompt.replace('$textOrSelection', selectedText ?? '');
-      userPrompt = userPrompt.replace('$textOrSelection', selectedText ?? '');
+      systemPrompt = systemPrompt.replaceAll('$textOrSelection', selectedText ?? '');
+      userPrompt = userPrompt.replaceAll('$textOrSelection', selectedText ?? '');
       if(assistantPrompt) {
-        assistantPrompt = assistantPrompt.replace('$textOrSelection', selectedText ?? '');
+        assistantPrompt = assistantPrompt.replaceAll('$textOrSelection', selectedText ?? '');
       }
       if(userPrompt2) {
-        userPrompt2 = userPrompt2.replace('$textOrSelection', selectedText ?? '');
+        userPrompt2 = userPrompt2.replaceAll('$textOrSelection', selectedText ?? '');
       }
 
-      systemPrompt = systemPrompt.replace('$chat', selectedText ?? '');
-      userPrompt = userPrompt.replace('$chat', selectedText ?? '');
+      systemPrompt = systemPrompt.replaceAll('$chat', selectedText ?? '');
+      userPrompt = userPrompt.replaceAll('$chat', selectedText ?? '');
       if(assistantPrompt) {
-        assistantPrompt = assistantPrompt.replace('$chat', selectedText ?? '');
+        assistantPrompt = assistantPrompt.replaceAll('$chat', selectedText ?? '');
       }
       if(userPrompt2) {
-        userPrompt2 = userPrompt2.replace('$chat', selectedText ?? '');
+        userPrompt2 = userPrompt2.replaceAll('$chat', selectedText ?? '');
       }
 
 
@@ -606,7 +606,7 @@ export const usePromptStore = defineStore('prompts', {
 
             //TODO do not split mid word, but expand to the nearest word
             const text = editor.state.doc.textBetween(Math.max(0, from - indexBackwards), Math.min(to + indexForwards, editor.state.doc.content.size), '\n\n');
-            userPrompt = userPrompt.replace(match[0], text);
+            userPrompt = userPrompt.replaceAll(match[0], text);
           }
           for (const match of systemPrompt.matchAll(regex)) {
             const indexBackwards = parseInt(match[1]);
@@ -614,7 +614,7 @@ export const usePromptStore = defineStore('prompts', {
 
             //TODO do not split mid word, but expand to the nearest word
             const text = editor.state.doc.textBetween(Math.max(0, from - indexBackwards), Math.min(to + indexForwards, editor.state.doc.content.size), '\n\n');
-            systemPrompt = systemPrompt.replace(match[0], text);
+            systemPrompt = systemPrompt.replaceAll(match[0], text);
           }
 
           if(assistantPrompt) {
@@ -624,7 +624,7 @@ export const usePromptStore = defineStore('prompts', {
 
               //TODO do not split mid word, but expand to the nearest word
               const text = editor.state.doc.textBetween(Math.max(0, from - indexBackwards), Math.min(to + indexForwards, editor.state.doc.content.size), '\n\n');
-              assistantPrompt = assistantPrompt.replace(match[0], text);
+              assistantPrompt = assistantPrompt.replaceAll(match[0], text);
             }
           }
 
@@ -635,7 +635,7 @@ export const usePromptStore = defineStore('prompts', {
 
               //TODO do not split mid word, but expand to the nearest word
               const text = editor.state.doc.textBetween(Math.max(0, from - indexBackwards), Math.min(to + indexForwards, editor.state.doc.content.size), '\n\n');
-              userPrompt2 = userPrompt2.replace(match[0], text);
+              userPrompt2 = userPrompt2.replaceAll(match[0], text);
             }
           }
         }
@@ -649,74 +649,74 @@ export const usePromptStore = defineStore('prompts', {
         selectedTextInEditor = editorSelection;
       }
 
-      systemPrompt = systemPrompt.replace('$selection', selectedTextInEditor ?? '');
-      userPrompt = userPrompt.replace('$selection', selectedTextInEditor ?? '');
+      systemPrompt = systemPrompt.replaceAll('$selection', selectedTextInEditor ?? '');
+      userPrompt = userPrompt.replaceAll('$selection', selectedTextInEditor ?? '');
       if(assistantPrompt) {
-        assistantPrompt = assistantPrompt.replace('$selection', selectedTextInEditor ?? '');
+        assistantPrompt = assistantPrompt.replaceAll('$selection', selectedTextInEditor ?? '');
       }
       if(userPrompt2) {
-        userPrompt2 = userPrompt2.replace('$selection', selectedTextInEditor ?? '');
+        userPrompt2 = userPrompt2.replaceAll('$selection', selectedTextInEditor ?? '');
       }
 
       if(request.agentMessages) {
         for (const agentMessage of request.agentMessages) {
-          agentMessage.text = agentMessage.text.replace('$selection', selectedTextInEditor ?? '');
-          agentMessage.text = agentMessage.text.replace('$textOrSelection', selectedText ?? '');
-          agentMessage.text = agentMessage.text.replace('$chat', selectedText ?? '');
+          agentMessage.text = agentMessage.text.replaceAll('$selection', selectedTextInEditor ?? '');
+          agentMessage.text = agentMessage.text.replaceAll('$textOrSelection', selectedText ?? '');
+          agentMessage.text = agentMessage.text.replaceAll('$chat', selectedText ?? '');
         }
       }
 
       function replace(what, withWhat) {
         if(systemPrefix.includes(what)) {
-          systemPrefix = systemPrefix.replace(what, withWhat());
+          systemPrefix = systemPrefix.replaceAll(what, withWhat());
         }
 
         if(systemSuffix.includes(what)) {
-          systemSuffix = systemSuffix.replace(what, withWhat());
+          systemSuffix = systemSuffix.replaceAll(what, withWhat());
         }
 
         if(systemPrompt.includes(what)) {
-          systemPrompt = systemPrompt.replace(what, withWhat());
+          systemPrompt = systemPrompt.replaceAll(what, withWhat());
         }
 
         if(userPrefix.includes(what)) {
-          userPrefix = userPrefix.replace(what, withWhat());
+          userPrefix = userPrefix.replaceAll(what, withWhat());
         }
 
         if(userSuffix.includes(what)) {
-          userSuffix = userSuffix.replace(what, withWhat());
+          userSuffix = userSuffix.replaceAll(what, withWhat());
         }
 
         if(userPrompt.includes(what)) {
-          userPrompt = userPrompt.replace(what, withWhat());
+          userPrompt = userPrompt.replaceAll(what, withWhat());
         }
 
         if(assistantPrompt) {
           if(assistantPrompt.includes(what)) {
-            assistantPrompt = assistantPrompt.replace(what, withWhat());
+            assistantPrompt = assistantPrompt.replaceAll(what, withWhat());
           }
         }
 
         if(userPrompt2) {
           if(userPrompt2.includes(what)) {
-            userPrompt2 = userPrompt2.replace(what, withWhat());
+            userPrompt2 = userPrompt2.replaceAll(what, withWhat());
           }
         }
 
         if(request.agentMessages) {
           for (const agentMessage of request.agentMessages) {
             if(agentMessage.text.includes(what)) {
-              agentMessage.text = agentMessage.text.replace(what, withWhat());
+              agentMessage.text = agentMessage.text.replaceAll(what, withWhat());
             }
           }
         }
 
         if(assistantPrefix.includes(what)) {
-          assistantPrefix = assistantPrefix.replace(what, withWhat());
+          assistantPrefix = assistantPrefix.replaceAll(what, withWhat());
         }
 
         if(assistantSuffix.includes(what)) {
-          assistantSuffix = assistantSuffix.replace(what, withWhat());
+          assistantSuffix = assistantSuffix.replaceAll(what, withWhat());
         }
       }
 
@@ -773,17 +773,17 @@ export const usePromptStore = defineStore('prompts', {
 
             const parameterValueText = replaceMentionEditorText(valueWithPrefixSuffix, useRawHtml);
 
-            systemPrompt = systemPrompt.replace('$' + parameter.name, parameterValueText);
-            userPrompt = userPrompt.replace('$' + parameter.name, parameterValueText);
+            systemPrompt = systemPrompt.replaceAll('$' + parameter.name, parameterValueText);
+            userPrompt = userPrompt.replaceAll('$' + parameter.name, parameterValueText);
             if(assistantPrompt) {
-              assistantPrompt = assistantPrompt.replace('$' + parameter.name, parameterValueText);
+              assistantPrompt = assistantPrompt.replaceAll('$' + parameter.name, parameterValueText);
             }
             if(userPrompt2) {
-              userPrompt2 = userPrompt2.replace('$' + parameter.name, parameterValueText);
+              userPrompt2 = userPrompt2.replaceAll('$' + parameter.name, parameterValueText);
             }
             if(request.agentMessages) {
               for (const agentMessage of request.agentMessages) {
-                agentMessage.text = agentMessage.text.replace('$' + parameter.name, parameterValueText);
+                agentMessage.text = agentMessage.text.replaceAll('$' + parameter.name, parameterValueText);
               }
             }
           }
@@ -821,17 +821,17 @@ export const usePromptStore = defineStore('prompts', {
 
         let variableValue = resolveVariablesOneLevel(variable.value, fileStore.variables);
 
-        systemPrompt = systemPrompt.replace('$' + variable.title, variableValue);
-        userPrompt = userPrompt.replace('$' + variable.title, variableValue);
+        systemPrompt = systemPrompt.replaceAll('$' + variable.title, variableValue);
+        userPrompt = userPrompt.replaceAll('$' + variable.title, variableValue);
         if(assistantPrompt) {
-          assistantPrompt = assistantPrompt.replace('$' + variable.title, variableValue);
+          assistantPrompt = assistantPrompt.replaceAll('$' + variable.title, variableValue);
         }
         if(userPrompt2) {
-          userPrompt2 = userPrompt2.replace('$' + variable.title, variableValue);
+          userPrompt2 = userPrompt2.replaceAll('$' + variable.title, variableValue);
         }
         if(request.agentMessages) {
           for (const agentMessage of request.agentMessages) {
-            agentMessage.text = agentMessage.text.replace('$' + variable.title, variableValue);
+            agentMessage.text = agentMessage.text.replaceAll('$' + variable.title, variableValue);
           }
         }
       }
