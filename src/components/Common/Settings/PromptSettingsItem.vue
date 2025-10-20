@@ -599,7 +599,12 @@
                         </q-card-section>
 
                         <q-card-section v-if="action.type === 'Reply'" >
-                          <q-input dense filled label="Reply Message" :model-value="action.typeParameter" v-on:update:model-value="updateAction(prompt, action, {typeParameter: $event})" hint="Message to send to AI as the reply"/>
+                          <CodeEditor
+                            :model-value="action.typeParameter"
+                            v-on:update:model-value="updateAction(prompt, action, {typeParameter: $event})"
+                            :parameters="[]"
+                            label="Reply Message"
+                          />
                         </q-card-section>
 
                         <q-card-section v-if="action.type === 'Add to Context'" >
