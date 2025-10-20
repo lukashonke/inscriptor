@@ -476,6 +476,10 @@
                           <HelpIcon :tooltip="$t('tooltips.parameters.hasResultsSeparator')"></HelpIcon>
                         </div>
                         <div class="col" />
+                        <div class="col-auto">
+                          <q-checkbox v-model="pinnedGlobally" dense label="Pinned in all files" />
+                          <HelpIcon :tooltip="$t('tooltips.parameters.pinnedGlobally')"></HelpIcon>
+                        </div>
                         <div class="col-auto" v-if="showHiddenInPromptSelector">
                           <q-checkbox v-model="hiddenInPromptSelector" dense label="Hidden in prompt selector" />
                           <HelpIcon :tooltip="$t('tooltips.parameters.hiddenInPromptSelector')"></HelpIcon>
@@ -599,7 +603,12 @@
                         </q-card-section>
 
                         <q-card-section v-if="action.type === 'Reply'" >
-                          <q-input dense filled label="Reply Message" :model-value="action.typeParameter" v-on:update:model-value="updateAction(prompt, action, {typeParameter: $event})" hint="Message to send to AI as the reply"/>
+                          <CodeEditor
+                            :model-value="action.typeParameter"
+                            v-on:update:model-value="updateAction(prompt, action, {typeParameter: $event})"
+                            :parameters="[]"
+                            label="Reply Message"
+                          />
                         </q-card-section>
 
                         <q-card-section v-if="action.type === 'Add to Context'" >
@@ -1235,6 +1244,13 @@ const hiddenInPromptSelector = computed({
   get: () => props.prompt.settings.hiddenInPromptSelector ?? false,
   set: (value) => {
     promptStore.updatePrompt(props.prompt, {hiddenInPromptSelector: value});
+  }
+});
+
+const pinnedGlobally = computed({
+  get: () => props.prompt.settings.pinnedGlobally ?? false,
+  set: (value) => {
+    promptStore.updatePrompt(props.prompt, {pinnedGlobally: value});
   }
 });
 

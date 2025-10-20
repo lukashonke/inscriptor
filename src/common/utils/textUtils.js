@@ -210,6 +210,39 @@ export function getTextBeforeKeepingWordsIntact(text, length) {
   return result;
 }
 
+export function getTextAfterKeepingWordsIntact(text, length) {
+  console.log(text, length);
+  if (!text) {
+    return '';
+  }
+
+  if (text.length <= length) {
+    return text;
+  }
+
+  let initialEndIndex = Math.min(length, text.length);
+  let adjustedEndIndex = initialEndIndex;
+
+  // Move the end index backward to the previous word boundary
+  while (
+    adjustedEndIndex > 0 &&
+    !/\s/.test(text.charAt(adjustedEndIndex))
+    ) {
+    adjustedEndIndex -= 1;
+  }
+
+  let result = text.substring(0, adjustedEndIndex);
+
+  // If we had to cut off the last word, append "..."
+  if (adjustedEndIndex < initialEndIndex) {
+    result = result + ' ...';
+  }
+
+  console.log(result);
+
+  return result;
+}
+
 export function uint8ArrayToBase64(uint8Array) {
   let binary = '';
   for (let i = 0; i < uint8Array.length; i++) {

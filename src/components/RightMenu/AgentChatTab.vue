@@ -13,17 +13,17 @@
       <!-- Chat controls and pagination -->
       <div class="col-auto">
         <div class="flex items-center justify-center q-mb-md" v-if="maxChatsPage > 0">
-          <div class="col-auto flex items-center" v-if="maxChatsPage > 0">
-            <q-pagination :max="maxChatsPage" v-model="page" direction-links :boundary-links="false" :max-pages="2" />
+          <div class="col-auto flex items-center justify-center" v-if="maxChatsPage > 0">
+            <q-pagination :max="maxChatsPage" v-model="page" :direction-links :boundary-links="false" :max-pages="2" />
           </div>
 
           <!-- Current file indicator -->
-          <div class="col flex items-center justify-center file-indicator" v-if="currentFile" >
+          <div class="col flex items-center justify-center file-indicator mobile-hide" v-if="currentFile" >
             <FileDetailItem :file="currentFile" hide-context-type />
           </div>
 
           <div class="col-auto flex items-center q-mr-sm">
-            <q-btn color="accent" @click="newChat" size="md" icon="mdi-pencil-box-outline" class="" label="New chat">
+            <q-btn color="accent" @click="newChat" size="md" icon="mdi-pencil-box-outline" class="" :label="isMobile ? undefined : 'New chat'">
               <q-tooltip>
                 Start a new AI conversation
               </q-tooltip>
@@ -70,7 +70,7 @@
         <template v-if="!currentChatMessages || currentChatMessages.length === 0">
           <div class="q-gutter-y-sm q-ml-xs chat-history-container justify-center q-mt-xl" style="margin-bottom: 100px;">
             <div class="row full-width justify-center" style="">
-              <q-card flat bordered class="col-auto" style="min-width: 350px; max-width: 600px;">
+              <q-card flat bordered class="col" style="max-width: 400px;">
                 <q-card-section class="q-gutter-y-xs">
                   <div class="row text-caption">
                     Prompt for this chat:
@@ -95,10 +95,17 @@
                     </div>
                     <div class="row">
                       <div class="col">
+                        <q-select
+                          dense
+                          outlined
+                          class="mobile-only"
+                          :options="reasoningEffortOptions"
+                          v-model="reasoningEffortForAgentChat"
+                        />
                         <q-btn-toggle
                           unelevated
                           no-caps
-                          class="bordered"
+                          class="bordered mobile-hide"
                           :options="reasoningEffortOptions"
                           v-model="reasoningEffortForAgentChat"
                         />
@@ -296,7 +303,7 @@
                         :disable="!inputText.trim() || aiAgentStore.agentChats.isAgentRunning || promptForAgentChatId === null"
                       />
                     </div>
-                    <div class="col q-mt-md">
+                    <div class="col q-mt-md mobile-hide">
                       <q-btn flat icon="mdi-cog" @click="settingsOpen = !settingsOpen" />
                     </div>
                   </div>
@@ -359,11 +366,13 @@ import AgentPromptResult from './AgentPromptResult.vue';
 import FileDetailItem from 'components/Common/Files/FileDetailItem.vue';
 import {isImageGenerationModel, reasoningEffortValuesLabeled, supportsReasoning} from 'src/common/helpers/modelHelper';
 import {useLayoutStore} from 'stores/layout-store';
+import {useResponsive} from 'src/common/utils/screenUtils';
 
 const aiAgentStore = useAiAgentStore();
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
 const layoutStore = useLayoutStore();
+const { isMobile } = useResponsive();
 
 const inputText = ref('');
 const inputRef = ref(null);

@@ -32,8 +32,16 @@
       <div class="chat-message chat-user-message q-mt-md" style="">
         <div class="chat-message-header">
           <span class="chat-message-role">You:</span>
+          <q-btn
+            flat
+            dense
+            size="sm"
+            :icon="userPromptExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+            @click="toggleUserPromptExpanded()"
+            class="q-ml-xs"
+          />
         </div>
-        <div class="chat-message-content">
+        <div class="chat-message-content" :class="{ 'chat-message-content-collapsed': !userPromptExpanded }">
           <contenteditable tag="span" ref="userPromptInput" contenteditable="true" v-model="promptResultInput" :no-html="false">
           </contenteditable>
         </div>
@@ -188,11 +196,22 @@
               <div v-if="!appendMessagesExpanded" class="chat-message chat-user-message q-my-sm" @click="appendMessagesExpanded = true">
                 <div class="chat-message-header">
                   <span class="chat-message-role">You:</span>
-                  <span class="chat-message-time">
+
+                  <span>
+                    <span class="chat-message-time">
                     <q-btn icon="mdi-expand-all-outline" size="sm" @click="appendMessagesExpanded = true" color="primary" flat dense no-caps />
                   </span>
+                    <q-btn
+                      flat
+                      dense
+                      size="sm"
+                      :icon="lastAppendMessageExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+                      @click.stop="toggleLastAppendMessageExpanded()"
+                      class="q-ml-sm"
+                    />
+                  </span>
                 </div>
-                <div class="chat-message-content">
+                <div class="chat-message-content" :class="{ 'chat-message-content-collapsed': !lastAppendMessageExpanded }">
                   {{ lastUserAppendMessage.text }}
                 </div>
               </div>
@@ -215,8 +234,16 @@
                     <div class="chat-message chat-user-message q-my-sm">
                       <div class="chat-message-header">
                         <span class="chat-message-role">You:</span>
+                        <q-btn
+                          flat
+                          dense
+                          size="sm"
+                          :icon="message.contentExpanded ? 'mdi-chevron-up' : 'mdi-chevron-down'"
+                          @click="toggleAppendMessageExpanded(message)"
+                          class="q-ml-xs"
+                        />
                       </div>
-                      <div class="chat-message-content">
+                      <div class="chat-message-content" :class="{ 'chat-message-content-collapsed': !message.contentExpanded }">
                         <span v-html="message.text" />
                       </div>
                     </div>
@@ -359,7 +386,7 @@
         </div>
 
         <div class="col q-ml-md" v-if="!disableFollowupActions">
-          <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm"
+          <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm" padding="xs sm"
             @click.prevent="generateFollowUpQuestions()" icon="mdi-creation-outline"
             v-if="promptStore.getPredefinedPromptId('Prompt Follow-Up Generator')"
             :loading="isPrompting">
@@ -371,7 +398,7 @@
             <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm" no-caps @click.prevent="removeFollowUpQuestions()" icon="mdi-close">
             </q-btn>
             <template v-for="question in promptResult.followUpQuestions" :key="question.title">
-              <q-btn class="col-auto text-weight-bold hoverable-btn-semi" :label="question.title" flat color="accent" unelevated size="sm" no-caps
+              <q-btn class="col-auto text-weight-bold hoverable-btn-semi" :label="question.title" flat color="accent" unelevated size="sm" padding="xs sm" no-caps
                 @click.prevent="doPromptAction({type: 'Reply', typeParameter: question.followUp})">
                 <q-tooltip>
                   Reply: '{{ question.followUp }}'
@@ -383,7 +410,7 @@
           <template v-else>
             <template v-for="(promptAction, index) in promptResult.prompt.actions ?? []" :key="index">
               <q-btn class="col-auto text-weight-bold hoverable-btn-semi" :label="promptAction.title" flat color="grey-7" unelevated no-caps
-                size="sm" @click.prevent="doPromptAction(promptAction)" :icon="getPromptActionIcon(promptAction)">
+                size="sm" padding="xs sm" @click.prevent="doPromptAction(promptAction)" :icon="getPromptActionIcon(promptAction)">
                 <q-tooltip v-if="promptAction.type === 'Add to Context'">
                   Add this text to a file with context '{{promptAction.typeParameter}}'
                 </q-tooltip>
@@ -394,7 +421,7 @@
                   Saves this text to a variable
                 </q-tooltip>
                 <q-tooltip v-if="promptAction.type === 'Reply'">
-                  Reply: '{{ promptAction.typeParameter }}'
+                  Reply: '{{ truncate(promptAction.typeParameter, 100) }}'
                 </q-tooltip>
               </q-btn>
             </template>
@@ -650,6 +677,8 @@
   const reactExpanded = ref(false);
   const appendMessagesExpanded = ref(false);
   const replyLoading = ref(false);
+  const userPromptExpanded = ref(false);
+  const lastAppendMessageExpanded = ref(false);
 
   const collapsed = computed({
     get: () => {
@@ -891,7 +920,7 @@
       return 'mdi-file-document-outline';
     }
     if(action.type === 'Run Prompt') {
-      return 'mdi-creation-outline';
+      return undefined;
     }
     if(action.type === 'Save to Variable') {
       return 'mdi-cogs';
@@ -1100,6 +1129,21 @@
     if(reactExpanded.value) {
       reactInputRef.value.focus();
     }
+  }
+
+  function toggleUserPromptExpanded() {
+    userPromptExpanded.value = !userPromptExpanded.value;
+  }
+
+  function toggleLastAppendMessageExpanded() {
+    lastAppendMessageExpanded.value = !lastAppendMessageExpanded.value;
+  }
+
+  function toggleAppendMessageExpanded(message) {
+    if (!message.hasOwnProperty('contentExpanded')) {
+      message.contentExpanded = false;
+    }
+    message.contentExpanded = !message.contentExpanded;
   }
 
   const copying = ref(false);
@@ -1439,6 +1483,12 @@
   }
   h1 {
     font-size: 1.3rem;
+  }
+
+  .chat-message-content-collapsed {
+    max-height: 40px;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
   }
 
 </style>

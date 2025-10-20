@@ -184,12 +184,20 @@
 
                 <q-separator />
 
+                <q-item clickable v-ripple @click="stickyPromptGlobally(prompt)" v-if="canBeSticky">
+                  <q-item-section side>
+                    <q-icon name="push_pin" :color="pinColorGlobally(prompt)" size="xs" />
+                  </q-item-section>
+                  <q-item-section v-if="!isStickyGlobally">Pin prompt in all files</q-item-section>
+                  <q-item-section v-else>Unpin prompt in all files</q-item-section>
+                </q-item>
+
                 <q-item clickable v-ripple @click="stickyPrompt(prompt)" v-if="canBeSticky">
                   <q-item-section side>
                     <q-icon name="push_pin" :color="pinColor(prompt)" size="xs" />
                   </q-item-section>
-                  <q-item-section v-if="!isSticky">Pin prompt</q-item-section>
-                  <q-item-section v-else>Unpin prompt</q-item-section>
+                  <q-item-section v-if="!isSticky">Pin prompt in this file</q-item-section>
+                  <q-item-section v-else>Unpin prompt in this file</q-item-section>
                 </q-item>
 
                 <q-separator />
@@ -397,12 +405,21 @@ const model = computed(() => {
 
 const isSticky = computed(() => fileStore.isStickyPrompt(props.prompt, fileStore.selectedFile));
 
+const isStickyGlobally = computed(() => props.prompt.settings.pinnedGlobally === true);
+
 function pinColor(prompt) {
   const isSticky = fileStore.isStickyPrompt(prompt, fileStore.selectedFile);
   if (layoutStore.darkMode) {
     return isSticky ? 'orange' : 'grey-5';
   }
   return isSticky ? 'orange' : 'grey-8';
+}
+
+function pinColorGlobally(prompt) {
+  if (layoutStore.darkMode) {
+    return isStickyGlobally.value ? 'orange' : 'grey-5';
+  }
+  return isStickyGlobally.value ? 'orange' : 'grey-8';
 }
 
 const canBeSticky = computed(() => props.prompt.promptType === "general" || props.prompt.promptType === "selection" || props.prompt.promptType === "insert");
@@ -412,6 +429,14 @@ function stickyPrompt(prompt) {
     fileStore.unstickyPrompt(prompt, fileStore.selectedFile);
   } else {
     fileStore.stickyPrompt(prompt, fileStore.selectedFile);
+  }
+}
+
+function stickyPromptGlobally(prompt) {
+  if(isStickyGlobally.value) {
+    promptStore.updatePrompt(prompt, {pinnedGlobally: false});
+  } else {
+    promptStore.updatePrompt(prompt, {pinnedGlobally: true});
   }
 }
 

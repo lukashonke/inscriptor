@@ -1,9 +1,58 @@
 <template>
   <q-layout view="hHh lpR fFf" :class="layoutStore.darkMode ? 'dark-mode' : 'day-mode'">
 
-    <q-header className="bg-primary text-white shadow-1">
-      <AppToolbar />
+    <q-header elevated className="bg-primary text-white shadow-1">
+      <div class="row bg-accent">
+        <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
+        <q-space />
+        <q-btn-dropdown
+          flat
+          icon="mdi-account-outline"
+          class=""
+          no-caps
+          :label="currentUser"
+          :loading="userSyncing"
+          v-if="currentUser">
+          <q-item clickable v-ripple @click="signOut" dense>
+            <q-item-section>
+              <q-item-label v-if="currentUser === 'Guest'">Login</q-item-label>
+              <q-item-label v-else>Sign out</q-item-label>
+            </q-item-section>
+          </q-item>
+        </q-btn-dropdown>
+        <q-space />
+        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" />
+      </div>
+
     </q-header>
+
+    <q-drawer show-if-above v-model="leftDrawerOpen" side="left" width="320">
+      <div class="fit left-menu-scroll bg-white">
+        <div class="q-pa-none">
+          <LeftMenuComponent />
+        </div>
+        <div class="absolute full-width" style="bottom: 0">
+          <q-separator />
+          <div class="row items-center bg-theme-primary justify-center no-wrap" id="variables">
+            <div class="col-auto mobile-hide">
+              <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="mdi-database-outline" label="Variables" @click="layoutStore.setVariableSettingsOpen(true)" />
+            </div>
+            <div class="col-auto mobile-hide">
+              <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="mdi-cog" label="Settings" @click="layoutStore.setSettingsOpen(true)" id="settingsButton" />
+            </div>
+            <div class="col-auto">
+              <q-btn no-caps stack unelevated class="row text-primary q-my-sm cursor-pointer" icon="mdi-history" label="History" @click="layoutStore.setConsoleOpen(!layoutStore.consoleOpen)"/>
+            </div>
+          </div>
+        </div>
+      </div>
+    </q-drawer>
+
+    <q-drawer show-if-above v-model="rightDrawerOpen" side="right" width="320">
+      <div class="bg-white full-height">
+        <RightMenuComponent />
+      </div>
+    </q-drawer>
 
     <q-page-container class="" style="padding-top: 0px">
         <router-view/>
@@ -13,8 +62,6 @@
     <template v-else>
       <AppSettings />
       <VariableSettings />
-
-
       <AppTour />
       <AddPromptDialog />
       <InAppTutorial />
@@ -42,9 +89,8 @@
 </template>
 
 <script setup>
-import {computed, onBeforeMount, onMounted, onUnmounted, watch} from 'vue';
+import {computed, onBeforeMount, onMounted, onUnmounted, ref, watch} from 'vue';
 import {useFileStore} from "stores/file-store";
-import AppToolbar from "components/Toolbar/AppToolbar.vue";
 import {useLayoutStore} from "stores/layout-store";
 import AppSettings from "components/Dialogs/AppSettings.vue";
 import {usePromptStore} from "stores/prompt-store";
@@ -53,7 +99,7 @@ import VariableSettings from "components/Dialogs/VariableSettingsDialog.vue";
 import PromptConfirmDialog from "components/Dialogs/PromptConfirmDialog.vue";
 import LoginDialog from "components/Dialogs/WelcomeDialog.vue";
 import ProjectSelectionDialog from "components/Dialogs/ProjectSelectionDialog.vue";
-import {getCurrentUser, useCurrentUser, useFirestore} from "vuefire";
+import {getCurrentUser, useCurrentUser, useFirebaseAuth} from "vuefire";
 import {Dialog, Notify} from "quasar";
 import LoadingDialog from "components/Dialogs/LoadingDialog.vue";
 import PromptMarketplaceDialog from "components/Dialogs/PromptMarketplaceDialog.vue";
@@ -70,7 +116,7 @@ import ErrorDialog from "components/Dialogs/ErrorDialog.vue";
 import { check } from '@tauri-apps/plugin-updater';
 import { relaunch } from '@tauri-apps/plugin-process';
 import { getVersion } from '@tauri-apps/api/app';
-import {onKeyStroke, useActiveElement, useKeyModifier, useMagicKeys, whenever} from "@vueuse/core";
+import {useActiveElement, useKeyModifier} from "@vueuse/core";
 import AppTour from "components/Dialogs/AppTour.vue";
 import InAppTutorial from "components/Dialogs/InAppTutorial.vue";
 import AddPromptDialog from "components/Dialogs/AddPromptDialog.vue";
@@ -80,14 +126,36 @@ import MessageUsDialog from "components/Dialogs/MessageUsDialog.vue";
 import NewUserWelcomeDialog from "components/Dialogs/NewUserWelcomeDialog.vue";
 import EditProjectMetadataDialog from 'components/Dialogs/EditProjectMetadataDialog.vue';
 import PromptUiDialog from 'components/Dialogs/PromptUiDialog.vue';
-import {getSelectedText} from 'src/common/utils/editorUtils';
 import {useEditorStore} from 'stores/editor-store';
+import LeftMenuComponent from 'components/LeftMenu/LeftMenuComponent.vue';
+import RightMenuComponent from 'components/RightMenu/RightMenuComponent.vue';
 
 const layoutStore = useLayoutStore();
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
 const localDataStore = useLocalDataStore();
 const editorStore = useEditorStore();
+const auth = useFirebaseAuth();
+
+const leftDrawerOpen = ref(false);
+const rightDrawerOpen = ref(false);
+
+const currentUser = computed(() => useCurrentUser()?.value?.email ?? 'Guest');
+const userSyncing = computed(() => layoutStore.userSyncIndicator);
+
+function toggleLeftDrawer() {
+  leftDrawerOpen.value = !leftDrawerOpen.value;
+}
+
+function toggleRightDrawer() {
+  rightDrawerOpen.value = !rightDrawerOpen.value;
+}
+
+async function signOut() {
+  await auth.signOut();
+
+  window.location.reload();
+}
 
 // control
 const controlState = useKeyModifier('Control');
@@ -102,41 +170,6 @@ watch(metaState, (value) => {
 });
 
 const activeElement = useActiveElement()
-const focusedEditor = computed(() =>
-  activeElement.value?.classList?.contains('tiptap')
-)
-
-const keys = useMagicKeys({
-  passive: false,
-  onEventFired(e) {
-    if (e.key === 'Tab' && editorStore.autoCompleteText) {
-      e.preventDefault()
-    }
-  },
-});
-const ctrlSpace = keys['Control+Space']
-const tab = keys['Tab']
-
-watch(ctrlSpace, (v) => {
-  if (focusedEditor.value && !v) {
-    console.log('ctrlSpace pressed');
-    const selectedText = getSelectedText();
-    if(selectedText) {
-      promptStore.analysisEnabled = true;
-      layoutStore.currentRightMenuView = 'analysis';
-      layoutStore.setAnalysisTriggered(false);
-      promptStore.promptSelectionAnalysisPrompts(true, true);
-    }
-  }
-})
-
-watch(tab, (v) => {
-  if (focusedEditor.value && !v) {
-    editorStore.confirmAutocompleteText();
-  }
-})
-
-const db = useFirestore();
 
 const user = useCurrentUser();
 
@@ -272,8 +305,6 @@ if(layoutStore.runsInDesktopApp()) {
       })
     }
   });
-} else {
-
 }
 
 async function tryUpdate() {
