@@ -359,7 +359,7 @@
         </div>
 
         <div class="col q-ml-md" v-if="!disableFollowupActions">
-          <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm"
+          <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm" padding="xs sm"
             @click.prevent="generateFollowUpQuestions()" icon="mdi-creation-outline"
             v-if="promptStore.getPredefinedPromptId('Prompt Follow-Up Generator')"
             :loading="isPrompting">
@@ -371,7 +371,7 @@
             <q-btn class="col-auto text-weight-bold hoverable-btn-semi" flat color="grey-7" unelevated size="sm" no-caps @click.prevent="removeFollowUpQuestions()" icon="mdi-close">
             </q-btn>
             <template v-for="question in promptResult.followUpQuestions" :key="question.title">
-              <q-btn class="col-auto text-weight-bold hoverable-btn-semi" :label="question.title" flat color="accent" unelevated size="sm" no-caps
+              <q-btn class="col-auto text-weight-bold hoverable-btn-semi" :label="question.title" flat color="accent" unelevated size="sm" padding="xs sm" no-caps
                 @click.prevent="doPromptAction({type: 'Reply', typeParameter: question.followUp})">
                 <q-tooltip>
                   Reply: '{{ question.followUp }}'
@@ -383,7 +383,7 @@
           <template v-else>
             <template v-for="(promptAction, index) in promptResult.prompt.actions ?? []" :key="index">
               <q-btn class="col-auto text-weight-bold hoverable-btn-semi" :label="promptAction.title" flat color="grey-7" unelevated no-caps
-                size="sm" @click.prevent="doPromptAction(promptAction)" :icon="getPromptActionIcon(promptAction)">
+                size="sm" padding="xs sm" @click.prevent="doPromptAction(promptAction)" :icon="getPromptActionIcon(promptAction)">
                 <q-tooltip v-if="promptAction.type === 'Add to Context'">
                   Add this text to a file with context '{{promptAction.typeParameter}}'
                 </q-tooltip>
@@ -394,7 +394,7 @@
                   Saves this text to a variable
                 </q-tooltip>
                 <q-tooltip v-if="promptAction.type === 'Reply'">
-                  Reply: '{{ promptAction.typeParameter }}'
+                  Reply: '{{ truncate(promptAction.typeParameter, 100) }}'
                 </q-tooltip>
               </q-btn>
             </template>
@@ -891,7 +891,7 @@
       return 'mdi-file-document-outline';
     }
     if(action.type === 'Run Prompt') {
-      return 'mdi-creation-outline';
+      return undefined;
     }
     if(action.type === 'Save to Variable') {
       return 'mdi-cogs';
