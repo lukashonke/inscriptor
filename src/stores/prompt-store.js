@@ -8,7 +8,7 @@ import {
 } from "src/common/helpers/promptHelper";
 import {
   convertHtmlToText,
-  diffStrings, getTextBeforeKeepingWordsIntact, reduceLineBreaks,
+  diffStrings, getTextBeforeKeepingWordsIntact, getTextAfterKeepingWordsIntact, reduceLineBreaks,
   replaceMentionEditorText, replaceParameterEditorText, tokenise,
 } from "src/common/utils/textUtils";
 import {guid} from "src/common/utils/guidUtils";
@@ -729,9 +729,9 @@ export const usePromptStore = defineStore('prompts', {
       replace('$text500Before', () => getTextBeforeKeepingWordsIntact(convertContent(textBefore), 500));
 
       replace('$textAfter', () => convertContent(textAfter) ?? '');
-      replace('$text2000After', () => getTextBeforeKeepingWordsIntact(convertContent(textAfter), 2000));
-      replace('$text1000After', () => getTextBeforeKeepingWordsIntact(convertContent(textAfter), 1000));
-      replace('$text500After', () => getTextBeforeKeepingWordsIntact(convertContent(textAfter), 500));
+      replace('$text2000After', () => getTextAfterKeepingWordsIntact(convertContent(textAfter), 2000));
+      replace('$text1000After', () => getTextAfterKeepingWordsIntact(convertContent(textAfter), 1000));
+      replace('$text500After', () => getTextAfterKeepingWordsIntact(convertContent(textAfter), 500));
 
 
       replace('$text', () => convertContent(text) ?? '');
@@ -2548,8 +2548,27 @@ export const usePromptStore = defineStore('prompts', {
     onUpdatePrompt(prompt) {
 
       if(prompt.userPrompt || prompt.systemPrompt) {
-        this.toggleTag(prompt, 'context', prompt.userPrompt.includes('$context') || prompt.systemPrompt.includes('$context') || (prompt.userPrompt2 && prompt.userPrompt2.includes('$context')) || (prompt.assistantPrompt && prompt.assistantPrompt.includes('$context')));
-        this.toggleTag(prompt, 'input', prompt.userPrompt.includes('$input') || prompt.systemPrompt.includes('$input') || (prompt.userPrompt2 && prompt.userPrompt2.includes('$input')) || (prompt.assistantPrompt && prompt.assistantPrompt.includes('$input')));
+        // Helper function to check if a variable exists anywhere in the prompt
+        const hasVariable = (variable) => {
+          // Check main prompts
+          if (prompt.userPrompt && prompt.userPrompt.includes(variable)) return true;
+          if (prompt.systemPrompt && prompt.systemPrompt.includes(variable)) return true;
+          if (prompt.userPrompt2 && prompt.userPrompt2.includes(variable)) return true;
+          if (prompt.assistantPrompt && prompt.assistantPrompt.includes(variable)) return true;
+
+          // Check runs
+          if (prompt.runs && prompt.runs.length > 0) {
+            for (const run of prompt.runs) {
+              if (run.systemPrompt && run.systemPrompt.includes(variable)) return true;
+              if (run.userPrompt && run.userPrompt.includes(variable)) return true;
+            }
+          }
+
+          return false;
+        };
+
+        this.toggleTag(prompt, 'context', hasVariable('$context'));
+        this.toggleTag(prompt, 'input', hasVariable('$input'));
       }
 
       if(prompt.folder) {
