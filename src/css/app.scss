@@ -377,7 +377,7 @@ textarea::-webkit-scrollbar-button {
   background-color: #eaeeff;
   align-self: flex-end;
   margin-left: auto;
-  max-height: 200px;
+  max-height: 150px;
   overflow-y: scroll;
 }
 
@@ -389,7 +389,6 @@ textarea::-webkit-scrollbar-button {
 .chat-message-header {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 4px;
   font-size: 0.8rem;
 }
 

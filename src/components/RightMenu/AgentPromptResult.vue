@@ -289,7 +289,6 @@ const writeClasses = computed(() => {
 .chat-message-header {
   font-size: 0.85em;
   font-weight: bold;
-  margin-bottom: 4px;
 }
 
 .chat-message-content :deep(p:last-child) {
