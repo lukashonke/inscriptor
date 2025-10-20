@@ -666,6 +666,16 @@ export const usePromptStore = defineStore('prompts', {
         }
       }
 
+      if(request.appendMessages) {
+        for (const appendMessage of request.appendMessages) {
+          if(appendMessage.text) {
+            appendMessage.text = appendMessage.text.replaceAll('$selection', selectedTextInEditor ?? '');
+            appendMessage.text = appendMessage.text.replaceAll('$textOrSelection', selectedText ?? '');
+            appendMessage.text = appendMessage.text.replaceAll('$chat', selectedText ?? '');
+          }
+        }
+      }
+
       function replace(what, withWhat) {
         if(systemPrefix.includes(what)) {
           systemPrefix = systemPrefix.replaceAll(what, withWhat());
@@ -707,6 +717,14 @@ export const usePromptStore = defineStore('prompts', {
           for (const agentMessage of request.agentMessages) {
             if(agentMessage.text.includes(what)) {
               agentMessage.text = agentMessage.text.replaceAll(what, withWhat());
+            }
+          }
+        }
+
+        if(request.appendMessages) {
+          for (const appendMessage of request.appendMessages) {
+            if(appendMessage.text && appendMessage.text.includes(what)) {
+              appendMessage.text = appendMessage.text.replaceAll(what, withWhat());
             }
           }
         }
@@ -786,6 +804,13 @@ export const usePromptStore = defineStore('prompts', {
                 agentMessage.text = agentMessage.text.replaceAll('$' + parameter.name, parameterValueText);
               }
             }
+            if(request.appendMessages) {
+              for (const appendMessage of request.appendMessages) {
+                if(appendMessage.text) {
+                  appendMessage.text = appendMessage.text.replaceAll('$' + parameter.name, parameterValueText);
+                }
+              }
+            }
           }
         }
       }
@@ -834,6 +859,13 @@ export const usePromptStore = defineStore('prompts', {
             agentMessage.text = agentMessage.text.replaceAll('$' + variable.title, variableValue);
           }
         }
+        if(request.appendMessages) {
+          for (const appendMessage of request.appendMessages) {
+            if(appendMessage.text) {
+              appendMessage.text = appendMessage.text.replaceAll('$' + variable.title, variableValue);
+            }
+          }
+        }
       }
 
       systemPrompt = replaceMentionEditorText(systemPrompt, useRawHtml);
@@ -848,6 +880,14 @@ export const usePromptStore = defineStore('prompts', {
       if(request.agentMessages) {
         for (const agentMessage of request.agentMessages) {
           agentMessage.text = replaceMentionEditorText(agentMessage.text, useRawHtml);
+        }
+      }
+
+      if(request.appendMessages) {
+        for (const appendMessage of request.appendMessages) {
+          if(appendMessage.text) {
+            appendMessage.text = replaceMentionEditorText(appendMessage.text, useRawHtml);
+          }
         }
       }
 
