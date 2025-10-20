@@ -6,7 +6,7 @@
       :editor="editor"
       :should-show="shouldShowDefaultBubbleMenu"
     >
-      <div class="q-gutter-y-xs" v-if="aiBubbleMenu">
+      <div class="q-gutter-y-xs mobile-hide" v-if="aiBubbleMenu">
         <div class="row">
           <div class="q-gutter-x-xs">
             <q-btn size="11px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-theme-primary bordered" inscriptor-shadow-1 color="accent" :class="{ 'text-primary': showPrompts }">
@@ -165,7 +165,7 @@
       :editor="editor"
       :should-show="shouldShowFloatingMenu"
     >
-      <div class="q-gutter-y-xs" v-if="aiBubbleMenu">
+      <div class="q-gutter-y-xs mobile-hide" v-if="aiBubbleMenu">
         <div class="row">
           <div class="q-gutter-x-xs">
             <q-btn size="11px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-theme-primary bordered inscriptor-shadow-1" color="accent" :class="{ 'text-primary': showPrompts }">
@@ -256,7 +256,7 @@
     </floating-menu>
   </div>
 
-  <div v-if="editor" class="q-mb-md sticky" :class="layoutStore.darkMode ? '' : 'inscriptor-shadow-1'">
+  <div v-if="editor" class="q-mb-md sticky mobile-hide" :class="layoutStore.darkMode ? '' : 'inscriptor-shadow-1'">
     <q-card class="row justify-center q-gutter-x-xs " bordered flat>
       <div class="col-auto">
         <q-btn size="11px" dense flat icon="format_bold" @click="editor.chain().focus().toggleBold().run()" :class="{ 'text-grey-5': !editor.isActive('bold'), 'text-primary': editor.isActive('bold') }" />
@@ -609,6 +609,7 @@ import {UniqueID} from '@tiptap/extension-unique-id';
 import {uploadImageFromFile, uploadImageFromUrl} from 'src/common/helpers/imageHelper';
 import {useCurrentUser} from 'vuefire';
 import { Details, DetailsContent, DetailsSummary } from '@tiptap/extension-details'
+import {isMobileScreen} from 'src/common/utils/screenUtils';
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
@@ -639,7 +640,7 @@ const selectedQuickSelectionPrompt = ref(null);
 
 const aiBubbleMenu = ref(true);
 
-const autoCompleteEnabled = ref(true);
+const autoCompleteEnabled = ref(!isMobileScreen());
 
 const imageUploadPopupOpen = ref(false);
 const imageUrlInput = ref('');

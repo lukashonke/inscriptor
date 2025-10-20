@@ -7,7 +7,7 @@
       <div class="col flex items-center">
         <q-input ref="titleRef" :shadow-text="file.title.length > 0 ? '' : ''" class="q-ml-sm full-width" dense autofocus borderless :input-class="writeClasses" v-model="fileTitle" @keydown="onKeydown" ></q-input>
       </div>
-      <div class="col-auto flex items-center q-mr-sm" v-if="file.children && file.children.length > 0">
+      <div class="col-auto flex items-center q-mr-sm mobile-hide" v-if="file.children && file.children.length > 0">
         <q-btn-toggle :options="views" v-model="file.view" unelevated no-caps class="bordered" toggle-color="primary" padding="xs md" size="12px" text-color="grey-7"  />
       </div>
       <div class="col-auto flex items-center ">

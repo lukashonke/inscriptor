@@ -164,22 +164,6 @@ onMounted(async () => {
     layoutStore.desktopAppVersion = appVersion;
   }
 
-  // TODO - if on mobile, display notification that mobile view is not supported
-  const isMobile = /Android|webOS|iPhone|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-  if(isMobile) {
-    Dialog.create({
-      title: 'Mobile view not supported',
-      message: 'Inscriptor is not optimized for mobile devices yet. Please use a desktop or laptop computer for the best experience.',
-      ok: 'Close',
-      persistent: true
-    }).onOk(() => {
-      // console.log('>>>> OK')
-    }).onDismiss(() => {
-      // console.log('I am triggered on both OK and Cancel')
-    })
-  }
-
-
   if(currentUser && (currentUser.emailVerified || currentUser.isAnonymous)) {
     layoutStore.setLoadingDialogOpen(true, 'Loading data');
 
