@@ -110,7 +110,7 @@
     <div class="fit q-my-sm q-pl-sm q-pr-md">
 
       <div class="fit ai-panel scroll">
-        <div class="text-center q-mt-md q-mb-md">
+        <div class="text-center q-mt-md q-mb-md" v-if="views.length > 1">
           <q-btn-toggle :options="views" v-model="layoutStore.currentRightMenuView" unelevated no-caps class="bordered inscriptor-highlight-btn" toggle-color="primary" padding="xs md" id="aiSwitch" >
             <template v-slot:prompts>
               <div class="col row full-width">
@@ -437,6 +437,7 @@
         </q-card>
         <PromptsTab v-if="layoutStore.currentRightMenuView === 'prompts'"/>
         <AgentChatTab v-if="layoutStore.currentRightMenuView === 'agentChat'"/>
+        <div style="height: 60px" />
       </div>
 
 
@@ -447,7 +448,7 @@
 
 <script setup>
   import {usePromptStore} from "stores/prompt-store";
-  import {computed, ref, watch} from "vue";
+  import {computed, onMounted, ref, watch} from "vue";
   import PromptResult from "components/RightMenu/PromptResult.vue";
   import {useFileStore} from "stores/file-store";
   import PromptsTab from "components/RightMenu/PromptsTab.vue";
@@ -466,12 +467,14 @@
   import SimplePromptContextSelector from "components/Common/Settings/SimplePromptContextSelector.vue";
   import PromptPicker from 'components/Common/PromptPicker.vue';
   import CodeEditor from "components/Common/Editors/CodeEditor.vue";
+  import {useResponsive} from 'src/common/utils/screenUtils';
 
   const promptStore = usePromptStore();
   const aiAgentStore = useAiAgentStore();
   const fileStore = useFileStore();
   const layoutStore = useLayoutStore();
   const tabs = computed(() => promptStore.tabs);
+  const { isMobile } = useResponsive();
 
   const uploadingImage = ref(false);
   const fileImg = ref(null);
@@ -495,6 +498,12 @@
   })
 
   const views = computed(() => {
+    // In mobile view, only show Chat tab
+    if (isMobile.value) {
+      return [{value: 'agentChat', slot: 'chat' }];
+    }
+
+    // Desktop view - show all tabs with filtering
     const allViews = [
       {value: 'prompts', slot: 'prompts' },
       {value: 'agentChat', slot: 'chat' },
@@ -515,6 +524,13 @@
     }
 
     return filteredViews;
+  });
+
+  // Set initial view on mount
+  onMounted(() => {
+    if (isMobile.value && layoutStore.currentRightMenuView !== 'agentChat') {
+      layoutStore.currentRightMenuView = 'agentChat';
+    }
   });
 
   watch(() => layoutStore.currentRightMenuView, (newValue) => {
