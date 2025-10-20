@@ -15,7 +15,7 @@
 
   <!-- Assistant messages -->
   <div v-else-if="message && message.role === 'assistant' && message.content && message.content.trim()" class="row">
-    <div class="chat-message chat-assistant-message q-mt-md full-width">
+    <div class="chat-assistant-message q-mt-md full-width" :class="isMobile ? 'chat-message-full' : 'chat-message'">
       <div class="chat-message-header">
         <span class="chat-message-role">AI:</span>
       </div>
@@ -27,7 +27,7 @@
 
   <!-- System messages -->
   <div v-else-if="message && message.role === 'system'" class="row">
-    <div class="chat-message chat-system-message q-mt-md">
+    <div class="chat-system-message q-mt-md" :class="isMobile ? 'chat-message-full' : 'chat-message'">
       <div class="chat-message-header">
         <span class="chat-message-role">System:</span>
       </div>
@@ -63,7 +63,7 @@ import {Notify, useQuasar} from 'quasar';
 import { writeText } from '@tauri-apps/plugin-clipboard-manager';
 import { markdownToHtml } from 'src/common/utils/textUtils';
 import AnimatedDots from 'src/components/Common/AnimatedDots.vue';
-import ToolCallDisplay from './ToolCallDisplay.vue';
+import {useResponsive} from 'src/common/utils/screenUtils';
 
 const props = defineProps({
   message: {
@@ -89,6 +89,7 @@ const fileStore = useFileStore();
 const layoutStore = useLayoutStore();
 const aiAgentStore = useAiAgentStore();
 const componentRef = ref(null);
+const { isMobile } = useResponsive();
 
 // Function to get tool result for a specific tool call
 function getToolResult(toolCall) {
@@ -257,6 +258,11 @@ const writeClasses = computed(() => {
 <style scoped>
 .chat-message {
   max-width: 80%;
+  margin-bottom: 8px;
+}
+
+.chat-message-full {
+  max-width: 100%;
   margin-bottom: 8px;
 }
 

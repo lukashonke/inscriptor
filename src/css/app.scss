@@ -373,6 +373,14 @@ textarea::-webkit-scrollbar-button {
   min-width: 150px;
 }
 
+.chat-message-full {
+  padding: 8px 12px;
+  border-radius: 12px;
+  margin-bottom: 8px;
+  max-width: 100%;
+  min-width: 150px;
+}
+
 .chat-user-message {
   background-color: #eaeeff;
   align-self: flex-end;
