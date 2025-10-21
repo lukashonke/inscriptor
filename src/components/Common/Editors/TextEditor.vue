@@ -503,6 +503,24 @@
     </q-card>
   </div>
 
+  <div class="flex justify-center">
+    <div class="full-width" :class="windowWidthClases">
+      <transition
+        appear
+        enter-active-class="animated fadeIn slow"
+        leave-active-class="animated fadeOut"
+      >
+        <q-card v-show="layoutStore.promptSelectorManuallyOpened" class="q-mb-md" id="manualPromptSelector">
+          <PromptSelector prompt-types="selection" @promptClick="promptClick" />
+        </q-card>
+
+      </transition>
+
+      <editor-content :class="writeClasses" class="no-outline" :editor="editor" :spellcheck="spellcheck" />
+      <div class="text-editor-bottom" @click="onClickBelowEditor" />
+    </div>
+  </div>
+
   <bubble-menu
     v-if="editor"
     :editor="editor"
