@@ -80,6 +80,7 @@ export const useLayoutStore = defineStore('layout', {
     tutorialCode: '',
 
     appTourOpened: false,
+    promptResultsDialogOpened: false,
     settingsTab: 'prompts',
 
     settingsPredefinedPromptsOpened: false,

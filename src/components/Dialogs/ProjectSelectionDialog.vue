@@ -32,9 +32,9 @@
         </div>
 
         <q-list separator bordered v-if="projectType === 'cloud'" style="max-height: 500px; overflow-y: auto">
-          <q-item v-for="(project, index) in projects" :key="index" :active="isCloudProjectLoaded(project)" clickable :title="project.projectId" class="">
+          <q-item v-for="(project, index) in projects" :key="index" :active="isCloudProjectLoaded(project)" :title="project.projectId" class="">
             <q-item-section>
-              <q-item-label class="text-subtitle2" v-if="fileStore.projectId !== project.projectId" @click="loadProject(project.projectId)">
+              <q-item-label class="text-subtitle2 cursor-pointer" v-if="fileStore.projectId !== project.projectId" @click="loadProject(project.projectId)">
                   {{ project.projectName }}
                 <q-badge color="accent" v-if="isCloudProjectLoaded(project)" label="Opened" />
               </q-item-label>

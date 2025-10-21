@@ -1,5 +1,5 @@
 <template>
-  <div class="q-mx-md">
+  <div :class="isMobile ? '' : 'q-mx-md'">
     <div class="flex justify-center q-mb-lg" v-if="maxResultsPage > 0">
       <div class="col-auto flex items-center" v-if="maxResultsPage > 0">
         <q-pagination :max="maxResultsPage" v-model="page" :max-pages="3"  :boundary-links="false" direction-links   />
@@ -85,9 +85,11 @@ import {Dialog} from "quasar";
 import {useLayoutStore} from "stores/layout-store";
 import FakePromptResult from "components/RightMenu/FakePromptResult.vue";
 import {promptTabId} from 'src/common/resources/tabs';
+import {useResponsive} from 'src/common/utils/screenUtils';
 
 const promptStore = usePromptStore();
 const layoutStore = useLayoutStore();
+const { isMobile } = useResponsive();
 
 const results = computed(() => {
   const index = promptStore.getTabData(promptTabId)?.promptResultsIndex ?? 0;

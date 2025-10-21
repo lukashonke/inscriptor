@@ -89,6 +89,7 @@
           :initial-value="writingStyleValue"
           :initial-name="writingStyleName"
           @writing-style-changed="onWritingStyleChanged"
+          :cols="isMobile ? 1 : 3"
         />
       </q-step>
 
@@ -149,10 +150,12 @@ import {Notify} from "quasar";
 import {guid} from "src/common/utils/guidUtils";
 import {hasFlag, markdownToHtml} from "src/common/utils/textUtils";
 import WritingStyleSelector from 'components/Common/WritingStyleSelector.vue';
+import {useResponsive} from 'src/common/utils/screenUtils';
 
 const layoutStore = useLayoutStore();
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
+const { isMobile } = useResponsive();
 
 const props = defineProps({
   defaultProjectType: {
