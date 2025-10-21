@@ -2,17 +2,38 @@
   <q-layout view="hHh lpR fFf" :class="layoutStore.darkMode ? 'dark-mode' : 'day-mode'">
 
     <q-header elevated className="bg-primary text-white shadow-1">
-      <div class="row bg-accent">
-        <q-btn dense flat round icon="menu" @click="toggleLeftDrawer" />
-        <q-space />
+      <div class="row bg-accent items-center justify-between">
+        <q-btn size="md" dense flat round icon="menu" @click="toggleLeftDrawer" />
+        <q-btn
+          flat
+          dense
+          no-caps
+          class="text-caption q-ml-sm"
+          @click="layoutStore.projectSelectionDialogOpen = true"
+          v-if="fileStore.projectName">
+          <template v-if="fileStore.projectSettings?.syncToCloud">
+            <q-spinner v-if="layoutStore.projectSyncIndicator" size="16px" class="q-mr-xs" />
+            <q-icon v-else name="mdi-folder-outline" size="16px" class="q-mr-xs" />
+          </template>
+          <template v-else>
+            <q-icon name="mdi-folder-outline" size="16px" class="q-mr-xs" />
+          </template>
+          {{ fileStore.projectName }}
+        </q-btn>
         <q-btn-dropdown
           flat
           icon="mdi-account-outline"
-          class=""
+          class="text-caption"
+          label="User"
           no-caps
-          :label="currentUser"
           :loading="userSyncing"
           v-if="currentUser">
+          <q-item dense v-if="currentUser !== 'Guest'">
+            <q-item-section>
+              <q-item-label caption>{{ currentUser }}</q-item-label>
+            </q-item-section>
+          </q-item>
+          <q-separator v-if="currentUser !== 'Guest'" />
           <q-item clickable v-ripple @click="signOut" dense>
             <q-item-section>
               <q-item-label v-if="currentUser === 'Guest'">Login</q-item-label>
@@ -20,13 +41,15 @@
             </q-item-section>
           </q-item>
         </q-btn-dropdown>
-        <q-space />
-        <q-btn dense flat round icon="menu" @click="toggleRightDrawer" />
+        <div>
+          <q-btn size="md" dense flat icon="mdi-creation-outline" class="text-white" @click="layoutStore.promptResultsDialogOpened = true" />
+          <q-btn size="md" dense flat round icon="mdi-robot-outline" @click="toggleRightDrawer" />
+        </div>
       </div>
 
     </q-header>
 
-    <q-drawer show-if-above v-model="leftDrawerOpen" side="left" width="320">
+    <q-drawer show-if-above v-model="leftDrawerOpen" side="left" width="350">
       <div class="fit left-menu-scroll bg-white">
         <div class="q-pa-none">
           <LeftMenuComponent />
@@ -48,7 +71,7 @@
       </div>
     </q-drawer>
 
-    <q-drawer show-if-above v-model="rightDrawerOpen" side="right" width="320">
+    <q-drawer show-if-above v-model="rightDrawerOpen" side="right" width="350">
       <div class="bg-white full-height">
         <RightMenuComponent />
       </div>
@@ -83,6 +106,7 @@
       <FeedbackWindow />
       <EditProjectMetadataDialog />
       <PromptUiDialog />
+      <PromptResultsDialog />
     </template>
 
   </q-layout>
@@ -129,6 +153,10 @@ import PromptUiDialog from 'components/Dialogs/PromptUiDialog.vue';
 import {useEditorStore} from 'stores/editor-store';
 import LeftMenuComponent from 'components/LeftMenu/LeftMenuComponent.vue';
 import RightMenuComponent from 'components/RightMenu/RightMenuComponent.vue';
+import PromptSelector from 'components/Common/PromptSelector/PromptSelector.vue';
+import {getAllMarkdown, getSelectedText} from 'src/common/utils/editorUtils';
+import {executePromptClick2} from 'src/common/helpers/promptHelper';
+import PromptResultsDialog from 'components/Dialogs/PromptResultsDialog.vue';
 
 const layoutStore = useLayoutStore();
 const promptStore = usePromptStore();
@@ -156,6 +184,8 @@ async function signOut() {
 
   window.location.reload();
 }
+
+
 
 // control
 const controlState = useKeyModifier('Control');

@@ -1,6 +1,9 @@
 <template>
-  <div class="row" style="width: 550px;">
-    <div class="col-auto right-border" :class="layoutStore.darkMode ? 'bg-dark' : 'bg-grey-1'" id="promptSelectorCategories">
+  <div class="mobile-only">
+    <q-select v-model="currentPromptCategory" :options="categories.map(c => c.label)" options-dense filled outlined label="Category"/>
+  </div>
+  <div class="row" :style="isMobile ? '' : 'width: 550px;'">
+    <div class="col-auto right-border mobile-hide" :class="layoutStore.darkMode ? 'bg-dark' : 'bg-grey-1'" id="promptSelectorCategories">
       <div v-if="promptStore.getStickyPrompts(fileStore.selectedFile) && promptStore.getStickyPrompts(fileStore.selectedFile).length > 0" class="row">
         <div class="col full-width">
           <q-btn
@@ -216,10 +219,12 @@ import {isTextLlm} from "src/common/utils/modelUtils";
 import {useLayoutStore} from "stores/layout-store";
 import {Dialog} from "quasar";
 import InputWithAi from "components/Common/InputWithAi.vue";
+import {useResponsive} from "src/common/utils/screenUtils";
 
 const promptStore = usePromptStore();
 const layoutStore = useLayoutStore();
 const fileStore = useFileStore();
+const { isMobile } = useResponsive();
 
 const customPromptPrefix = computed(() => promptStore.defaultCustomPromptInstructions);
 const customPromptText = ref('');

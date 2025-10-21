@@ -1,6 +1,6 @@
 <template>
   <q-dialog v-model="promptPreviewShown">
-    <q-card style="min-width: 800px;">
+    <q-card :style="isMobile ? '' : 'min-width: 800px;'">
       <q-card-section class="row items-center">
         <div class="text-h6">{{ prompt.title }} prompt preview</div>
         <q-space />
@@ -170,7 +170,7 @@
     </q-card>
   </q-dialog>
   <q-dialog v-model="promptStore.promptParametersShown">
-    <q-card style="min-width: 700px">
+    <q-card :style="isMobile ? '' : 'min-width: 700px'">
       <q-card-section class="row items-center q-px-md q-pt-md q-pb-sm">
         <div class="text-h6 bg-accent text-white text-aleo q-px-md q-py-xs rounded-borders full-width row items-center">
           <q-icon name="mdi-creation-outline" class="q-mr-sm" />
@@ -178,7 +178,7 @@
           <span v-if="!request.agent">prompt</span>
           <span v-else>agent</span>
           <q-space />
-          <q-btn icon="close" flat round dense v-close-popup />
+          <q-btn icon="close" flat round dense v-close-popup class="mobile-hide" />
         </div>
         <q-tooltip class="q-px-md text-italic bg-accent text-white" v-if="prompt.description" :delay="500">
           {{ prompt.description }}
@@ -256,7 +256,7 @@
               </template>
 
               <q-popup-proxy >
-                <q-card style="width: 668px">
+                <q-card :style="isMobile ? '' : 'width: 668px'">
                   <q-card-section class="no-padding">
                     <div class="row">
                       <div class="col q-pa-md">
@@ -422,7 +422,7 @@
 
         <div class="col">
         </div>
-        <div class="col-auto q-mr-md" v-if="!request.agent">
+        <div class="col-auto q-mr-md mobile-hide" v-if="!request.agent">
           <q-btn flat label="Preview & Cost" no-caps color="secondary" @click="previewPrompt" class="float-left" :disable="!canConfirmPrompt"/>
         </div>
         <div class="col-auto q-mr-md" v-else>
@@ -466,10 +466,12 @@
     reasoningEffortValuesLabeled,
     supportsReasoning
   } from "src/common/helpers/modelHelper";
+  import {useResponsive} from "src/common/utils/screenUtils";
 
   const promptStore = usePromptStore();
   const fileStore = useFileStore();
   const layoutStore = useLayoutStore();
+  const { isMobile } = useResponsive();
 
   const enterConfirms = ref(false);
 

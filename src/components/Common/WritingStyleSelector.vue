@@ -94,14 +94,16 @@
       control-color="primary"
       arrows
       height="auto"
+      :padding="isMobile ? 'none' : undefined"
     >
       <q-carousel-slide
         v-for="(slideStyles, slideIndex) in writingStyleSlides"
         :key="slideIndex"
         :name="slideIndex"
-        class="column no-wrap q-px-xl"
+        class="column no-wrap"
+        :class="isMobile ? '' : 'q-px-xl'"
       >
-        <div class="row q-gutter-md q-pa-md">
+        <div class="row q-gutter-md " :class="isMobile ? 'q-px-lg' : 'q-pa-md'">
           <div
             v-for="writingStyle in slideStyles"
             :key="writingStyle.name"
@@ -217,6 +219,7 @@ import {computed, ref, watch} from 'vue';
 import {writingStyles} from 'assets/writingStyles/writingStyleList';
 import InputWithChatAi from 'components/Common/InputWithChatAi.vue';
 import {writingStyleRefinePrompt} from 'assets/writingStyles/writingStyleRefinePrompt';
+import {useResponsive} from 'src/common/utils/screenUtils';
 
 const props = defineProps({
   title: {
@@ -260,6 +263,7 @@ const selectedFilters = ref([]);
 const showCustomInput = ref(false);
 const writingStyleName = ref(props.initialName);
 const writingStyleValue = ref(props.initialValue);
+const { isMobile } = useResponsive();
 
 const projectTypeMap = {
   'story': 'fiction',

@@ -12,48 +12,52 @@
 
       <!-- Chat controls and pagination -->
       <div class="col-auto">
-        <div class="flex items-center justify-center q-mb-md" v-if="maxChatsPage > 0">
-          <div class="col-auto flex items-center justify-center" v-if="maxChatsPage > 0">
-            <q-pagination :max="maxChatsPage" v-model="page" :direction-links :boundary-links="false" :max-pages="2" />
+        <div class="row q-mb-md q-mt-lg" v-if="maxChatsPage > 0">
+          <div class="col flex">
+            <div class="col-auto flex items-center justify-center">
+              <q-pagination :max="maxChatsPage" v-model="page" direction-links :boundary-numbers="false" :boundary-links="false" :max-pages="isMobile ? 3 : 5" />
+            </div>
+            <!-- Current file indicator -->
+            <div class="col flex items-center justify-center file-indicator mobile-hide" v-if="currentFile" >
+              <q-chip>
+                <FileDetailItem :file="currentFile" hide-context-type />
+              </q-chip>
+            </div>
           </div>
+          <div class="col-auto flex items-center" v-if="maxChatsPage > 0">
+            <div class="col-auto flex items-center">
+              <q-btn color="accent" @click="newChat" size="md" icon="mdi-pencil-box-outline" class="" :label="isMobile ? undefined : 'New chat'" :padding="isMobile ? 'xs md' : undefined">
+                <q-tooltip>
+                  Start a new AI conversation
+                </q-tooltip>
+              </q-btn>
+            </div>
 
-          <!-- Current file indicator -->
-          <div class="col flex items-center justify-center file-indicator mobile-hide" v-if="currentFile" >
-            <FileDetailItem :file="currentFile" hide-context-type />
-          </div>
-
-          <div class="col-auto flex items-center q-mr-sm">
-            <q-btn color="accent" @click="newChat" size="md" icon="mdi-pencil-box-outline" class="" :label="isMobile ? undefined : 'New chat'">
-              <q-tooltip>
-                Start a new AI conversation
-              </q-tooltip>
-            </q-btn>
-          </div>
-
-          <div class="col-auto flex items-center">
-            <q-btn flat color="negative" icon="mdi-delete-outline" size="md">
-              <q-menu>
-                <q-list dense>
-                  <q-item clickable @click="removeCurrentChat" v-close-popup>
-                    <q-item-section side>
-                      <q-icon name="mdi-close" />
-                    </q-item-section>
-                    <q-item-section>
-                      Remove current conversation
-                    </q-item-section>
-                  </q-item>
-                  <q-separator />
-                  <q-item clickable @click="removeAllChats">
-                    <q-item-section side>
-                      <q-icon name="mdi-delete-outline" color="negative" />
-                    </q-item-section>
-                    <q-item-section>
-                      Remove all AI conversations
-                    </q-item-section>
-                  </q-item>
-                </q-list>
-              </q-menu>
-            </q-btn>
+            <div class="col-auto flex items-center">
+              <q-btn flat color="negative" icon="mdi-delete-outline" size="md" :padding="isMobile ? 'xs md' : undefined">
+                <q-menu>
+                  <q-list dense>
+                    <q-item clickable @click="removeCurrentChat" v-close-popup>
+                      <q-item-section side>
+                        <q-icon name="mdi-close" />
+                      </q-item-section>
+                      <q-item-section>
+                        Remove current conversation
+                      </q-item-section>
+                    </q-item>
+                    <q-separator />
+                    <q-item clickable @click="removeAllChats">
+                      <q-item-section side>
+                        <q-icon name="mdi-delete-outline" color="negative" />
+                      </q-item-section>
+                      <q-item-section>
+                        Remove all AI conversations
+                      </q-item-section>
+                    </q-item>
+                  </q-list>
+                </q-menu>
+              </q-btn>
+            </div>
           </div>
         </div>
         <div v-else class="flex justify-center q-mb-md q-mt-lg">
