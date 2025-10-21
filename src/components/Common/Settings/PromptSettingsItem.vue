@@ -447,6 +447,38 @@
 
             <q-tab-panel name="advanced">
               <q-card-section class="q-pt-none q-mt-sm q-px-sm" v-if="showAdvancedSettings">
+                <q-expansion-item label="Keyboard Shortcut" dense icon="mdi-keyboard-outline">
+                  <q-card>
+                    <q-card-section>
+                      <div class="text-caption text-grey q-mb-md">Assign a keyboard shortcut (Alt+1 through Alt+9) to quickly execute this prompt.</div>
+                      <div class="row q-gutter-x-md items-center">
+                        <div class="col">
+                          <q-select
+                            v-model="keyboardShortcut"
+                            filled
+                            dense
+                            label="Keyboard Shortcut"
+                            :options="keyboardShortcutOptions"
+                            clearable
+                            :hint="getShortcutHint()"
+                          >
+                            <template v-slot:prepend>
+                              <q-icon name="mdi-keyboard-outline" />
+                            </template>
+                          </q-select>
+                        </div>
+                        <div class="col-auto items-center flex">
+                          <HelpIcon tooltip="When assigned, press Alt+[number] while the editor is focused to execute this prompt. The prompt will use selected text if available, or the whole file text otherwise."></HelpIcon>
+                        </div>
+                      </div>
+                      <div v-if="shortcutConflict" class="text-warning q-mt-sm">
+                        <q-icon name="mdi-alert" />
+                        Warning: This shortcut is already assigned to "{{ shortcutConflict.title }}"
+                      </div>
+                    </q-card-section>
+                  </q-card>
+                </q-expansion-item>
+
                 <q-expansion-item label="Advanced Prompt Parameters" dense icon="mdi-cog-outline">
                   <q-card class="q-py-sm">
                     <q-card-section class="q-gutter-y-md">
@@ -1462,6 +1494,52 @@ function exportPrompt() {
   }).onOk(() => {
     navigator.clipboard.writeText(json);
   });
+}
+
+// Keyboard shortcut options (1-9)
+const keyboardShortcutOptions = [
+  { label: 'Alt+1', value: 1 },
+  { label: 'Alt+2', value: 2 },
+  { label: 'Alt+3', value: 3 },
+  { label: 'Alt+4', value: 4 },
+  { label: 'Alt+5', value: 5 },
+  { label: 'Alt+6', value: 6 },
+  { label: 'Alt+7', value: 7 },
+  { label: 'Alt+8', value: 8 },
+  { label: 'Alt+9', value: 9 },
+];
+
+const keyboardShortcut = computed({
+  get: () => {
+    const value = props.prompt.settings?.keyboardShortcut;
+    if (!value) return null;
+    return keyboardShortcutOptions.find(opt => opt.value === value);
+  },
+  set: (option) => {
+    const value = option?.value || null;
+    promptStore.updatePrompt(props.prompt, { keyboardShortcut: value });
+  }
+});
+
+// Check if another prompt is using the same shortcut
+const shortcutConflict = computed(() => {
+  const currentShortcut = props.prompt.settings?.keyboardShortcut;
+  if (!currentShortcut) return null;
+
+  const conflictingPrompt = promptStore.prompts.find(p =>
+    p.id !== props.prompt.id &&
+    p.settings?.keyboardShortcut === currentShortcut
+  );
+
+  return conflictingPrompt || null;
+});
+
+function getShortcutHint() {
+  const shortcut = props.prompt.settings?.keyboardShortcut;
+  if (!shortcut) {
+    return 'No keyboard shortcut assigned';
+  }
+  return `Press Alt+${shortcut} to execute this prompt`;
 }
 </script>
 

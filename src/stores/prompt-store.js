@@ -2557,6 +2557,9 @@ export const usePromptStore = defineStore('prompts', {
       if(args.pinnedGlobally !== undefined) {
         prompt.settings.pinnedGlobally = args.pinnedGlobally;
       }
+      if(args.keyboardShortcut !== undefined) {
+        prompt.settings.keyboardShortcut = args.keyboardShortcut;
+      }
       if(args.temperature !== undefined) {
         prompt.settings.temperature = args.temperature;
       }

@@ -60,7 +60,6 @@ export const useLayoutStore = defineStore('layout', {
     promptAction: null,
     promptActionPromptResult: null,
 
-    promptSelectorManuallyOpened: false,
     fileDetailsOpen: false,
     fakePromptResult: false,
 

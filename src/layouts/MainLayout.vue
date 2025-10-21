@@ -80,8 +80,9 @@ import MessageUsDialog from "components/Dialogs/MessageUsDialog.vue";
 import NewUserWelcomeDialog from "components/Dialogs/NewUserWelcomeDialog.vue";
 import EditProjectMetadataDialog from 'components/Dialogs/EditProjectMetadataDialog.vue';
 import PromptUiDialog from 'components/Dialogs/PromptUiDialog.vue';
-import {getSelectedText} from 'src/common/utils/editorUtils';
+import {getAllMarkdown, getSelectedText} from 'src/common/utils/editorUtils';
 import {useEditorStore} from 'stores/editor-store';
+import {executePromptClick2} from 'src/common/helpers/promptHelper';
 
 const layoutStore = useLayoutStore();
 const promptStore = usePromptStore();
@@ -112,10 +113,23 @@ const keys = useMagicKeys({
     if (e.key === 'Tab' && editorStore.autoCompleteText) {
       e.preventDefault()
     }
+    // Prevent default for Alt+P and Alt+1-9 to avoid browser shortcuts
+    if (e.altKey && ((e.key >= '1' && e.key <= '9'))) {
+      e.preventDefault()
+    }
   },
 });
 const ctrlSpace = keys['Control+Space']
 const tab = keys['Tab']
+const alt1 = keys['Alt+1']
+const alt2 = keys['Alt+2']
+const alt3 = keys['Alt+3']
+const alt4 = keys['Alt+4']
+const alt5 = keys['Alt+5']
+const alt6 = keys['Alt+6']
+const alt7 = keys['Alt+7']
+const alt8 = keys['Alt+8']
+const alt9 = keys['Alt+9']
 
 watch(ctrlSpace, (v) => {
   if (focusedEditor.value && !v) {
@@ -135,6 +149,17 @@ watch(tab, (v) => {
     editorStore.confirmAutocompleteText();
   }
 })
+
+// Alt+1-9 to execute prompts by shortcut
+watch(alt1, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(1); })
+watch(alt2, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(2); })
+watch(alt3, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(3); })
+watch(alt4, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(4); })
+watch(alt5, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(5); })
+watch(alt6, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(6); })
+watch(alt7, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(7); })
+watch(alt8, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(8); })
+watch(alt9, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(9); })
 
 const db = useFirestore();
 
@@ -393,6 +418,32 @@ async function reloadUserDataWithOpenUserInfo() {
     // refresh user data - quotas, tiers and so on
     await layoutStore.loadUserData();
   }
+}
+
+// Helper function to find prompt by keyboard shortcut number
+function findPromptByShortcut(shortcutNumber) {
+  return promptStore.prompts.find(p => p.settings?.keyboardShortcut === shortcutNumber);
+}
+
+// Helper function to execute prompt by keyboard shortcut
+async function executePromptByShortcut(shortcutNumber) {
+  const prompt = findPromptByShortcut(shortcutNumber);
+
+  if (!prompt) {
+    return;
+  }
+
+  // Determine input: use selected text if available, otherwise whole file
+  const selectedText = getSelectedText();
+  const text = selectedText || getAllMarkdown();
+
+  // Execute the prompt
+  const request = {
+    prompt: prompt,
+    text: text,
+  };
+
+  await executePromptClick2(request);
 }
 
 </script>
