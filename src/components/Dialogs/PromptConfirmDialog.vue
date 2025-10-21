@@ -813,6 +813,13 @@
     }
   })
 
+  onKeyStroke('Enter', (e) => {
+    if((e.ctrlKey || e.metaKey) && promptStore.promptParametersShown && canConfirmPrompt.value) {
+      e.preventDefault();
+      confirmPrompt(false);
+    }
+  })
+
   function moveTextMessage(message, byIndex) {
     const index = promptPreview.value.textMessages.indexOf(message);
     if (index === -1) return;
