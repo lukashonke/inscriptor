@@ -102,6 +102,9 @@ watch(metaState, (value) => {
   layoutStore.ctrlDown = value;
 });
 
+// shift
+const shiftState = useKeyModifier('Shift');
+
 const activeElement = useActiveElement()
 const focusedEditor = computed(() =>
   activeElement.value?.classList?.contains('tiptap')
@@ -163,16 +166,16 @@ watch(tab, (v) => {
   }
 })
 
-// Alt+1-9 to execute prompts by shortcut
-watch(alt1, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(1); })
-watch(alt2, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(2); })
-watch(alt3, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(3); })
-watch(alt4, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(4); })
-watch(alt5, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(5); })
-watch(alt6, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(6); })
-watch(alt7, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(7); })
-watch(alt8, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(8); })
-watch(alt9, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(9); })
+// Alt+1-9 to execute prompts by shortcut (only when Shift is not pressed)
+watch(alt1, (v) => { if (focusedEditor.value && !v && !shiftState.value) executePromptByShortcut(1); })
+watch(alt2, (v) => { if (focusedEditor.value && !v && !shiftState.value) executePromptByShortcut(2); })
+watch(alt3, (v) => { if (focusedEditor.value && !v && !shiftState.value) executePromptByShortcut(3); })
+watch(alt4, (v) => { if (focusedEditor.value && !v && !shiftState.value) executePromptByShortcut(4); })
+watch(alt5, (v) => { if (focusedEditor.value && !v && !shiftState.value) executePromptByShortcut(5); })
+watch(alt6, (v) => { if (focusedEditor.value && !v && !shiftState.value) executePromptByShortcut(6); })
+watch(alt7, (v) => { if (focusedEditor.value && !v && !shiftState.value) executePromptByShortcut(7); })
+watch(alt8, (v) => { if (focusedEditor.value && !v && !shiftState.value) executePromptByShortcut(8); })
+watch(alt9, (v) => { if (focusedEditor.value && !v && !shiftState.value) executePromptByShortcut(9); })
 
 // Shift+Alt+1-9 to execute prompts by shortcut and bypass confirmation dialog
 watch(shiftAlt1, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(1, true); })
