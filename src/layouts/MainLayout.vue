@@ -117,6 +117,10 @@ const keys = useMagicKeys({
     if (e.altKey && ((e.key >= '1' && e.key <= '9'))) {
       e.preventDefault()
     }
+    // Prevent default for Shift+Alt+1-9 to avoid browser shortcuts
+    if (e.shiftKey && e.altKey && ((e.key >= '1' && e.key <= '9'))) {
+      e.preventDefault()
+    }
   },
 });
 const ctrlSpace = keys['Control+Space']
@@ -130,6 +134,15 @@ const alt6 = keys['Alt+6']
 const alt7 = keys['Alt+7']
 const alt8 = keys['Alt+8']
 const alt9 = keys['Alt+9']
+const shiftAlt1 = keys['Shift+Alt+1']
+const shiftAlt2 = keys['Shift+Alt+2']
+const shiftAlt3 = keys['Shift+Alt+3']
+const shiftAlt4 = keys['Shift+Alt+4']
+const shiftAlt5 = keys['Shift+Alt+5']
+const shiftAlt6 = keys['Shift+Alt+6']
+const shiftAlt7 = keys['Shift+Alt+7']
+const shiftAlt8 = keys['Shift+Alt+8']
+const shiftAlt9 = keys['Shift+Alt+9']
 
 watch(ctrlSpace, (v) => {
   if (focusedEditor.value && !v) {
@@ -160,6 +173,17 @@ watch(alt6, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(6); 
 watch(alt7, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(7); })
 watch(alt8, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(8); })
 watch(alt9, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(9); })
+
+// Shift+Alt+1-9 to execute prompts by shortcut and bypass confirmation dialog
+watch(shiftAlt1, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(1, true); })
+watch(shiftAlt2, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(2, true); })
+watch(shiftAlt3, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(3, true); })
+watch(shiftAlt4, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(4, true); })
+watch(shiftAlt5, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(5, true); })
+watch(shiftAlt6, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(6, true); })
+watch(shiftAlt7, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(7, true); })
+watch(shiftAlt8, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(8, true); })
+watch(shiftAlt9, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(9, true); })
 
 const db = useFirestore();
 
@@ -426,7 +450,7 @@ function findPromptByShortcut(shortcutNumber) {
 }
 
 // Helper function to execute prompt by keyboard shortcut
-async function executePromptByShortcut(shortcutNumber) {
+async function executePromptByShortcut(shortcutNumber, bypassConfirmation = false) {
   const prompt = findPromptByShortcut(shortcutNumber);
 
   if (!prompt) {
@@ -441,6 +465,7 @@ async function executePromptByShortcut(shortcutNumber) {
   const request = {
     prompt: prompt,
     text: text,
+    forceBypassMoreParameters: bypassConfirmation,
   };
 
   await executePromptClick2(request);
