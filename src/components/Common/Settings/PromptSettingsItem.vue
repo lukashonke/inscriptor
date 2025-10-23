@@ -450,13 +450,14 @@
                 <q-expansion-item label="Keyboard Shortcut" dense icon="mdi-keyboard-outline">
                   <q-card>
                     <q-card-section>
-                      <div class="text-caption text-grey q-mb-md">Assign a keyboard shortcut (Alt+1 through Alt+9) to quickly execute this prompt.</div>
+                      <div class="text-caption text-grey q-mb-md">Assign a keyboard shortcut (Alt+0 through Alt+9) to quickly execute this prompt. Use Shift+Alt+[number] to bypass the confirmation dialog.</div>
                       <div class="row q-gutter-x-md items-center">
                         <div class="col">
                           <q-select
                             v-model="keyboardShortcut"
                             filled
                             dense
+                            options-dense
                             label="Keyboard Shortcut"
                             :options="keyboardShortcutOptions"
                             clearable
@@ -468,7 +469,7 @@
                           </q-select>
                         </div>
                         <div class="col-auto items-center flex">
-                          <HelpIcon tooltip="When assigned, press Alt+[number] while the editor is focused to execute this prompt. The prompt will use selected text if available, or the whole file text otherwise."></HelpIcon>
+                          <HelpIcon tooltip="When assigned, press Alt+[number] while the editor is focused to execute this prompt. Press Shift+Alt+[number] to bypass the confirmation dialog. The prompt will use selected text if available, or the whole file text otherwise."></HelpIcon>
                         </div>
                       </div>
                       <div v-if="shortcutConflict" class="text-warning q-mt-sm">
@@ -1496,7 +1497,7 @@ function exportPrompt() {
   });
 }
 
-// Keyboard shortcut options (1-9)
+// Keyboard shortcut options (0-9)
 const keyboardShortcutOptions = [
   { label: 'Alt+1', value: 1 },
   { label: 'Alt+2', value: 2 },
@@ -1507,6 +1508,7 @@ const keyboardShortcutOptions = [
   { label: 'Alt+7', value: 7 },
   { label: 'Alt+8', value: 8 },
   { label: 'Alt+9', value: 9 },
+  { label: 'Alt+0', value: 0 },
 ];
 
 const keyboardShortcut = computed({

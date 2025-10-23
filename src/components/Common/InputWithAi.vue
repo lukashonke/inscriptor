@@ -38,6 +38,8 @@
       :autogrow="autogrow"
       :spellcheck="automaticTextCorrection"
       @update:modelValue="onInput"
+      @keydown.ctrl.enter.prevent="emit('ctrlEnter')"
+      @keydown.meta.enter.prevent="emit('ctrlEnter')"
     >
     </q-input>
 
@@ -107,7 +109,7 @@ const props = defineProps({
 })
 
 // Emits
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits(['update:modelValue', 'ctrlEnter'])
 
 // Local state
 const internalText = ref(props.modelValue)

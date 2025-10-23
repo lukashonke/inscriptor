@@ -158,7 +158,7 @@
             </q-card-section>
           </q-card>-->
 
-          <InputWithAi v-model="customPromptText" :autofocus="true" :filled="true" label="Instructions for AI" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Prompt Refiner')" :prompt-input="customPromptText" class="write-monospace" :automatic-text-correction="false"/>
+          <InputWithAi v-model="customPromptText" :autofocus="true" :filled="true" label="Instructions for AI" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Prompt Refiner')" :prompt-input="customPromptText" class="write-monospace" :automatic-text-correction="false" @ctrlEnter="customPromptClick"/>
           <div class="row">
             <div class="col-auto">
               <q-select v-model="customPromptModel" :options="models" filled dense options-dense label="AI Model" class="" />

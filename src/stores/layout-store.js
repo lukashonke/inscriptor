@@ -119,6 +119,8 @@ export const useLayoutStore = defineStore('layout', {
     newChatClass: '',
     newBrainstormClass: '',
     newSuggestClass: '',
+
+    showPromptSelectorDialog: false,
   }),
   getters: {
     getIsDragAndDropping: (state) => state.isDragAndDropping,
@@ -428,6 +430,12 @@ export const useLayoutStore = defineStore('layout', {
           this.newChatClass = '';
         }, 500);
       }
+    },
+    openPromptSelectorDialog() {
+      this.showPromptSelectorDialog = true;
+    },
+    closePromptSelectorDialog() {
+      this.showPromptSelectorDialog = false;
     },
   }
 });
