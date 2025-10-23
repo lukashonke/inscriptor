@@ -131,8 +131,8 @@ const keys = useMagicKeys({
     if (e.altKey && ((e.key >= '0' && e.key <= '9'))) {
       e.preventDefault()
     }
-    // Prevent default for Shift+Alt+0-9 to avoid writing characters
-    if (e.shiftKey && e.altKey && ((e.key >= '0' && e.key <= '9'))) {
+    // Prevent default for Shift+Alt+0-9 to avoid writing characters (only when shortcuts are enabled)
+    if (layoutStore.keyboardShortcutsEnabled && e.shiftKey && e.altKey && ((e.key >= '0' && e.key <= '9'))) {
       e.preventDefault()
     }
     // Prevent default for Alt+P to avoid browser shortcuts
@@ -197,16 +197,16 @@ watch(alt9, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(9); 
 watch(alt0, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(0); })
 
 // Shift+Alt+0-9 to execute prompts by shortcut and bypass confirmation dialog
-watch(shiftAlt1, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(1, true); })
-watch(shiftAlt2, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(2, true); })
-watch(shiftAlt3, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(3, true); })
-watch(shiftAlt4, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(4, true); })
-watch(shiftAlt5, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(5, true); })
-watch(shiftAlt6, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(6, true); })
-watch(shiftAlt7, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(7, true); })
-watch(shiftAlt8, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(8, true); })
-watch(shiftAlt9, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(9, true); })
-watch(shiftAlt0, (v) => { if (focusedEditor.value && !v) executePromptByShortcut(0, true); })
+watch(shiftAlt1, (v) => { if (layoutStore.keyboardShortcutsEnabled && focusedEditor.value && !v) executePromptByShortcut(1, true); })
+watch(shiftAlt2, (v) => { if (layoutStore.keyboardShortcutsEnabled && focusedEditor.value && !v) executePromptByShortcut(2, true); })
+watch(shiftAlt3, (v) => { if (layoutStore.keyboardShortcutsEnabled && focusedEditor.value && !v) executePromptByShortcut(3, true); })
+watch(shiftAlt4, (v) => { if (layoutStore.keyboardShortcutsEnabled && focusedEditor.value && !v) executePromptByShortcut(4, true); })
+watch(shiftAlt5, (v) => { if (layoutStore.keyboardShortcutsEnabled && focusedEditor.value && !v) executePromptByShortcut(5, true); })
+watch(shiftAlt6, (v) => { if (layoutStore.keyboardShortcutsEnabled && focusedEditor.value && !v) executePromptByShortcut(6, true); })
+watch(shiftAlt7, (v) => { if (layoutStore.keyboardShortcutsEnabled && focusedEditor.value && !v) executePromptByShortcut(7, true); })
+watch(shiftAlt8, (v) => { if (layoutStore.keyboardShortcutsEnabled && focusedEditor.value && !v) executePromptByShortcut(8, true); })
+watch(shiftAlt9, (v) => { if (layoutStore.keyboardShortcutsEnabled && focusedEditor.value && !v) executePromptByShortcut(9, true); })
+watch(shiftAlt0, (v) => { if (layoutStore.keyboardShortcutsEnabled && focusedEditor.value && !v) executePromptByShortcut(0, true); })
 
 // Alt+P to toggle PromptSelector dialog
 watch(altP, (v) => {
@@ -241,6 +241,9 @@ function handlePopState(event) {
 onMounted(async () => {
 
   const currentUser = await getCurrentUser();
+
+  // Initialize keyboard shortcuts setting
+  layoutStore.initializeKeyboardShortcuts();
 
   if(layoutStore.runsInDesktopApp()) {
     const appVersion = await getVersion();

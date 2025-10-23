@@ -121,6 +121,8 @@ export const useLayoutStore = defineStore('layout', {
     newSuggestClass: '',
 
     showPromptSelectorDialog: false,
+
+    keyboardShortcutsEnabled: true,
   }),
   getters: {
     getIsDragAndDropping: (state) => state.isDragAndDropping,
@@ -164,6 +166,27 @@ export const useLayoutStore = defineStore('layout', {
       // Update store state
       this.darkMode = isDarkMode;
       this.applyDarkMode($q, isDarkMode);
+    },
+    toggleKeyboardShortcuts() {
+      this.keyboardShortcutsEnabled = !this.keyboardShortcutsEnabled;
+      // Persist to localStorage
+      localStorage.setItem('inscriptor_keyboardShortcutsEnabled', this.keyboardShortcutsEnabled);
+    },
+    setKeyboardShortcuts(enabled) {
+      this.keyboardShortcutsEnabled = enabled;
+      // Persist to localStorage
+      localStorage.setItem('inscriptor_keyboardShortcutsEnabled', enabled);
+    },
+    initializeKeyboardShortcuts() {
+      const saved = localStorage.getItem('inscriptor_keyboardShortcutsEnabled');
+
+      if (saved !== null) {
+        this.keyboardShortcutsEnabled = JSON.parse(saved);
+      } else {
+        // Default to enabled
+        this.keyboardShortcutsEnabled = true;
+        localStorage.setItem('inscriptor_keyboardShortcutsEnabled', true);
+      }
     },
     setLeftDrawerOpen(b) {
       this.leftDrawerOpen = b;
