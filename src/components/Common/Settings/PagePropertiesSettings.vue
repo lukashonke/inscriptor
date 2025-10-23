@@ -103,7 +103,7 @@
       <div class="bordered">
         <q-expansion-item label="General" caption="General application settings.">
           <div class="q-pa-sm">
-            <q-checkbox v-model="layoutStore.keyboardShortcutsEnabled" @update:model-value="layoutStore.setKeyboardShortcuts" label="Enable keyboard shortcuts (Shift+Alt+[0-9])" />
+            <q-checkbox v-model="promptStore.keyboardShortcutsEnabled" label="Enable keyboard shortcuts (Shift+Alt+[0-9])" />
           </div>
         </q-expansion-item>
       </div>

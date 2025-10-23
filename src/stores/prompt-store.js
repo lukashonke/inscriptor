@@ -120,6 +120,7 @@ export const usePromptStore = defineStore('prompts', {
     toolApprovalSettings: {},
 
     diffsShowRemoved: false,
+    keyboardShortcutsEnabled: true,
     lastPromptUpdate: Date.now(),
 
     brainstormingPrompt: null,
@@ -3171,6 +3172,7 @@ export const usePromptStore = defineStore('prompts', {
         defaultCustomPromptInstructions: this.defaultCustomPromptInstructions,
         toolApprovalSettings: this.toolApprovalSettings,
         diffsShowRemoved: this.diffsShowRemoved,
+        keyboardShortcutsEnabled: this.keyboardShortcutsEnabled,
         brainstormingPrompt: this.brainstormingPrompt,
         brainstormPromptContext: this.brainstormPromptContext,
         suggestingPrompt: this.suggestingPrompt,
@@ -3271,6 +3273,7 @@ export const usePromptStore = defineStore('prompts', {
       };
 
       this.diffsShowRemoved = false;
+      this.keyboardShortcutsEnabled = true;
 
       this.contextTypes = [];
       this.promptUserInputs = [];
@@ -3327,6 +3330,10 @@ export const usePromptStore = defineStore('prompts', {
 
       if(aiSettings.diffsShowRemoved !== undefined) {
         this.diffsShowRemoved = aiSettings.diffsShowRemoved;
+      }
+
+      if(aiSettings.keyboardShortcutsEnabled !== undefined) {
+        this.keyboardShortcutsEnabled = aiSettings.keyboardShortcutsEnabled;
       }
 
       if(aiSettings.modelPromptPacks) {
