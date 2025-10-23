@@ -514,8 +514,6 @@ async function handlePromptSelectorClick(promptData) {
     return;
   }
 
-  debugger;
-
   // Determine input: use selected text if available, otherwise whole file
   const selectedText = getSelectedText();
   const text = selectedText || getAllMarkdown();
