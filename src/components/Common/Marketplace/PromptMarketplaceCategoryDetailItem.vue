@@ -121,7 +121,7 @@
 
 <script setup>
   import {directusClient} from "boot/directus";
-  import {readItem} from "@directus/sdk";
+  import {readItem, readItems} from "@directus/sdk";
   import {importModel} from "src/common/utils/modelUtils";
   import {usePromptStore} from "stores/prompt-store";
   import {computed, ref} from "vue";
@@ -218,11 +218,31 @@
       isImporting.value = false;
     }, 5000);
 
+    debugger;
+
     const itemDetail = await client.request(readItem(props.category, props.item.id));
     if(itemDetail) {
 
+      // Support new promptIds structure at top level - fetch prompts from Prompts collection
+      if(itemDetail.data.promptIds && itemDetail.data.promptIds.length > 0) {
+        const promptIds = itemDetail.data.promptIds.map(p => p.promptId);
+        const fetchedPrompts = await client.request(
+          readItems('Prompts', {
+            filter: {
+              promptId: { _in: promptIds }
+            }
+          })
+        );
+
+        debugger;
+        // Data is already deserialized from Directus, no need to JSON.parse
+        itemDetail.data.prompts = fetchedPrompts.map(p => p.data);
+      }
+
       await importModel((itemDetail.data), async (status) => {
         if(status === true) {
+
+          debugger;
 
           /*notif = Notify.create({
             message: 'Importing ...',
@@ -274,6 +294,22 @@
             for(const pack of itemDetail.data.promptPackages) {
 
               const nestedPack = await client.request(readItem("Prompt_Packages", pack.packId));
+
+              debugger;
+
+              // Support new promptIds structure - fetch prompts from Prompts collection
+              if(nestedPack.data.promptIds && nestedPack.data.promptIds.length > 0) {
+                const promptIds = nestedPack.data.promptIds.map(p => p.promptId);
+                const fetchedPrompts = await client.request(
+                  readItems('Prompts', {
+                    filter: {
+                      promptId: { _in: promptIds }
+                    }
+                  })
+                );
+                // Data is already deserialized from Directus, no need to JSON.parse
+                nestedPack.data.prompts = fetchedPrompts.map(p => p.data);
+              }
 
               await importModel(nestedPack.data, (status) => {
                 if(status === true) {
