@@ -767,8 +767,14 @@
                   </q-card>
                 </q-expansion-item>
               </q-card-section>
-              <q-card-actions>
+              <q-card-actions class="q-gutter-x-sm">
                 <q-btn label="Export" unelevated @click="exportPrompt()"  />
+                <q-btn v-if="showSyncButton" label="Share" unelevated color="primary" @click="sharePrompt()" :loading="sharingPrompt">
+                  <q-tooltip>Share this prompt to Inscriptor Hub</q-tooltip>
+                </q-btn>
+                <q-btn v-else dense flat round size="sm" icon="mdi-cog" @click="configureSyncAccount()">
+                  <q-tooltip>Configure sync credentials</q-tooltip>
+                </q-btn>
               </q-card-actions>
             </q-tab-panel>
           </q-tab-panels>
@@ -785,7 +791,7 @@ import {usePromptStore} from "stores/prompt-store";
 import HelpIcon from "components/Common/HelpIcon.vue";
 import ColorPicker from "components/Common/ColorPicker.vue";
 import {applyPromptFormatPrefixSuffix, exportPromptToJson} from "src/common/helpers/promptHelper";
-import {Dialog} from "quasar";
+import {Dialog, Notify} from "quasar";
 import IconPicker from "components/Common/IconPicker.vue";
 import {useFileStore} from "stores/file-store";
 import CodeEditor from "components/Common/Editors/CodeEditor.vue";
@@ -796,6 +802,7 @@ import {
 } from "src/common/resources/promptContexts";
 import SimplePromptContextSelector from 'components/Common/Settings/SimplePromptContextSelector.vue';
 import {isImageGenerationModel, reasoningEffortValues, supportsReasoning} from "src/common/helpers/modelHelper";
+import {useMarketplace} from "src/composables/useMarketplace";
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
@@ -872,6 +879,10 @@ const newPromptCategories = ref([]);
 
 const settingsExpanded = ref(props.startExpanded);
 const selectedTab = ref('general');
+const sharingPrompt = ref(false);
+
+const { isSyncConfigured, configureSyncCredentials } = useMarketplace();
+const showSyncButton = computed(() => isSyncConfigured());
 
 const tabs = computed(() => promptStore.tabs.map(tab => ({label: tab.title, value: tab.id})));
 const models = computed(() => promptStore.models.map(tab => ({label: tab.name, value: tab.id})));
@@ -1495,6 +1506,27 @@ function exportPrompt() {
   }).onOk(() => {
     navigator.clipboard.writeText(json);
   });
+}
+
+async function sharePrompt() {
+  try {
+    sharingPrompt.value = true;
+    const { sharePromptToMarketplace } = useMarketplace();
+    await sharePromptToMarketplace(props.prompt);
+  } catch (error) {
+    console.error('Error sharing prompt:', error);
+    Notify.create({
+      message: 'Failed to share prompt: ' + (error.message || 'Unknown error'),
+      color: 'negative',
+      position: 'top'
+    });
+  } finally {
+    sharingPrompt.value = false;
+  }
+}
+
+async function configureSyncAccount() {
+  await configureSyncCredentials();
 }
 
 // Keyboard shortcut options (0-9)

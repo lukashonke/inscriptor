@@ -120,17 +120,14 @@
 </template>
 
 <script setup>
-  import {directusClient} from "boot/directus";
-  import {readItem, readItems} from "@directus/sdk";
-  import {importModel} from "src/common/utils/modelUtils";
   import {usePromptStore} from "stores/prompt-store";
   import {computed, ref} from "vue";
   import {useLayoutStore} from "stores/layout-store";
   import HelpIcon from "components/Common/HelpIcon.vue";
   import {formatNumber} from "src/common/utils/textUtils";
-  import {Notify} from "quasar";
   import {getAssetUrl} from "src/common/utils/cmsUtils";
   import {useElementHover} from "@vueuse/core";
+  import {useMarketplace} from "src/composables/useMarketplace";
 
   const promptStore = usePromptStore();
   const layoutStore = useLayoutStore();
@@ -209,194 +206,15 @@
   const isImporting = ref(false);
 
   async function importItem() {
-    const client = directusClient;
-
-    let notif;
-
     isImporting.value = true;
     setTimeout(() => {
       isImporting.value = false;
     }, 5000);
 
-    debugger;
-
-    const itemDetail = await client.request(readItem(props.category, props.item.id));
-    if(itemDetail) {
-
-      // Support new promptIds structure at top level - fetch prompts from Prompts collection
-      if(itemDetail.data.promptIds && itemDetail.data.promptIds.length > 0) {
-        const promptIds = itemDetail.data.promptIds.map(p => p.promptId);
-        const fetchedPrompts = await client.request(
-          readItems('Prompts', {
-            filter: {
-              promptId: { _in: promptIds }
-            }
-          })
-        );
-
-        debugger;
-        // Data is already deserialized from Directus, no need to JSON.parse
-        itemDetail.data.prompts = fetchedPrompts.map(p => p.data);
-      }
-
-      await importModel((itemDetail.data), async (status) => {
-        if(status === true) {
-
-          debugger;
-
-          /*notif = Notify.create({
-            message: 'Importing ...',
-            spinner: true,
-            group: false,
-            color: 'positive',
-            position: 'top',
-            timeout: 3000,
-          });*/
-
-          imported.value.push(props.item.id);
-
-          const totalCount = (itemDetail.data.modelPackages ? itemDetail.data.modelPackages.length : 0) + (itemDetail.data.promptPackages ? itemDetail.data.promptPackages.length : 0);
-          const showStatus = totalCount > 1;
-
-          let notif = null;
-          if(showStatus) {
-            notif = Notify.create({
-              group: false, // required to be updatable
-              timeout: 0, // we want to be in control when it gets dismissed
-              spinner: true,
-              color: 'positive',
-              position: 'top',
-              message: 'Importing from Inscriptor Hub...',
-              caption: '0%'
-            });
-          }
-
-          if(itemDetail.data.modelPackages && itemDetail.data.modelPackages.length > 0) {
-            for(const pack of itemDetail.data.modelPackages) {
-
-              const nestedPack = await client.request(readItem("Models", pack.packId));
-
-              await importModel(nestedPack.data, (status) => {
-                if(status === true) {
-                  imported.value.push(pack.id);
-                }
-              }, true, null, showStatus);
-
-              if(notif) {
-                notif({
-                  caption: `${Math.round((imported.value.length / (totalCount+1)) * 100)}%`
-                });
-              }
-            }
-          }
-
-          if(itemDetail.data.promptPackages && itemDetail.data.promptPackages.length > 0) {
-            for(const pack of itemDetail.data.promptPackages) {
-
-              const nestedPack = await client.request(readItem("Prompt_Packages", pack.packId));
-
-              debugger;
-
-              // Support new promptIds structure - fetch prompts from Prompts collection
-              if(nestedPack.data.promptIds && nestedPack.data.promptIds.length > 0) {
-                const promptIds = nestedPack.data.promptIds.map(p => p.promptId);
-                const fetchedPrompts = await client.request(
-                  readItems('Prompts', {
-                    filter: {
-                      promptId: { _in: promptIds }
-                    }
-                  })
-                );
-                // Data is already deserialized from Directus, no need to JSON.parse
-                nestedPack.data.prompts = fetchedPrompts.map(p => p.data);
-              }
-
-              await importModel(nestedPack.data, (status) => {
-                if(status === true) {
-                  imported.value.push(pack.id);
-                }
-              }, true, pack.modelIdToUse, showStatus);
-
-              if(notif) {
-                notif({
-                  caption: `${Math.round((imported.value.length / (totalCount+1)) * 100)}%`
-                });
-              }
-            }
-          }
-
-          if(itemDetail.data.promptAgents && itemDetail.data.promptAgents.length > 0) {
-            for(const agent of itemDetail.data.promptAgents) {
-              const existingAgent = promptStore.promptAgents.find(a => a.id === agent.id);
-              if(!existingAgent) {
-                promptStore.addPromptAgent(agent);
-              }
-            }
-          }
-
-          if(itemDetail.data.projectAgents && itemDetail.data.projectAgents.length > 0) {
-            for(const agent of itemDetail.data.projectAgents) {
-              const existingAgent = promptStore.projectAgents.find(a => a.id === agent.id);
-              if(!existingAgent) {
-                promptStore.addProjectAgent(agent);
-              }
-            }
-          }
-
-          if(notif) {
-            notif({
-              icon: 'done', // we add an icon
-              spinner: false, // we reset the spinner setting so the icon can be displayed
-              message: 'Import finished!',
-              timeout: 2500 // we will timeout it in 2.5s
-            })
-          }
-
-          if(itemDetail.data.settingsOverrides) {
-            if(itemDetail.data.settingsOverrides.predefinedPrompts) {
-              for(const prompt of itemDetail.data.settingsOverrides.predefinedPrompts) {
-                promptStore.addPredefinedPrompt(prompt.promptType, prompt.promptId);
-              }
-            }
-
-            if(itemDetail.data.settingsOverrides.analysisPrompts) {
-              for(const promptId of itemDetail.data.settingsOverrides.analysisPrompts) {
-                const prompt = promptStore.getPromptById(promptId);
-                if(prompt) {
-                  promptStore.addAnalysisPrompt({
-                    value: prompt.id
-                  })
-                }
-              }
-            }
-
-            if(itemDetail.data.settingsOverrides.modelForChat) {
-              promptStore.currentModelForChatId = itemDetail.data.settingsOverrides.modelForChat;
-            }
-
-            if(itemDetail.data.settingsOverrides.promptForChat) {
-              promptStore.currentPromptForChatId = itemDetail.data.settingsOverrides.promptForChat;
-            }
-
-            if(itemDetail.data.settingsOverrides.brainstormingPrompt) {
-              const prompt = promptStore.getPromptById(itemDetail.data.settingsOverrides.brainstormingPrompt);
-              promptStore.brainstormingPrompt = {
-                label: prompt.title,
-                value: prompt.id,
-              };
-            }
-
-            if(itemDetail.data.settingsOverrides.suggestPrompt) {
-              const prompt = promptStore.getPromptById(itemDetail.data.settingsOverrides.suggestPrompt);
-              promptStore.suggestingPrompt = {
-                label: prompt.title,
-                value: prompt.id,
-              };
-            }
-          }
-        }
-      });
-    }
+    const { importFromMarketplace } = useMarketplace();
+    await importFromMarketplace(props.item.id, props.category, {
+      importedTracker: imported
+    });
   }
 
   const hasPrice = computed(() => {
