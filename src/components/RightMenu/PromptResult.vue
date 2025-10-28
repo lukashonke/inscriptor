@@ -1374,13 +1374,11 @@
       retValue += 'Reply: ';
     }
 
+    if(props.promptResult.request.resultTitle) {
+      retValue += truncate(props.promptResult.request.resultTitle, 30) + ": ";
+    }
+
     retValue += truncate(props.promptResult.prompt.title, 30);
-
-    //retValue += ' [' + truncate(promptStore.getModel(props.promptResult.model?.id)?.name, 12) + ']';
-
-    /*if(props.promptResult.temperature !== undefined && props.promptResult.temperature !== null) {
-      retValue += ' (temperature ' + props.promptResult.temperature + ')';
-    }*/
 
     return retValue;
   });

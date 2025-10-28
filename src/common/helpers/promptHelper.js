@@ -371,6 +371,8 @@ export function cloneRequest(request, copyAbortController = false) {
 
     reasoningEffort: request.reasoningEffort,
     useRawHtml: request.useRawHtml,
+
+    resultTitle: request.resultTitle,
   }
 }
 

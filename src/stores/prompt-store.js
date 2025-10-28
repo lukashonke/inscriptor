@@ -209,6 +209,8 @@ export const usePromptStore = defineStore('prompts', {
               return null;
             }
 
+            newRequest.resultTitle = run.name;
+
             const result = await this.promptInternalStreaming(newRequest);
 
             this.calculateDiffs(newRequest, result);
