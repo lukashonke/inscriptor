@@ -193,7 +193,7 @@ export async function executeConfirmPrompt2(request) {
     promptStore.setCurrentTabId(request.prompt.tabId);
   }
 
-  let clear = true;
+  let clear = request.clear !== undefined ? request.clear : true;
   if((request.forceInput && request.forceInput.isRegenerating) || request.prompt.promptType === "chat") {
     clear = false;
   }
