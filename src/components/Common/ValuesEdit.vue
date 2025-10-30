@@ -34,7 +34,7 @@
       </q-item-section>
     </q-item>
   </q-list>
-  <q-btn color="primary" icon="mdi-plus" label="Add" @click="promptStore.addListItem(list, newItemName, 'blue')" class="q-mx-md q-mt-md q-mb-md"/>
+  <q-btn color="accent" icon="mdi-plus" label="Add" @click="promptStore.addListItem(list, newItemName, 'blue')" class="q-mx-md q-mt-md q-mb-md"/>
 </template>
 
 <script setup>

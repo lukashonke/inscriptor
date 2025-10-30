@@ -75,7 +75,7 @@ C<template>
           dense
           options-dense
           stack-label
-          label="Tags"
+          label="Filter Tags"
           class="full-width"
         >
           <template v-slot:option="scope">

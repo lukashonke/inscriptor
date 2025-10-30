@@ -104,9 +104,8 @@
       </q-expansion-item>
     </q-card-section>
 
-    <q-separator />
-
     <q-card-actions class="flex items-center">
+      <q-space />
       <q-btn color="accent" v-if="isImporting" no-caps>
         <q-spinner /> &nbsp;Importing...
       </q-btn>

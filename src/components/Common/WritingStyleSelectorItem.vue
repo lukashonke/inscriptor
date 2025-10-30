@@ -5,7 +5,7 @@
         <div class="" :class="{'text-italic': renderVariant === 'not-recommended', 'text-weight-bold': renderVariant === 'recommended', '': !renderVariant}" style="font-size: 0.9rem">{{ writingStyle.name }}</div>
       </div>
       <div class="col-auto q-ml-xs flex items-center">
-        <q-btn no-caps :color="isCurrentStyle ? 'accent' : 'primary'" :class="{'bg-accent text-white': isCurrentStyle}" @click="onClick" padding="2px 8px" style="height: 30px; width: 70px;">
+        <q-btn :flat="isCurrentStyle" no-caps :color="isCurrentStyle ? 'accent' : 'accent'" :class="{'bg-accent-1': isCurrentStyle}" @click="onClick" padding="2px 8px" style="height: 30px; width: 70px;">
           <q-icon :name="buttonIcon" size="16px" :class="buttonText ? 'q-pr-sm' : ''" />
           {{ buttonText }}
         </q-btn>

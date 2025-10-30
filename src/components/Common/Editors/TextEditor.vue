@@ -265,7 +265,7 @@
         <q-btn size="11px" dense flat icon="format_italic"  @click="editor.chain().focus().toggleItalic().run()" :class="{ 'text-grey-5': !editor.isActive('italic'), 'text-primary': editor.isActive('italic') }"/>
       </div>
       <div class="col-auto">
-        <q-btn-dropdown size="11px" dense flat label="Style" class="text-grey-5">
+        <q-btn-dropdown size="11px" dense flat label="Style" class="text-grey-5" no-caps>
           <q-list>
             <q-item clickable v-close-popup @click="editor.chain().focus().toggleHeading({ level: 1 }).run()" :class="{ 'text-grey-5': !editor.isActive('heading', { level: 1 }), 'text-primary': editor.isActive('heading', { level: 1 }) }">
               <q-item-section>
@@ -381,7 +381,7 @@
 
       <div class="col-auto bg-accent-opaque row rounded-borders q-px-sm">
         <div class="col-auto">
-          <q-btn size="11px" id="togglePrompts" dense flat  icon="mdi-creation-outline" class="text-accent" :class="{ 'text-primary': showPrompts }">
+          <q-btn size="11px" id="togglePrompts" label="Prompts" no-caps dense flat  icon="mdi-creation-outline" class="text-accent" :class="{ 'text-primary': showPrompts }">
             <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" anchor="bottom start">
               <q-card v-show="showPrompts">
                 <PromptSelector prompt-types="insert" @promptClick="promptClick" />
@@ -393,11 +393,13 @@
           </q-btn>
         </div>
 
-        <div class="col-auto q-ml-sm" v-if="promptStore.projectAgents.length > 0" ref="agentSelectorButton" id="agentSelector">
+        <div class="col-auto q-ml-md" v-if="promptStore.projectAgents.length > 0" ref="agentSelectorButton" id="agentSelector">
           <q-btn
             v-if="!isAgentActive"
             size="11px"
             dense
+            label="Agents"
+            no-caps
             flat
             :icon="agentIcon"
             :class="agentButtonClass"
@@ -476,27 +478,53 @@
         </div>
       </div>
 
-      <div class="col-auto q-ml-md">
-        <q-btn size="11px" dense flat icon="mdi-alpha-a-box" @click="toggleAiBubbleMenu" class="" :class="{ 'text-primary': aiBubbleMenu, 'text-grey-5': !aiBubbleMenu }">
+      <div class="col-auto q-ml-md q-pr-xs">
+        <q-btn size="11px" dense flat icon="mdi-dots-vertical" class="" color="primary">
           <q-tooltip>
-            Toggle Inline AI bubble menu
+            Editor Options
           </q-tooltip>
-        </q-btn>
-      </div>
+          <q-menu>
+            <q-list dense>
+              <q-item clickable @click="toggleAiBubbleMenu">
+                <q-item-section avatar>
+                  <q-icon name="mdi-creation-outline" class="bordered bg-white shadow-1 text-primary"/>
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>AI prompts button in editor</q-item-label>
+                  <q-item-label caption>Toggle the 'Open prompts' button when in text editor</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-toggle v-model="aiBubbleMenu" @click.stop color="accent" />
+                </q-item-section>
+              </q-item>
 
-      <div class="col-auto">
-        <q-btn size="11px" dense flat icon="mdi-alpha-g-box" @click="toggleAutomaticCorrections" class="" :class="{ 'text-primary': automaticCorrections, 'text-grey-5': !automaticCorrections }">
-          <q-tooltip>
-            Toggle Display Grammar Errors
-          </q-tooltip>
-        </q-btn>
-      </div>
+              <q-item clickable @click="toggleAutomaticCorrections">
+                <q-item-section avatar>
+                  <q-icon name="mdi-spellcheck" :color="automaticCorrections ? 'primary' : 'grey-5'" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>Highlight Grammar Errors</q-item-label>
+                  <q-item-label caption>Browser/OS grammar checking</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-toggle v-model="automaticCorrections" @click.stop color="accent" />
+                </q-item-section>
+              </q-item>
 
-      <div class="col-auto">
-        <q-btn size="11px" dense flat icon="mdi-alpha-c-box" @click="toggleAutoComplete" class="" :class="{ 'text-primary': autoCompleteEnabled, 'text-grey-5': !autoCompleteEnabled }">
-          <q-tooltip>
-            Toggle AI Auto complete
-          </q-tooltip>
+              <q-item clickable @click="toggleAutoComplete">
+                <q-item-section avatar>
+                  <q-icon name="mdi-creation-outline" :color="autoCompleteEnabled ? 'primary' : 'grey-5'" />
+                </q-item-section>
+                <q-item-section>
+                  <q-item-label>AI Auto complete</q-item-label>
+                  <q-item-label caption>Customize the Auto Complete prompt in Project Settings</q-item-label>
+                </q-item-section>
+                <q-item-section side>
+                  <q-toggle v-model="autoCompleteEnabled" @click.stop color="accent" />
+                </q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
         </q-btn>
       </div>
 
@@ -740,6 +768,7 @@ function quickSelectionPromptKeydown(e) {
 const showPrompts = ref(true);
 const currentInsertPromptCategory = ref('');
 const currentSelectionPromptCategory = ref('');
+const currentAgentCategory = ref('Project Agents');
 
 const fileInfo = ref(null);
 const fileInfoHover = useElementHover(fileInfo)

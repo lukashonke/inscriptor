@@ -58,13 +58,15 @@
             </div>
           </div>
 
+          <div class="q-mb-md">
+            <q-btn color="accent" label="Inscriptor Hub" icon="mdi-storefront-outline" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
+          </div>
+
           <div v-for="model in models" :key="model.id">
             <ModelSettingsItem :model="model" />
           </div>
 
-          <div>
-            <q-btn color="primary" label="Inscriptor Hub" icon="mdi-storefront-outline" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
-          </div>
+
           <!-- <q-btn color="primary" label="Add model" @click="promptStore.addNewModel" /> -->
         </q-tab-panel>
 
@@ -79,8 +81,8 @@
           </div>
 
           <div class="q-gutter-x-sm q-mb-md" v-else>
-            <q-btn color="primary" icon="mdi-plus" label="Add prompt" @click="layoutStore.openAddPromptDialog(true, promptModel)" />
             <q-btn color="accent" label="Inscriptor Hub" icon="mdi-storefront-outline" @click="layoutStore.promptMarketplaceOpen = true; layoutStore.settingsOpen = false;"/>
+            <q-btn color="primary" icon="mdi-plus" label="Add prompt" @click="layoutStore.openAddPromptDialog(true, promptModel)" />
           </div>
 
           <div class="q-mb-md">
@@ -196,7 +198,7 @@
   const searchFilter = ref('');
   const selectedModel = ref(null);
   const selectedCategory = ref(null);
-  
+
   // Stable filtered prompt IDs that only update when search filter changes
   const stableFilteredPromptIds = ref(null);
 
@@ -212,7 +214,7 @@
       value: category
     }));
   });
-  
+
   // Method to update stable filtered prompt IDs based on search filter
   const updateStableFilteredPromptIds = () => {
     if (searchFilter.value) {
@@ -260,7 +262,7 @@
     updateStableFilteredPromptIds();
     currentPage.value = 1;
   });
-  
+
   // Reset to first page when model or category filters change
   watch([selectedModel, selectedCategory], () => {
     currentPage.value = 1;
@@ -291,7 +293,7 @@
   const anyModelImported = computed(() => {
     return promptStore.models.length > 0
   });
-  
+
   // Initialize stable filtered IDs on mount if there's already a search filter
   onMounted(() => {
     if (searchFilter.value) {
