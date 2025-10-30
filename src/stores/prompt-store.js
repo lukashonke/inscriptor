@@ -3147,7 +3147,7 @@ export const usePromptStore = defineStore('prompts', {
         tabs: this.tabs,
 
         prompts: this.prompts,
-        predefinedPromptInstances: this.predefinedPromptInstances,
+        predefinedPromptInstances: this.predefinedPromptInstances.filter(p => this.getPromptById(p.promptId)),
         models: this.models,
         currentModelForChatId: this.currentModelForChatId,
         currentPromptForChatId: this.currentPromptForChatId,
@@ -3740,7 +3740,7 @@ export const usePromptStore = defineStore('prompts', {
       const retValue = [];
 
       for(const predefinedPrompt of this.predefinedPromptInstances) {
-        if(predefinedPrompt.promptType === promptType) {
+        if(predefinedPrompt.promptType === promptType && this.getPromptById(predefinedPrompt.promptId)) {
           retValue.push(predefinedPrompt.promptId);
         }
       }
