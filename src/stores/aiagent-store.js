@@ -62,7 +62,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
   },
   actions: {
     // Helper methods for action history and status
-    addActionToHistory(action, details = {}) {
+    addActionToHistory(action, details = {}, showNotification = false) {
       const timestamp = new Date().toLocaleTimeString();
       this.agentActionHistory.push({
         timestamp,
@@ -70,6 +70,17 @@ export const useAiAgentStore = defineStore('ai-agent', {
         details,
         ...details
       });
+
+      // Show notification if requested
+      if (showNotification) {
+        Notify.create({
+          message: action,
+          color: 'accent',
+          position: 'bottom',
+          timeout: 3000,
+          icon: 'mdi-robot'
+        });
+      }
     },
     updateAgentStatus(status) {
       this.agentStatus = status;
@@ -124,7 +135,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           agentName: agent.title,
           searchPrefix: agent.searchPrefix,
           mode: 'paragraph_based'
-        });
+        }, true);
         this.updateAgentStatus('Looking for paragraphs to process...');
 
         await this.processNextParagraph(agent);
@@ -159,7 +170,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
         this.addActionToHistory('✅ All paragraphs processed', {
           type: 'completed',
           reason: 'No more paragraphs found to process'
-        });
+        }, true);
         this.updateAgentStatus('Completed');
 
         this.clearProjectAgent();
@@ -263,70 +274,98 @@ export const useAiAgentStore = defineStore('ai-agent', {
     onWidgetAccept(data) {
       console.log('User accepted changes:', data);
       const editorStore = useEditorStore();
+      const fileStore = useFileStore();
 
       this.projectAgentCurrentPromptRequest?.abortController?.abort();
-
-      const { from, to } = data.paragraphRange;
 
       if(editorStore.editor) {
         editorStore.editor.commands.blur();
       }
 
-      this.manageParagraphDecoration({from, to}, 'remove');
+      // Handle independent agent (HTML-based replacement)
+      if (this.confirmationWidgetData?.isIndependentAgent) {
+        // Clear decoration
+        if (data.paragraphRange) {
+          this.manageParagraphDecoration(data.paragraphRange, 'remove');
+        }
 
-      // Get operation type from widget data
-      const operationType = this.confirmationWidgetData?.toolCallResult?.action || 'modify';
-      const position = this.confirmationWidgetData?.toolCallResult?.position;
+        const toolResult = this.confirmationWidgetData?.toolCallResult;
+        if (toolResult && toolResult.oldContent && toolResult.newContent) {
+          const currentFile = fileStore.selectedFile;
+          if (currentFile && currentFile.content) {
+            // Perform HTML string replacement
+            const updatedContent = currentFile.content.replace(toolResult.oldContent, toolResult.newContent);
+            currentFile.content = updatedContent;
 
-      // Execute different operations based on type
-      if (operationType === 'remove') {
-        // Remove the paragraph
-        editorStore.editor
-          .chain()
-          .focus()
-          .command(({ tr }) => {
-            tr.delete(from, to);
-            return true;
-          })
-          .run();
-      } else if (operationType === 'add') {
-        // Handle special position markers
-        const nodeId = this.confirmationWidgetData?.nodeId;
-        let insertPos = position === 'before' ? from : to;
+            // Mark file as dirty for cloud sync
+            fileStore.setDirty(currentFile);
 
-        // Convert markdown to HTML for proper formatting
-        const htmlContent = markdownToHtml(data.aiSuggestion);
-        editorStore.editor
-          .chain()
-          .focus()
-          .insertContentAt(insertPos, htmlContent)
-          .run();
+            // Reload the editor content
+            if (editorStore.editor) {
+              editorStore.editor.commands.setContent(updatedContent);
+            }
+          }
+        }
       } else {
-        // Default modify operation
-        // Convert markdown to HTML for proper formatting
-        const htmlContent = markdownToHtml(data.aiSuggestion);
-        editorStore.editor
-          .chain()
-          .focus()
-          .command(({ tr }) => {
-            // Delete the existing content and insert the new HTML content
-            tr.delete(from, to);
-            return true;
-          })
-          .insertContentAt(from, htmlContent)
-          .run();
-      }
+        // Handle regular paragraph-based agent
+        const { from, to } = data.paragraphRange;
 
-      if(this.projectAgentCurrentProcessingParagraphItem) {
-        this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'remove');
+        this.manageParagraphDecoration({from, to}, 'remove');
 
-        // Log user acceptance for project agent
-        if (!this.confirmationWidgetData?.isIndependentAgent) {
-          this.addActionToHistory('✅ User accepted change', {
-            type: 'user_accept',
-            paragraphId: this.projectAgentCurrentProcessingParagraphItem.nodeId,
-            operationType
-          });
+        // Get operation type from widget data
+        const operationType = this.confirmationWidgetData?.toolCallResult?.action || 'modify';
+        const position = this.confirmationWidgetData?.toolCallResult?.position;
+
+        // Execute different operations based on type
+        if (operationType === 'remove') {
+          // Remove the paragraph
+          editorStore.editor
+            .chain()
+            .focus()
+            .command(({ tr }) => {
+              tr.delete(from, to);
+              return true;
+            })
+            .run();
+        } else if (operationType === 'add') {
+          // Handle special position markers
+          const nodeId = this.confirmationWidgetData?.nodeId;
+          let insertPos = position === 'before' ? from : to;
+
+          // Convert markdown to HTML for proper formatting
+          const htmlContent = markdownToHtml(data.aiSuggestion);
+          editorStore.editor
+            .chain()
+            .focus()
+            .insertContentAt(insertPos, htmlContent)
+            .run();
+        } else {
+          // Default modify operation
+          // Convert markdown to HTML for proper formatting
+          const htmlContent = markdownToHtml(data.aiSuggestion);
+          editorStore.editor
+            .chain()
+            .focus()
+            .command(({ tr }) => {
+              // Delete the existing content and insert the new HTML content
+              tr.delete(from, to);
+              return true;
+            })
+            .insertContentAt(from, htmlContent)
+            .run();
+        }
+
+        if(this.projectAgentCurrentProcessingParagraphItem) {
+          this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'remove');
+
+          // Log user acceptance for project agent
+          if (!this.confirmationWidgetData?.isIndependentAgent) {
+            this.addActionToHistory('✅ User accepted change', {
+              type: 'user_accept',
+              paragraphId: this.projectAgentCurrentProcessingParagraphItem.nodeId,
+              operationType
+            });
+          }
         }
       }
 
@@ -358,8 +397,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
       this.projectAgentCurrentPromptRequest?.abortController?.abort();
 
+      // Clear decorations
       if(this.projectAgentCurrentProcessingParagraphItem) {
         this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'remove');
+      } else if (data.paragraphRange) {
+        // For independent agents, use paragraphRange from data
+        this.manageParagraphDecoration(data.paragraphRange, 'remove');
       }
 
       if (this.currentConfirmationPromise) {
@@ -385,10 +428,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
       }
 
       if(this.confirmationWidgetData.isIndependentAgent) {
-        this.independentAgentChatHistory.push({
-          type: 'user',
-          text: userFeedback
-        });
+        const editorStore = useEditorStore();
 
         // Log user feedback
         this.addActionToHistory('💬 User provided feedback', {
@@ -396,43 +436,19 @@ export const useAiAgentStore = defineStore('ai-agent', {
           feedback: userFeedback,
           paragraphId: this.confirmationWidgetData.nodeId
         });
-        this.updateAgentStatus('Processing feedback...');
 
-        // Clear current suggestion and set streaming state
-        this.confirmationWidgetData.aiMessage = '';
-        this.confirmationWidgetData.isLoading = true;
+        if(editorStore.editor) {
+          editorStore.editor.commands.blur();
+        }
 
         // Abort any current request
         this.projectAgentCurrentPromptRequest?.abortController?.abort();
 
-        try {
-          const promptStore = usePromptStore();
-
-          const request = cloneRequest(this.projectAgentCurrentPromptRequest);
-          this.projectAgentCurrentPromptRequest = request;
-
-          request.abortController = new AbortController();
-          if (this.independentAgentChatHistory.length > 0) {
-            request.appendMessages = [...this.independentAgentChatHistory];
-          }
-
-          const result = await promptStore.promptInternalSimple(request);
-
-          this.confirmationWidgetData.isLoading = false;
-
-          await this.processIndependentAgentResult(result, false);
-
-          // Update status after processing feedback
-          this.updateAgentStatus('Waiting for user confirmation...');
-        } catch (error) {
-          this.clearProjectAgent();
-        } finally {
-          if(this.confirmationWidgetData) {
-            this.confirmationWidgetData.isLoading = false;
-          }
+        // Resolve promise with feedback - let processIndependentAgentResult handle it
+        if (this.currentConfirmationPromise) {
+          this.currentConfirmationPromise.resolve({ result: 'feedback', feedback: userFeedback });
+          this.currentConfirmationPromise = null;
         }
-
-        await this.continueIndependentAgent(this.projectAgent);
       } else {
         // Log user feedback for project agent
         this.addActionToHistory('💬 User provided feedback', {
@@ -681,8 +697,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
       return userChoice;
     },
     async processIndependentAgent(agent) {
-      // Generate full file content with node IDs
-      const fullFileContent = this.generateFullFileWithNodeIds();
+      // Generate full file content as HTML
+      const fullFileContent = this.generateFullFileAsHtml();
       if (!fullFileContent.trim()) {
         this.clearProjectAgent();
         return;
@@ -693,7 +709,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
         type: 'start',
         agentName: agent.title,
         documentLength: fullFileContent.split('\n').filter(line => line.trim()).length + ' paragraphs'
-      });
+      }, true);
       this.updateAgentStatus('Analyzing document...');
 
       try {
@@ -720,7 +736,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
     async continueIndependentAgent(agent) {
       if (agent && !this.confirmationWidgetData?.isAgentStopped) {
         // Generate current file content for next iteration
-        const currentFileContent = this.generateFullFileWithNodeIds();
+        const currentFileContent = this.generateFullFileAsHtml();
 
         this.independentAgentChatHistory.push({
           type: 'user',
@@ -783,7 +799,22 @@ export const useAiAgentStore = defineStore('ai-agent', {
         const toolResult = this.executeIndependentAgentTool(toolCallResult);
 
         if (toolResult.error) {
+          this.independentAgentChatHistory.push({
+            type: 'tool',
+            name: 'modify',
+            toolCallId: toolCallResult.toolCallId,
+            text: `Error: ${toolResult.error || 'Unknown error'}`
+          });
           console.log(toolResult.error);
+
+          // Update agent status to show the error
+          this.addActionToHistory('⚠️ Tool execution error', {
+            type: 'tool_error',
+            toolName: toolCallResult.toolName,
+            error: toolResult.error
+          });
+          this.updateAgentStatus(`Error: ${toolResult.error}`);
+
           continue;
         }
 
@@ -792,68 +823,33 @@ export const useAiAgentStore = defineStore('ai-agent', {
           this.addActionToHistory('🛑 Agent finished his work', {
             type: 'stop',
             reasoning: toolResult.reasoning
-          });
+          }, true);
           this.updateAgentStatus('Completed');
 
           this.clearProjectAgent();
           return;
         }
 
-        if (toolResult.action === 'modify' || toolResult.action === 'add' || toolResult.action === 'remove') {
-          this.projectAgentCurrentProcessingParagraphItem = toolResult.targetNode;
+        if (toolResult.action === 'modify') {
+          // Store positions for decoration and later cleanup
+          const matchPositions = { from: toolResult.from, to: toolResult.to };
 
-          if(!this.projectAgentCurrentProcessingParagraphItem) {
-            this.clearProjectAgent();
-            return;
-          }
-
-          // Log appropriate action suggestion
-          const actionEmoji = toolResult.action === 'add' ? '➕' : toolResult.action === 'remove' ? '🗑️' : '✏️';
-          const actionLabel = toolResult.action === 'add' ? 'addition' : toolResult.action === 'remove' ? 'removal' : 'modification';
-
-          this.addActionToHistory(`${actionEmoji} Suggested ${actionLabel}`, {
+          // Log modification suggestion
+          this.addActionToHistory('✏️ Suggested modification', {
             type: 'suggest',
             action: toolResult.action,
-            paragraphId: this.projectAgentCurrentProcessingParagraphItem.nodeId,
             reasoning: toolResult.reasoning,
-            preview: toolResult.newContent ? toolResult.newContent.substring(0, 100) + (toolResult.newContent.length > 100 ? '...' : '') : 'Remove paragraph'
+            preview: toolResult.newContent ? toolResult.newContent.substring(0, 100) + (toolResult.newContent.length > 100 ? '...' : '') : ''
           });
-
-          // Check for auto-approval on empty documents
-          const editorStore = useEditorStore();
-          if (toolResult.action === 'add' && this.isDocumentEmpty(editorStore.editor)) {
-            // Auto-approve: directly execute insertion for empty document
-            await this.executeDirectInsertionForEmptyDocument(toolResult);
-
-            this.addActionToHistory('✅ Auto-approved addition to empty document', {
-              type: 'auto_approved',
-              action: toolResult.action,
-              paragraphId: this.projectAgentCurrentProcessingParagraphItem.nodeId,
-              reasoning: 'Document was empty, no user confirmation needed'
-            });
-
-            // Continue to next paragraph processing
-            await this.processNextParagraph(agent);
-            return;
-          }
 
           this.updateAgentStatus('Waiting for user confirmation...');
 
           if(createNewWidget || !this.confirmationWidgetData) {
             // Set up confirmation widget for independent agent
-            const nodeId = this.projectAgentCurrentProcessingParagraphItem.nodeId;
-            let displayText = this.projectAgentCurrentProcessingParagraphItem.text;
-
-            // Handle special position markers
-            if (nodeId === '__END__') {
-              displayText = 'Insert at document end';
-            }
-
             this.confirmationWidgetData = {
               agentTitle: this.projectAgent.title,
-              paragraphRange: { from: this.projectAgentCurrentProcessingParagraphItem.from, to: this.projectAgentCurrentProcessingParagraphItem.to },
-              originalText: displayText,
-              nodeId: nodeId,
+              paragraphRange: matchPositions,
+              originalText: toolResult.oldContent,
               conversationMessages: [...this.independentAgentChatHistory],
               isStreaming: false,
               originalAiSuggestion: toolResult.newContent || '',
@@ -864,6 +860,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
               toolCallResult: toolResult
             };
           } else {
+            this.confirmationWidgetData.paragraphRange = matchPositions;
+            this.confirmationWidgetData.originalText = toolResult.oldContent;
             this.confirmationWidgetData.aiSuggestion = toolResult.newContent || '';
             this.confirmationWidgetData.conversationMessages = [...this.independentAgentChatHistory];
             this.confirmationWidgetData.promptResult = result;
@@ -871,7 +869,8 @@ export const useAiAgentStore = defineStore('ai-agent', {
             this.confirmationWidgetData.toolCallResult = toolResult;
           }
 
-          this.manageParagraphDecoration(this.projectAgentCurrentProcessingParagraphItem, 'awaiting_confirmation');
+          // Add decoration to highlight the text being modified
+          this.manageParagraphDecoration(matchPositions, 'awaiting_confirmation');
 
           let promiseResolve;
           const confirmationPromise = new Promise((resolve) => {
@@ -881,40 +880,51 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
           const confirmationResult = await confirmationPromise;
 
+          // Clear decoration after user responds
+          this.manageParagraphDecoration(matchPositions, 'remove');
+
           // Add tool result to assistant history
           if(confirmationResult === 'accepted') {
             this.independentAgentChatHistory.push({
               type: 'tool',
-              name: 'modifyParagraph',
+              name: 'modify',
               toolCallId: toolCallResult.toolCallId,
-              text: `Successfully modified paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId}. User ACCEPTED the change.`
+              text: `Successfully modified the document. User ACCEPTED the change.`
             });
 
             // Log user acceptance
             this.addActionToHistory('✅ User accepted change', {
-              type: 'user_accept',
-              paragraphId: this.projectAgentCurrentProcessingParagraphItem.nodeId
+              type: 'user_accept'
             });
 
             this.confirmationWidgetData = null;
           } else if (confirmationResult === 'skipped') {
             this.independentAgentChatHistory.push({
               type: 'tool',
-              name: 'modifyParagraph',
+              name: 'modify',
               toolCallId: toolCallResult.toolCallId,
-              text: `Modification of paragraph ${this.projectAgentCurrentProcessingParagraphItem.nodeId} was SKIPPED by user. Do not suggest it again!`
+              text: `Modification was SKIPPED by user. Do not suggest this exact change again!`
             });
 
             // Log user rejection
             this.addActionToHistory('❌ User skipped change', {
-              type: 'user_skip',
-              paragraphId: this.projectAgentCurrentProcessingParagraphItem.nodeId
+              type: 'user_skip'
+            });
+
+            this.confirmationWidgetData = null;
+          } else if (confirmationResult && typeof confirmationResult === 'object' && confirmationResult.result === 'feedback') {
+
+            // Add tool result indicating user wants revision
+            this.independentAgentChatHistory.push({
+              type: 'tool',
+              name: 'modify',
+              toolCallId: toolCallResult.toolCallId,
+              text: `User provided feedback on the modification: "${confirmationResult.feedback}". Please revise the modification based on this feedback.`
             });
 
             this.confirmationWidgetData = null;
           }
 
-          editorStore.clearAllAgentDecorations();
           this.currentConfirmationPromise = null;
         }
       }
@@ -928,12 +938,14 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
         newRequest.userPrompt = fullFileContent;
         newRequest.text = fullFileContent;
+
         newRequest.isProjectAgent = true;
         newRequest.isIndependentAgent = true;
         newRequest.abortController = new AbortController();
         newRequest.silent = true;
         newRequest.contextTypes = this.projectAgentContext;
         newRequest.tools = this.getIndependentAgentTools();
+        newRequest.useRawHtml = true;
 
         if (this.independentAgentChatHistory.length > 0) {
           newRequest.appendMessages = [...this.independentAgentChatHistory];
@@ -974,28 +986,89 @@ export const useAiAgentStore = defineStore('ai-agent', {
 
       this.clearProjectAgent();
     },
-    generateFullFileWithNodeIds() {
+    generateFullFileAsHtml() {
+      const fileStore = useFileStore();
+      const currentFile = fileStore.selectedFile;
+
+      if (!currentFile || !currentFile.content) return '';
+
+      // Return the raw HTML content of the current file
+      return currentFile.content;
+    },
+    findPositionsForHtmlMatch(matchIndex, matchLength) {
       const editorStore = useEditorStore();
       const editor = editorStore.editor;
+      const fileStore = useFileStore();
 
-      if (!editor) return '';
+      if (!editor) return null;
+
+      const currentFile = fileStore.selectedFile;
+      if (!currentFile || !currentFile.content) return null;
+
+      const fullHtml = currentFile.content;
+      const matchedHtml = fullHtml.substring(matchIndex, matchIndex + matchLength);
+
+      // We need to find where this HTML content appears in the ProseMirror document
+      // Strategy: Walk through the document and serialize to HTML, tracking positions
 
       const doc = editor.state.doc;
-      let fullContent = '';
+      let currentHtmlPos = 0;
+      let foundFrom = null;
+      let foundTo = null;
 
-      doc.nodesBetween(0, doc.content.size, (node, pos) => {
-        if (node.type.name === 'paragraph') {
-          const from = pos;
-          const to = pos + node.nodeSize;
-          const text = editorTextBetween(doc, { from, to }, '\\n', '\\n');
-
-          if (text.trim().length > 0) {
-            fullContent += `[${node.attrs.id}]: ${text.trim()}\n\n`;
-          }
+      // Walk through all nodes in the document
+      doc.descendants((node, pos) => {
+        if (foundFrom !== null && foundTo !== null) {
+          return false; // Stop if we found both positions
         }
+
+        // Get the node's HTML representation
+        const nodeHtml = editor.storage.markdown?.serializer?.serialize(node) || '';
+
+        // For now, use a simpler approach: check if we're at the match position
+        // by comparing the cumulative HTML length
+        const nodeSize = node.nodeSize;
+
+        // Check if the match starts within this node's HTML range
+        if (foundFrom === null && currentHtmlPos <= matchIndex && matchIndex < currentHtmlPos + nodeHtml.length) {
+          foundFrom = pos;
+        }
+
+        // Check if the match ends within this node's HTML range
+        if (foundFrom !== null && foundTo === null && currentHtmlPos + nodeHtml.length >= matchIndex + matchLength) {
+          foundTo = pos + nodeSize;
+        }
+
+        currentHtmlPos += nodeHtml.length;
       });
 
-      return fullContent;
+      // Fallback: if we couldn't find exact positions, try a broader search
+      // Find any text node that contains part of the matched content
+      if (foundFrom === null || foundTo === null) {
+        // Strip HTML tags to get plain text for matching
+        const matchedText = matchedHtml.replace(/<[^>]*>/g, '').trim();
+
+        if (matchedText) {
+          doc.descendants((node, pos) => {
+            if (node.isText && node.text) {
+              if (node.text.includes(matchedText.substring(0, Math.min(50, matchedText.length)))) {
+                if (foundFrom === null) {
+                  foundFrom = pos;
+                  foundTo = pos + node.nodeSize;
+                  return false;
+                }
+              }
+            }
+          });
+        }
+      }
+
+      // Final fallback: select the entire document
+      if (foundFrom === null || foundTo === null) {
+        return { from: 0, to: doc.content.size };
+      }
+
+      return { from: foundFrom, to: foundTo };
     },
     findParagraphByNodeId(nodeId) {
       const editorStore = useEditorStore();
@@ -1085,25 +1158,25 @@ export const useAiAgentStore = defineStore('ai-agent', {
         {
           type: "function",
           function: {
-            name: "modifyParagraph",
-            description: "Modify the content of a specific paragraph in the document",
+            name: "modify",
+            description: "🚨 CRITICAL: DOCUMENT CONTAINS HTML TAGS - YOU MUST INCLUDE ALL TAGS IN old_string AND new_string 🚨\n\nModify document content by finding and replacing exact HTML text. The document is stored as HTML with tags like <p>, <br>, <strong>, <h1>, etc.\n\n⚠️ MANDATORY HTML REQUIREMENT:\nWhen you see in document: <p>Hello world</p>\nYour old_string MUST be: \"<p>Hello world</p>\" (WITH the <p> and </p> tags)\nNOT: \"Hello world\" (this will FAIL - missing tags!)\n\nALWAYS copy the EXACT HTML including opening/closing tags from the document content.\n\n📋 HOW TO USE THIS TOOL:\n1. COPY: Copy the HTML text including ALL tags (<p>, </p>, <h1>, </h1>, etc.) exactly as shown in the document\n2. INCLUDE CONTEXT: Add 2-3 paragraphs before and after (with their HTML tags) to make it unique\n3. PASTE: Use that EXACT HTML (with all tags) as your old_string\n\n❌ COMMON MISTAKES THAT CAUSE FAILURES:\n• Forgetting to include <p> and </p> tags around text\n• Stripping HTML tags from the text\n• Not including enough surrounding context\n• Not matching whitespace/line breaks exactly\n\n✅ CORRECT EXAMPLE:\nDocument contains: <p>First sentence.</p><p>Second sentence.</p>\nold_string: \"<p>First sentence.</p><p>Second sentence.</p>\"\n\n❌ WRONG EXAMPLE:\nDocument contains: <p>First sentence.</p><p>Second sentence.</p>\nold_string: \"First sentence.\\nSecond sentence.\" ← WILL FAIL! Missing HTML tags!",
             parameters: {
               type: "object",
               properties: {
-                nodeId: {
+                old_string: {
                   type: "string",
-                  description: "The ID of the paragraph node to modify"
+                  description: "⚠️ MUST INCLUDE HTML TAGS! The exact text to find WITH all HTML tags (<p>, </p>, <br>, <h1>, etc.). Copy directly from the document including all tags. Include 2-3 paragraphs of context before and after (with their tags) to ensure uniqueness. Example: If document shows \"<p>Text here</p>\", use \"<p>Text here</p>\" NOT \"Text here\"."
                 },
-                newContent: {
+                new_string: {
                   type: "string",
-                  description: "The new content to replace the paragraph with"
+                  description: "⚠️ MUST INCLUDE HTML TAGS! The replacement text WITH all HTML tags you want. Example: \"<p>New text</p>\" NOT \"New text\". This completely replaces old_string."
                 },
                 reasoning: {
                   type: "string",
                   description: "Explanation of why this change is being made"
                 }
               },
-              required: ["nodeId", "newContent", "reasoning"]
+              required: ["old_string", "new_string", "reasoning"]
             }
           }
         },
@@ -1382,60 +1455,72 @@ export const useAiAgentStore = defineStore('ai-agent', {
       const { toolName, arguments: args } = toolCall;
 
       switch (toolName) {
-        case 'modifyParagraph':
-          return this.executeModifyParagraphTool(args);
+        case 'modify':
+          return this.executeModifyTool(args);
         case 'stop':
           return this.executeStopTool(args);
         default:
           return { error: `Unknown tool: ${toolName}` };
       }
     },
-    executeModifyParagraphTool(args) {
-      const { action = 'modify', nodeId, newContent, position, reasoning } = args;
+    executeModifyTool(args) {
+      const { old_string, new_string, reasoning } = args;
 
-      if (!nodeId || !reasoning) {
-        return { error: "Missing required arguments: nodeId and reasoning" };
+      if (!old_string || !new_string || !reasoning) {
+        return { error: "Missing required arguments: old_string, new_string, and reasoning are all required" };
       }
 
-      if ((action === 'modify' || action === 'add') && !newContent) {
-        return { error: `Missing newContent for ${action} action` };
+      const fileStore = useFileStore();
+      const currentFile = fileStore.selectedFile;
+
+      if (!currentFile) {
+        return { error: "No file is currently open" };
       }
 
-      if (action === 'add' && !position && nodeId !== '__END__') {
-        return { error: "Missing position for add action" };
+      // Get the current document HTML content
+      const documentHtml = currentFile.content || '';
+
+      if (!documentHtml.trim()) {
+        return { error: "Document is empty" };
       }
 
-      // Handle special position markers
-      if (nodeId === '__END__') {
-        // Find the last paragraph instead of using position marker
-        const editorStore = useEditorStore();
-        const lastParagraph = this.findLastParagraph(editorStore.editor);
-        if (!lastParagraph) {
-          return { error: "No paragraphs found in document for __END__ positioning" };
-        }
+      // Find the exact HTML match
+      const matchIndex = documentHtml.indexOf(old_string);
 
-        return {
-          success: true,
-          action,
-          targetNode: lastParagraph,  // Use actual last paragraph
-          newContent,
-          position: 'after',  // Always insert after the last paragraph
-          reasoning
-        };
+      if (matchIndex === -1) {
+        return { error: `Could not find the exact HTML text in the document. Make sure you copied the HTML exactly, including all tags like <p>, </p>, etc. The old_string must match the document content exactly.` };
       }
 
-      // Find the target paragraph for regular nodeIds
-      const targetNode = this.findParagraphByNodeId(nodeId);
-      if (!targetNode) {
-        return { error: `Paragraph with ID ${nodeId} not found` };
+      // Check for multiple matches
+      const secondMatchIndex = documentHtml.indexOf(old_string, matchIndex + 1);
+      if (secondMatchIndex !== -1) {
+        return { error: `Found multiple matches for the provided text. Please include more surrounding context (2-3 paragraphs before and after) to make the match unique.` };
+      }
+
+      // Calculate position in the editor
+      const editorStore = useEditorStore();
+      const editor = editorStore.editor;
+
+      if (!editor) {
+        return { error: "Editor not available" };
+      }
+
+      // Find the corresponding ProseMirror document positions
+      const positions = this.findPositionsForHtmlMatch(matchIndex, old_string.length);
+
+      if (!positions) {
+        return { error: "Could not determine document positions for the matched text" };
       }
 
       return {
         success: true,
-        action,
-        targetNode,
-        newContent,
-        position,
+        action: 'modify',
+        oldContent: old_string,
+        newContent: new_string,
+        matchIndex: matchIndex,
+        matchLength: old_string.length,
+        from: positions.from,
+        to: positions.to,
         reasoning
       };
     },
@@ -2649,4 +2734,4 @@ export const useAiAgentStore = defineStore('ai-agent', {
       }
     },
   },
-});
+})
