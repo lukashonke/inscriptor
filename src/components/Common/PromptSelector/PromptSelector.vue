@@ -136,28 +136,6 @@
 
         <q-card-section v-if="currentPromptCategory === '-custom-'" class="q-gutter-y-sm" style="width: 480px;" id="promptSelectorCustomPrompt">
 
-          <!--<q-card class="q-pa-sm bordered" flat>
-            <q-card-section class="no-padding">
-
-              <template v-if="props.promptTypes === 'insert'">
-                <q-chip text-color="black" :color="currentFilePromptInput.color + '-3'" icon="mdi-check" >
-                  {{currentFilePromptInput.label}} included
-                  <q-tooltip color="primary">
-                    <div>all text from file</div>
-                  </q-tooltip>
-                </q-chip>
-              </template>
-              <template v-else>
-                <q-chip text-color="black" :color="selectedTextPromptInput.color + '-3'" icon="mdi-check" >
-                  {{selectedTextPromptInput.label}}
-                  <q-tooltip color="primary">
-                    <div>selected text it included</div>
-                  </q-tooltip>
-                </q-chip>
-              </template>
-            </q-card-section>
-          </q-card>-->
-
           <InputWithAi v-model="customPromptText" :autofocus="true" :filled="true" label="Instructions for AI" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Prompt Refiner')" :prompt-input="customPromptText" class="write-monospace" :automatic-text-correction="false" @ctrlEnter="customPromptClick"/>
           <div class="row">
             <div class="col-auto">
@@ -182,7 +160,7 @@
         </q-card-section>
 
         <q-card-section v-if="currentPromptCategory === '-pinned-'" class="full-width q-pa-sm" id="promptSelectorPinnedPrompts">
-          <div class="q-pa-sm shadow-1">
+          <div class="q-pa-sm inscriptor-shadow-1">
             <div class="q-mt-xs">
               <template v-for="prompt in promptStore.getStickyPrompts(fileStore.selectedFile)" :key="prompt.id">
                 <div class="row text-caption full-width q-pb-xs">
@@ -194,7 +172,7 @@
         </q-card-section>
 
         <q-card-section class="full-width q-pa-sm" v-if="groupPromptsByFolder(categoryPrompts).length > 0">
-          <div class="q-pa-sm shadow-1" :class="layoutStore.darkMode ? 'bordered' : ''">
+          <div class="q-pa-sm inscriptor-shadow-1" :class="layoutStore.darkMode ? 'bordered' : ''">
             <div class="q-mt-xs">
               <template v-for="prompt in groupPromptsByFolder(categoryPrompts)" :key="prompt.id">
                 <div class="row text-caption full-width q-pb-xs">
