@@ -9,7 +9,7 @@
       <div class="q-gutter-y-xs mobile-hide" v-if="aiBubbleMenu">
         <div class="row">
           <div class="q-gutter-x-xs">
-            <q-btn size="11px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-theme-primary bordered" inscriptor-shadow-1 color="accent" :class="{ 'text-primary': showPrompts }">
+            <q-btn size="11px" dense flat icon="mdi-creation-outline" padding="4px 6px" class="bg-theme-primary bordered" color="accent" :class="{ 'text-primary': showPrompts }">
               <q-popup-proxy transition-show="jump-down" transition-hide="fade" :offset="[0, 10]" >
                 <q-card v-show="showPrompts">
                   <PromptSelector prompt-types="selection" @promptClick="promptClick" />
@@ -414,17 +414,52 @@
             />
 
             <q-menu v-if="!isAgentActive">
-              <q-list>
-                <q-item v-for="agent in promptStore.projectAgents" :key="agent.id" clickable v-close-popup @click="runProjectAgent(agent)">
-                  <q-item-section>
-                    <q-item-label class="flex items-center text-caption">
-                      <q-icon :name="(promptStore.getPromptById(agent.promptId)?.icon?.length > 0) ? promptStore.getPromptById(agent.promptId).icon : 'mdi-robot-outline'" :color="(promptStore.getPromptById(agent.promptId)?.color?.length > 0) ? promptStore.getPromptById(agent.promptId).color : undefined" size="15px" class="q-mr-sm" />
-                      {{ agent.title }}
-                    </q-item-label>
-                    <q-item-label caption>{{ agent.description }}</q-item-label>
-                  </q-item-section>
-                </q-item>
-              </q-list>
+              <div class="row" style="width: 600px;">
+                <!-- Left Column: Category Tabs -->
+                <div class="col-auto right-border mobile-hide" :class="layoutStore.darkMode ? 'bg-dark' : 'bg-grey-1'">
+                  <div class="row">
+                    <div class="col full-width">
+                      <q-btn
+                        size="12px"
+                        no-caps
+                        flat
+                        color="indigo"
+                        label="Project Agents"
+                        icon="mdi-robot-outline"
+                        :class="[
+                          layoutStore.darkMode
+                            ? (currentAgentCategory === 'Project Agents' ? 'bg-grey-1' : '')
+                            : ('bg-accent' + (currentAgentCategory === 'Project Agents' ? '-1' : '-0'))
+                        ]"
+                        class="full-width items-start"
+                        unelevated
+                        @click="currentAgentCategory = 'Project Agents'"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Right Column: Agent List -->
+                <div class="col">
+                  <q-card-section class="full-width q-pa-xs">
+                    <div class="scroll-y" style="max-height: 400px;">
+                      <template v-for="agent in promptStore.projectAgents" :key="agent.id">
+                        <div class="row text-caption full-width">
+                          <q-item clickable v-close-popup @click="runProjectAgent(agent)" class="full-width">
+                            <q-item-section side>
+                              <q-icon :name="(promptStore.getPromptById(agent.promptId)?.icon?.length > 0) ? promptStore.getPromptById(agent.promptId).icon : 'mdi-robot-outline'" :color="(promptStore.getPromptById(agent.promptId)?.color?.length > 0) ? promptStore.getPromptById(agent.promptId).color : undefined" size="20px" />
+                            </q-item-section>
+                            <q-item-section>
+                              <q-item-label class="text-caption text-weight-medium">{{ agent.title }}</q-item-label>
+                              <q-item-label caption>{{ agent.description }}</q-item-label>
+                            </q-item-section>
+                          </q-item>
+                        </div>
+                      </template>
+                    </div>
+                  </q-card-section>
+                </div>
+              </div>
             </q-menu>
 
             <q-tooltip :delay="1000">
