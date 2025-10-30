@@ -176,7 +176,7 @@
               flat
               class="q-ml-xs"
               autofocus
-              label="Reply to AI..."
+              label="Reject and reply to AI..."
               placeholder="e.g., Make it shorter, Add more detail, Change tone..."
               @keyup.enter="onChat"
               :disable="widgetData.isStreaming"
@@ -265,13 +265,13 @@
               <q-btn
                 flat
                 color="negative"
-                label="Skip"
+                label="Reject"
                 @click="onReject"
                 class="full-width"
                 no-caps
                 :disable="widgetData.isStreaming || widgetData.isLoading"
               >
-                <q-tooltip>Skip this paragraph</q-tooltip>
+                <q-tooltip :delay="500">Skip this paragraph</q-tooltip>
               </q-btn>
             </div>
             <div class="col-auto q-ml-sm" v-if="widgetData.aiSuggestion != widgetData.originalAiSuggestion">
@@ -285,7 +285,7 @@
                 no-caps
                 :disable="widgetData.isStreaming || widgetData.isLoading"
               >
-                <q-tooltip>Revert to original AI suggestion</q-tooltip>
+                <q-tooltip :delay="500">Revert to original AI suggestion</q-tooltip>
               </q-btn>
             </div>
             <div class="col"/>
@@ -293,13 +293,13 @@
               <q-btn
                 color="accent"
                 icon="mdi-check"
-                label="Accept & Continue"
+                label="Accept"
                 @click="onAccept"
                 class="full-width"
                 no-caps
                 :disable="widgetData.isStreaming || widgetData.isLoading"
               >
-                <q-tooltip>Accept this change</q-tooltip>
+                <q-tooltip :delay="500">Accept this change and continue</q-tooltip>
               </q-btn>
             </div>
           </template>
@@ -311,7 +311,7 @@
 
 <script setup>
 import { computed, ref, nextTick } from 'vue'
-import {diffStrings, markdownToHtml} from 'src/common/utils/textUtils'
+import {diffStrings, htmlToMarkdown, markdownToHtml} from 'src/common/utils/textUtils'
 import { useFileStore } from 'stores/file-store'
 import PromptResult from 'components/RightMenu/PromptResult.vue';
 import {useAiAgentStore} from 'stores/aiagent-store';
@@ -369,9 +369,9 @@ const writeClasses = computed(() => {
 // Calculate diff and render it with highlighting
 const diffHtml = computed(() => {
   // Use streaming text if available and streaming, otherwise use final suggested text
-  const textToCompare = props.widgetData.aiSuggestion;
+  const textToCompare = htmlToMarkdown(props.widgetData.aiSuggestion);
 
-  const diff = diffStrings(props.widgetData.originalText ?? '', textToCompare ?? '');
+  const diff = diffStrings(htmlToMarkdown(props.widgetData.originalText) ?? '', textToCompare ?? '');
 
   let html = '';
   for (const part of diff) {
