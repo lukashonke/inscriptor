@@ -2,28 +2,27 @@
   <q-layout view="hHh lpR fFf" :class="layoutStore.darkMode ? 'dark-mode' : 'day-mode'">
 
     <q-header elevated className="bg-primary text-white shadow-1">
-      <div class="row bg-accent items-center justify-between">
-        <q-btn size="md" dense flat round icon="menu" @click="toggleLeftDrawer" />
+      <div class="row bg-accent items-center justify-between q-px-sm" style="min-height: 56px">
+        <q-btn flat round icon="menu" @click="toggleLeftDrawer" />
         <q-btn
           flat
-          dense
           no-caps
-          class="text-caption q-ml-sm"
+          class="text-body2 q-ml-sm"
           @click="layoutStore.projectSelectionDialogOpen = true"
           v-if="fileStore.projectName">
           <template v-if="fileStore.projectSettings?.syncToCloud">
-            <q-spinner v-if="layoutStore.projectSyncIndicator" size="16px" class="q-mr-xs" />
-            <q-icon v-else name="mdi-folder-outline" size="16px" class="q-mr-xs" />
+            <q-spinner v-if="layoutStore.projectSyncIndicator" size="18px" class="q-mr-xs" />
+            <q-icon v-else name="mdi-folder-outline" size="18px" class="q-mr-xs" />
           </template>
           <template v-else>
-            <q-icon name="mdi-folder-outline" size="16px" class="q-mr-xs" />
+            <q-icon name="mdi-folder-outline" size="18px" class="q-mr-xs" />
           </template>
           {{ fileStore.projectName }}
         </q-btn>
         <q-btn-dropdown
           flat
           icon="mdi-account-outline"
-          class="text-caption"
+          class="text-body2"
           label="User"
           no-caps
           :loading="userSyncing"
@@ -42,8 +41,8 @@
           </q-item>
         </q-btn-dropdown>
         <div>
-          <q-btn size="md" dense flat icon="mdi-creation-outline" class="text-white" @click="layoutStore.promptResultsDialogOpened = true" />
-          <q-btn size="md" dense flat round icon="mdi-robot-outline" @click="toggleRightDrawer" />
+          <q-btn flat icon="mdi-creation-outline" class="text-white" @click="layoutStore.promptResultsDialogOpened = true" />
+          <q-btn flat round icon="mdi-robot-outline" @click="toggleRightDrawer" />
         </div>
       </div>
 
