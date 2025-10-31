@@ -16,6 +16,9 @@
           <q-btn class="q-ml-lg bg-primary-light full-width" dense unelevated no-caps @click="layoutStore.searchOpen = true">
             <q-icon name="mdi-magnify" />
             <q-space />
+            <q-tooltip :delay="500">
+              Search files (Ctrl+K)
+            </q-tooltip>
           </q-btn>
         </div>
       </div>

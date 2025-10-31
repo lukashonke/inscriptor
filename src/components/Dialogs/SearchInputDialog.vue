@@ -1,7 +1,7 @@
 <template>
-  <q-dialog v-model="layoutStore.searchOpen" position="top" >
+  <q-dialog v-model="layoutStore.searchOpen" position="top" @keydown="handleKeyDown">
     <q-card style="width: 800px; max-width: 70vw;">
-      <q-input v-model="searchQuery" label="Search..." filled style="min-width: 300px;" dense ref="searchRef" autofocus :debounce="500" clearable>
+      <q-input v-model="searchQuery" label="Search..." filled style="min-width: 300px;" dense ref="searchRef" autofocus :debounce="500" clearable hint="Use arrow keys to navigate, Enter to open (Ctrl+K to toggle)">
         <template v-slot:prepend>
           <q-icon name="mdi-magnify" size="xs" />
         </template>
@@ -13,7 +13,7 @@
 
       <q-card-section v-if="queryResults && queryResults.length > 0">
         <q-list dense>
-          <q-item v-for="result in queryResults" :key="result.id" clickable dense @click="openFile(result, false)">
+          <q-item v-for="(result, index) in queryResults" :key="result.id" clickable dense @click="openFile(result, false)" :class="{ 'bg-primary text-white': selectedIndex === index }" :ref="el => setItemRef(el, index)">
             <q-item-section side>
               <q-icon :name="result.file.originalFile.icon ?? 'mdi-file-document-outline'" :color="result.file.originalFile.state?.color" class="no-padding no-margin" size="17px" />
             </q-item-section>
@@ -24,9 +24,9 @@
         </q-list>
       </q-card-section>
 
-      <q-card-section v-if="fileNameResults.length > 0 || fileSynopsisResults.length > 0 || fileNoteResults.length > 0 || fileContentResults.length > 0">
+      <q-card-section v-if="fileNameResults.length > 0 || fileSynopsisResults.length > 0 || fileNoteResults.length > 0 || fileContentResults.length > 0" ref="resultsContainer">
         <q-list dense>
-          <q-item v-for="result in fileNameResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)">
+          <q-item v-for="(result, index) in fileNameResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)" :class="{ 'bg-primary text-white': selectedIndex === index }" :ref="el => setItemRef(el, index)">
             <q-item-section side>
               <q-icon :name="result.file.icon ?? 'mdi-file-document-outline'" :color="result.file.state?.color" class="no-padding no-margin" size="17px" />
             </q-item-section>
@@ -36,7 +36,7 @@
           </q-item>
         </q-list>
         <q-list dense>
-          <q-item v-for="result in fileContentResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)">
+          <q-item v-for="(result, index) in fileContentResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)" :class="{ 'bg-primary text-white': selectedIndex === fileNameResults.length + index }" :ref="el => setItemRef(el, fileNameResults.length + index)">
             <q-item-section side>
               <q-icon :name="result.file.icon ?? 'mdi-file-document-outline'" :color="result.file.state?.color" class="no-padding no-margin" size="17px" />
             </q-item-section>
@@ -49,7 +49,7 @@
           </q-item>
         </q-list>
         <q-list dense>
-          <q-item v-for="result in fileSynopsisResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)">
+          <q-item v-for="(result, index) in fileSynopsisResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)" :class="{ 'bg-primary text-white': selectedIndex === fileNameResults.length + fileContentResults.length + index }" :ref="el => setItemRef(el, fileNameResults.length + fileContentResults.length + index)">
             <q-item-section side>
               <q-icon :name="result.file.icon ?? 'mdi-file-document-outline'" :color="result.file.state?.color" class="no-padding no-margin" size="17px" />
             </q-item-section>
@@ -68,7 +68,7 @@
           </q-item>
         </q-list>
         <q-list dense>
-          <q-item v-for="result in fileNoteResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)">
+          <q-item v-for="(result, index) in fileNoteResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)" :class="{ 'bg-primary text-white': selectedIndex === fileNameResults.length + fileContentResults.length + fileSynopsisResults.length + index }" :ref="el => setItemRef(el, fileNameResults.length + fileContentResults.length + fileSynopsisResults.length + index)">
             <q-item-section side>
               <q-icon :name="result.file.icon ?? 'mdi-file-document-outline'" :color="result.file.state?.color" class="no-padding no-margin" size="17px" />
             </q-item-section>
@@ -92,7 +92,7 @@
   </q-dialog>
 </template>
 <script setup>
-import {ref, watch} from "vue";
+import {ref, watch, computed, nextTick} from "vue";
 import {useLayoutStore} from "stores/layout-store";
 import {useFileStore} from "stores/file-store";
 import {removeHtmlTags} from "src/common/utils/textUtils";
@@ -111,8 +111,84 @@ const noResults = ref(false);
 
 const queryResults = ref(null);
 
+// Keyboard navigation
+const selectedIndex = ref(-1);
+const itemRefs = ref([]);
+
+// Get total count of results
+const totalResults = computed(() => {
+  return fileNameResults.value.length +
+         fileContentResults.value.length +
+         fileSynopsisResults.value.length +
+         fileNoteResults.value.length;
+});
+
+// Get all results as a flat array for navigation
+const allResults = computed(() => {
+  return [
+    ...fileNameResults.value.map(r => r.file),
+    ...fileContentResults.value.map(r => r.file),
+    ...fileSynopsisResults.value.map(r => r.file),
+    ...fileNoteResults.value.map(r => r.file)
+  ];
+});
+
+// Set item refs for scrolling
+function setItemRef(el, index) {
+  if (el) {
+    itemRefs.value[index] = el;
+  }
+}
+
+// Handle keyboard navigation
+function handleKeyDown(event) {
+  if (totalResults.value === 0) return;
+
+  if (event.key === 'ArrowDown') {
+    event.preventDefault();
+    selectedIndex.value = (selectedIndex.value + 1) % totalResults.value;
+    scrollToSelected();
+  } else if (event.key === 'ArrowUp') {
+    event.preventDefault();
+    selectedIndex.value = selectedIndex.value <= 0
+      ? totalResults.value - 1
+      : selectedIndex.value - 1;
+    scrollToSelected();
+  } else if (event.key === 'Enter' && selectedIndex.value >= 0) {
+    event.preventDefault();
+    const selectedFile = allResults.value[selectedIndex.value];
+    if (selectedFile) {
+      openFile(selectedFile);
+    }
+  }
+}
+
+// Scroll selected item into view
+function scrollToSelected() {
+  nextTick(() => {
+    const selectedEl = itemRefs.value[selectedIndex.value];
+    if (selectedEl?.$el) {
+      selectedEl.$el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  });
+}
+
 watch(searchQuery, (v) => {
   doSearch();
+})
+
+// Reset selection when results change
+watch([fileNameResults, fileContentResults, fileSynopsisResults, fileNoteResults], () => {
+  selectedIndex.value = totalResults.value > 0 ? 0 : -1;
+  itemRefs.value = [];
+})
+
+// Reset selection when dialog opens
+watch(() => layoutStore.searchOpen, (isOpen) => {
+  if (isOpen) {
+    selectedIndex.value = totalResults.value > 0 ? 0 : -1;
+    itemRefs.value = [];
+  }
 })
 
 function doSearch() {
