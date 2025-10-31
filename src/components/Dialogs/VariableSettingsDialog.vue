@@ -68,7 +68,7 @@
           </q-expansion-item>
         </q-card>
 
-        <q-btn color="primary" label="Add variable" @click="fileStore.addVariable" icon="mdi-plus" class="q-mt-md" />
+        <q-btn color="accent" label="Add variable" @click="fileStore.addVariable" icon="mdi-plus" class="q-mt-md" />
       </q-card-section>
     </q-card>
   </q-dialog>

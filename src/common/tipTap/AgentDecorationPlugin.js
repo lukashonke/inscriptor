@@ -85,8 +85,8 @@ export const AgentDecorationPlugin = Extension.create({
     const createDecoration = (from, to, status) => {
       const className = getClassForStatus(status)
 
-      // Use node decoration for paragraph-level styling
-      return Decoration.node(from, to, {
+      // Use inline decoration to support arbitrary ranges (single or multiple nodes)
+      return Decoration.inline(from, to, {
         class: className,
         'data-agent-status': status,
       })

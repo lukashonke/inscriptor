@@ -11,7 +11,7 @@
           <div class="">
 
             <q-list>
-              <q-item active-class="text-accent text-weight-medium" clickable :active="selectedCategory === 'Prompt_Packages'" v-ripple @click="selectedCategory = 'Prompt_Packages'">
+              <q-item active-class="text-accent text-weight-bold bg-accent-opaque" clickable :active="selectedCategory === 'Prompt_Packages'" v-ripple @click="selectedCategory = 'Prompt_Packages'" class="">
                 <q-item-section avatar>
                   <q-icon name="mdi-creation-outline" />
                 </q-item-section>
@@ -20,7 +20,7 @@
                 </q-item-section>
               </q-item>
 
-              <q-item active-class="text-accent text-weight-medium" clickable :active="selectedCategory === 'Models'" v-ripple @click="selectedCategory = 'Models'">
+              <q-item active-class="text-accent text-weight-medium bg-accent-opaque" clickable :active="selectedCategory === 'Models'" v-ripple @click="selectedCategory = 'Models'">
                 <q-item-section avatar>
                   <q-icon name="mdi-chip" />
                 </q-item-section>

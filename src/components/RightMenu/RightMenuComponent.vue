@@ -188,16 +188,16 @@
               <div class="col flex items-center q-pr-md">
                 <q-btn @click="promptStore.promptSelectionAnalysisPrompts" icon="mdi-chart-timeline-variant-shimmer" color="accent" :label="analyseLabel" no-caps :loading="promptStore.selectionAnalysisRunning" v-if="canAnalyse" style="min-width: 220px;"/>
                 <span v-else class="text-grey-8">
-                  No text selected, please select text to analyse.
+                  Please select text to analyse
                 </span>
               </div>
               <div class="col justify-end flex">
-                <q-btn :label="analysisPrompts.length + ' prompts active'" flat color="accent"  icon-right="mdi-chevron-down" no-caps>
+                <q-btn :label="analysisPrompts.length + ' Analysis prompts'" flat color="accent"  icon-right="mdi-chevron-down" no-caps>
                   <q-popup-proxy>
                     <q-card style="width: 600px; " class="">
 
-                      <q-list v-if="analysisPrompts" dense class="full-width q-mb-sm scroll-y" style="max-height: 600px;">
-                        <q-item v-for="(prompt, i) in analysisPrompts" :key="i" dense class="full-width">
+                      <q-list v-if="analysisPrompts" dense class="full-width q-mb-sm scroll-y" style="max-height: 600px;" >
+                        <q-item v-for="(prompt, i) in analysisPrompts" :key="i" dense class="full-width" >
                           <q-item-section side>
                             <div class="text-grey-8 q-gutter-xs flex items-center">
                               <q-toggle dense :model-value="prompt.enabled" @update:model-value="(val) => promptStore.updateAnalysisPrompt(prompt, {enabled: val})" color="accent" />

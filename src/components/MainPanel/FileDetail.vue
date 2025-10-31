@@ -18,8 +18,15 @@
                 <FileSettings :file="file" />
               </q-card-section>
               <q-separator />
-              <q-card-section>
-                <q-btn icon="mdi-open-in-new" flat @click="makeTemplate" label="Create template from this file" color="primary" no-caps />
+              <q-card-section class="text-center">
+                <q-btn icon="mdi-open-in-new" flat @click="makeTemplate" label="Create template from this file" color="primary" no-caps >
+                  <q-tooltip>
+                    <div style="max-width: 500px;">
+                      <div>Create a new template from this file. You can then easily create new files from this template.</div>
+                      <div>Example usage: character or location sheet templates</div>
+                    </div>
+                  </q-tooltip>
+                </q-btn>
               </q-card-section>
             </q-card>
           </q-popup-proxy>

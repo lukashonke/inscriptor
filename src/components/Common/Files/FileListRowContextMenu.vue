@@ -35,22 +35,6 @@
         <q-item-section>Add</q-item-section>
       </q-item>
 
-      <q-separator />
-
-      <q-item clickable v-close-popup @click.prevent="renameFile(file, $event)">
-        <q-item-section avatar>
-          <q-icon name="mdi-pencil-outline"/>
-        </q-item-section>
-        <q-item-section>Rename</q-item-section>
-      </q-item>
-
-      <q-item clickable v-close-popup @click.prevent="cloneFile(file, $event)">
-        <q-item-section avatar>
-          <q-icon name="mdi-content-copy"/>
-        </q-item-section>
-        <q-item-section>Clone</q-item-section>
-      </q-item>
-
       <q-item clickable v-if="fileTemplates?.length > 0 && fileStore.checkCanHaveChildren(file)">
         <q-item-section avatar>
           <q-icon name="mdi-plus"/>
@@ -75,6 +59,22 @@
           </q-list>
         </q-menu>
 
+      </q-item>
+
+      <q-separator />
+
+      <q-item clickable v-close-popup @click.prevent="renameFile(file, $event)">
+        <q-item-section avatar>
+          <q-icon name="mdi-pencil-outline"/>
+        </q-item-section>
+        <q-item-section>Rename</q-item-section>
+      </q-item>
+
+      <q-item clickable v-close-popup @click.prevent="cloneFile(file, $event)">
+        <q-item-section avatar>
+          <q-icon name="mdi-content-copy"/>
+        </q-item-section>
+        <q-item-section>Clone</q-item-section>
       </q-item>
 
       <q-item clickable>

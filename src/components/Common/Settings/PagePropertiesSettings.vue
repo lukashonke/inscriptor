@@ -101,9 +101,9 @@
       </div>
 
       <div class="bordered">
-        <q-expansion-item label="General" caption="General application settings.">
+        <q-expansion-item label="Misc" caption="Misc application settings.">
           <div class="q-pa-sm">
-            <q-checkbox v-model="promptStore.keyboardShortcutsEnabled" label="Enable keyboard shortcuts (Shift+Alt+[0-9])" />
+            <q-checkbox v-model="promptStore.keyboardShortcutsEnabled" label="Enable Shift+Alt+[0-9] keyboard shortcuts to quickly invoke prompts without additional confirmation" />
           </div>
         </q-expansion-item>
       </div>
