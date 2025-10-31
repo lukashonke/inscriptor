@@ -90,7 +90,8 @@
       <FileListRow :file="child"
                    :show-children="true"
                    :level="level + 1"
-                   :is-last-children="index === file.children.length - 1"/>
+                   :is-last-children="index === file.children.length - 1"
+                   :focused-file-id="focusedFileId"/>
 
     </template>
   </template>
@@ -159,6 +160,10 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },
+  focusedFileId: {
+    type: String,
+    default: null,
+  },
 });
 
 const offset = computed(() => 'tree-padding-' + props.level);
@@ -173,10 +178,12 @@ const isEmptyChildRefHovered = useElementHover(emptyChildRef, {
 const hover = computed(() => isHovered.value ? 'bg-file-list-hover file-list-item-hover' : 'file-list-item');
 
 const isSelected = computed(() => fileStore.selectedFile?.id === props.file.id);
+const isFocused = computed(() => props.focusedFileId === props.file.id);
 
 const classes = computed(() => {
   return {
     'bg-file-list-selected': isSelected.value,
+    'bg-file-list-focused': isFocused.value && !isSelected.value,
     'q-mt-sm': props.file.id === '__trash_bin__',
   };
 });
