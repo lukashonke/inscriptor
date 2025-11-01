@@ -38,6 +38,16 @@
     box-shadow: 0 0px 1px rgb(227, 227, 241);
   }
 
+  .bg-file-list-focused {
+    background-color: #e8e8e8;
+    border: 1px solid #b0b0b0 !important;
+  }
+
+  .search-result-selected {
+    background-color: rgba(78, 93, 212, 0.15) !important;
+    border-radius: 4px;
+  }
+
   .bg-drag-hover {
     background-color: #d0d0d0;
   }

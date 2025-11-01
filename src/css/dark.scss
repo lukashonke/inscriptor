@@ -39,6 +39,16 @@
     background-color: #434343;
   }
 
+  .bg-file-list-focused {
+    background-color: #353535;
+    border: 1px solid #707070 !important;
+  }
+
+  .search-result-selected {
+    background-color: rgba(177, 162, 43, 0.25) !important;
+    border-radius: 4px;
+  }
+
   .bg-drag-hover {
     background-color: #3a3a3a;
   }

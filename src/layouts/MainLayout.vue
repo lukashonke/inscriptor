@@ -139,10 +139,15 @@ const keys = useMagicKeys({
     if (e.altKey && e.key === 'p') {
       e.preventDefault()
     }
+    // Prevent default for Ctrl+K to avoid browser shortcuts
+    if (e.ctrlKey && e.key === 'k') {
+      e.preventDefault()
+    }
   },
 });
 const ctrlSpace = keys['Control+Space']
 const tab = keys['Tab']
+const ctrlK = keys['Control+K']
 const alt1 = keys['Alt+1']
 const alt2 = keys['Alt+2']
 const alt3 = keys['Alt+3']
@@ -181,6 +186,13 @@ watch(ctrlSpace, (v) => {
 watch(tab, (v) => {
   if (focusedEditor.value && !v) {
     editorStore.confirmAutocompleteText();
+  }
+})
+
+// Ctrl+K to toggle search dialog
+watch(ctrlK, (v) => {
+  if (!v) {
+    layoutStore.searchOpen = !layoutStore.searchOpen;
   }
 })
 
