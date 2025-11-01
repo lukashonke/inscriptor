@@ -1,7 +1,7 @@
 <template>
-  <q-dialog v-model="layoutStore.searchOpen" position="top" @keydown="handleKeyDown">
+  <q-dialog v-model="layoutStore.searchOpen" position="top" @keydown="handleKeyDown" @show="onDialogShow">
     <q-card style="width: 800px; max-width: 70vw;">
-      <q-input v-model="searchQuery" label="Search..." filled style="min-width: 300px;" dense ref="searchRef" autofocus :debounce="500" clearable hint="Use arrow keys to navigate, Enter to open (Ctrl+K to toggle)">
+      <q-input v-model="searchQuery" label="Search..." filled style="min-width: 300px;" dense ref="searchRef" autofocus :debounce="500" clearable>
         <template v-slot:prepend>
           <q-icon name="mdi-magnify" size="xs" />
         </template>
@@ -13,7 +13,7 @@
 
       <q-card-section v-if="queryResults && queryResults.length > 0">
         <q-list dense>
-          <q-item v-for="(result, index) in queryResults" :key="result.id" clickable dense @click="openFile(result, false)" :class="{ 'bg-primary text-white': selectedIndex === index }" :ref="el => setItemRef(el, index)">
+          <q-item v-for="(result, index) in queryResults" :key="result.id" clickable dense @click="openFile(result, false)" :class="{ 'search-result-selected': selectedIndex === index }" :ref="el => setItemRef(el, index)">
             <q-item-section side>
               <q-icon :name="result.file.originalFile.icon ?? 'mdi-file-document-outline'" :color="result.file.originalFile.state?.color" class="no-padding no-margin" size="17px" />
             </q-item-section>
@@ -26,7 +26,7 @@
 
       <q-card-section v-if="fileNameResults.length > 0 || fileSynopsisResults.length > 0 || fileNoteResults.length > 0 || fileContentResults.length > 0" ref="resultsContainer">
         <q-list dense>
-          <q-item v-for="(result, index) in fileNameResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)" :class="{ 'bg-primary text-white': selectedIndex === index }" :ref="el => setItemRef(el, index)">
+          <q-item v-for="(result, index) in fileNameResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)" :class="{ 'search-result-selected': selectedIndex === index }" :ref="el => setItemRef(el, index)">
             <q-item-section side>
               <q-icon :name="result.file.icon ?? 'mdi-file-document-outline'" :color="result.file.state?.color" class="no-padding no-margin" size="17px" />
             </q-item-section>
@@ -36,7 +36,7 @@
           </q-item>
         </q-list>
         <q-list dense>
-          <q-item v-for="(result, index) in fileContentResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)" :class="{ 'bg-primary text-white': selectedIndex === fileNameResults.length + index }" :ref="el => setItemRef(el, fileNameResults.length + index)">
+          <q-item v-for="(result, index) in fileContentResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)" :class="{ 'search-result-selected': selectedIndex === fileNameResults.length + index }" :ref="el => setItemRef(el, fileNameResults.length + index)">
             <q-item-section side>
               <q-icon :name="result.file.icon ?? 'mdi-file-document-outline'" :color="result.file.state?.color" class="no-padding no-margin" size="17px" />
             </q-item-section>
@@ -49,7 +49,7 @@
           </q-item>
         </q-list>
         <q-list dense>
-          <q-item v-for="(result, index) in fileSynopsisResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)" :class="{ 'bg-primary text-white': selectedIndex === fileNameResults.length + fileContentResults.length + index }" :ref="el => setItemRef(el, fileNameResults.length + fileContentResults.length + index)">
+          <q-item v-for="(result, index) in fileSynopsisResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)" :class="{ 'search-result-selected': selectedIndex === fileNameResults.length + fileContentResults.length + index }" :ref="el => setItemRef(el, fileNameResults.length + fileContentResults.length + index)">
             <q-item-section side>
               <q-icon :name="result.file.icon ?? 'mdi-file-document-outline'" :color="result.file.state?.color" class="no-padding no-margin" size="17px" />
             </q-item-section>
@@ -68,7 +68,7 @@
           </q-item>
         </q-list>
         <q-list dense>
-          <q-item v-for="(result, index) in fileNoteResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)" :class="{ 'bg-primary text-white': selectedIndex === fileNameResults.length + fileContentResults.length + fileSynopsisResults.length + index }" :ref="el => setItemRef(el, fileNameResults.length + fileContentResults.length + fileSynopsisResults.length + index)">
+          <q-item v-for="(result, index) in fileNoteResults" :key="result.file.id" clickable dense @click="openFile(result.file, false)" :class="{ 'search-result-selected': selectedIndex === fileNameResults.length + fileContentResults.length + fileSynopsisResults.length + index }" :ref="el => setItemRef(el, fileNameResults.length + fileContentResults.length + fileSynopsisResults.length + index)">
             <q-item-section side>
               <q-icon :name="result.file.icon ?? 'mdi-file-document-outline'" :color="result.file.state?.color" class="no-padding no-margin" size="17px" />
             </q-item-section>
@@ -326,7 +326,20 @@ function openFile(file) {
   layoutStore.searchOpen = false;
 }
 
+// Select all text when dialog opens
+function onDialogShow() {
+  nextTick(() => {
+    if (searchRef.value?.$el) {
+      const inputElement = searchRef.value.$el.querySelector('input');
+      if (inputElement) {
+        inputElement.select();
+      }
+    }
+  });
+}
+
 const input = ref('');
+const searchRef = ref(null);
 </script>
 
 <style>

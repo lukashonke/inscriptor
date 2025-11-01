@@ -39,8 +39,13 @@
   }
 
   .bg-file-list-focused {
-    background-color: #f5f5f5;
-    border: 1px solid #d0d0d0 !important;
+    background-color: #e8e8e8;
+    border: 1px solid #b0b0b0 !important;
+  }
+
+  .search-result-selected {
+    background-color: rgba(78, 93, 212, 0.15) !important;
+    border-radius: 4px;
   }
 
   .bg-drag-hover {

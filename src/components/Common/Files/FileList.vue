@@ -42,9 +42,9 @@
     return visibleFiles.value.findIndex(f => f.id === focusedFileId.value);
   });
 
-  // Initialize focus to selected file or first file
+  // Keep focus synced with selected file
   watch(() => fileStore.selectedFile, (newFile) => {
-    if (newFile && !focusedFileId.value) {
+    if (newFile) {
       focusedFileId.value = newFile.id;
     }
   }, { immediate: true });
