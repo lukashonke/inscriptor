@@ -278,6 +278,9 @@
                         <template v-else>
                           <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply..." @click="idea.customReplyEnabled = true"  class="q-mr-sm"/>
                         </template>
+                        <q-btn flat padding="xs xs" no-caps color="accent" icon="mdi-robot" size="sm" label="To AI Agent" @click="sendToAgent(idea)" class="q-mr-sm">
+                          <q-tooltip>Send this idea to AI Agent for implementation</q-tooltip>
+                        </q-btn>
 
                       </template>
                     </div>
@@ -300,6 +303,9 @@
                               <template v-else>
                                 <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply..." @click="child.customReplyEnabled = true"  class="q-mr-sm"/>
                               </template>
+                              <q-btn flat padding="xs xs" no-caps color="accent" icon="mdi-robot" size="sm" label="To AI Agent" @click="sendToAgent(child)" class="q-mr-sm">
+                                <q-tooltip>Send this idea to AI Agent for implementation</q-tooltip>
+                              </q-btn>
                             </template>
                           </div>
                           <div v-if="child.loading">
@@ -558,6 +564,7 @@
   import {computed, ref, watch} from "vue";
   import { writeText } from '@tauri-apps/plugin-clipboard-manager';
   import {usePromptStore} from "stores/prompt-store";
+  import {useAiAgentStore} from "stores/aiagent-store";
   import {cloneRequest, executePromptClick2} from "src/common/helpers/promptHelper";
   import {
     convertHtmlToText,
@@ -596,6 +603,8 @@
 
   const promptStore = usePromptStore();
   const fileStore = useFileStore();
+  const aiAgentStore = useAiAgentStore();
+  const layoutStore = useLayoutStore();
   const $q = useQuasar();
 
   const reactInputRef = ref();
@@ -1034,6 +1043,34 @@
     treeItem.loading = false;
 
     return result;
+  }
+
+  async function sendToAgent(idea) {
+    // Switch to the Chat tab
+    layoutStore.currentRightMenuView = 'agentChat';
+
+    // Create a new chat if there are no chats
+    if (!aiAgentStore.agentChats.chats || aiAgentStore.agentChats.chats.length === 0) {
+      aiAgentStore.createAgentChat();
+    }
+
+    // Prepare the message with the idea text and details
+    let message = `Implement this idea:\n\n${idea.text}`;
+
+    if (idea.children && idea.children.length > 0) {
+      message += '\n\nRelated Ideas:';
+      idea.children.forEach(child => {
+        message += `\n- ${child.text}`;
+      });
+    }
+
+    // Get the current prompt for agent chat
+    const currentPrompt = promptStore.prompts.find(p => p.id === promptStore.currentPromptForAgentChatId);
+
+    if (currentPrompt) {
+      // Execute the agent prompt with the idea
+      await aiAgentStore.executeAgentPrompt(message, currentPrompt, promptStore.currentReasoningEffortForAgentChat);
+    }
   }
 
   function formatBrainstormBubbles(promptResult) {
