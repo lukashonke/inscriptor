@@ -201,6 +201,9 @@ function handlePopState(event) {
 }
 
 onMounted(async () => {
+  // Close drawers by default on mobile
+  layoutStore.setLeftDrawerOpen(false);
+  layoutStore.rightDrawerOpen = false;
 
   const currentUser = await getCurrentUser();
 

@@ -4,36 +4,51 @@
       <FileDetail />
     </div>
 
-    <!-- FAB for AI Agent -->
+    <!-- Collapsible FAB with actions -->
     <q-page-sticky position="bottom-right" :offset="[18, 18]">
-      <q-btn
-        fab
-        icon="mdi-robot-outline"
+      <q-fab
+        v-model="fabOpen"
+        icon="mdi-plus"
+        direction="up"
         color="accent"
-        @click="layoutStore.closeRightPanel()"
-        aria-label="Open AI Agent"
-      />
-    </q-page-sticky>
-
-    <!-- FAB for Prompts -->
-    <q-page-sticky position="bottom-right" :offset="[18, 90]">
-      <q-btn
-        fab
-        icon="mdi-creation-outline"
-        color="primary"
-        @click="layoutStore.promptResultsDialogOpened = true"
-        aria-label="Open Prompts"
-      />
+        aria-label="Actions"
+      >
+        <q-fab-action
+          @click="openPrompts"
+          icon="mdi-creation-outline"
+          color="primary"
+          label="Prompts"
+          aria-label="Open Prompts"
+        />
+        <q-fab-action
+          @click="openAgent"
+          icon="mdi-robot-outline"
+          color="accent"
+          label="Agent"
+          aria-label="Open AI Agent"
+        />
+      </q-fab>
     </q-page-sticky>
   </q-page>
 </template>
 
 <script setup>
-import {onMounted} from 'vue'
+import {onMounted, ref} from 'vue'
 import {useLayoutStore} from "stores/layout-store";
 import FileDetail from 'components/MainPanel/FileDetail.vue';
 
 const layoutStore = useLayoutStore();
+const fabOpen = ref(false);
+
+function openPrompts() {
+  layoutStore.promptResultsDialogOpened = true;
+  fabOpen.value = false;
+}
+
+function openAgent() {
+  layoutStore.closeRightPanel();
+  fabOpen.value = false;
+}
 
 onMounted(() => {
   console.log('Mobile page mounted');
