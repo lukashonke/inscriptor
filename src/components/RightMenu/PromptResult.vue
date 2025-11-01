@@ -278,6 +278,28 @@
                         <template v-else>
                           <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply..." @click="idea.customReplyEnabled = true"  class="q-mr-sm"/>
                         </template>
+                        <q-btn flat padding="xs xs" no-caps color="accent" icon="mdi-robot" size="sm" label="To AI Agent" class="q-mr-sm">
+                          <q-menu>
+                            <q-list dense>
+                              <q-item clickable v-close-popup @click="sendToAgent(idea, 'discuss')">
+                                <q-item-section side>
+                                  <q-icon name="mdi-chat-outline" />
+                                </q-item-section>
+                                <q-item-section>
+                                  Discuss this idea with AI agent
+                                </q-item-section>
+                              </q-item>
+                              <q-item clickable v-close-popup @click="sendToAgent(idea, 'implement')">
+                                <q-item-section side>
+                                  <q-icon name="mdi-code-braces" />
+                                </q-item-section>
+                                <q-item-section>
+                                  Implement this idea
+                                </q-item-section>
+                              </q-item>
+                            </q-list>
+                          </q-menu>
+                        </q-btn>
 
                       </template>
                     </div>
@@ -300,6 +322,28 @@
                               <template v-else>
                                 <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply..." @click="child.customReplyEnabled = true"  class="q-mr-sm"/>
                               </template>
+                              <q-btn flat padding="xs xs" no-caps color="accent" icon="mdi-robot" size="sm" label="To AI Agent" class="q-mr-sm">
+                                <q-menu>
+                                  <q-list dense>
+                                    <q-item clickable v-close-popup @click="sendToAgent(child, 'discuss')">
+                                      <q-item-section side>
+                                        <q-icon name="mdi-chat-outline" />
+                                      </q-item-section>
+                                      <q-item-section>
+                                        Discuss this idea with AI agent
+                                      </q-item-section>
+                                    </q-item>
+                                    <q-item clickable v-close-popup @click="sendToAgent(child, 'implement')">
+                                      <q-item-section side>
+                                        <q-icon name="mdi-code-braces" />
+                                      </q-item-section>
+                                      <q-item-section>
+                                        Implement this idea
+                                      </q-item-section>
+                                    </q-item>
+                                  </q-list>
+                                </q-menu>
+                              </q-btn>
                             </template>
                           </div>
                           <div v-if="child.loading">
@@ -558,6 +602,7 @@
   import {computed, ref, watch} from "vue";
   import { writeText } from '@tauri-apps/plugin-clipboard-manager';
   import {usePromptStore} from "stores/prompt-store";
+  import {useAiAgentStore} from "stores/aiagent-store";
   import {cloneRequest, executePromptClick2} from "src/common/helpers/promptHelper";
   import {
     convertHtmlToText,
@@ -596,6 +641,8 @@
 
   const promptStore = usePromptStore();
   const fileStore = useFileStore();
+  const aiAgentStore = useAiAgentStore();
+  const layoutStore = useLayoutStore();
   const $q = useQuasar();
 
   const reactInputRef = ref();
@@ -1034,6 +1081,37 @@
     treeItem.loading = false;
 
     return result;
+  }
+
+  async function sendToAgent(idea, action) {
+    // Switch to the Chat tab
+    layoutStore.currentRightMenuView = 'agentChat';
+
+    // Always create a new chat
+    aiAgentStore.createAgentChat();
+
+    // Prepare the message with the idea text and details based on action
+    let message = '';
+    if (action === 'discuss') {
+      message = `Let's discuss this idea:\n\n${idea.text}`;
+    } else {
+      message = `Implement this idea:\n\n${idea.text}`;
+    }
+
+    if (idea.children && idea.children.length > 0) {
+      message += '\n\nRelated Ideas:';
+      idea.children.forEach(child => {
+        message += `\n- ${child.text}`;
+      });
+    }
+
+    // Get the current prompt for agent chat
+    const currentPrompt = promptStore.prompts.find(p => p.id === promptStore.currentPromptForAgentChatId);
+
+    if (currentPrompt) {
+      // Execute the agent prompt with the idea
+      await aiAgentStore.executeAgentPrompt(message, currentPrompt, promptStore.currentReasoningEffortForAgentChat);
+    }
   }
 
   function formatBrainstormBubbles(promptResult) {
