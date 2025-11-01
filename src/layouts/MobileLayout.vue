@@ -4,7 +4,7 @@
     <q-header elevated className="bg-primary text-white shadow-1">
       <div class="row bg-accent items-center justify-between q-px-sm" style="min-height: 56px">
         <q-btn flat round icon="menu" @click="toggleLeftDrawer" />
-        <div class="text-h6">{{ fileStore.projectName || 'Inscriptor' }}</div>
+        <div class="text-subtitle2">{{ fileStore.projectName || 'Inscriptor' }}</div>
         <q-btn flat round icon="mdi-dots-vertical">
           <q-menu>
             <q-list style="min-width: 200px">
