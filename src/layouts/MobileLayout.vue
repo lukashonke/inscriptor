@@ -4,51 +4,37 @@
     <q-header elevated className="bg-primary text-white shadow-1">
       <div class="row bg-accent items-center justify-between q-px-sm" style="min-height: 56px">
         <q-btn flat round icon="menu" @click="toggleLeftDrawer" />
-        <q-btn
-          flat
-          no-caps
-          class="text-body2 q-ml-sm"
-          @click="layoutStore.projectSelectionDialogOpen = true"
-          v-if="fileStore.projectName">
-          <template v-if="fileStore.projectSettings?.syncToCloud">
-            <q-spinner v-if="layoutStore.projectSyncIndicator" size="18px" class="q-mr-xs" />
-            <q-icon v-else name="mdi-folder-outline" size="18px" class="q-mr-xs" />
-          </template>
-          <template v-else>
-            <q-icon name="mdi-folder-outline" size="18px" class="q-mr-xs" />
-          </template>
-          {{ fileStore.projectName }}
+        <div class="text-h6">{{ fileStore.projectName || 'Inscriptor' }}</div>
+        <q-btn flat round icon="mdi-dots-vertical">
+          <q-menu>
+            <q-list style="min-width: 200px">
+              <q-item clickable v-close-popup @click="layoutStore.projectSelectionDialogOpen = true">
+                <q-item-section avatar>
+                  <q-icon name="mdi-folder-outline" />
+                </q-item-section>
+                <q-item-section>Projects</q-item-section>
+              </q-item>
+              <q-separator />
+              <q-item clickable v-close-popup @click="signOut" v-if="currentUser !== 'Guest'">
+                <q-item-section avatar>
+                  <q-icon name="mdi-logout" />
+                </q-item-section>
+                <q-item-section>Sign out</q-item-section>
+              </q-item>
+              <q-item clickable v-close-popup @click="signOut" v-else>
+                <q-item-section avatar>
+                  <q-icon name="mdi-login" />
+                </q-item-section>
+                <q-item-section>Login</q-item-section>
+              </q-item>
+            </q-list>
+          </q-menu>
         </q-btn>
-        <q-btn-dropdown
-          flat
-          icon="mdi-account-outline"
-          class="text-body2"
-          label="User"
-          no-caps
-          :loading="userSyncing"
-          v-if="currentUser">
-          <q-item dense v-if="currentUser !== 'Guest'">
-            <q-item-section>
-              <q-item-label caption>{{ currentUser }}</q-item-label>
-            </q-item-section>
-          </q-item>
-          <q-separator v-if="currentUser !== 'Guest'" />
-          <q-item clickable v-ripple @click="signOut" dense>
-            <q-item-section>
-              <q-item-label v-if="currentUser === 'Guest'">Login</q-item-label>
-              <q-item-label v-else>Sign out</q-item-label>
-            </q-item-section>
-          </q-item>
-        </q-btn-dropdown>
-        <div>
-          <q-btn flat icon="mdi-creation-outline" class="text-white" @click="layoutStore.promptResultsDialogOpened = true" />
-          <q-btn flat round icon="mdi-robot-outline" @click="toggleRightDrawer" />
-        </div>
       </div>
 
     </q-header>
 
-    <q-drawer show-if-above v-model="leftDrawerOpen" side="left" width="350">
+    <q-drawer show-if-above v-model="layoutStore.leftDrawerOpen" side="left" width="350">
       <div class="fit left-menu-scroll bg-white">
         <div class="q-pa-none">
           <LeftMenuComponent />
@@ -70,7 +56,7 @@
       </div>
     </q-drawer>
 
-    <q-drawer show-if-above v-model="rightDrawerOpen" side="right" width="350">
+    <q-drawer show-if-above v-model="layoutStore.rightDrawerOpen" side="right" width="350">
       <div class="bg-white full-height">
         <RightMenuComponent />
       </div>
@@ -164,18 +150,15 @@ const localDataStore = useLocalDataStore();
 const editorStore = useEditorStore();
 const auth = useFirebaseAuth();
 
-const leftDrawerOpen = ref(false);
-const rightDrawerOpen = ref(false);
-
 const currentUser = computed(() => useCurrentUser()?.value?.email ?? 'Guest');
 const userSyncing = computed(() => layoutStore.userSyncIndicator);
 
 function toggleLeftDrawer() {
-  leftDrawerOpen.value = !leftDrawerOpen.value;
+  layoutStore.setLeftDrawerOpen(!layoutStore.leftDrawerOpen);
 }
 
 function toggleRightDrawer() {
-  rightDrawerOpen.value = !rightDrawerOpen.value;
+  layoutStore.closeRightPanel();
 }
 
 async function signOut() {
