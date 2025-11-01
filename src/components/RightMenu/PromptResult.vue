@@ -278,8 +278,27 @@
                         <template v-else>
                           <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply..." @click="idea.customReplyEnabled = true"  class="q-mr-sm"/>
                         </template>
-                        <q-btn flat padding="xs xs" no-caps color="accent" icon="mdi-robot" size="sm" label="To AI Agent" @click="sendToAgent(idea)" class="q-mr-sm">
-                          <q-tooltip>Send this idea to AI Agent for implementation</q-tooltip>
+                        <q-btn flat padding="xs xs" no-caps color="accent" icon="mdi-robot" size="sm" label="To AI Agent" class="q-mr-sm">
+                          <q-menu>
+                            <q-list dense>
+                              <q-item clickable v-close-popup @click="sendToAgent(idea, 'discuss')">
+                                <q-item-section side>
+                                  <q-icon name="mdi-chat-outline" />
+                                </q-item-section>
+                                <q-item-section>
+                                  Discuss this idea with AI agent
+                                </q-item-section>
+                              </q-item>
+                              <q-item clickable v-close-popup @click="sendToAgent(idea, 'implement')">
+                                <q-item-section side>
+                                  <q-icon name="mdi-code-braces" />
+                                </q-item-section>
+                                <q-item-section>
+                                  Implement this idea
+                                </q-item-section>
+                              </q-item>
+                            </q-list>
+                          </q-menu>
                         </q-btn>
 
                       </template>
@@ -303,8 +322,27 @@
                               <template v-else>
                                 <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply..." @click="child.customReplyEnabled = true"  class="q-mr-sm"/>
                               </template>
-                              <q-btn flat padding="xs xs" no-caps color="accent" icon="mdi-robot" size="sm" label="To AI Agent" @click="sendToAgent(child)" class="q-mr-sm">
-                                <q-tooltip>Send this idea to AI Agent for implementation</q-tooltip>
+                              <q-btn flat padding="xs xs" no-caps color="accent" icon="mdi-robot" size="sm" label="To AI Agent" class="q-mr-sm">
+                                <q-menu>
+                                  <q-list dense>
+                                    <q-item clickable v-close-popup @click="sendToAgent(child, 'discuss')">
+                                      <q-item-section side>
+                                        <q-icon name="mdi-chat-outline" />
+                                      </q-item-section>
+                                      <q-item-section>
+                                        Discuss this idea with AI agent
+                                      </q-item-section>
+                                    </q-item>
+                                    <q-item clickable v-close-popup @click="sendToAgent(child, 'implement')">
+                                      <q-item-section side>
+                                        <q-icon name="mdi-code-braces" />
+                                      </q-item-section>
+                                      <q-item-section>
+                                        Implement this idea
+                                      </q-item-section>
+                                    </q-item>
+                                  </q-list>
+                                </q-menu>
                               </q-btn>
                             </template>
                           </div>
@@ -1045,17 +1083,20 @@
     return result;
   }
 
-  async function sendToAgent(idea) {
+  async function sendToAgent(idea, action) {
     // Switch to the Chat tab
     layoutStore.currentRightMenuView = 'agentChat';
 
-    // Create a new chat if there are no chats
-    if (!aiAgentStore.agentChats.chats || aiAgentStore.agentChats.chats.length === 0) {
-      aiAgentStore.createAgentChat();
-    }
+    // Always create a new chat
+    aiAgentStore.createAgentChat();
 
-    // Prepare the message with the idea text and details
-    let message = `Implement this idea:\n\n${idea.text}`;
+    // Prepare the message with the idea text and details based on action
+    let message = '';
+    if (action === 'discuss') {
+      message = `Let's discuss this idea:\n\n${idea.text}`;
+    } else {
+      message = `Implement this idea:\n\n${idea.text}`;
+    }
 
     if (idea.children && idea.children.length > 0) {
       message += '\n\nRelated Ideas:';
