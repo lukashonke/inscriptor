@@ -1,13 +1,13 @@
 <template>
   <q-dialog v-model="variableSettingsOpened" full-height>
-    <q-card style="max-width: 90vw; width: 1600px">
-      <q-card-section class="row">
+    <q-card style="max-width: 90vw; width: 1600px; display: flex; flex-direction: column; height: 100%;">
+      <q-card-section class="row" style="flex-shrink: 0;">
         <span class="text-h6">Project Variables</span>
         <HelpIcon tooltip="You can reference parameters anywhere by writing their name, prefixed with $. Eg: $ParameterName." />
         <q-space />
         <q-btn icon="close" flat round dense v-close-popup />
       </q-card-section>
-      <q-card-section class="q-gutter-y-sm">
+      <q-card-section class="q-gutter-y-sm" style="flex: 1; overflow-y: auto;">
         <q-card v-for="(variable, index) in fileStore.variables" :key="index" bordered flat>
 
           <q-expansion-item

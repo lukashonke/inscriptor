@@ -107,11 +107,10 @@
 
       </q-card>
     </q-expansion-item>
-    <div class="fit q-my-sm q-pl-sm q-pr-md">
+    <div class="fit q-my-sm q-pl-sm q-pr-md" style="display: flex; flex-direction: column;">
 
-      <div class="fit ai-panel scroll">
-        <div class="text-center q-mt-md q-mb-md" v-if="views.length > 1">
-          <q-btn-toggle :options="views" v-model="layoutStore.currentRightMenuView" unelevated no-caps class="bordered inscriptor-highlight-btn" toggle-color="primary" padding="xs md" id="aiSwitch" >
+      <div class="text-center q-mt-md q-mb-md" v-if="views.length > 1" style="flex-shrink: 0;">
+        <q-btn-toggle :options="views" v-model="layoutStore.currentRightMenuView" unelevated no-caps class="bordered inscriptor-highlight-btn" toggle-color="primary" padding="xs md" id="aiSwitch" >
             <template v-slot:prompts>
               <div class="col row full-width">
                 <div class="col column items-center justify-center">
@@ -172,8 +171,9 @@
               </div>
             </template>
           </q-btn-toggle>
-        </div>
+      </div>
 
+      <div class="ai-panel" style="flex: 1; overflow-y: auto;">
         <q-card flat v-if="promptStore.analysisEnabled" class="bg-transparent">
 
           <q-card-section v-if="promptStore.analysisEnabled && promptStore.selectionAnalysisAvailablePrompts.length === 0">
