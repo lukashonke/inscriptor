@@ -1,115 +1,29 @@
 <template>
-  <div class="" id="rightPanel" style="height: calc(100vh - 104px); width: 100%">
-    <q-expansion-item
-      label="File Details"
-      icon="mdi-information-outline"
-      v-model="layoutStore.fileDetailsOpen"
-      id="fileDetails"
+  <div class="" id="rightPanel" style="height: calc(100vh - 34px); width: 100%; display: flex; flex-direction: column;">
+    <q-tabs
+      v-model="activeTab"
+      dense
+      no-caps
+      class="text-grey"
+      active-color="primary"
+      indicator-color="primary"
+      align="justify"
     >
-      <q-card v-if="file" :class="layoutStore.darkMode ? '' : ''">
-        <q-card-section class="q-pb-sm">
-          <div class="row q-gutter-x-sm">
-            <div class="col">
-              <q-select v-model="fileState" label="State" filled dense :options="promptStore.statuses" option-label="label" option-value="label" clearable options-dense>
-                <template v-slot:prepend>
-                  <q-icon name="mdi-flag-outline" />
-                </template>
-                <template v-slot:option="scope">
-                  <q-item v-bind="scope.itemProps">
-                    <q-item-section avatar>
-                      <q-icon name="mdi-flag-outline" :color="scope.opt.color ?? 'black'" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>{{ scope.opt.label }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-                <template v-slot:after-options>
-                  <q-separator />
-                  <div class="flex full-width justify-center">
-                    <q-btn flat dense icon="mdi-playlist-edit" color="grey-6" no-caps label="Edit..." @click="layoutStore.openConfiguration('statuses')" />
-                  </div>
-                </template>
-              </q-select>
-            </div>
-            <div class="col">
-              <q-select v-model="fileLabels" label="Labels" filled dense :options="promptStore.labels" option-label="label" option-value="label" multiple clearable use-chips options-dense>
-                <template v-slot:prepend>
-                  <q-icon name="mdi-tag-outline" />
-                </template>
-                <template v-slot:option="scope">
-                  <q-item v-bind="scope.itemProps">
-                    <q-item-section avatar>
-                      <q-badge :color="scope.opt.color ?? 'black'" />
-                    </q-item-section>
-                    <q-item-section>
-                      <q-item-label>{{ scope.opt.label }}</q-item-label>
-                    </q-item-section>
-                  </q-item>
-                </template>
-                <template v-slot:after-options>
-                  <q-separator />
-                  <div class="flex full-width justify-center">
-                    <q-btn flat dense icon="mdi-playlist-edit" color="grey-6" no-caps label="Edit..." @click="layoutStore.openConfiguration('labels')" />
-                  </div>
-                </template>
-              </q-select>
-            </div>
-          </div>
-        </q-card-section>
-        <q-card-section class="q-py-sm">
-          <q-img v-if="file.imageUrl" :src="file.imageUrl" class="full-width" ref="fileImg" style="max-height: 400px;" fit="contain">
-            <div class="absolute all-pointer-events q-gutter-y-xs no-padding flex column " style="" v-if="imageHovered">
-              <q-btn  flat size="12px" icon="mdi-upload"  @click="uploadImage">
-                <q-tooltip>
-                  Replace image
-                </q-tooltip>
-              </q-btn>
-              <q-btn flat size="12px" icon="mdi-close" @click="deleteFileImage">
-                <q-tooltip>
-                  Delete image
-                </q-tooltip>
-              </q-btn>
-            </div>
+      <q-tab name="ai" icon="mdi-creation-outline">
+        <q-tooltip :delay="500">AI Functions</q-tooltip>
+      </q-tab>
+      <q-tab name="fileInfo" icon="mdi-file-cog-outline" >
+        <q-tooltip :delay="500">File Metadata</q-tooltip>
+      </q-tab>
+    </q-tabs>
 
-          </q-img>
-          <q-btn v-else flat no-caps :loading="uploadingImage" @click="uploadImage" icon="mdi-image-outline" color="grey-7" label="Add Image" class="full-width" />
-        </q-card-section>
-        <q-card-section class="q-py-sm">
-          <InputWithAi v-model="fileSynopsis" label="Synopsis" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" :prompt-input="file.content" :class="writeClasses" autogrow />
-        </q-card-section>
-        <q-card-section class="q-py-sm">
-          <q-input label="Note" v-model="fileNote" type="textarea" filled :class="layoutStore.darkMode ? 'bg-brown-10' : 'bg-yellow-2'" dense autogrow/>
-        </q-card-section>
-        <q-card-section class="q-pt-sm">
-          <div class="">
-            <q-select v-model="contextType" :options="contextTypes" option-label="label" option-value="label" label="Include in Context" filled dense clearable use-chips options-dense>
-              <template v-slot:selected-item="scope">
-                <q-chip
-                  @remove="scope.removeAtIndex(scope.index)"
-                  :tabindex="scope.tabindex"
-                  :color="scope.opt.color + (layoutStore.darkMode ? '-9' : '-3')"
-                  dense
-                  class="q-ma-none"
-                >
-                  {{ scope.opt.label }}
-                </q-chip>
-              </template>
-              <template v-slot:after-options>
-                <q-separator />
-                <div class="flex full-width justify-center">
-                  <q-btn flat dense icon="mdi-playlist-edit" color="grey-6" no-caps label="Edit..." @click="layoutStore.openConfiguration('contextTypes')" />
-                </div>
-              </template>
-            </q-select>
-          </div>
-        </q-card-section>
+    <q-separator />
 
-      </q-card>
-    </q-expansion-item>
-    <div class="fit q-my-sm q-pl-sm q-pr-md" style="display: flex; flex-direction: column;">
+    <q-tab-panels v-model="activeTab" animated style="flex: 1; overflow-y: auto;">
+      <q-tab-panel name="ai" class="q-pa-none">
+        <div class="fit q-pr-md" style="display: flex; flex-direction: column; height: 100%;">
 
-      <div class="text-center q-mt-md q-mb-md" v-if="views.length > 1" style="flex-shrink: 0;">
+      <div class="text-center q-mt-md q-mb-none" v-if="views.length > 1" style="flex-shrink: 0;">
         <q-btn-toggle :options="views" v-model="layoutStore.currentRightMenuView" unelevated no-caps class="bordered inscriptor-highlight-btn" toggle-color="primary" padding="xs md" id="aiSwitch" >
             <template v-slot:prompts>
               <div class="col row full-width">
@@ -304,7 +218,7 @@
                 <PromptPicker v-model="promptStore.brainstormingPrompt" :prompts="availableBrainstormingPrompts" placeholder="Set prompt for Brainstorming"></PromptPicker>
               </div>
               <div class="col-auto">
-                <q-btn no-caps icon="mdi-book-outline" label="Context" color="primary">
+                <q-btn no-caps icon="mdi-book-outline" flat>
                   <q-menu max-width="800px">
                     <SimplePromptContextSelector v-model="promptStore.brainstormPromptContext" title="Set Brainstorming Context" icon="mdi-book-outline" output-context-as-objects/>
                   </q-menu>
@@ -396,7 +310,7 @@
                 <PromptPicker v-model="promptStore.suggestingPrompt" :prompts="availableSuggestingPrompts" placeholder="Set prompt for Suggestions"></PromptPicker>
               </div>
               <div class="col-auto">
-                <q-btn no-caps icon="mdi-book-outline" label="Context" color="primary">
+                <q-btn no-caps icon="mdi-book-outline" flat>
                   <q-menu max-width="800px">
                     <SimplePromptContextSelector v-model="promptStore.suggestPromptContext" title="Set Suggestion Context" icon="mdi-book-outline" output-context-as-objects/>
                   </q-menu>
@@ -439,10 +353,110 @@
         <AgentChatTab v-if="layoutStore.currentRightMenuView === 'agentChat'"/>
         <div style="height: 60px" />
       </div>
+        </div>
+      </q-tab-panel>
 
-
-    </div>
-
+      <q-tab-panel name="fileInfo" class="q-pa-sm">
+        <q-card v-if="file" :class="layoutStore.darkMode ? '' : ''" flat>
+          <q-card-section class="q-pa-sm">
+            <div class="row q-gutter-x-sm">
+              <div class="col">
+                <q-select v-model="fileState" label="State" filled dense :options="promptStore.statuses" option-label="label" option-value="label" clearable options-dense>
+                  <template v-slot:prepend>
+                    <q-icon name="mdi-flag-outline" />
+                  </template>
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section avatar>
+                        <q-icon name="mdi-flag-outline" :color="scope.opt.color ?? 'black'" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>{{ scope.opt.label }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                  <template v-slot:after-options>
+                    <q-separator />
+                    <div class="flex full-width justify-center">
+                      <q-btn flat dense icon="mdi-playlist-edit" color="grey-6" no-caps label="Edit..." @click="layoutStore.openConfiguration('statuses')" />
+                    </div>
+                  </template>
+                </q-select>
+              </div>
+              <div class="col">
+                <q-select v-model="fileLabels" label="Labels" filled dense :options="promptStore.labels" option-label="label" option-value="label" multiple clearable use-chips options-dense>
+                  <template v-slot:prepend>
+                    <q-icon name="mdi-tag-outline" />
+                  </template>
+                  <template v-slot:option="scope">
+                    <q-item v-bind="scope.itemProps">
+                      <q-item-section avatar>
+                        <q-badge :color="scope.opt.color ?? 'black'" />
+                      </q-item-section>
+                      <q-item-section>
+                        <q-item-label>{{ scope.opt.label }}</q-item-label>
+                      </q-item-section>
+                    </q-item>
+                  </template>
+                  <template v-slot:after-options>
+                    <q-separator />
+                    <div class="flex full-width justify-center">
+                      <q-btn flat dense icon="mdi-playlist-edit" color="grey-6" no-caps label="Edit..." @click="layoutStore.openConfiguration('labels')" />
+                    </div>
+                  </template>
+                </q-select>
+              </div>
+            </div>
+          </q-card-section>
+          <q-card-section class="q-py-sm">
+            <q-img v-if="file.imageUrl" :src="file.imageUrl" class="full-width" ref="fileImg" style="max-height: 400px;" fit="contain">
+              <div class="absolute all-pointer-events q-gutter-y-xs no-padding flex column " style="" v-if="imageHovered">
+                <q-btn  flat size="12px" icon="mdi-upload"  @click="uploadImage">
+                  <q-tooltip>
+                    Replace image
+                  </q-tooltip>
+                </q-btn>
+                <q-btn flat size="12px" icon="mdi-close" @click="deleteFileImage">
+                  <q-tooltip>
+                    Delete image
+                  </q-tooltip>
+                </q-btn>
+              </div>
+            </q-img>
+            <q-btn v-else flat no-caps :loading="uploadingImage" @click="uploadImage" icon="mdi-image-outline" color="grey-7" label="Add Image" class="full-width" />
+          </q-card-section>
+          <q-card-section class="q-py-sm">
+            <InputWithAi v-model="fileSynopsis" label="Synopsis" type="textarea" :prompt-ids="promptStore.getPredefinedPromptId('Summarize Page')" :prompt-input="file.content" :class="writeClasses" autogrow />
+          </q-card-section>
+          <q-card-section class="q-py-sm">
+            <q-input label="Note" v-model="fileNote" type="textarea" filled :class="layoutStore.darkMode ? 'bg-brown-10' : 'bg-yellow-2'" dense autogrow/>
+          </q-card-section>
+          <q-card-section class="q-pt-sm">
+            <div class="">
+              <q-select v-model="contextType" :options="contextTypes" option-label="label" option-value="label" label="Include in Context" filled dense clearable use-chips options-dense>
+                <template v-slot:selected-item="scope">
+                  <q-chip
+                    @remove="scope.removeAtIndex(scope.index)"
+                    :tabindex="scope.tabindex"
+                    :color="scope.opt.color + (layoutStore.darkMode ? '-9' : '-3')"
+                    dense
+                    class="q-ma-none"
+                  >
+                    {{ scope.opt.label }}
+                  </q-chip>
+                </template>
+                <template v-slot:after-options>
+                  <q-separator />
+                  <div class="flex full-width justify-center">
+                    <q-btn flat dense icon="mdi-playlist-edit" color="grey-6" no-caps label="Edit..." @click="layoutStore.openConfiguration('contextTypes')" />
+                  </div>
+                </template>
+              </q-select>
+            </div>
+          </q-card-section>
+        </q-card>
+      </q-tab-panel>
+    </q-tab-panels>
   </div>
 </template>
 
@@ -483,6 +497,7 @@
   const addPrompt = ref(null);
   const brainstormParametersValue = ref([]);
   const brainstormParametersExpanded = ref(true);
+  const activeTab = ref('ai');
 
   // Track last suggest generation to avoid unnecessary re-runs
   const lastSuggestFileId = ref(null);

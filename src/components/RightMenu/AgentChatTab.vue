@@ -12,7 +12,7 @@
 
       <!-- Chat controls and pagination -->
       <div class="col-auto">
-        <div class="row q-mb-md q-mt-lg" v-if="maxChatsPage > 0">
+        <div class="row q-mb-md q-mt-md" v-if="maxChatsPage > 0">
           <div class="col flex">
             <div class="col-auto flex items-center justify-center">
               <q-pagination :max="maxChatsPage" v-model="page" direction-links :boundary-numbers="false" :boundary-links="false" :max-pages="isMobile ? 3 : 5" />
@@ -26,7 +26,7 @@
           </div>
           <div class="col-auto flex items-center" v-if="maxChatsPage > 0">
             <div class="col-auto flex items-center">
-              <q-btn color="accent" @click="newChat" size="md" icon="mdi-pencil-box-outline" class="" :label="isMobile ? undefined : 'New chat'" :padding="isMobile ? 'xs md' : undefined">
+              <q-btn color="accent" @click="newChat" size="md" icon="mdi-pencil-box-outline" class="" :label="isMobile ? undefined : 'chat'" :padding="isMobile ? 'xs md' : undefined">
                 <q-tooltip>
                   Start a new AI conversation
                 </q-tooltip>
