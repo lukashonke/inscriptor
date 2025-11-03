@@ -63,7 +63,7 @@
             </q-btn>
           </div>
           <div class="col-auto" v-if="hasCopy">
-            <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-dots-horizontal" v-if="type !== 'inline'" class="hoverable-btn-semi">
+            <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-more" v-if="type !== 'inline'" class="hoverable-btn-semi">
               <q-menu>
                 <q-list dense>
                   <template v-if="!hasImages">
@@ -303,7 +303,7 @@
                         <template v-else>
                           <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply..." @click="idea.customReplyEnabled = true"  class="q-mr-sm"/>
                         </template>
-                        <q-btn flat padding="xs xs" no-caps color="accent" icon="mdi-robot" size="sm" label="To AI Agent" class="q-mr-sm">
+                        <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-robot" size="sm" label="To AI Agent" class="q-mr-sm">
                           <q-menu>
                             <q-list dense>
                               <q-item clickable v-close-popup @click="sendToAgent(idea, 'discuss')">
@@ -356,7 +356,7 @@
                               <template v-else>
                                 <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-creation-outline" size="sm" label="Reply..." @click="child.customReplyEnabled = true"  class="q-mr-sm"/>
                               </template>
-                              <q-btn flat padding="xs xs" no-caps color="accent" icon="mdi-robot" size="sm" label="To AI Agent" class="q-mr-sm">
+                              <q-btn flat padding="xs xs" no-caps color="primary" icon="mdi-robot" size="sm" label="To AI Agent" class="q-mr-sm">
                                 <q-menu>
                                   <q-list dense>
                                     <q-item clickable v-close-popup @click="sendToAgent(child, 'discuss')">
