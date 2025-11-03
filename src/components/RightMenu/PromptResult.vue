@@ -53,7 +53,7 @@
   <transition appear enter-active-class="animated fadeIn slow" leave-active-class="animated fadeOut">
 
     <q-card :class="[isReactionToAnotherPrompt ? 'q-ml-md' : '', isPreviousPromptResult ? 'gradient-variation-3' : 'gradient-variation-1']" class="hoverable-card idea-card  q-pa-xs no-p-margin-0" @click="onCardClick" :style="{ cursor: collapsed ? 'pointer' : 'default' }">
-      <div class="prompt-actions" :class="type === 'inline' ? '' : 'sticky-top'">
+      <div class="prompt-actions bg-white" :class="type === 'inline' ? '' : 'sticky-top'">
         <div class="row no-wrap ellipsis">
           <div class="col-auto">
             <q-btn color="grey-7" flat unelevated size="sm" :icon="type === 'inline' ? 'mdi-plus' : 'mdi-chevron-double-left'" @click.stop="insert" :loading="copying" class="hoverable-btn-semi">
