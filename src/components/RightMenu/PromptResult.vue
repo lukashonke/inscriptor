@@ -101,6 +101,41 @@
             </q-btn>
           </div>
 
+          <div class="col-auto">
+            <q-btn color="accent" flat unelevated size="sm" icon="mdi-robot" class="hoverable-btn-semi">
+              <q-tooltip>Send to AI Agent</q-tooltip>
+              <q-menu>
+                <q-list dense>
+                  <q-item clickable v-close-popup @click="sendPromptResultToAgent('discuss')">
+                    <q-item-section side>
+                      <q-icon name="mdi-chat-outline" />
+                    </q-item-section>
+                    <q-item-section>
+                      Discuss this with AI agent
+                    </q-item-section>
+                  </q-item>
+                  <q-item clickable v-close-popup @click="sendPromptResultToAgent('implement')">
+                    <q-item-section side>
+                      <q-icon name="mdi-code-braces" />
+                    </q-item-section>
+                    <q-item-section>
+                      Implement this
+                    </q-item-section>
+                  </q-item>
+                  <q-separator />
+                  <q-item clickable v-close-popup @click="sendPromptResultToAgentWithCustomMessage()">
+                    <q-item-section side>
+                      <q-icon name="mdi-message-text-outline" />
+                    </q-item-section>
+                    <q-item-section>
+                      Custom message...
+                    </q-item-section>
+                  </q-item>
+                </q-list>
+              </q-menu>
+            </q-btn>
+          </div>
+
           <div class="col ellipsis" v-if="showPromptInfo">
             <q-badge class="q-ml-md q-gutter-x-xs hoverable-btn-semi ">
               <span>{{ promptResultTitle }}</span>
@@ -1148,6 +1183,53 @@
     }).onOk(customMessage => {
       if (customMessage && customMessage.trim()) {
         sendToAgent(idea, 'custom', customMessage.trim());
+      }
+    });
+  }
+
+  async function sendPromptResultToAgent(action, customMessage = null) {
+    // Switch to the Chat tab
+    layoutStore.currentRightMenuView = 'agentChat';
+
+    // Always create a new chat
+    aiAgentStore.createAgentChat();
+
+    // Get the full prompt result text (strip HTML if needed)
+    const resultText = convertHtmlToText(promptResultText.value) || props.promptResult.text || props.promptResult.originalText || '';
+
+    // Prepare the message based on action
+    let message = '';
+    if (customMessage) {
+      message = `${customMessage}\n\n${resultText}`;
+    } else if (action === 'discuss') {
+      message = `Let's discuss this:\n\n${resultText}`;
+    } else {
+      message = `Implement this:\n\n${resultText}`;
+    }
+
+    // Get the current prompt for agent chat
+    const currentPrompt = promptStore.prompts.find(p => p.id === promptStore.currentPromptForAgentChatId);
+
+    if (currentPrompt) {
+      // Execute the agent prompt with the result
+      await aiAgentStore.executeAgentPrompt(message, currentPrompt, promptStore.currentReasoningEffortForAgentChat);
+    }
+  }
+
+  function sendPromptResultToAgentWithCustomMessage() {
+    Dialog.create({
+      title: 'Custom Message',
+      message: 'Enter your custom message for the AI agent:',
+      prompt: {
+        model: '',
+        type: 'textarea',
+        rows: 4
+      },
+      cancel: true,
+      persistent: true
+    }).onOk(customMessage => {
+      if (customMessage && customMessage.trim()) {
+        sendPromptResultToAgent('custom', customMessage.trim());
       }
     });
   }
