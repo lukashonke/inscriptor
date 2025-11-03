@@ -63,7 +63,7 @@
             </q-btn>
           </div>
           <div class="col-auto" v-if="hasCopy">
-            <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-content-copy" v-if="type !== 'inline'" class="hoverable-btn-semi">
+            <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-dots-horizontal" v-if="type !== 'inline'" class="hoverable-btn-semi">
               <q-menu>
                 <q-list dense>
                   <template v-if="!hasImages">
@@ -96,19 +96,10 @@
                       </q-item-section>
                     </q-item>
                   </template>
-                </q-list>
-              </q-menu>
-            </q-btn>
-          </div>
-
-          <div class="col-auto">
-            <q-btn color="accent" flat unelevated size="sm" icon="mdi-robot" class="hoverable-btn-semi">
-              <q-tooltip>Send to AI Agent</q-tooltip>
-              <q-menu>
-                <q-list dense>
+                  <q-separator />
                   <q-item clickable v-close-popup @click="sendPromptResultToAgent('discuss')">
                     <q-item-section side>
-                      <q-icon name="mdi-chat-outline" />
+                      <q-icon name="mdi-chat-outline" size="xs" />
                     </q-item-section>
                     <q-item-section>
                       Discuss this with AI agent
@@ -116,16 +107,15 @@
                   </q-item>
                   <q-item clickable v-close-popup @click="sendPromptResultToAgent('implement')">
                     <q-item-section side>
-                      <q-icon name="mdi-code-braces" />
+                      <q-icon name="mdi-code-braces" size="xs" />
                     </q-item-section>
                     <q-item-section>
                       Implement this
                     </q-item-section>
                   </q-item>
-                  <q-separator />
                   <q-item clickable v-close-popup @click="sendPromptResultToAgentWithCustomMessage()">
                     <q-item-section side>
-                      <q-icon name="mdi-message-text-outline" />
+                      <q-icon name="mdi-message-text-outline" size="xs" />
                     </q-item-section>
                     <q-item-section>
                       Custom message...
