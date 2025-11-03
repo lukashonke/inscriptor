@@ -63,7 +63,7 @@
             </q-btn>
           </div>
           <div class="col-auto" v-if="hasCopy">
-            <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-more" v-if="type !== 'inline'" class="hoverable-btn-semi">
+            <q-btn color="grey-7" flat unelevated size="sm" icon="mdi-dots-horizontal" v-if="type !== 'inline'" class="hoverable-btn-semi">
               <q-menu>
                 <q-list dense>
                   <template v-if="!hasImages">
