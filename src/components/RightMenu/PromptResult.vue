@@ -297,6 +297,15 @@
                                   Implement this idea
                                 </q-item-section>
                               </q-item>
+                              <q-separator />
+                              <q-item clickable v-close-popup @click="sendToAgentWithCustomMessage(idea)">
+                                <q-item-section side>
+                                  <q-icon name="mdi-message-text-outline" />
+                                </q-item-section>
+                                <q-item-section>
+                                  Custom message...
+                                </q-item-section>
+                              </q-item>
                             </q-list>
                           </q-menu>
                         </q-btn>
@@ -339,6 +348,15 @@
                                       </q-item-section>
                                       <q-item-section>
                                         Implement this idea
+                                      </q-item-section>
+                                    </q-item>
+                                    <q-separator />
+                                    <q-item clickable v-close-popup @click="sendToAgentWithCustomMessage(child)">
+                                      <q-item-section side>
+                                        <q-icon name="mdi-message-text-outline" />
+                                      </q-item-section>
+                                      <q-item-section>
+                                        Custom message...
                                       </q-item-section>
                                     </q-item>
                                   </q-list>
@@ -614,7 +632,7 @@
   import PromptSelector from "components/Common/PromptSelector/PromptSelector.vue";
   import contenteditable from 'vue-contenteditable';
   import {useFileStore} from "stores/file-store";
-  import {Notify, useQuasar} from "quasar";
+  import {Notify, useQuasar, Dialog} from "quasar";
   import {uploadImage} from "src/common/apiServices/imageGenService";
   import {useCurrentUser} from "vuefire";
   import {useLayoutStore} from "stores/layout-store";
@@ -1083,7 +1101,7 @@
     return result;
   }
 
-  async function sendToAgent(idea, action) {
+  async function sendToAgent(idea, action, customMessage = null) {
     // Switch to the Chat tab
     layoutStore.currentRightMenuView = 'agentChat';
 
@@ -1092,7 +1110,9 @@
 
     // Prepare the message with the idea text and details based on action
     let message = '';
-    if (action === 'discuss') {
+    if (customMessage) {
+      message = `${customMessage}\n\nIdea:\n${idea.text}`;
+    } else if (action === 'discuss') {
       message = `Let's discuss this idea:\n\n${idea.text}`;
     } else {
       message = `Implement this idea:\n\n${idea.text}`;
@@ -1112,6 +1132,24 @@
       // Execute the agent prompt with the idea
       await aiAgentStore.executeAgentPrompt(message, currentPrompt, promptStore.currentReasoningEffortForAgentChat);
     }
+  }
+
+  function sendToAgentWithCustomMessage(idea) {
+    Dialog.create({
+      title: 'Custom Message',
+      message: 'Enter your custom message for the AI agent:',
+      prompt: {
+        model: '',
+        type: 'textarea',
+        rows: 4
+      },
+      cancel: true,
+      persistent: true
+    }).onOk(customMessage => {
+      if (customMessage && customMessage.trim()) {
+        sendToAgent(idea, 'custom', customMessage.trim());
+      }
+    });
   }
 
   function formatBrainstormBubbles(promptResult) {
