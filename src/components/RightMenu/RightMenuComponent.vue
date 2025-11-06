@@ -4,10 +4,11 @@
       v-model="activeTab"
       dense
       no-caps
-      class="text-grey"
-      active-color="primary"
-      indicator-color="primary"
-      align="justify"
+      class="text-grey-10"
+      active-color="grey-10"
+      indicator-color="grey-10"
+      :breakpoint="380"
+      align="center"
     >
       <q-tab name="ai" icon="mdi-creation-outline">
         <q-tooltip :delay="500">AI Functions</q-tooltip>
@@ -17,13 +18,13 @@
       </q-tab>
     </q-tabs>
 
-    <q-separator />
+    <q-separator class="q-mb-md" />
 
     <q-tab-panels v-model="activeTab" animated style="flex: 1; overflow-y: auto;">
       <q-tab-panel name="ai" class="q-pa-none">
         <div class="fit q-pr-md" style="display: flex; flex-direction: column; height: 100%;">
 
-      <div class="text-center q-mt-md q-mb-none" v-if="views.length > 1" style="flex-shrink: 0;">
+      <div class="text-center q-mb-none" v-if="views.length > 1" style="flex-shrink: 0;">
         <q-btn-toggle :options="views" v-model="layoutStore.currentRightMenuView" unelevated no-caps class="bordered inscriptor-highlight-btn" toggle-color="primary" padding="xs md" id="aiSwitch" >
             <template v-slot:prompts>
               <div class="col row full-width">

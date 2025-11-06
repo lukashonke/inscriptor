@@ -1,24 +1,21 @@
 <template>
   <div class="q-mx-md full-width">
-    <div class="column full-height">
-
-      <!-- Loading indicator -->
-      <div class="col-auto">
-        <div v-if="aiAgentStore.agentChats.isAgentRunning" class="menu-subtitle q-mb-lg">
-          <q-spinner-ios></q-spinner-ios> {{ aiAgentStore.agentState === 'waiting_for_user' ? 'AI is waiting for approval...' : 'AI is working...' }}
-          <q-btn dense outline @click="aiAgentStore.stopAgentChatExecution()" label="Stop" size="sm" class="no-margin q-py-none" color="red"/>
-        </div>
-      </div>
+    <div class="column full-height q-ml-md">
 
       <!-- Chat controls and pagination -->
       <div class="col-auto">
         <div class="row q-mb-md q-mt-md" v-if="maxChatsPage > 0">
           <div class="col flex">
             <div class="col-auto flex items-center justify-center">
-              <q-pagination :max="maxChatsPage" v-model="page" direction-links :boundary-numbers="false" :boundary-links="false" :max-pages="isMobile ? 3 : 5" />
+              <q-pagination :max="maxChatsPage" v-model="page" :disable="aiAgentStore.agentChats.isAgentRunning" direction-links :boundary-numbers="false" :boundary-links="false" :max-pages="isMobile ? 3 : 5" />
+            </div>
+            <div v-if="aiAgentStore.agentChats.isAgentRunning" class="col menu-subtitle flex items-center justify-center">
+              <q-spinner-ios class="q-mr-xs"></q-spinner-ios>
+              {{ aiAgentStore.agentState === 'waiting_for_user' ? 'AI is waiting for approval...' : 'AI is working...' }}
+              <q-btn dense outline @click="aiAgentStore.stopAgentChatExecution()" label="Stop" size="sm" class="q-ml-xs q-py-none" color="red"/>
             </div>
             <!-- Current file indicator -->
-            <div class="col flex items-center justify-center file-indicator mobile-hide" v-if="currentFile" >
+            <div class="col flex items-center justify-center file-indicator mobile-hide" v-else-if="currentFile" >
               <q-chip>
                 <FileDetailItem :file="currentFile" hide-context-type />
               </q-chip>
@@ -26,7 +23,7 @@
           </div>
           <div class="col-auto flex items-center" v-if="maxChatsPage > 0">
             <div class="col-auto flex items-center">
-              <q-btn color="accent" @click="newChat" size="md" icon="mdi-pencil-box-outline" class="" :label="isMobile ? undefined : 'chat'" :padding="isMobile ? 'xs md' : undefined">
+              <q-btn color="accent" @click="newChat" :disable="aiAgentStore.agentChats.isAgentRunning" size="md" icon="mdi-pencil-box-outline" class="" :label="isMobile ? undefined : 'chat'" :padding="isMobile ? 'xs md' : undefined">
                 <q-tooltip>
                   Start a new AI conversation
                 </q-tooltip>
