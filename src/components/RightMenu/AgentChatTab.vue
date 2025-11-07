@@ -7,7 +7,7 @@
         <div class="row q-mb-md q-mt-md" v-if="maxChatsPage > 0">
           <div class="col flex">
             <div class="col-auto flex items-center justify-center">
-              <q-pagination :max="maxChatsPage" v-model="page" :disable="aiAgentStore.agentChats.isAgentRunning" direction-links :boundary-numbers="false" :boundary-links="false" :max-pages="isMobile ? 3 : 5" />
+              <q-pagination :max="maxChatsPage" v-model="page" :disable="aiAgentStore.agentChats.isAgentRunning || aiAgentStore.isAgentActive" direction-links :boundary-numbers="false" :boundary-links="false" :max-pages="isMobile ? 3 : 5" />
             </div>
             <div v-if="aiAgentStore.agentChats.isAgentRunning" class="col menu-subtitle flex items-center justify-center">
               <q-spinner-ios class="q-mr-xs"></q-spinner-ios>
@@ -23,7 +23,7 @@
           </div>
           <div class="col-auto flex items-center" v-if="maxChatsPage > 0">
             <div class="col-auto flex items-center">
-              <q-btn color="accent" @click="newChat" :disable="aiAgentStore.agentChats.isAgentRunning" size="md" icon="mdi-pencil-box-outline" class="" :label="isMobile ? undefined : 'chat'" :padding="isMobile ? 'xs md' : undefined">
+              <q-btn color="accent" @click="newChat" :disable="aiAgentStore.agentChats.isAgentRunning || aiAgentStore.isAgentActive" size="md" icon="mdi-pencil-box-outline" class="" :label="isMobile ? undefined : 'chat'" :padding="isMobile ? 'xs md' : undefined">
                 <q-tooltip>
                   Start a new AI conversation
                 </q-tooltip>

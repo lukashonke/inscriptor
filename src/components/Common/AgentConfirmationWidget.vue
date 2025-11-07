@@ -75,28 +75,90 @@
             ></div>
           </div>
 
-          <div v-else class="suggested-text q-mb-sm">
-            <div
-              v-if="!isEditingNow"
-              class="q-pa-xs rounded border-accent"
-              :class="writeClasses"
-              v-html="diffHtml"
-              contenteditable
-              @focus="startEditing"
-            >
+          <div v-else class="q-mb-sm">
+            <!-- Toggle button for diff view -->
+            <div class="q-mb-xs text-right">
+              <q-btn
+                flat
+                dense
+                no-caps
+                size="sm"
+                :icon="showSeparateDiffs ? 'mdi-format-text' : 'mdi-compare'"
+                :label="showSeparateDiffs ? 'Inline View' : 'Before/After View'"
+                @click="showSeparateDiffs = !showSeparateDiffs"
+                color="primary"
+              >
+                <q-tooltip>Toggle between inline and separate before/after views</q-tooltip>
+              </q-btn>
             </div>
-            <div
-              v-else
-              class="q-pa-xs rounded border-accent"
-              :class="writeClasses"
-              contenteditable
-              ref="editableDiv"
-              @input="handleInput"
-              @blur="finishEditing"
-            ></div>
-            <template v-if="widgetData.isStreaming">
-              <q-spinner-ios /> generating <AnimatedDots />
-            </template>
+
+            <!-- Inline diff view -->
+            <div v-if="!showSeparateDiffs" class="suggested-text inscriptor-shadow-1 bordered">
+              <div
+                v-if="!isEditingNow"
+                class="q-pa-xs rounded border-accent"
+                :class="writeClasses"
+                v-html="diffHtml"
+                contenteditable
+                @focus="startEditing"
+              >
+              </div>
+              <div
+                v-else
+                class="q-pa-xs rounded border-accent"
+                :class="writeClasses"
+                contenteditable
+                ref="editableDiv"
+                @input="handleInput"
+                @blur="finishEditing"
+              ></div>
+              <template v-if="widgetData.isStreaming">
+                <q-spinner-ios /> generating <AnimatedDots />
+              </template>
+            </div>
+
+            <!-- Separate before/after diff view -->
+            <div v-else class="separate-diff-view">
+              <!-- Before section -->
+              <div class="diff-section q-mb-sm inscriptor-shadow-1">
+                <div class="diff-section-header bg-red-1 q-pa-xs">
+                  <span class="text-caption text-weight-bold">Before:</span>
+                </div>
+                <div class="diff-content bg-grey-1">
+                  <div
+                    v-for="(part, index) in beforeDiffParts"
+                    :key="'before-' + index"
+                    class="diff-part"
+                    :class="{
+                      'diff-removed': part.removed
+                    }"
+                  >{{ part.value }}</div>
+                </div>
+              </div>
+
+              <!-- After section -->
+              <div class="diff-section inscriptor-shadow-1">
+                <div class="diff-section-header bg-green-1 q-pa-xs">
+                  <span class="text-caption text-weight-bold">After:</span>
+                </div>
+                <div class="diff-content bg-grey-1">
+                  <div
+                    v-for="(part, index) in afterDiffParts"
+                    :key="'after-' + index"
+                    class="diff-part"
+                    :class="{
+                      'diff-added': part.added
+                    }"
+                  >{{ part.value }}</div>
+                </div>
+              </div>
+
+              <template v-if="widgetData.isStreaming">
+                <div class="q-mt-sm">
+                  <q-spinner-ios /> generating <AnimatedDots />
+                </div>
+              </template>
+            </div>
           </div>
         </div>
       </q-card-section>
@@ -334,6 +396,7 @@ const fileStore = useFileStore()
 const previousResultsExpanded = ref(false);
 const editableContent = ref('');
 const isEditingNow = ref(false);
+const showSeparateDiffs = ref(false);
 
 const aiSuggestionEdit = computed({
   get() {
@@ -531,6 +594,23 @@ function getPositionDescription() {
     ? 'Insert new paragraph before this content'
     : 'Insert new paragraph after this content';
 }
+
+// Computed properties for separate before/after diff view
+const beforeDiffParts = computed(() => {
+  const textToCompare = htmlToMarkdown(props.widgetData.aiSuggestion);
+  const diff = diffStrings(htmlToMarkdown(props.widgetData.originalText) ?? '', textToCompare ?? '');
+
+  // Filter to show only unchanged and removed parts
+  return diff.filter(part => !part.added);
+});
+
+const afterDiffParts = computed(() => {
+  const textToCompare = htmlToMarkdown(props.widgetData.aiSuggestion);
+  const diff = diffStrings(htmlToMarkdown(props.widgetData.originalText) ?? '', textToCompare ?? '');
+
+  // Filter to show only unchanged and added parts
+  return diff.filter(part => !part.removed);
+});
 </script>
 
 <style lang="scss" scoped>
@@ -612,5 +692,80 @@ function getPositionDescription() {
 @keyframes blink {
   0%, 50% { opacity: 1; }
   51%, 100% { opacity: 0; }
+}
+
+// Separate diff view styles (matching ToolCallDisplay)
+.separate-diff-view {
+  font-family: inherit;
+}
+
+.diff-section {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.diff-section-header {
+  padding: 4px 8px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.diff-content {
+  padding: 8px;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.diff-part {
+  display: inline;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.diff-added {
+  background-color: #c8e6c9;
+  padding: 2px 0;
+}
+
+.diff-removed {
+  background-color: #ffcdd2;
+  padding: 2px 0;
+}
+
+// Dark mode support for separate diff view
+body.body--dark {
+  .diff-section {
+    border-color: #444;
+  }
+
+  .diff-section-header {
+    border-bottom-color: #444;
+
+    &.bg-red-1 {
+      background-color: #3d1f1f !important;
+    }
+
+    &.bg-green-1 {
+      background-color: #1f3d1f !important;
+    }
+  }
+
+  .diff-content {
+    background-color: #1a1a1a !important;
+
+    &.bg-grey-1 {
+      background-color: #2a2a2a !important;
+    }
+  }
+
+  .diff-added {
+    background-color: #2d5016;
+    color: #a5d6a7;
+  }
+
+  .diff-removed {
+    background-color: #423538;
+    color: #d6a5a5 !important;
+  }
 }
 </style>

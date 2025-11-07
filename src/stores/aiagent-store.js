@@ -245,6 +245,12 @@ export const useAiAgentStore = defineStore('ai-agent', {
         return;
       }
 
+      // Skip decoration if positions are invalid or missing
+      if (!item || typeof item.from !== 'number' || typeof item.to !== 'number') {
+        console.warn('Invalid decoration positions:', item);
+        return;
+      }
+
       switch (state) {
         case 'pending':
           editorStore.addAgentDecoration(item.from, item.to, 'pending');
@@ -1000,73 +1006,114 @@ export const useAiAgentStore = defineStore('ai-agent', {
       const editor = editorStore.editor;
       const fileStore = useFileStore();
 
-      if (!editor) return null;
+      if (!editor) {
+        console.warn('[findPositionsForHtmlMatch] Editor not available');
+        return null;
+      }
 
       const currentFile = fileStore.selectedFile;
-      if (!currentFile || !currentFile.content) return null;
+      if (!currentFile || !currentFile.content) {
+        console.warn('[findPositionsForHtmlMatch] No current file or file content');
+        return null;
+      }
 
       const fullHtml = currentFile.content;
       const matchedHtml = fullHtml.substring(matchIndex, matchIndex + matchLength);
 
-      // We need to find where this HTML content appears in the ProseMirror document
-      // Strategy: Walk through the document and serialize to HTML, tracking positions
+      // Log the matched HTML segment for debugging
+      console.log('[findPositionsForHtmlMatch] Matched HTML segment:', matchedHtml.substring(0, 200) + (matchedHtml.length > 200 ? '...' : ''));
 
+      // Extract plain text from the matched HTML by stripping tags
+      const matchedText = matchedHtml.replace(/<[^>]*>/g, '');
+
+      if (!matchedText.trim()) {
+        console.warn('[findPositionsForHtmlMatch] Matched HTML contains no text content');
+        return null;
+      }
+
+      console.log('[findPositionsForHtmlMatch] Searching for text:', matchedText.substring(0, 100) + (matchedText.length > 100 ? '...' : ''));
+
+      // Build a complete text content string and position map from the editor document
       const doc = editor.state.doc;
-      let currentHtmlPos = 0;
-      let foundFrom = null;
-      let foundTo = null;
+      let fullText = '';
+      const positionMap = []; // Maps text character index to ProseMirror position
 
-      // Walk through all nodes in the document
       doc.descendants((node, pos) => {
-        if (foundFrom !== null && foundTo !== null) {
-          return false; // Stop if we found both positions
+        if (node.isText && node.text) {
+          for (let i = 0; i < node.text.length; i++) {
+            positionMap.push(pos + i);
+            fullText += node.text[i];
+          }
         }
-
-        // Get the node's HTML representation
-        const nodeHtml = editor.storage.markdown?.serializer?.serialize(node) || '';
-
-        // For now, use a simpler approach: check if we're at the match position
-        // by comparing the cumulative HTML length
-        const nodeSize = node.nodeSize;
-
-        // Check if the match starts within this node's HTML range
-        if (foundFrom === null && currentHtmlPos <= matchIndex && matchIndex < currentHtmlPos + nodeHtml.length) {
-          foundFrom = pos;
-        }
-
-        // Check if the match ends within this node's HTML range
-        if (foundFrom !== null && foundTo === null && currentHtmlPos + nodeHtml.length >= matchIndex + matchLength) {
-          foundTo = pos + nodeSize;
-        }
-
-        currentHtmlPos += nodeHtml.length;
       });
 
-      // Fallback: if we couldn't find exact positions, try a broader search
-      // Find any text node that contains part of the matched content
-      if (foundFrom === null || foundTo === null) {
-        // Strip HTML tags to get plain text for matching
-        const matchedText = matchedHtml.replace(/<[^>]*>/g, '').trim();
+      console.log('[findPositionsForHtmlMatch] Editor text length:', fullText.length, 'Position map length:', positionMap.length);
 
-        if (matchedText) {
-          doc.descendants((node, pos) => {
-            if (node.isText && node.text) {
-              if (node.text.includes(matchedText.substring(0, Math.min(50, matchedText.length)))) {
-                if (foundFrom === null) {
-                  foundFrom = pos;
-                  foundTo = pos + node.nodeSize;
-                  return false;
-                }
+      // Try exact match first
+      let textMatchIndex = fullText.indexOf(matchedText);
+
+      if (textMatchIndex === -1) {
+        // Try normalized text (collapse multiple spaces, trim)
+        const normalizedMatchedText = matchedText.replace(/\s+/g, ' ').trim();
+        const normalizedFullText = fullText.replace(/\s+/g, ' ');
+
+        console.log('[findPositionsForHtmlMatch] Exact match failed, trying normalized text');
+        console.log('[findPositionsForHtmlMatch] Normalized search text:', normalizedMatchedText.substring(0, 100));
+
+        textMatchIndex = normalizedFullText.indexOf(normalizedMatchedText);
+
+        if (textMatchIndex !== -1) {
+          // Map back to original text position by counting non-collapsed characters
+          let originalIndex = 0;
+          let normalizedIndex = 0;
+
+          while (normalizedIndex < textMatchIndex && originalIndex < fullText.length) {
+            if (fullText[originalIndex].match(/\s/)) {
+              // Skip consecutive whitespace in original
+              originalIndex++;
+              if (fullText[originalIndex - 1] && !fullText[originalIndex - 1].match(/\s/)) {
+                normalizedIndex++;
               }
+            } else {
+              originalIndex++;
+              normalizedIndex++;
             }
-          });
+          }
+
+          textMatchIndex = originalIndex;
+          console.log('[findPositionsForHtmlMatch] Mapped normalized position back to original:', textMatchIndex);
         }
       }
 
-      // Final fallback: select the entire document
-      if (foundFrom === null || foundTo === null) {
-        return { from: 0, to: doc.content.size };
+      if (textMatchIndex === -1) {
+        // Try matching first 100 characters as last resort
+        const shortText = matchedText.substring(0, Math.min(100, matchedText.length)).trim();
+        textMatchIndex = fullText.indexOf(shortText);
+
+        if (textMatchIndex !== -1) {
+          console.log('[findPositionsForHtmlMatch] Found partial match (first 100 chars) at position:', textMatchIndex);
+        }
       }
+
+      if (textMatchIndex === -1) {
+        console.error('[findPositionsForHtmlMatch] Could not find text in editor document');
+        console.error('[findPositionsForHtmlMatch] Searched for:', matchedText.substring(0, 200));
+        console.error('[findPositionsForHtmlMatch] In document text:', fullText.substring(0, 200));
+        return null;
+      }
+
+      // Map text positions to ProseMirror positions
+      const textEndIndex = Math.min(textMatchIndex + matchedText.length - 1, positionMap.length - 1);
+
+      if (textMatchIndex >= positionMap.length || textEndIndex >= positionMap.length) {
+        console.error('[findPositionsForHtmlMatch] Text match index out of bounds:', textMatchIndex, textEndIndex, 'map length:', positionMap.length);
+        return null;
+      }
+
+      const foundFrom = positionMap[textMatchIndex];
+      const foundTo = positionMap[textEndIndex] + 1; // +1 to include the last character
+
+      console.log('[findPositionsForHtmlMatch] SUCCESS - Found positions:', { from: foundFrom, to: foundTo, textLength: matchedText.length });
 
       return { from: foundFrom, to: foundTo };
     },
@@ -1159,7 +1206,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "modify",
-            description: "🚨 CRITICAL: DOCUMENT CONTAINS HTML TAGS - YOU MUST INCLUDE ALL TAGS IN old_string AND new_string 🚨\n\nModify document content by finding and replacing exact HTML text. The document is stored as HTML with tags like <p>, <br>, <strong>, <h1>, etc.\n\n⚠️ MANDATORY HTML REQUIREMENT:\nWhen you see in document: <p>Hello world</p>\nYour old_string MUST be: \"<p>Hello world</p>\" (WITH the <p> and </p> tags)\nNOT: \"Hello world\" (this will FAIL - missing tags!)\n\nALWAYS copy the EXACT HTML including opening/closing tags from the document content.\n\n📋 HOW TO USE THIS TOOL:\n1. COPY: Copy the HTML text including ALL tags (<p>, </p>, <h1>, </h1>, etc.) exactly as shown in the document\n2. INCLUDE CONTEXT: Add 2-3 paragraphs before and after (with their HTML tags) to make it unique\n3. PASTE: Use that EXACT HTML (with all tags) as your old_string\n\n❌ COMMON MISTAKES THAT CAUSE FAILURES:\n• Forgetting to include <p> and </p> tags around text\n• Stripping HTML tags from the text\n• Not including enough surrounding context\n• Not matching whitespace/line breaks exactly\n\n✅ CORRECT EXAMPLE:\nDocument contains: <p>First sentence.</p><p>Second sentence.</p>\nold_string: \"<p>First sentence.</p><p>Second sentence.</p>\"\n\n❌ WRONG EXAMPLE:\nDocument contains: <p>First sentence.</p><p>Second sentence.</p>\nold_string: \"First sentence.\\nSecond sentence.\" ← WILL FAIL! Missing HTML tags!",
+            description: "🚨 CRITICAL: DOCUMENT CONTAINS HTML TAGS - YOU MUST INCLUDE ALL TAGS IN old_string AND new_string 🚨\n\n⭐ BEST PRACTICE - USE MULTIPLE TOOL CALLS FOR MULTIPLE CHANGES:\n• You CAN and SHOULD output MULTIPLE modify tool calls in a SINGLE response\n• Each tool call should modify a SMALL CHUNK (1-3 paragraphs) at a time\n• DO NOT try to change the entire document in one tool call - break it into multiple small edits\n• This approach is MORE RELIABLE and ensures accurate replacements\n• Example: If you need to edit 10 paragraphs, make 5-10 separate modify calls in one response\n\nModify document content by finding and replacing exact HTML text. The document is stored as HTML with tags like <p>, <br>, <strong>, <h1>, etc.\n\n⚠️ MANDATORY HTML REQUIREMENT:\nWhen you see in document: <p>Hello world</p>\nYour old_string MUST be: \"<p>Hello world</p>\" (WITH the <p> and </p> tags)\nNOT: \"Hello world\" (this will FAIL - missing tags!)\n\nALWAYS copy the EXACT HTML including opening/closing tags from the document content.\n\n📋 HOW TO USE THIS TOOL:\n1. IDENTIFY: Find a small section (1-3 paragraphs) you want to modify\n2. COPY: Copy the HTML text including ALL tags (<p>, </p>, <h1>, </h1>, etc.) exactly as shown\n3. INCLUDE CONTEXT: Add 1-2 paragraphs before and after (with their HTML tags) to make it unique\n4. OUTPUT: Create a modify tool call with that exact HTML\n5. REPEAT: Add more modify tool calls in the SAME response for other sections\n\n❌ COMMON MISTAKES THAT CAUSE FAILURES:\n• Trying to modify too much text in ONE tool call (more than 3-5 paragraphs)\n• Forgetting to include <p> and </p> tags around text\n• Stripping HTML tags from the text\n• Not using multiple tool calls when making multiple changes\n• Not including enough surrounding context\n• Not matching whitespace/line breaks exactly\n\n✅ CORRECT EXAMPLE (SMALL CHUNK):\nDocument contains: <p>First sentence.</p><p>Second sentence.</p>\nold_string: \"<p>First sentence.</p><p>Second sentence.</p>\"\n\n✅ CORRECT APPROACH (MULTIPLE CHANGES):\nTo edit 6 paragraphs, output 3 separate modify tool calls in one response:\n- Tool call 1: Modify paragraphs 1-2\n- Tool call 2: Modify paragraphs 3-4\n- Tool call 3: Modify paragraphs 5-6\n\n❌ WRONG EXAMPLES:\n1. Missing HTML tags: old_string: \"First sentence.\" ← WILL FAIL!\n2. Too large: old_string: \"<entire 50 paragraph document>\" ← BAD!\n3. One tool call for many changes: Making one giant modify call instead of multiple small ones",
             parameters: {
               type: "object",
               properties: {
@@ -1428,7 +1475,7 @@ export const useAiAgentStore = defineStore('ai-agent', {
           type: "function",
           function: {
             name: "editDocument",
-            description: "🚨 CRITICAL: FILES CONTAIN HTML TAGS - YOU MUST INCLUDE ALL TAGS IN old_string AND new_string 🚨\n\nEdit any file by finding and replacing text. Files are stored as HTML with tags like <p>, <br>, <strong>, etc.\n\n⚠️ MANDATORY HTML REQUIREMENT:\nWhen you read a file and see: <p>Hello world</p>\nYour old_string MUST be: \"<p>Hello world</p>\" (WITH the <p> and </p> tags)\nNOT: \"Hello world\" (this will FAIL - missing tags!)\n\nALWAYS copy the EXACT HTML including opening/closing tags from readFile/getCurrentDocument output.\n\n📋 HOW TO USE THIS TOOL:\n1. FIRST: Read the target file with readFile to see the EXACT HTML (use getCurrentDocument only if editing the currently opened file)\n2. COPY: Copy the HTML text including ALL tags (<p>, </p>, etc.) exactly as shown\n3. INCLUDE CONTEXT: Add 3-5 lines before and after (with their HTML tags) to make it unique\n4. PASTE: Use that EXACT HTML (with all tags) as your old_string\n\n❌ COMMON MISTAKES THAT CAUSE FAILURES:\n• Forgetting to include <p> and </p> tags around text\n• Stripping HTML tags from the text\n• Not including enough surrounding context\n• Not matching whitespace/line breaks exactly\n\n✅ CORRECT EXAMPLE:\nFile contains: <p>First sentence.</p><p>Second sentence.</p>\nold_string: \"<p>First sentence.</p><p>Second sentence.</p>\"\n\n❌ WRONG EXAMPLE:\nFile contains: <p>First sentence.</p><p>Second sentence.</p>\nold_string: \"First sentence.\\nSecond sentence.\" ← WILL FAIL! Missing HTML tags!",
+            description: "🚨 CRITICAL: FILES CONTAIN HTML TAGS - YOU MUST INCLUDE ALL TAGS IN old_string AND new_string 🚨\n\n⭐ BEST PRACTICE - USE MULTIPLE TOOL CALLS FOR MULTIPLE CHANGES:\n• You CAN and SHOULD output MULTIPLE editDocument tool calls in a SINGLE response\n• Each tool call should edit a SMALL CHUNK (1-3 paragraphs) at a time\n• DO NOT try to change an entire file in one tool call - break it into multiple small edits\n• This approach is MORE RELIABLE and ensures accurate replacements\n• Example: If you need to edit 10 paragraphs, make 5-10 separate editDocument calls in one response\n\nEdit any file by finding and replacing text. Files are stored as HTML with tags like <p>, <br>, <strong>, etc.\n\n⚠️ MANDATORY HTML REQUIREMENT:\nWhen you read a file and see: <p>Hello world</p>\nYour old_string MUST be: \"<p>Hello world</p>\" (WITH the <p> and </p> tags)\nNOT: \"Hello world\" (this will FAIL - missing tags!)\n\nALWAYS copy the EXACT HTML including opening/closing tags from readFile/getCurrentDocument output.\n\n📋 HOW TO USE THIS TOOL:\n1. FIRST: Read the target file with readFile to see the EXACT HTML (use getCurrentDocument only if editing the currently opened file)\n2. IDENTIFY: Find a small section (1-3 paragraphs) you want to edit\n3. COPY: Copy the HTML text including ALL tags (<p>, </p>, etc.) exactly as shown\n4. INCLUDE CONTEXT: Add 1-2 paragraphs before and after (with their HTML tags) to make it unique\n5. OUTPUT: Create an editDocument tool call with that exact HTML\n6. REPEAT: Add more editDocument tool calls in the SAME response for other sections\n\n❌ COMMON MISTAKES THAT CAUSE FAILURES:\n• Trying to edit too much text in ONE tool call (more than 3-5 paragraphs)\n• Forgetting to include <p> and </p> tags around text\n• Stripping HTML tags from the text\n• Not using multiple tool calls when making multiple changes\n• Not including enough surrounding context\n• Not matching whitespace/line breaks exactly\n\n✅ CORRECT EXAMPLE (SMALL CHUNK):\nFile contains: <p>First sentence.</p><p>Second sentence.</p>\nold_string: \"<p>First sentence.</p><p>Second sentence.</p>\"\n\n✅ CORRECT APPROACH (MULTIPLE CHANGES):\nTo edit 6 paragraphs, output 3 separate editDocument tool calls in one response:\n- Tool call 1: Edit paragraphs 1-2\n- Tool call 2: Edit paragraphs 3-4\n- Tool call 3: Edit paragraphs 5-6\n\n❌ WRONG EXAMPLES:\n1. Missing HTML tags: old_string: \"First sentence.\" ← WILL FAIL!\n2. Too large: old_string: \"<entire 50 paragraph file>\" ← BAD!\n3. One tool call for many changes: Making one giant edit instead of multiple small ones",
             parameters: {
               type: "object",
               properties: {

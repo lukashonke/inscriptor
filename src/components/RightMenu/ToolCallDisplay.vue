@@ -48,7 +48,7 @@
             <!-- Special diff rendering for editDocument -->
             <div v-if="isEditDocument && editDocumentDiff" class="edit-document-diff row">
               <!-- Before section -->
-              <div class="diff-section q-mb-sm">
+              <div class="diff-section q-mb-sm inscriptor-shadow-1">
                 <div class="diff-section-header bg-red-1 q-pa-xs">
                   <span class="text-caption text-weight-bold">Before:</span>
                 </div>
@@ -65,8 +65,8 @@
               </div>
 
               <!-- After section -->
-              <div class="diff-section">
-                <div class="diff-section-header bg-green-1 q-pa-xs">
+              <div class="diff-section inscriptor-shadow-1">
+                <div class="diff-section-header bg-green-1  q-pa-xs">
                   <span class="text-caption text-weight-bold">After:</span>
                 </div>
                 <div class="diff-content bg-grey-1">

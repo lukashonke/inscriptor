@@ -235,8 +235,8 @@
                       </q-item-section>
 
                       <q-item-section>
-                        <q-item-label>1 project on cloud</q-item-label>
-                        <q-item-label caption>max 30 files per project</q-item-label>
+                        <q-item-label>1 project stored on cloud</q-item-label>
+                        <q-item-label caption>limit 100 files per project</q-item-label>
                       </q-item-section>
                     </q-item>
 
@@ -276,7 +276,8 @@
                     </div>
 
                   </q-card-section>
-                  <q-list class="q-py-sm bg-accent-lighter text-white">
+                  <q-separator />
+                  <q-list class="q-py-sm bg-accent text-white">
                     <q-item clickable>
                       <q-item-section avatar>
                         <q-icon name="mdi-check" />
@@ -316,7 +317,7 @@
 
                       <q-item-section>
                         <q-item-label>Up to 20 projects on cloud</q-item-label>
-                        <q-item-label caption class="text-white">Synchronized across all devices</q-item-label>
+                        <q-item-label caption class="text-white">2000 files per project</q-item-label>
                       </q-item-section>
                     </q-item>
 
@@ -332,6 +333,7 @@
                     </q-item>
 
                   </q-list>
+                  <q-separator />
                   <q-card-actions v-if="userData.subscriptionLevel === 0" class="bg-accent">
                     <q-btn flat color="white" class="full-width" @click="buyPremium(yearly ? 'SubscriptionPremiumYearly' : 'SubscriptionPremium')">Subscribe</q-btn>
                   </q-card-actions>
