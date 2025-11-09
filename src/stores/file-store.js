@@ -9,13 +9,13 @@ import {
   useFindFileRecursively
 } from "src/common/utils/fileUtils";
 import {open, save} from '@tauri-apps/plugin-dialog';
-import {readTextFile, writeTextFile} from "@tauri-apps/plugin-fs";
+import {readTextFile, writeTextFile, writeFile} from "@tauri-apps/plugin-fs";
 import {htmlToMarkdown, tokenise} from "src/common/utils/textUtils";
 import {usePromptStore} from "stores/prompt-store";
 import {md5} from "src/common/utils/hashUtils";
 import {
   deleteProject,
-  downloadProject, getCloudProjectFile, pingProject,
+  downloadProject, downloadProjectAsZip, getCloudProjectFile, pingProject,
   uploadProject, uploadProjectData, uploadProjectFiles,
   uploadProjectUserProjectSettings
 } from "src/common/apiServices/userProjectService";
@@ -1325,6 +1325,51 @@ export const useFileStore = defineStore('files', {
         const jsonString = saveToJson(project);
 
         downloadFile(jsonString, convertToFilesystemSafeName(project.projectName) + '.json', 'application/json');
+      }
+    },
+    async downloadCloudProjectAsZip(projectId) {
+      const user = useCurrentUser();
+      if(!user) return;
+
+      const zipBlob = await downloadProjectAsZip(user, projectId);
+
+      const layoutStore = useLayoutStore();
+
+      if(layoutStore.runsInDesktopApp()) {
+        // Desktop app: Use Tauri dialog to save file
+        let filePath = await save({
+          filters: [{
+            name: 'Zip Archive',
+            extensions: ['zip']
+          }]
+        });
+
+        if (filePath) {
+          // Convert blob to array buffer for Tauri
+          const arrayBuffer = await zipBlob.arrayBuffer();
+          const uint8Array = new Uint8Array(arrayBuffer);
+          await writeFile(filePath, uint8Array);
+
+          Notify.create({
+            message: 'Project downloaded successfully',
+            color: 'positive',
+            position: 'top'
+          });
+        }
+      } else {
+        // Browser: Download blob directly
+        const blob = new Blob([zipBlob], { type: 'application/zip' });
+        const link = document.createElement('a');
+        link.download = convertToFilesystemSafeName(this.projectName) + '.zip';
+        link.href = URL.createObjectURL(blob);
+        link.click();
+        URL.revokeObjectURL(link.href);
+
+        Notify.create({
+          message: 'Project downloaded successfully',
+          color: 'positive',
+          position: 'top'
+        });
       }
     },
     async loadCloudProject(projectId) {

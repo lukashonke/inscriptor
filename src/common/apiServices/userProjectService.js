@@ -271,6 +271,34 @@ export async function downloadProject(user, projectId, abortController) {
   }
 }
 
+export async function downloadProjectAsZip(user, projectId, abortController) {
+  try {
+    const response = await fetch(url + 'Project/Projects/' + projectId + '/download', {
+        method: 'GET',
+        headers: {
+          'Authorization': await user.value.getIdToken()
+        },
+        signal: abortController?.signal
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(`Response status: ${response.status}`);
+    }
+
+    // Return response as blob for zip file
+    return await response.blob();
+  }
+  catch (error) {
+    Notify.create({
+      message: 'Project download failed. Please try again.',
+      color: 'negative',
+      position: 'top'
+    });
+    throw error;
+  }
+}
+
 export async function deleteProject(user, projectId, abortController) {
   try {
     const response = await fetch(url + 'Project/Projects/' + projectId, {

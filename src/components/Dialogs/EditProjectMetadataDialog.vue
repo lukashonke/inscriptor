@@ -31,6 +31,7 @@
 
       <q-card-actions align="right">
         <q-btn icon="mdi-download" label="Download Project" color="primary" @click="downloadProject" no-caps/>
+        <q-btn icon="mdi-download" label="Download ZIP" color="primary" @click="downloadProjectAsZip" no-caps/>
       </q-card-actions>
     </q-card>
 
@@ -101,6 +102,10 @@
 
   async function downloadProject() {
     await fileStore.downloadCloudProject(fileStore.projectId);
+  }
+
+  async function downloadProjectAsZip() {
+    await fileStore.downloadCloudProjectAsZip(fileStore.projectId);
   }
 
 </script>
