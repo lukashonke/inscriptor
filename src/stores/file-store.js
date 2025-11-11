@@ -28,6 +28,7 @@ import {convertToFilesystemSafeName, downloadFile} from "src/common/utils/browse
 import {importFromMarketplace} from "src/common/utils/cmsUtils";
 import {useDebounceFn, useStorage} from "@vueuse/core";
 import { useFileSearch } from 'src/composables/useFileSearch';
+import { signalRService } from 'src/common/signalRService';
 
 export const useFileStore = defineStore('files', {
   state: () => ({
@@ -61,6 +62,8 @@ export const useFileStore = defineStore('files', {
     saveUserProjectSettingsFunction: null,
     saveProjectDataFunction: null,
     saveDebounceFunction: null,
+
+    fileChangedHandler: null,
   }),
   getters: {
     //getFiles: (state) => state.files,
@@ -581,6 +584,9 @@ export const useFileStore = defineStore('files', {
       return parents;
     },
     async removeFiles() {
+      // Disconnect from SignalR before removing files
+      await this.disconnectFromSignalR();
+
       this.files.splice(0, this.files.length);
     },
     getCurrentTextTokens() {
@@ -1013,6 +1019,11 @@ export const useFileStore = defineStore('files', {
         } catch (e) {
           console.error('Failed to initialize history in loadProject:', e);
         }
+      }
+
+      // Connect to SignalR if cloud sync is enabled
+      if (this.projectSettings.syncToCloud) {
+        await this.connectToSignalR();
       }
     },
     getProjectData(excludeFiles = false) {
@@ -1516,6 +1527,153 @@ export const useFileStore = defineStore('files', {
 
       // Pass fromHistory=true to prevent pushing to history again
       this.selectFile(file, false, true);
+    },
+
+    // SignalR Integration
+    async connectToSignalR() {
+      const user = useCurrentUser();
+
+      // Guest mode check - if no user, skip SignalR
+      if (!user || !user.value) {
+        console.log('[FileStore] Guest mode - skipping SignalR connection');
+        return;
+      }
+
+      if (!this.projectId) {
+        console.warn('[FileStore] Cannot connect to SignalR - no projectId');
+        return;
+      }
+
+      try {
+        // Connect to SignalR hub
+        await signalRService.connect(user.value);
+
+        // Join the project group
+        await signalRService.joinProject(this.projectId);
+
+        // Register handler for file change messages
+        // Store the bound handler reference for later removal
+        this.fileChangedHandler = this.handleFileChangedMessage.bind(this);
+        signalRService.onMessage('FileChanged', this.fileChangedHandler);
+
+        console.log('[FileStore] Connected to SignalR for project:', this.projectId);
+      } catch (error) {
+        console.error('[FileStore] Failed to connect to SignalR:', error);
+        // Don't throw - SignalR is not critical, app should continue working
+      }
+    },
+
+    async disconnectFromSignalR() {
+      if (!this.projectId) {
+        return;
+      }
+
+      try {
+        // Leave the project group
+        await signalRService.leaveProject(this.projectId);
+
+        // Remove the message handler using the stored reference
+        if (this.fileChangedHandler) {
+          signalRService.offMessage('FileChanged', this.fileChangedHandler);
+          this.fileChangedHandler = null;
+        }
+
+        console.log('[FileStore] Disconnected from SignalR for project:', this.projectId);
+      } catch (error) {
+        console.error('[FileStore] Error disconnecting from SignalR:', error);
+      }
+    },
+
+    async handleFileChangedMessage(payload, timestamp) {
+      console.log('[FileStore] Received FileChanged message:', payload);
+
+      if (!payload) {
+        return;
+      }
+
+      const { updatedFiles, deletedFiles } = payload;
+
+      // Handle updated files with smart refresh logic
+      if (updatedFiles && Array.isArray(updatedFiles)) {
+        for (const fileId of updatedFiles) {
+          const file = this.getFile(fileId);
+
+          if (!file) {
+            console.log('[FileStore] File not found locally:', fileId);
+            continue;
+          }
+
+          // Smart refresh: Check if file is dirty
+          if (file.dirty) {
+            // File is being edited locally, show notification instead of auto-refresh
+            Notify.create({
+              message: `"${file.title}" was updated on the server. Click to refresh.`,
+              color: 'info',
+              position: 'top',
+              timeout: 10000,
+              actions: [
+                {
+                  label: 'Refresh',
+                  color: 'white',
+                  handler: async () => {
+                    await this.refreshFileFromCloud(fileId);
+                  }
+                },
+                {
+                  label: 'Dismiss',
+                  color: 'white'
+                }
+              ]
+            });
+          } else {
+            // File is not dirty, auto-refresh from cloud
+            await this.refreshFileFromCloud(fileId);
+            console.log('[FileStore] Auto-refreshed file:', fileId);
+          }
+        }
+      }
+
+      // Handle deleted files
+      if (deletedFiles && Array.isArray(deletedFiles)) {
+        for (const fileId of deletedFiles) {
+          console.log('[FileStore] File deleted on server:', fileId);
+          // You can add logic here to handle deleted files if needed
+        }
+      }
+    },
+
+    async refreshFileFromCloud(fileId) {
+      const user = useCurrentUser();
+      if (!user || !user.value || !this.projectId) {
+        return;
+      }
+
+      try {
+        const file = await getCloudProjectFile(user.value, this.projectId, fileId);
+        const localFile = this.getFile(fileId);
+
+        if (localFile && file) {
+          // Update local file with cloud data
+          localFile.title = file.title;
+          localFile.content = file.content;
+          localFile.synopsis = file.synopsis;
+          localFile.note = file.note;
+          localFile.etag = file.etag;
+          localFile.icon = file.icon;
+          localFile.imageUrl = file.imageUrl;
+          localFile.state = file.state;
+          localFile.dirty = false;
+
+          console.log('[FileStore] Refreshed file from cloud:', fileId);
+        }
+      } catch (error) {
+        console.error('[FileStore] Failed to refresh file from cloud:', error);
+        Notify.create({
+          message: 'Failed to refresh file from server',
+          color: 'negative',
+          position: 'top'
+        });
+      }
     },
   }
 });

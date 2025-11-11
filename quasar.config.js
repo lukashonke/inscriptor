@@ -34,6 +34,7 @@ module.exports = configure(function (/* ctx */) {
       'axios',
       'colors',
       'firebase',
+      'signalr',
       'directus',
       'showdown',
       'turndown',
