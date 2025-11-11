@@ -584,9 +584,6 @@ export const useFileStore = defineStore('files', {
       return parents;
     },
     async removeFiles() {
-      // Disconnect from SignalR before removing files
-      await this.disconnectFromSignalR();
-
       this.files.splice(0, this.files.length);
     },
     getCurrentTextTokens() {
@@ -931,6 +928,12 @@ export const useFileStore = defineStore('files', {
       const data = project.data;
       const files = data.files ? unflattenFiles(data.files) : undefined;
       const variables = data.variables;
+
+      // Save the old project ID before overwriting
+      const oldProjectId = this.projectId;
+
+      // Disconnect from the old project before switching
+      await this.disconnectFromSignalR(oldProjectId);
 
       this.etag = project.data.etag;
       this.projectId = project.projectId;
@@ -1563,14 +1566,16 @@ export const useFileStore = defineStore('files', {
       }
     },
 
-    async disconnectFromSignalR() {
-      if (!this.projectId) {
+    async disconnectFromSignalR(projectId = null) {
+      const projectIdToLeave = projectId || this.projectId;
+
+      if (!projectIdToLeave) {
         return;
       }
 
       try {
         // Leave the project group
-        await signalRService.leaveProject(this.projectId);
+        await signalRService.leaveProject(projectIdToLeave);
 
         // Remove the message handler using the stored reference
         if (this.fileChangedHandler) {
@@ -1578,7 +1583,7 @@ export const useFileStore = defineStore('files', {
           this.fileChangedHandler = null;
         }
 
-        console.log('[FileStore] Disconnected from SignalR for project:', this.projectId);
+        console.log('[FileStore] Disconnected from SignalR for project:', projectIdToLeave);
       } catch (error) {
         console.error('[FileStore] Error disconnecting from SignalR:', error);
       }
@@ -1604,7 +1609,7 @@ export const useFileStore = defineStore('files', {
           }
 
           // Smart refresh: Check if file is dirty
-          if (file.dirty) {
+          if (file.dirty && this.selectedFile.id !== file.id) {
             // File is being edited locally, show notification instead of auto-refresh
             Notify.create({
               message: `"${file.title}" was updated on the server. Click to refresh.`,
@@ -1616,7 +1621,7 @@ export const useFileStore = defineStore('files', {
                   label: 'Refresh',
                   color: 'white',
                   handler: async () => {
-                    await this.refreshFileFromCloud(fileId);
+                    await this.loadFileFromCloud(fileId);
                   }
                 },
                 {
@@ -1627,7 +1632,7 @@ export const useFileStore = defineStore('files', {
             });
           } else {
             // File is not dirty, auto-refresh from cloud
-            await this.refreshFileFromCloud(fileId);
+            await this.loadFileFromCloud(fileId);
             console.log('[FileStore] Auto-refreshed file:', fileId);
           }
         }
