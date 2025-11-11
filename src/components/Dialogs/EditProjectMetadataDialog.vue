@@ -30,8 +30,21 @@
       <q-separator />
 
       <q-card-actions align="right">
-        <q-btn icon="mdi-download" label="Download Project" color="primary" @click="downloadProject" no-caps/>
-        <q-btn icon="mdi-download" label="Download ZIP" color="primary" @click="downloadProjectAsZip" no-caps/>
+        <q-btn-dropdown color="primary" label="Download" icon="mdi-download" no-caps>
+          <q-list dense>
+            <q-item clickable v-close-popup @click="downloadProject">
+              <q-item-section>
+                <q-item-label>JSON Format</q-item-label>
+              </q-item-section>
+            </q-item>
+
+            <q-item clickable v-close-popup @click="downloadProjectAsZip">
+              <q-item-section>
+                <q-item-label>Markdown Format</q-item-label>
+              </q-item-section>
+            </q-item>
+          </q-list>
+        </q-btn-dropdown>
       </q-card-actions>
     </q-card>
 
