@@ -121,6 +121,7 @@ export const useLayoutStore = defineStore('layout', {
     newSuggestClass: '',
 
     showPromptSelectorDialog: false,
+    deepAgentDialogShown: true,
   }),
   getters: {
     getIsDragAndDropping: (state) => state.isDragAndDropping,
