@@ -423,7 +423,7 @@
                         size="12px"
                         no-caps
                         flat
-                        color="indigo"
+                        :color="layoutStore.darkMode ? 'indigo-3' : 'indigo'"
                         label="Project Agents"
                         icon="mdi-robot-outline"
                         :class="[
@@ -437,25 +437,83 @@
                       />
                     </div>
                   </div>
+                  <div class="row">
+                    <div class="col">
+                      <q-btn
+                        size="12px"
+                        no-caps
+                        flat
+                        :color="layoutStore.darkMode ? 'purple-3' : 'purple'"
+                        label="Deep Agents"
+                        icon="mdi-robot-outline"
+                        :class="[
+                          layoutStore.darkMode
+                            ? (currentAgentCategory === 'Deep Agents' ? 'bg-grey-1' : '')
+                            : ('bg-accent' + (currentAgentCategory === 'Deep Agents' ? '-1' : '-0'))
+                        ]"
+                        class="full-width items-start"
+                        unelevated
+                        @click="currentAgentCategory = 'Deep Agents'"
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <!-- Right Column: Agent List -->
-                <div class="col">
-                  <q-card-section class="full-width q-pa-xs">
-                    <div class="scroll-y" style="max-height: 400px;">
-                      <template v-for="agent in promptStore.projectAgents" :key="agent.id">
+                <div class="col" v-if="currentAgentCategory === 'Project Agents'">
+                  <q-card-section class="full-width q-pa-none">
+                    <div class="scroll-y" style="max-height: 500px;">
+                      <div class="text-caption  full-width q-px-lg q-py-sm" :class="layoutStore.darkMode ? 'bg-dark' : 'bg-grey-1 text-grey-9'">
+                        <div class="text-bold" :class="layoutStore.darkMode ? 'text-grey-2' : 'text-grey-10'">Project Agents</div>
+                        Run a set of predefined instructions on the selected file.
+                      </div>
+
+                      <q-separator />
+
+                      <div class="q-pa-xs">
+                        <template v-for="agent in promptStore.projectAgents" :key="agent.id">
+                          <div class="row text-caption full-width">
+                            <q-item clickable v-close-popup @click="runProjectAgent(agent)" class="full-width">
+                              <q-item-section side>
+                                <q-icon :name="(promptStore.getPromptById(agent.promptId)?.icon?.length > 0) ? promptStore.getPromptById(agent.promptId).icon : 'mdi-robot-outline'" :color="(promptStore.getPromptById(agent.promptId)?.color?.length > 0) ? promptStore.getPromptById(agent.promptId).color : undefined" size="20px" />
+                              </q-item-section>
+                              <q-item-section>
+                                <q-item-label class="text-caption text-weight-medium">{{ agent.title }}</q-item-label>
+                                <q-item-label caption>{{ agent.description }}</q-item-label>
+                              </q-item-section>
+                            </q-item>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </q-card-section>
+                </div>
+
+                <div class="col" v-if="currentAgentCategory === 'Deep Agents'">
+                  <q-card-section class="full-width q-pa-none">
+                    <div class="scroll-y" style="max-height: 500px;">
+                      <div class="text-caption full-width q-px-lg q-py-sm" :class="layoutStore.darkMode ? 'bg-dark' : 'bg-grey-1 text-grey-9'">
+                        <div class="text-bold" :class="layoutStore.darkMode ? 'text-grey-2' : 'text-grey-10'">Deep Agents</div>
+                        The most advanced AI agent.
+                        It is similar to Chat with AI, but it performs very deep researches and uses advanced planning and reasoning before responding.
+                        It can draft entire scenes and chapters for you.
+                      </div>
+
+                      <q-separator />
+
+                      <div class="q-pa-xs">
                         <div class="row text-caption full-width">
-                          <q-item clickable v-close-popup @click="runProjectAgent(agent)" class="full-width">
+                          <q-item clickable v-close-popup @click="deepAgentStore.runDeepAgent()" class="full-width">
                             <q-item-section side>
-                              <q-icon :name="(promptStore.getPromptById(agent.promptId)?.icon?.length > 0) ? promptStore.getPromptById(agent.promptId).icon : 'mdi-robot-outline'" :color="(promptStore.getPromptById(agent.promptId)?.color?.length > 0) ? promptStore.getPromptById(agent.promptId).color : undefined" size="20px" />
+                              <q-icon name="mdi-robot-outline" color="purple" size="20px" />
                             </q-item-section>
                             <q-item-section>
-                              <q-item-label class="text-caption text-weight-medium">{{ agent.title }}</q-item-label>
-                              <q-item-label caption>{{ agent.description }}</q-item-label>
+                              <q-item-label class="text-caption text-weight-medium text-purple">Inscriptor Deep Agent</q-item-label>
+                              <q-item-label caption>Our most advanced AI agent yet</q-item-label>
                             </q-item-section>
                           </q-item>
                         </div>
-                      </template>
+                      </div>
                     </div>
                   </q-card-section>
                 </div>
@@ -673,12 +731,14 @@ import {uploadImageFromFile, uploadImageFromUrl} from 'src/common/helpers/imageH
 import {useCurrentUser} from 'vuefire';
 import { Details, DetailsContent, DetailsSummary } from '@tiptap/extension-details'
 import {isMobileScreen} from 'src/common/utils/screenUtils';
+import {useDeepAgentStore} from 'stores/deepagent-store';
 
 const promptStore = usePromptStore();
 const fileStore = useFileStore();
 const editorStore = useEditorStore();
 const layoutStore = useLayoutStore();
 const aiAgentStore = useAiAgentStore();
+const deepAgentStore = useDeepAgentStore();
 
 const props = defineProps({
   modelValue: {
