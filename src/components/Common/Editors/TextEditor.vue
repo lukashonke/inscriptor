@@ -508,7 +508,7 @@
                               <q-icon name="mdi-robot-outline" color="purple" size="20px" />
                             </q-item-section>
                             <q-item-section>
-                              <q-item-label class="text-caption text-weight-medium text-purple">Inscriptor Deep Agent</q-item-label>
+                              <q-item-label class="text-caption text-weight-medium text-purple">Open Inscriptor Deep Agent</q-item-label>
                               <q-item-label caption>Our most advanced AI agent yet</q-item-label>
                             </q-item-section>
                           </q-item>
