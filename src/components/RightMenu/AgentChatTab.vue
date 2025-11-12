@@ -71,7 +71,7 @@
         <template v-if="!currentChatMessages || currentChatMessages.length === 0">
           <div class="q-gutter-y-sm q-ml-xs chat-history-container justify-center q-mt-xl" style="margin-bottom: 100px;">
             <div class="row full-width justify-center" style="">
-              <q-card flat bordered class="col" style="max-width: 400px;">
+              <q-card flat bordered class="col help-text-area" style="max-width: 400px;">
                 <q-card-section class="q-gutter-y-xs">
                   <div class="row text-caption">
                     Prompt for this chat:
