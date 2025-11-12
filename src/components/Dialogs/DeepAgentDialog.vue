@@ -9,7 +9,7 @@
         <!-- Status indicator -->
         <q-chip
           v-if="currentChat"
-          :color="deepAgentStore.isStreaming ? 'orange' : 'positive'"
+          :color="deepAgentStore.isStreaming ? 'accent' : 'positive'"
           text-color="white"
           size="sm"
           class="q-mr-sm"
@@ -19,7 +19,7 @@
             size="xs"
             class="q-mr-xs"
           />
-          {{ deepAgentStore.isStreaming ? 'Streaming...' : 'Ready' }}
+          {{ deepAgentStore.getStatusMessage }}
         </q-chip>
 
         <q-btn icon="close" flat round dense @click="layoutStore.deepAgentDialogShown = false" />
@@ -41,25 +41,38 @@
           />
         </div>
 
-        <div v-else class="chat-messages">
+        <div v-else class="chat-history-container" style="margin-bottom: 100px;">
+          <!-- Help text for empty chat -->
+          <div v-if="currentChat.messages.length === 0" class="text-caption q-pa-md q-pb-sm q-pt-sm text-grey-7">
+            <div class="bordered q-pa-sm help-text-area">
+              <q-icon name="mdi-robot" class="text-accent q-mb-xs" />
+              Deep Agent Chat:
+              <div class="q-mt-sm">
+                The Deep Agent has comprehensive planning and reasoning abilities and will analyse your project, understand context and assist with complex writing, planning or brainstorming tasks.
+              </div>
+              <div class="q-mt-sm">
+                <q-icon name="mdi-cloud-outline" />
+                Uses Inscriptor AI cloud, consuming AI credits. Note that it is more demanding on credits than the regular Chat.
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-messages">
           <!-- Loop through all messages -->
           <div
-            v-for="message in currentChat.messages"
+            v-for="(message, index) in currentChat.messages"
             :key="message.id"
-            :class="['message-wrapper', message.role === 'user' ? 'user-message' : 'agent-message', 'q-mb-md']"
+            :class="['message-wrapper', message.role === 'user' ? 'da-user-message' : 'da-agent-message', 'q-mb-md']"
           >
             <div class="message-bubble">
               <!-- Message header for assistant messages -->
-              <div v-if="message.role === 'assistant'" class="message-header q-mb-xs">
+              <div v-if="message.role === 'assistant'" class="message-header q-mb-sm items-center text-grey-9">
                 <q-icon name="mdi-robot" size="xs" class="q-mr-xs" />
                 <span class="text-caption text-weight-medium">Deep Agent</span>
               </div>
 
               <!-- Message content -->
-              <div class="message-content">{{ message.content }}</div>
-
-              <!-- Streaming indicator for empty assistant messages -->
-              <q-spinner-dots v-if="message.isStreaming && !message.content" color="primary" size="md" />
+              <div class="message-content text-editor no-p-margin-0 write-serif write-medium prompt-test-editor prompt-results tiptap" v-html="markdownToHtml(message.content)"></div>
 
               <!-- Tool calls section -->
               <div
@@ -67,7 +80,7 @@
                 class="tool-calls-section q-mt-sm q-pa-sm"
               >
                 <div class="text-caption text-weight-medium">
-                  <q-icon name="mdi-tools" size="xs" />
+                  <q-icon name="mdi-tools" size="xs" color="primary" />
                   {{ message.metadata.tool_calls.filter(t => t.name).length }} tool call{{ message.metadata.tool_calls.filter(t => t.name).length !== 1 ? 's' : '' }}
                   ({{ message.metadata.tool_calls.filter(t => t.name).map(t => t.name).join(', ') }})
                 </div>
@@ -76,22 +89,23 @@
               <!-- Metadata footer for assistant messages -->
               <div
                 v-if="message.role === 'assistant' && message.metadata && Object.keys(message.metadata).length > 0"
-                class="message-footer text-caption text-grey-6 q-mt-xs"
+                class="message-footer text-caption text-grey-5 q-mt-xs justify-end"
               >
-                <span v-if="message.metadata.tokens">
-                  <q-icon name="mdi-counter" size="xs" /> {{ message.metadata.tokens }} tokens
-                </span>
-                <span v-if="message.metadata.model" class="q-ml-sm">
-                  <q-icon name="mdi-brain" size="xs" /> {{ message.metadata.model }}
+                <span v-if="message?.metadata?.usage?.total_tokens">
+                  {{ message.metadata.usage.total_tokens }} total tokens
                 </span>
               </div>
             </div>
+
+            <!-- Streaming indicator below last user message -->
+            <div
+              v-if="message.role === 'user' && index === currentChat.messages.length - 1 && deepAgentStore.isStreaming"
+              class="streaming-indicator q-mt-xs"
+            >
+              <q-spinner-dots color="primary" size="md" />
+            </div>
           </div>
 
-          <!-- Empty state when no messages -->
-          <div v-if="currentChat.messages.length === 0" class="text-center text-grey-6 q-mt-xl">
-            <q-icon name="mdi-chat-outline" size="48px" class="q-mb-md" />
-            <div class="text-body2">Start a conversation with the Deep Agent</div>
           </div>
         </div>
       </q-card-section>
@@ -175,6 +189,7 @@
   import {useResponsive} from "src/common/utils/screenUtils";
   import {useDeepAgentStore} from 'stores/deepagent-store';
   import {Notify} from 'quasar';
+  import {markdownToHtml} from 'src/common/utils/textUtils';
 
   const promptStore = usePromptStore();
   const fileStore = useFileStore();
@@ -187,6 +202,21 @@
 
   const currentChat = computed(() => deepAgentStore.getCurrentChat);
 
+  // Auto-scroll to bottom when new message is added (only for user messages)
+  watch(() => currentChat.value?.messages?.length, (newLength, oldLength) => {
+    if (newLength > (oldLength || 0)) {
+      // New message was added
+      const lastMessage = currentChat.value.messages[newLength - 1];
+
+      // Only scroll if last message is from user (user just sent a message)
+      if (lastMessage.role === 'user') {
+        nextTick(() => {
+          scrollToBottom();
+        });
+      }
+    }
+  });
+
   // Initialize with a chat if none exists
   watch(() => layoutStore.deepAgentDialogShown, (shown) => {
     if (shown && !currentChat.value) {
@@ -194,26 +224,10 @@
     }
   });
 
-  function scrollToUserMessage() {
-    if (chatScrollArea.value && currentChat.value?.messages) {
-      nextTick(() => {
-        const scrollElement = chatScrollArea.value.$el || chatScrollArea.value;
-        const messages = scrollElement.querySelectorAll('.message-wrapper');
-
-        if (messages.length > 0) {
-          // Get all user messages
-          const userMessages = Array.from(messages).filter(msg =>
-            msg.classList.contains('user-message')
-          );
-
-          if (userMessages.length > 0) {
-            // Get the last user message (most recent)
-            const lastUserMessage = userMessages[userMessages.length - 1];
-            // Scroll so user message is at top of visible area
-            lastUserMessage.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          }
-        }
-      });
+  function scrollToBottom() {
+    if (chatScrollArea.value) {
+      const scrollElement = chatScrollArea.value.$el || chatScrollArea.value;
+      scrollElement.scrollTop = scrollElement.scrollHeight;
     }
   }
 
@@ -260,9 +274,6 @@
 
     try {
       await deepAgentStore.streamDeepAgent(currentChat.value.id, query, projectId);
-
-      // Scroll so the new user message is at the top (Gemini-style)
-      scrollToUserMessage();
     } catch (error) {
       Notify.create({
         message: `Error: ${error.message}`,
@@ -292,6 +303,9 @@
   overflow-x: hidden;
 }
 
+.chat-history-container {
+}
+
 .chat-messages {
   display: flex;
   flex-direction: column;
@@ -305,46 +319,52 @@
   max-width: 80%;
 }
 
-.user-message {
+.da-user-message {
   align-items: flex-end;
   margin-left: auto;
 }
 
-.user-message .message-bubble {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-radius: 18px 18px 4px 18px;
-  padding: 12px 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.da-user-message .message-bubble {
+  background-color: rgba(79, 94, 214, 0.1);
+  color: rgba(0, 0, 0, 0.87);
+  border-radius: 8px;
+  padding: 8px 12px;
 }
 
-.agent-message {
+body.body--dark .da-user-message .message-bubble {
+  background-color: rgba(107, 126, 214, 0.2);
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.da-agent-message {
   align-items: flex-start;
   margin-right: auto;
 }
 
-.agent-message .message-bubble {
-  background: var(--q-dark);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 18px 18px 18px 4px;
-  padding: 12px 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+.da-agent-message .message-bubble {
+  background-color: rgba(0, 0, 0, 0.05);
+  color: rgba(0, 0, 0, 0.87);
+  border-radius: 8px;
+  padding: 8px 12px;
 }
 
-body.body--light .agent-message .message-bubble {
-  background: #f5f5f5;
-  border: 1px solid rgba(0, 0, 0, 0.08);
+body.body--dark .da-agent-message .message-bubble {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.87);
 }
 
 .message-header {
   display: flex;
   align-items: center;
+  align-content: center;
   opacity: 0.8;
+  font-size: 0.85em;
+  font-weight: bold;
+  margin-bottom: 8px;
 }
 
 .message-content {
   line-height: 1.5;
-  white-space: pre-wrap;
   word-wrap: break-word;
 }
 
@@ -352,27 +372,151 @@ body.body--light .agent-message .message-bubble {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-top: 4px;
+  padding-top: 8px;
+  margin-top: 4px;
+}
+
+body.body--dark .message-footer {
   border-top: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-body.body--light .message-footer {
-}
-
 .tool-calls-section {
-  background: rgba(255, 255, 255, 0.05);
+  background-color: rgba(0, 0, 0, 0.05);
   border-radius: 8px;
-  border-left: 3px solid var(--q-primary);
+  transition: background-color 0.2s;
 }
 
-body.body--light .tool-calls-section {
-  background: rgba(0, 0, 0, 0.03);
+body.body--dark .tool-calls-section {
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
-.tool-call-item {
+.tool-calls-section:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+body.body--dark .tool-calls-section:hover {
+  background-color: rgba(255, 255, 255, 0.08);
+}
+
+.help-text-area {
+  background-color: rgba(0, 0, 0, 0.02);
+  color: rgba(0, 0, 0, 0.87);
+}
+
+body.body--dark .help-text-area {
+  background-color: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.87);
+}
+
+.streaming-indicator {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-right: 8px;
+}
+
+/* Code and pre tag styles */
+.message-content :deep(code) {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-size: 0.9em;
   font-family: monospace;
-  font-size: 12px;
 }
 
+.message-content :deep(pre) {
+  background-color: rgba(0, 0, 0, 0.05);
+  padding: 1em;
+  border-radius: 4px;
+  overflow-x: auto;
+  margin: 0.5em 0;
+}
 
+.message-content :deep(pre code) {
+  background-color: transparent;
+  padding: 0;
+}
+
+/* Blockquote styles */
+.message-content :deep(blockquote) {
+  position: relative;
+  margin: 0.5em 0;
+  padding: 0.5em 1em;
+  color: rgba(0, 0, 0, 0.75);
+  background: linear-gradient(135deg, #ffffff 80%, #ededf8 100%);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+/* Copy button for blockquotes */
+.message-content :deep(blockquote .blockquote-copy-btn) {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  opacity: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7e7e8e;
+  padding: 0;
+}
+
+.message-content :deep(blockquote):hover .blockquote-copy-btn {
+  opacity: 1;
+}
+
+.message-content :deep(blockquote .blockquote-copy-btn):hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 1);
+  color: #7e7e8e;
+}
+
+.message-content :deep(blockquote p) {
+  margin: 0;
+}
+
+.message-content :deep(blockquote p:not(:last-child)) {
+  margin-bottom: 0.5em;
+}
+
+.message-content :deep(p:not(:last-child)) {
+  margin-bottom: 0.5em;
+}
+
+/* Dark mode code and pre styles */
+body.body--dark .message-content :deep(code) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+body.body--dark .message-content :deep(pre) {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Dark mode blockquote styles */
+body.body--dark .message-content :deep(blockquote) {
+  border-left: 4px solid rgba(107, 126, 214, 0.7);
+  background: linear-gradient(135deg, rgba(107, 126, 214, 0.2) 80%, rgba(107, 126, 214, 0.3) 100%);
+  color: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 10px rgba(107, 126, 214, 0.1);
+}
+
+/* Dark mode copy button styles */
+body.body--dark .message-content :deep(blockquote .blockquote-copy-btn) {
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.8);
+}
+
+body.body--dark .message-content :deep(blockquote .blockquote-copy-btn):hover {
+  background-color: rgba(0, 0, 0, 0.8);
+  color: rgba(255, 255, 255, 1);
+}
 </style>

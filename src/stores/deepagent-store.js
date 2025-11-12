@@ -9,6 +9,7 @@ export const useDeepAgentStore = defineStore('deepAgent', {
     deepAgentChats: [],
     currentDeepAgentChat: 0,
     abortController: null,
+    currentStatusMessage: null,
   }),
   getters: {
     getCurrentChat: (state) => {
@@ -20,6 +21,16 @@ export const useDeepAgentStore = defineStore('deepAgent', {
     isStreaming: (state) => {
       const currentChat = state.deepAgentChats[state.currentDeepAgentChat];
       return currentChat ? currentChat.isWorking : false;
+    },
+    getStatusMessage: (state) => {
+      if (state.currentStatusMessage) {
+        return state.currentStatusMessage;
+      }
+      const currentChat = state.deepAgentChats[state.currentDeepAgentChat];
+      if (currentChat && currentChat.isWorking) {
+        return 'Thinking...';
+      }
+      return 'Ready';
     }
   },
   actions: {
@@ -141,6 +152,13 @@ export const useDeepAgentStore = defineStore('deepAgent', {
             if (data.error) {
               console.error('[DeepAgent] Error in stream data:', data.error);
               currentChat.streamMetadata.completionReason = 'error';
+              return;
+            }
+
+            // Handle status messages
+            if (data.type === 'status' && data.message) {
+              this.currentStatusMessage = data.message;
+              console.log('[DeepAgent] Status update:', data.message);
               return;
             }
 
@@ -282,6 +300,7 @@ export const useDeepAgentStore = defineStore('deepAgent', {
 
             currentChat.isWorking = false;
             currentChat.lastActivity = Date.now();
+            this.currentStatusMessage = null;
             this.abortController = null;
           },
           // errorCallback - called on errors
@@ -296,6 +315,7 @@ export const useDeepAgentStore = defineStore('deepAgent', {
             currentChat.isWorking = false;
             currentChat.streamMetadata.completionReason = 'error';
             currentChat.lastActivity = Date.now();
+            this.currentStatusMessage = null;
             this.abortController = null;
           },
           // signal - abort signal for cancellation
@@ -306,6 +326,7 @@ export const useDeepAgentStore = defineStore('deepAgent', {
         currentChat.isWorking = false;
         currentChat.streamMetadata.completionReason = 'error';
         currentChat.lastActivity = Date.now();
+        this.currentStatusMessage = null;
         this.abortController = null;
         throw error;
       }
@@ -329,6 +350,7 @@ export const useDeepAgentStore = defineStore('deepAgent', {
         currentChat.lastActivity = Date.now();
       }
 
+      this.currentStatusMessage = null;
       console.log('[DeepAgent] Stream cancelled');
     },
 
