@@ -11,6 +11,7 @@ import {
   diffStrings, getTextBeforeKeepingWordsIntact, getTextAfterKeepingWordsIntact, reduceLineBreaks,
   replaceMentionEditorText, replaceParameterEditorText, tokenise,
 } from "src/common/utils/textUtils";
+import { resolveVariablesOneLevel } from "src/common/helpers/variableHelper";
 import {guid} from "src/common/utils/guidUtils";
 import {useFileStore} from "stores/file-store";
 import OpenAI from "openai";
@@ -816,23 +817,6 @@ export const usePromptStore = defineStore('prompts', {
             }
           }
         }
-      }
-
-      // Function to resolve variables one level deep
-      function resolveVariablesOneLevel(text, variables) {
-        if (!text || typeof text !== 'string') return text;
-
-        return text.replace(/\$([A-Za-z][A-Za-z0-9_]*)/g, (match, variableName) => {
-          const foundVariable = variables.find(v => v.title === variableName);
-          if (!foundVariable) return match;
-
-          // If variable has null, undefined, or empty value, replace with empty string
-          if (foundVariable.value === null || foundVariable.value === undefined || foundVariable.value === '') {
-            return '';
-          }
-
-          return foundVariable.value;
-        });
       }
 
       for (const variable of fileStore.variables) {

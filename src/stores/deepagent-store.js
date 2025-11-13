@@ -2,8 +2,10 @@ import { defineStore } from 'pinia';
 import { streamSseResponse } from 'src/common/helpers/sseStreamHelper';
 import { useLayoutStore } from 'stores/layout-store';
 import { usePromptStore } from 'stores/prompt-store';
+import { useFileStore } from 'stores/file-store';
 import { useCurrentUser } from 'vuefire';
 import { api } from 'src/boot/axios';
+import { getResolvedVariable } from 'src/common/helpers/variableHelper';
 
 export const useDeepAgentStore = defineStore('deepAgent', {
   state: () => ({
@@ -138,6 +140,11 @@ export const useDeepAgentStore = defineStore('deepAgent', {
         currentChat.messages.push(userMessage);
         console.log('[DeepAgent] Added user message:', userMessage);
 
+        // Retrieve writing style from project variables
+        const fileStore = useFileStore();
+        const writingStyle = getResolvedVariable('WritingStyle', fileStore.variables) || '';
+        console.log('[DeepAgent] Retrieved writing style:', writingStyle);
+
         await streamSseResponse(
           'POST',
           'deepagent/inscriptor_agent/stream',
@@ -145,6 +152,7 @@ export const useDeepAgentStore = defineStore('deepAgent', {
             query: userQuery,
             project_id: projectId,
             thread_id: threadId,
+            writing_style: writingStyle,
           },
           null, // params
           // dataCallback - called with parsed data from each SSE message
