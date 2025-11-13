@@ -351,8 +351,9 @@
           </q-card-section>
         </q-card>
         <PromptsTab v-if="layoutStore.currentRightMenuView === 'prompts'"/>
-        <AgentChatTab v-if="layoutStore.currentRightMenuView === 'agentChat'"/>
-        <div style="height: 60px" />
+        <AgentChatTab v-if="layoutStore.currentRightMenuView === 'agentChat' && layoutStore.currentChatAgentMode === 'simple'"/>
+        <DeepAgentChat v-if="layoutStore.currentRightMenuView === 'agentChat' && layoutStore.currentChatAgentMode === 'deep-agent'"/>
+        <div style="height: 60px" v-if="layoutStore.currentRightMenuView !== 'agentChat'"/>
       </div>
         </div>
       </q-tab-panel>
