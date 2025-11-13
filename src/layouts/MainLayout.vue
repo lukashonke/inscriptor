@@ -29,6 +29,7 @@
       <UserInfoDialog />
       <BrowserDialog />
       <PromptActionDialog />
+      <DeepAgentDialog />
       <MessageUsDialog />
       <SmartSearchInputDialog />
       <LowOnCreditsDialog />
@@ -97,6 +98,7 @@ import PromptSelector from 'components/Common/PromptSelector/PromptSelector.vue'
 import {getAllMarkdown, getSelectedText} from 'src/common/utils/editorUtils';
 import {useEditorStore} from 'stores/editor-store';
 import {executePromptClick2} from 'src/common/helpers/promptHelper';
+import DeepAgentDialog from 'components/Dialogs/DeepAgentDialog.vue';
 
 const layoutStore = useLayoutStore();
 const promptStore = usePromptStore();

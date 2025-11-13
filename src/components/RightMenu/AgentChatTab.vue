@@ -1,358 +1,345 @@
 <template>
-  <div class="q-mx-md full-width">
-    <div class="column full-height q-ml-md">
+  <div class="column fit deep-agent-gradient-variation-2">
 
-      <!-- Chat controls and pagination -->
-      <div class="col-auto">
-        <div class="row q-mb-md q-mt-md" v-if="maxChatsPage > 0">
-          <div class="col flex">
-            <div class="col-auto flex items-center justify-center">
-              <q-pagination :max="maxChatsPage" v-model="page" :disable="aiAgentStore.agentChats.isAgentRunning || aiAgentStore.isAgentActive" direction-links :boundary-numbers="false" :boundary-links="false" :max-pages="isMobile ? 3 : 5" />
-            </div>
-            <div v-if="aiAgentStore.agentChats.isAgentRunning" class="col menu-subtitle flex items-center justify-center">
-              <q-spinner-ios class="q-mr-xs"></q-spinner-ios>
-              {{ aiAgentStore.agentState === 'waiting_for_user' ? 'AI is waiting for approval...' : 'AI is working...' }}
-              <q-btn dense outline @click="aiAgentStore.stopAgentChatExecution()" label="Stop" size="sm" class="q-ml-xs q-py-none" color="red"/>
-            </div>
-            <!-- Current file indicator -->
-            <div class="col flex items-center justify-center file-indicator mobile-hide" v-else-if="currentFile" >
-              <q-chip>
-                <FileDetailItem :file="currentFile" hide-context-type />
-              </q-chip>
-            </div>
-          </div>
-          <div class="col-auto flex items-center" v-if="maxChatsPage > 0">
-            <div class="col-auto flex items-center">
-              <q-btn color="accent" @click="newChat" :disable="aiAgentStore.agentChats.isAgentRunning || aiAgentStore.isAgentActive" size="md" icon="mdi-pencil-box-outline" class="" :label="isMobile ? undefined : 'chat'" :padding="isMobile ? 'xs md' : undefined">
-                <q-tooltip>
-                  Start a new AI conversation
-                </q-tooltip>
-              </q-btn>
-            </div>
-
-            <div class="col-auto flex items-center">
-              <q-btn flat color="negative" icon="mdi-delete-outline" size="md" :padding="isMobile ? 'xs md' : undefined">
-                <q-menu>
-                  <q-list dense>
-                    <q-item clickable @click="removeCurrentChat" v-close-popup>
-                      <q-item-section side>
-                        <q-icon name="mdi-close" />
-                      </q-item-section>
-                      <q-item-section>
-                        Remove current conversation
-                      </q-item-section>
-                    </q-item>
-                    <q-separator />
-                    <q-item clickable @click="removeAllChats">
-                      <q-item-section side>
-                        <q-icon name="mdi-delete-outline" color="negative" />
-                      </q-item-section>
-                      <q-item-section>
-                        Remove all AI conversations
-                      </q-item-section>
-                    </q-item>
-                  </q-list>
-                </q-menu>
-              </q-btn>
-            </div>
-          </div>
+    <!-- Chat controls and pagination -->
+    <div class="row items-center q-mx-md q-mb-sm q-mt-xs" v-if="maxChatsPage > 0" style="height: 61px">
+      <div class="col flex">
+        <div class="col-auto flex items-center justify-center q-mt-xs">
+          <q-pagination :max="maxChatsPage" v-model="page" :disable="aiAgentStore.agentChats.isAgentRunning || aiAgentStore.isAgentActive" direction-links :boundary-numbers="false" :boundary-links="false" :max-pages="isMobile ? 3 : 5" />
         </div>
-        <div v-else class="flex justify-center q-mb-md q-mt-lg">
-          <q-btn color="accent" @click="newChat" size="md" icon="mdi-robot" class="" label="New AI chat">
-            <q-tooltip>
-              Start a new conversation with AI
-            </q-tooltip>
-          </q-btn>
+        <div v-if="aiAgentStore.agentChats.isAgentRunning" class="col menu-subtitle flex items-center justify-center">
+          <q-spinner-ios class="q-mr-xs"></q-spinner-ios>
+          {{ aiAgentStore.agentState === 'waiting_for_user' ? 'AI is waiting for approval...' : 'AI is working...' }}
+          <q-btn dense outline @click="aiAgentStore.stopAgentChatExecution()" label="Stop" size="sm" class="q-ml-xs q-py-none" color="red"/>
         </div>
       </div>
+      <div class="col flex items-center justify-center q-mr-xs">
+        <AgentModeSelector />
+      </div>
+      <div class="col flex items-center justify-end" v-if="maxChatsPage > 0">
+        <div class="col-auto flex items-center">
+          <q-btn flat color="negative" icon="mdi-delete-outline" size="md" :padding="isMobile ? 'xs md' : undefined">
+            <q-menu>
+              <q-list dense>
+                <q-item clickable @click="removeCurrentChat" v-close-popup>
+                  <q-item-section side>
+                    <q-icon name="mdi-close" />
+                  </q-item-section>
+                  <q-item-section>
+                    Remove current conversation
+                  </q-item-section>
+                </q-item>
+                <q-separator />
+                <q-item clickable @click="removeAllChats">
+                  <q-item-section side>
+                    <q-icon name="mdi-delete-outline" color="negative" />
+                  </q-item-section>
+                  <q-item-section>
+                    Remove all AI conversations
+                  </q-item-section>
+                </q-item>
+              </q-list>
+            </q-menu>
+          </q-btn>
+        </div>
+        <q-btn color="primary" no-caps @click="newChat" :disable="aiAgentStore.agentChats.isAgentRunning || aiAgentStore.isAgentActive" dense size="md" icon="mdi-plus" class="" :label="isMobile ? undefined : 'New'" :padding="isMobile ? 'xs md' : 'xs md'">
+          <q-tooltip>
+            Start a new AI conversation
+          </q-tooltip>
+        </q-btn>
+      </div>
+    </div>
+    <div v-else class="flex justify-center q-mb-md q-mt-lg">
+      <q-btn color="accent" @click="newChat" size="md" icon="mdi-robot" class="" label="New AI chat">
+        <q-tooltip>
+          Start a new conversation with AI
+        </q-tooltip>
+      </q-btn>
+    </div>
 
-      <!-- Chat messages -->
-      <div class="col">
-        <template v-if="!currentChatMessages || currentChatMessages.length === 0">
-          <div class="q-gutter-y-sm q-ml-xs chat-history-container justify-center q-mt-xl" style="margin-bottom: 100px;">
-            <div class="row full-width justify-center" style="">
-              <q-card flat bordered class="col" style="max-width: 400px;">
-                <q-card-section class="q-gutter-y-xs">
-                  <div class="row text-caption">
-                    Prompt for this chat:
+    <!-- Chat messages -->
+    <div class="col scroll-area q-px-md">
+      <template v-if="!currentChatMessages || currentChatMessages.length === 0">
+        <div class="q-gutter-y-sm q-ml-xs chat-history-container justify-center q-mt-xl" style="margin-bottom: 100px;">
+          <div class="row full-width justify-center" style="">
+            <q-card flat bordered class="col help-text-area" style="max-width: 400px;">
+              <q-card-section class="q-gutter-y-xs">
+                <div class="row text-caption">
+                  Prompt for this chat:
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <q-select v-model="promptForAgentChatId" filled dense :options="mergedPrompts" >
+                      <template v-slot:option="scope">
+                        <q-item v-bind="scope.itemProps">
+                          <q-item-section>
+                            <q-item-label>{{ scope.opt.label }}</q-item-label>
+                            <q-item-label caption v-if="scope.opt.description?.length > 0 ?? false">{{ scope.opt.description }}</q-item-label>
+                          </q-item-section>
+                        </q-item>
+                      </template>
+                    </q-select>
+                  </div>
+                </div>
+                <template v-if="promptForAgentChatId && supportsReasoning(promptStore.getModel(promptStore.currentModelForAgentChatId))">
+                  <div class="row text-caption q-mt-md">
+                    Reasoning Effort:
                   </div>
                   <div class="row">
                     <div class="col">
-                      <q-select v-model="promptForAgentChatId" filled dense :options="mergedPrompts" >
-                        <template v-slot:option="scope">
-                          <q-item v-bind="scope.itemProps">
-                            <q-item-section>
-                              <q-item-label>{{ scope.opt.label }}</q-item-label>
-                              <q-item-label caption v-if="scope.opt.description?.length > 0 ?? false">{{ scope.opt.description }}</q-item-label>
-                            </q-item-section>
-                          </q-item>
-                        </template>
-                      </q-select>
+                      <q-select
+                        dense
+                        outlined
+                        class="mobile-only"
+                        :options="reasoningEffortOptions"
+                        v-model="reasoningEffortForAgentChat"
+                      />
+                      <q-btn-toggle
+                        unelevated
+                        no-caps
+                        class="bordered mobile-hide"
+                        :options="reasoningEffortOptions"
+                        v-model="reasoningEffortForAgentChat"
+                      />
                     </div>
                   </div>
-                  <template v-if="promptForAgentChatId && supportsReasoning(promptStore.getModel(promptStore.currentModelForAgentChatId))">
-                    <div class="row text-caption q-mt-md">
-                      Reasoning Effort:
-                    </div>
-                    <div class="row">
-                      <div class="col">
-                        <q-select
-                          dense
-                          outlined
-                          class="mobile-only"
-                          :options="reasoningEffortOptions"
-                          v-model="reasoningEffortForAgentChat"
-                        />
-                        <q-btn-toggle
-                          unelevated
-                          no-caps
-                          class="bordered mobile-hide"
-                          :options="reasoningEffortOptions"
-                          v-model="reasoningEffortForAgentChat"
-                        />
-                      </div>
-                    </div>
-                  </template>
-                </q-card-section>
-              </q-card>
-            </div>
+                </template>
+              </q-card-section>
+            </q-card>
           </div>
-        </template>
+        </div>
+      </template>
 
-        <div class="q-gutter-y-sm q-ml-xs chat-history-container" style="margin-bottom: 100px;">
-          <div class="chat-messages-container-unhinged">
-            <div v-for="message in currentChatMessages" :key="message.id" class="full-width">
-              <!-- Display message content -->
-              <AgentPromptResult
-                :message="message"
-                :tool-call-results="toolCallResults"
-              />
-
-              <!-- Display tool calls separately with assistant styling -->
-              <div v-if="message.toolCalls && message.toolCalls.length > 0" class="q-mt-sm">
-                <div v-for="(toolCall, index) in message.toolCalls" :key="index" class="tool-call-container q-mb-sm">
-                  <ToolCallDisplay
-                    :toolCall="toolCall"
-                    :toolResult="getToolResult(toolCall)"
-                    :isPending="isToolPending(toolCall)"
-                    :isSelected="isToolSelected(toolCall)"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <!-- Loading indicator when agent is processing -->
+      <div class="q-gutter-y-sm chat-history-container" style="margin-bottom: 100px;">
+        <div class="chat-messages-container-unhinged">
+          <div v-for="message in currentChatMessages" :key="message.id" class="full-width">
+            <!-- Display message content -->
             <AgentPromptResult
-              v-if="aiAgentStore.agentChats.isAgentRunning && !aiAgentStore.pendingToolBatch"
-              :is-loading="true"
-              :loading-text="aiAgentStore.agentState === 'waiting_for_user' ? 'Waiting for approval' : 'Thinking'"
+              :message="message"
               :tool-call-results="toolCallResults"
             />
 
-            <!-- Batch Tool Approval Widget (moved here, after messages) -->
-            <div v-if="aiAgentStore.pendingToolBatch" class="row q-mt-sm">
-              <div class="batch-approval-message chat-assistant-message agent-awaiting-confirmation-simple">
-                <div class="chat-message-header">
-                  <span class="chat-message-role">AI:</span>
-                  <span v-if="isSingleToolApproval" class="text-caption">wants to use a tool</span>
-                  <span v-else class="text-caption">
-                    wants to use {{ aiAgentStore.pendingToolBatch.length }} tools
-                  </span>
-                </div>
-                <div class="chat-message-content">
-                  <!-- Tool List -->
-                  <div class="tool-list q-mt-sm">
-                    <div
-                      v-for="tool in aiAgentStore.pendingToolBatch"
-                      :key="tool.id"
-                      class="tool-item q-pa-sm q-mb-xs rounded-borders"
-                      :class="{ 'tool-item-selected': aiAgentStore.selectedTools.includes(tool.id) }"
-                    >
-                      <div class="flex items-center">
-                        <!-- Checkbox for multiple tools only -->
-                        <q-checkbox
-                          v-if="!isSingleToolApproval"
-                          :model-value="aiAgentStore.selectedTools.includes(tool.id)"
-                          @update:model-value="aiAgentStore.toggleTool(tool.id)"
-                          class="q-mr-sm"
-                          size="sm"
-                        >
-                          <div class="flex items-center">
-                            <q-icon :name="getToolIcon(tool.function.name)" class="q-mr-xs q-ml-sm" size="xs" />
-                            <span class="text-caption">{{ getToolFriendlyName(tool) }}</span>
-                            <span class="text-caption text-grey-7 q-ml-sm">
-                              {{ getToolDescription(tool) }}
-                            </span>
-                          </div>
-                        </q-checkbox>
+            <!-- Display tool calls separately with assistant styling -->
+            <div v-if="message.toolCalls && message.toolCalls.length > 0" class="q-mt-sm">
+              <div v-for="(toolCall, index) in message.toolCalls" :key="index" class="tool-call-container q-mb-sm">
+                <ToolCallDisplay
+                  :toolCall="toolCall"
+                  :toolResult="getToolResult(toolCall)"
+                  :isPending="isToolPending(toolCall)"
+                  :isSelected="isToolSelected(toolCall)"
+                />
+              </div>
+            </div>
+          </div>
 
-                        <!-- Single tool: show without checkbox -->
-                        <div v-else class="flex items-center">
-                          <q-icon :name="getToolIcon(tool.function.name)" class="q-mr-xs" size="xs" />
+          <!-- Loading indicator when agent is processing -->
+          <AgentPromptResult
+            v-if="aiAgentStore.agentChats.isAgentRunning && !aiAgentStore.pendingToolBatch"
+            :is-loading="true"
+            :loading-text="aiAgentStore.agentState === 'waiting_for_user' ? 'Waiting for approval' : 'Thinking'"
+            :tool-call-results="toolCallResults"
+          />
+
+          <!-- Batch Tool Approval Widget (moved here, after messages) -->
+          <div v-if="aiAgentStore.pendingToolBatch" class="row q-mt-sm">
+            <div class="batch-approval-message chat-assistant-message agent-awaiting-confirmation-simple">
+              <div class="chat-message-header">
+                <span class="chat-message-role">AI:</span>
+                <span v-if="isSingleToolApproval" class="text-caption">wants to use a tool</span>
+                <span v-else class="text-caption">
+                  wants to use {{ aiAgentStore.pendingToolBatch.length }} tools
+                </span>
+              </div>
+              <div class="chat-message-content">
+                <!-- Tool List -->
+                <div class="tool-list q-mt-sm">
+                  <div
+                    v-for="tool in aiAgentStore.pendingToolBatch"
+                    :key="tool.id"
+                    class="tool-item q-pa-sm q-mb-xs rounded-borders"
+                    :class="{ 'tool-item-selected': aiAgentStore.selectedTools.includes(tool.id) }"
+                  >
+                    <div class="flex items-center">
+                      <!-- Checkbox for multiple tools only -->
+                      <q-checkbox
+                        v-if="!isSingleToolApproval"
+                        :model-value="aiAgentStore.selectedTools.includes(tool.id)"
+                        @update:model-value="aiAgentStore.toggleTool(tool.id)"
+                        class="q-mr-sm"
+                        size="sm"
+                      >
+                        <div class="flex items-center">
+                          <q-icon :name="getToolIcon(tool.function.name)" class="q-mr-xs q-ml-sm" size="xs" />
                           <span class="text-caption">{{ getToolFriendlyName(tool) }}</span>
                           <span class="text-caption text-grey-7 q-ml-sm">
                             {{ getToolDescription(tool) }}
                           </span>
                         </div>
+                      </q-checkbox>
+
+                      <!-- Single tool: show without checkbox -->
+                      <div v-else class="flex items-center">
+                        <q-icon :name="getToolIcon(tool.function.name)" class="q-mr-xs" size="xs" />
+                        <span class="text-caption">{{ getToolFriendlyName(tool) }}</span>
+                        <span class="text-caption text-grey-7 q-ml-sm">
+                          {{ getToolDescription(tool) }}
+                        </span>
                       </div>
                     </div>
                   </div>
+                </div>
 
-                  <!-- Action buttons -->
-                  <div class="batch-actions q-mt-sm">
-                    <div class="row q-gutter-sm">
-                      <!-- Batch Controls (only for multiple tools) -->
-                      <template v-if="!isSingleToolApproval">
-                        <div class="col-auto">
-                          <q-btn
-                            flat
-                            dense
-                            @click="aiAgentStore.selectAll"
-                            label="Select All"
-                            no-caps
-                            size="sm"
-                            class="text-caption"
-                          />
-                        </div>
-                        <div class="col-auto">
-                          <q-btn
-                            flat
-                            dense
-                            no-caps
-                            @click="aiAgentStore.selectNone"
-                            label="Select None"
-                            size="sm"
-                            class="text-caption"
-                          />
-                        </div>
-                      </template>
-
-                      <div class="col"></div>
-
-                      <!-- Execute/Refuse -->
+                <!-- Action buttons -->
+                <div class="batch-actions q-mt-sm">
+                  <div class="row q-gutter-sm">
+                    <!-- Batch Controls (only for multiple tools) -->
+                    <template v-if="!isSingleToolApproval">
                       <div class="col-auto">
                         <q-btn
                           flat
-                          color="negative"
-                          @click="aiAgentStore.cancelBatch"
-                          label="Refuse"
+                          dense
+                          @click="aiAgentStore.selectAll"
+                          label="Select All"
+                          no-caps
                           size="sm"
+                          class="text-caption"
                         />
                       </div>
                       <div class="col-auto">
                         <q-btn
-                          color="accent"
-                          @click="aiAgentStore.executeBatch"
-                          :label="isSingleToolApproval ? 'Allow' : (selectedToolCount === aiAgentStore.pendingToolBatch.length ? `Allow All (${selectedToolCount})` : `Allow Selected (${selectedToolCount})`)"
+                          flat
+                          dense
+                          no-caps
+                          @click="aiAgentStore.selectNone"
+                          label="Select None"
                           size="sm"
-                          :disable="selectedToolCount === 0"
+                          class="text-caption"
                         />
                       </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+                    </template>
 
-      <!-- Input area -->
-      <div class="col-auto"  >
-        <div class="full-width" style="position: absolute; bottom: 0; right: 0; z-index: 1000;">
-          <div class="q-mr-lg">
-            <div class="">
+                    <div class="col"></div>
 
-              <div class="text-caption q-pa-md q-pb-sm q-pt-sm text-grey-7" v-if="currentChatMessages.length === 0">
-                <div class="bordered q-pa-sm help-text-area">
-                  <q-icon name="mdi-robot" class="text-accent q-mb-xs" />
-                  AI Agent Chat:
-                  <div class="q-mt-sm">
-                    It can analyze, look for context in project and modify your document, asking for your approvals before. Start by describing what you want the AI to do.
-                  </div>
-                  <div class="q-mt-sm">
-                    <q-icon name="mdi-cloud-outline" />
-                    Agent uses Inscriptor AI cloud, consuming AI credits.
-                  </div>
-                </div>
-              </div>
-
-              <div class="row">
-                <div class="col q-ml-sm rounded-borders q-px-sm">
-                  <q-input
-                    v-model="inputText"
-                    :label="currentModelName && currentPromptName ? `Message ${currentModelName} • ${currentPromptName}...` : 'Message AI...'"
-                    borderless
-                    class="full-width"
-                    rows="4"
-                    type="textarea"
-                    lines
-                    autofocus
-                    dense
-                    ref="inputRef"
-                    @keydown="onInputKey"
-                    :disable="aiAgentStore.agentChats.isAgentRunning"
-                  />
-                </div>
-                <div class="col-auto q-ml-sm">
-                  <div class="column">
-                    <div class="col">
+                    <!-- Execute/Refuse -->
+                    <div class="col-auto">
                       <q-btn
-                        icon="mdi-send"
-                        color="accent"
-                        @click="sendMessage()"
-                        :disable="!inputText.trim() || aiAgentStore.agentChats.isAgentRunning || promptForAgentChatId === null"
+                        flat
+                        color="negative"
+                        @click="aiAgentStore.cancelBatch"
+                        label="Refuse"
+                        size="sm"
                       />
                     </div>
-                    <div class="col q-mt-md mobile-hide">
-                      <q-btn flat icon="mdi-cog" @click="settingsOpen = !settingsOpen" />
+                    <div class="col-auto">
+                      <q-btn
+                        color="accent"
+                        @click="aiAgentStore.executeBatch"
+                        :label="isSingleToolApproval ? 'Allow' : (selectedToolCount === aiAgentStore.pendingToolBatch.length ? `Allow All (${selectedToolCount})` : `Allow Selected (${selectedToolCount})`)"
+                        size="sm"
+                        :disable="selectedToolCount === 0"
+                      />
                     </div>
                   </div>
                 </div>
               </div>
-
-              <q-slide-transition>
-                <q-card-section v-if="settingsOpen" class="q-gutter-y-xs">
-                  <div class="row">
-                    <div class="col">
-                      <q-select v-model="promptForAgentChatId" filled dense label="Select AI Prompt" :options="mergedPrompts" >
-                        <template v-slot:option="scope">
-                          <q-item v-bind="scope.itemProps">
-                            <q-item-section>
-                              <q-item-label>{{ scope.opt.label }}</q-item-label>
-                              <q-item-label caption v-if="scope.opt.description?.length > 0 ?? false">{{ scope.opt.description }}</q-item-label>
-                            </q-item-section>
-                          </q-item>
-                        </template>
-                      </q-select>
-                    </div>
-                  </div>
-                  <template v-if="promptForAgentChatId && supportsReasoning(promptStore.getModel(promptStore.currentModelForAgentChatId))">
-                    <div class="row text-caption q-mt-md">
-                      <q-icon name="mdi-thought-bubble" size="15px" class="q-mr-xs" />
-                      Reasoning Effort:
-                    </div>
-                    <div class="row">
-                      <div class="col">
-                        <q-btn-toggle
-                          unelevated
-                          no-caps
-                          class="bordered"
-                          :options="reasoningEffortOptions"
-                          v-model="reasoningEffortForAgentChat"
-                        />
-                      </div>
-                    </div>
-                  </template>
-                </q-card-section>
-              </q-slide-transition>
-
             </div>
           </div>
         </div>
       </div>
-
     </div>
+
+    <!-- Input area -->
+    <div class="col-auto">
+      <div class="full-width" >
+        <div class="q-mr-md">
+          <div class="text-caption q-pa-md q-pb-sm q-pt-sm text-grey-7" v-if="currentChatMessages.length === 0">
+            <div class="bordered q-pa-sm help-text-area">
+              <q-icon name="mdi-robot" class="text-accent q-mb-xs" />
+              AI Agent Chat:
+              <div class="q-mt-sm">
+                It can analyze, look for context in project and modify your document, asking for your approvals before. Start by describing what you want the AI to do.
+              </div>
+              <div class="q-mt-sm">
+                <q-icon name="mdi-cloud-outline" />
+                Agent uses Inscriptor AI cloud, consuming AI credits.
+              </div>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col q-ml-sm rounded-borders q-px-sm">
+              <q-input
+                v-model="inputText"
+                :placeholder="currentModelName && currentPromptName ? `Message ${currentModelName} • ${currentPromptName}...` : 'Message AI...'"
+                borderless
+                class="full-width"
+                rows="4"
+                type="textarea"
+                lines
+                autofocus
+                dense
+                ref="inputRef"
+                @keydown="onInputKey"
+                :disable="aiAgentStore.agentChats.isAgentRunning"
+              />
+            </div>
+            <div class="col-auto">
+              <div class="column">
+                <div class="col">
+                  <q-btn
+                    icon="mdi-send"
+                    color="accent"
+                    @click="sendMessage()"
+                    :disable="!inputText.trim() || aiAgentStore.agentChats.isAgentRunning || promptForAgentChatId === null"
+                  />
+                </div>
+                <div class="col q-mt-md mobile-hide">
+                  <q-btn flat icon="mdi-cog" @click="settingsOpen = !settingsOpen" />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <q-slide-transition>
+            <q-card-section v-if="settingsOpen" class="q-gutter-y-xs">
+              <div class="row">
+                <div class="col">
+                  <q-select v-model="promptForAgentChatId" filled dense label="Select AI Prompt" :options="mergedPrompts" >
+                    <template v-slot:option="scope">
+                      <q-item v-bind="scope.itemProps">
+                        <q-item-section>
+                          <q-item-label>{{ scope.opt.label }}</q-item-label>
+                          <q-item-label caption v-if="scope.opt.description?.length > 0 ?? false">{{ scope.opt.description }}</q-item-label>
+                        </q-item-section>
+                      </q-item>
+                    </template>
+                  </q-select>
+                </div>
+              </div>
+              <template v-if="promptForAgentChatId && supportsReasoning(promptStore.getModel(promptStore.currentModelForAgentChatId))">
+                <div class="row text-caption q-mt-md">
+                  <q-icon name="mdi-thought-bubble" size="15px" class="q-mr-xs" />
+                  Reasoning Effort:
+                </div>
+                <div class="row">
+                  <div class="col">
+                    <q-btn-toggle
+                      unelevated
+                      no-caps
+                      class="bordered"
+                      :options="reasoningEffortOptions"
+                      v-model="reasoningEffortForAgentChat"
+                    />
+                  </div>
+                </div>
+              </template>
+            </q-card-section>
+          </q-slide-transition>
+
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -368,6 +355,7 @@ import FileDetailItem from 'components/Common/Files/FileDetailItem.vue';
 import {isImageGenerationModel, reasoningEffortValuesLabeled, supportsReasoning} from 'src/common/helpers/modelHelper';
 import {useLayoutStore} from 'stores/layout-store';
 import {useResponsive} from 'src/common/utils/screenUtils';
+import AgentModeSelector from 'components/Common/AgentModeSelector.vue';
 
 const aiAgentStore = useAiAgentStore();
 const promptStore = usePromptStore();
@@ -764,6 +752,11 @@ function isToolSelected(toolCall) {
 </script>
 
 <style scoped>
+.scroll-area {
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 .chat-history-container {
 }
 

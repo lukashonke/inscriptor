@@ -121,6 +121,9 @@ export const useLayoutStore = defineStore('layout', {
     newSuggestClass: '',
 
     showPromptSelectorDialog: false,
+    deepAgentDialogShown: false,
+
+    currentChatAgentMode: 'simple', // or deep-agent
   }),
   getters: {
     getIsDragAndDropping: (state) => state.isDragAndDropping,
