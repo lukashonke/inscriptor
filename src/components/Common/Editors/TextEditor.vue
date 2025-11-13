@@ -503,7 +503,7 @@
 
                       <div class="q-pa-xs">
                         <div class="row text-caption full-width">
-                          <q-item clickable v-close-popup @click="deepAgentStore.runDeepAgent()" class="full-width">
+                          <q-item clickable v-close-popup @click="deepAgentStore.openDeepAgent()" class="full-width">
                             <q-item-section side>
                               <q-icon name="mdi-robot-outline" color="purple" size="20px" />
                             </q-item-section>

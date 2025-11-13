@@ -34,9 +34,11 @@ export const useDeepAgentStore = defineStore('deepAgent', {
     }
   },
   actions: {
-    runDeepAgent() {
+    openDeepAgent() {
       const layoutStore = useLayoutStore();
-      layoutStore.deepAgentDialogShown = true;
+      layoutStore.currentChatAgentMode = 'deep-agent';
+      layoutStore.currentRightMenuView = 'agentChat';
+      layoutStore.notifyNewChat();
     },
     /**
      * Create a new Deep Agent chat session
