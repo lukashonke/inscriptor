@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia';
 import { streamSseResponse } from 'src/common/helpers/sseStreamHelper';
 import { useLayoutStore } from 'stores/layout-store';
+import { usePromptStore } from 'stores/prompt-store';
 import { useCurrentUser } from 'vuefire';
 import { api } from 'src/boot/axios';
 
@@ -154,6 +155,22 @@ export const useDeepAgentStore = defineStore('deepAgent', {
             if (data.error) {
               console.error('[DeepAgent] Error in stream data:', data.error);
               currentChat.streamMetadata.completionReason = 'error';
+
+              // Add error message to chat so user can see it
+              const errorMessage = {
+                id: `msg-${Date.now()}-error`,
+                role: 'system',
+                content: `Error: ${data.error}`,
+                isStreaming: false,
+                timestamp: Date.now(),
+                metadata: {}
+              };
+              currentChat.messages.push(errorMessage);
+
+              // Update status indicator to show error
+              this.currentStatusMessage = 'Error occurred';
+
+              console.log('[DeepAgent] Added error message to chat:', errorMessage);
               return;
             }
 
@@ -161,6 +178,20 @@ export const useDeepAgentStore = defineStore('deepAgent', {
             if (data.type === 'status' && data.message) {
               this.currentStatusMessage = data.message;
               console.log('[DeepAgent] Status update:', data.message);
+              return;
+            }
+
+            // Handle stats messages (credit costs)
+            if (data.type === 'stats' && data.inputTokens !== undefined && data.outputTokens !== undefined) {
+              currentChat.streamMetadata.creditCost = {
+                inputTokens: data.inputTokens,
+                outputTokens: data.outputTokens
+              };
+              console.log('[DeepAgent] Credit stats received:', {
+                inputTokens: data.inputTokens,
+                outputTokens: data.outputTokens,
+                total: data.inputTokens + data.outputTokens
+              });
               return;
             }
 
@@ -300,6 +331,40 @@ export const useDeepAgentStore = defineStore('deepAgent', {
             console.log('[DeepAgent] Final metadata:', currentChat.streamMetadata);
             console.log('[DeepAgent] Total messages:', currentChat.messages.length);
 
+            // Add to prompt history if we have credit stats
+            if (currentChat.streamMetadata.creditCost) {
+              const promptStore = usePromptStore();
+
+              // Find the last user message (most recent query)
+              const userMessage = [...currentChat.messages]
+                .reverse()
+                .find(msg => msg.role === 'user');
+
+              const assistantMessage = currentChat.messages.find(
+                msg => msg.role === 'assistant' && !msg.isStreaming
+              );
+
+              if (userMessage && assistantMessage) {
+                promptStore.pushLastPrompt({
+                  model: 'Deep Agent',
+                  input: 'User message: ' + userMessage.content,
+                  timeStamp: new Date(userMessage.timestamp).toISOString(),
+                  pr: {
+                    text: assistantMessage.content,
+                    originalText: assistantMessage.content,
+                    meta: null,
+                    stats: currentChat.streamMetadata.creditCost,
+                    waitingForResponse: false
+                  }
+                });
+
+                console.log('[DeepAgent] Added to prompt history:', {
+                  model: assistantMessage.metadata?.model_name || 'Deep Agent',
+                  credits: currentChat.streamMetadata.creditCost.inputTokens + currentChat.streamMetadata.creditCost.outputTokens
+                });
+              }
+            }
+
             currentChat.isWorking = false;
             currentChat.lastActivity = Date.now();
             this.currentStatusMessage = null;
@@ -314,10 +379,28 @@ export const useDeepAgentStore = defineStore('deepAgent', {
               stack: error.stack,
             });
 
+            // Add error message to chat so user can see it
+            const errorMessage = {
+              id: `msg-${Date.now()}-error`,
+              role: 'system',
+              content: `Connection error: ${error.message}`,
+              isStreaming: false,
+              timestamp: Date.now(),
+              metadata: {
+                status: error.status,
+                responseText: error.responseText
+              }
+            };
+            currentChat.messages.push(errorMessage);
+
+            // Update status indicator to show error
+            this.currentStatusMessage = 'Connection error';
+
+            console.log('[DeepAgent] Added error message to chat:', errorMessage);
+
             currentChat.isWorking = false;
             currentChat.streamMetadata.completionReason = 'error';
             currentChat.lastActivity = Date.now();
-            this.currentStatusMessage = null;
             this.abortController = null;
           },
           // signal - abort signal for cancellation
