@@ -22,7 +22,7 @@
 
     <q-tab-panels v-model="activeTab" animated style="flex: 1; overflow-y: auto;">
       <q-tab-panel name="ai" class="q-pa-none">
-        <div class="fit q-pr-md" style="display: flex; flex-direction: column; height: 100%;">
+        <div class="fit" style="display: flex; flex-direction: column; height: 100%;">
 
       <div class="text-center q-mb-none" v-if="views.length > 1" style="flex-shrink: 0;">
         <q-btn-toggle :options="views" v-model="layoutStore.currentRightMenuView" unelevated no-caps class="bordered inscriptor-highlight-btn" toggle-color="primary" padding="xs md" id="aiSwitch" >
@@ -239,7 +239,13 @@
             </div>
           </q-card-section>
           <q-card-section v-else>
-              <PromptPicker v-model="promptStore.brainstormingPrompt" :prompts="availableBrainstormingPrompts" placeholder="Select prompt for Brainstorming..."></PromptPicker>
+            <div class="row full-width">
+              <div class="col"/>
+              <div class="col">
+                <PromptPicker v-model="promptStore.brainstormingPrompt" :prompts="availableBrainstormingPrompts" placeholder="Select prompt for Brainstorming..."></PromptPicker>
+              </div>
+              <div class="col"/>
+            </div>
           </q-card-section>
 
           <q-card-section v-if="brainstormParametersValue.length > 0 && brainstormParametersExpanded" class="q-pt-none q-gutter-y-md">
@@ -323,7 +329,13 @@
             </div>
           </q-card-section>
           <q-card-section v-else>
-              <PromptPicker v-model="promptStore.suggestingPrompt" :prompts="availableSuggestingPrompts" placeholder="Select prompt for Suggestions..."></PromptPicker>
+            <div class="row full-width">
+              <div class="col"/>
+              <div class="col">
+                <PromptPicker v-model="promptStore.suggestingPrompt" :prompts="availableSuggestingPrompts" placeholder="Select prompt for Suggestions..."></PromptPicker>
+              </div>
+              <div class="col"/>
+            </div>
           </q-card-section>
 
           <q-card-section v-if="promptStore.suggestingPrompt && suggestPromptResults?.length === 0" class="text-center">
@@ -478,6 +490,7 @@
   import {useElementHover} from "@vueuse/core";
   import {chatTabId, promptTabId, agentChatTabId, brainstormTabId, suggestTabId} from 'src/common/resources/tabs';
   import AgentChatTab from 'components/RightMenu/AgentChatTab.vue';
+  import DeepAgentChat from 'components/RightMenu/DeepAgentChat.vue';
   import {getSelectedText} from 'src/common/utils/editorUtils';
   import {useAiAgentStore} from 'stores/aiagent-store';
   import SimplePromptContextSelector from "components/Common/Settings/SimplePromptContextSelector.vue";

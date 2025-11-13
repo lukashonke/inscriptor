@@ -2,10 +2,13 @@
   <q-btn
     :label="modelValue?.label || placeholder"
     outlined
-    flat
+    :flat="modelValue !== null"
     dense
     no-caps
-    class="full-width justify-start"
+    padding="xs sm"
+    class="justify-start"
+    :class="modelValue?.label ? 'full-width' : ''"
+    :color="modelValue ? undefined : 'accent'"
   >
     <q-menu style="width: 500px; max-height: 400px">
       <!-- Current Selection Display -->

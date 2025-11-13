@@ -138,9 +138,6 @@ import PromptUiDialog from 'components/Dialogs/PromptUiDialog.vue';
 import {useEditorStore} from 'stores/editor-store';
 import LeftMenuComponent from 'components/LeftMenu/LeftMenuComponent.vue';
 import RightMenuComponent from 'components/RightMenu/RightMenuComponent.vue';
-import PromptSelector from 'components/Common/PromptSelector/PromptSelector.vue';
-import {getAllMarkdown, getSelectedText} from 'src/common/utils/editorUtils';
-import {executePromptClick2} from 'src/common/helpers/promptHelper';
 import PromptResultsDialog from 'components/Dialogs/PromptResultsDialog.vue';
 
 const layoutStore = useLayoutStore();
