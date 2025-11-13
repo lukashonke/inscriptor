@@ -2,8 +2,8 @@
   <q-btn-toggle
     v-model="layoutStore.currentChatAgentMode"
     :options="[
-      { label: 'AI Chat', value: 'simple', icon: 'mdi-robot' },
-      { label: 'Deep Agent', value: 'deep-agent', icon: 'mdi-brain' }
+      { label: 'Agent Chat', value: 'simple' },
+      { label: '🧠 Deep Agent', value: 'deep-agent' }
     ]"
     :toggle-color="layoutStore.currentChatAgentMode === 'deep-agent' ? 'purple' : 'primary'"
     unelevated

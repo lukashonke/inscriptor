@@ -3,11 +3,12 @@
     <!-- Header with controls -->
     <div class="row items-center q-mx-md q-mb-sm q-mt-xs" style="height: 61px">
       <div class="col flex">
-        <div class="col-auto flex items-center" v-if="deepAgentStore.isStreaming">
-          <div class="menu-subtitle flex items-center">
-            <q-spinner-ios class="q-mr-xs"></q-spinner-ios>
+        <div class="col-auto flex items-center" v-if="deepAgentStore.isStreaming || isErrorStatus">
+          <div class="menu-subtitle flex items-center" :class="{ 'status-error': isErrorStatus }">
+            <q-spinner-ios v-if="deepAgentStore.isStreaming" class="q-mr-xs"></q-spinner-ios>
+            <q-icon v-else-if="isErrorStatus" name="mdi-alert-circle" class="q-mr-xs" />
             {{ deepAgentStore.getStatusMessage }}
-            <q-btn dense outline @click="handleCancel" label="Stop" size="sm" class="q-ml-xs q-py-none" color="red"/>
+            <q-btn v-if="deepAgentStore.isStreaming" dense outline @click="handleCancel" label="Stop" size="sm" class="q-ml-xs q-py-none" color="red"/>
           </div>
         </div>
       </div>
@@ -47,7 +48,12 @@
           <div
             v-for="(message, index) in currentChat?.messages || []"
             :key="message.id"
-            :class="['message-wrapper', message.role === 'user' ? 'da-user-message' : 'da-agent-message', 'q-mb-md']"
+            :class="[
+              'message-wrapper',
+              message.role === 'user' ? 'da-user-message' : 'da-agent-message',
+              message.role === 'system' ? 'da-system-message' : '',
+              'q-mb-md'
+            ]"
           >
           <div class="message-bubble">
             <!-- Message header for assistant messages -->
@@ -100,11 +106,11 @@
         <q-icon name="mdi-robot" class="text-accent q-mb-xs" />
         Deep Agent Chat:
         <div class="q-mt-sm">
-          The Deep Agent has comprehensive planning and reasoning abilities and will analyse your project, understand context and assist with complex writing, planning or brainstorming tasks.
+          The Deep Agent has comprehensive planning and reasoning abilities and will analyse your project, understand context deeply and then assist with writing, planning or brainstorming tasks.
         </div>
         <div class="q-mt-sm">
           <q-icon name="mdi-cloud-outline" />
-          Uses Inscriptor AI cloud, consuming AI credits. Note that it is more demanding on credits than the regular Chat.
+          Uses Inscriptor AI cloud, consuming AI credits. Note: it is more demanding on credits than the regular Chat.
         </div>
       </div>
     </div>
@@ -177,6 +183,12 @@
   const componentRef = ref(null);
 
   const currentChat = computed(() => deepAgentStore.getCurrentChat);
+
+  // Check if current status indicates an error
+  const isErrorStatus = computed(() => {
+    const status = deepAgentStore.getStatusMessage;
+    return status && (status.toLowerCase().includes('error') || status.toLowerCase().includes('failed'));
+  });
 
   // Auto-scroll to bottom when new message is added (only for user messages)
   watch(() => currentChat.value?.messages?.length, (newLength, oldLength) => {
@@ -318,6 +330,15 @@
 </script>
 
 <style scoped>
+/* Status error styling in header */
+.status-error {
+  color: #ef5350 !important;
+}
+
+body.body--dark .status-error {
+  color: #ff6b6b !important;
+}
+
 .scroll-area {
   overflow-y: auto;
   overflow-x: hidden;
@@ -538,5 +559,23 @@ body.body--dark .message-content :deep(blockquote .blockquote-copy-btn) {
 body.body--dark .message-content :deep(blockquote .blockquote-copy-btn):hover {
   background-color: rgba(0, 0, 0, 0.8);
   color: rgba(255, 255, 255, 1);
+}
+
+/* System message styles (for errors) */
+.da-system-message .message-content {
+  color: #ef5350;
+  font-weight: 500;
+}
+
+body.body--dark .da-system-message .message-content {
+  color: #ff6b6b;
+}
+
+.da-system-message .message-bubble {
+  background-color: rgba(239, 83, 80, 0.1);
+}
+
+body.body--dark .da-system-message .message-bubble {
+  background-color: rgba(255, 107, 107, 0.15);
 }
 </style>
