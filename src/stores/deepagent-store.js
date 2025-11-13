@@ -145,6 +145,14 @@ export const useDeepAgentStore = defineStore('deepAgent', {
         const writingStyle = getResolvedVariable('WritingStyle', fileStore.variables) || '';
         console.log('[DeepAgent] Retrieved writing style:', writingStyle);
 
+        // Build context info with currently opened file
+        let contextInfo = '';
+        if (fileStore.selectedFile) {
+          const fileNameWithPath = fileStore.getFileNameAndFileNameWithPath(fileStore.selectedFile);
+          contextInfo = `User has currently opened this file: ${fileNameWithPath}`;
+        }
+        console.log('[DeepAgent] Context info:', contextInfo);
+
         await streamSseResponse(
           'POST',
           'deepagent/inscriptor_agent/stream',
@@ -153,6 +161,7 @@ export const useDeepAgentStore = defineStore('deepAgent', {
             project_id: projectId,
             thread_id: threadId,
             writing_style: writingStyle,
+            context_info: contextInfo,
           },
           null, // params
           // dataCallback - called with parsed data from each SSE message
