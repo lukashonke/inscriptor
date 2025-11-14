@@ -2,7 +2,7 @@
   <div class="column fit deep-agent-gradient-variation-2">
 
     <!-- Chat controls and pagination -->
-    <div class="row items-center q-mx-md q-mb-sm q-mt-xs" v-if="maxChatsPage > 0" style="height: 61px">
+    <div class="row items-start q-mx-md q-mb-sm" :class="isMobile ? '' : 'q-mt-md'" v-if="maxChatsPage > 0" style="height: 28px">
       <div class="col flex">
         <div class="col-auto flex items-center justify-center q-mt-xs">
           <q-pagination :max="maxChatsPage" v-model="page" :disable="aiAgentStore.agentChats.isAgentRunning || aiAgentStore.isAgentActive" direction-links :boundary-numbers="false" :boundary-links="false" :max-pages="isMobile ? 3 : 5" />
@@ -10,15 +10,15 @@
         <div v-if="aiAgentStore.agentChats.isAgentRunning" class="col menu-subtitle flex items-center justify-center">
           <q-spinner-ios class="q-mr-xs"></q-spinner-ios>
           {{ aiAgentStore.agentState === 'waiting_for_user' ? 'AI is waiting for approval...' : 'AI is working...' }}
-          <q-btn dense outline @click="aiAgentStore.stopAgentChatExecution()" label="Stop" size="sm" class="q-ml-xs q-py-none" color="red"/>
         </div>
       </div>
       <div class="col flex items-center justify-center q-mr-xs">
         <AgentModeSelector />
       </div>
       <div class="col flex items-center justify-end" v-if="maxChatsPage > 0">
-        <div class="col-auto flex items-center">
-          <q-btn flat color="negative" icon="mdi-delete-outline" size="md" :padding="isMobile ? 'xs md' : undefined">
+        <q-btn v-if="aiAgentStore.agentChats.isAgentRunning" dense no-caps flat label="Stop" @click="aiAgentStore.stopAgentChatExecution()" icon="mdi-stop" size="md" class="q-mr-sm" color="negative" :padding="isMobile ? 'xs md' : undefined"/>
+        <div v-else class="col-auto flex items-center q-mr-sm">
+          <q-btn dense flat color="negative" icon="mdi-delete-outline" size="md" :padding="isMobile ? 'xs md' : undefined">
             <q-menu>
               <q-list dense>
                 <q-item clickable @click="removeCurrentChat" v-close-popup>
@@ -42,7 +42,7 @@
             </q-menu>
           </q-btn>
         </div>
-        <q-btn color="primary" no-caps @click="newChat" :disable="aiAgentStore.agentChats.isAgentRunning || aiAgentStore.isAgentActive" dense size="md" icon="mdi-plus" class="" :label="isMobile ? undefined : 'New'" :padding="isMobile ? 'xs md' : 'xs md'">
+        <q-btn color="primary" no-caps @click="newChat" :disable="aiAgentStore.agentChats.isAgentRunning || aiAgentStore.isAgentActive" dense size="md" icon="mdi-plus" class="" :padding="isMobile ? 'xs xs' : 'xs sm'">
           <q-tooltip>
             Start a new AI conversation
           </q-tooltip>

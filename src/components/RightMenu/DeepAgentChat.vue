@@ -1,14 +1,14 @@
 <template>
   <div class="column fit deep-agent-gradient-variation-1">
     <!-- Header with controls -->
-    <div class="row items-center q-mx-md q-mb-sm q-mt-xs" style="height: 61px">
+    <div class="row items-start q-mx-md q-mb-sm " style="height: 28px" :class="isMobile ? '' : 'q-mt-md'">
       <div class="col flex">
         <div class="col-auto flex items-center" v-if="deepAgentStore.isStreaming || isErrorStatus">
           <div class="menu-subtitle flex items-center" :class="{ 'status-error': isErrorStatus }">
             <q-spinner-ios v-if="deepAgentStore.isStreaming" class="q-mr-xs"></q-spinner-ios>
             <q-icon v-else-if="isErrorStatus" name="mdi-alert-circle" class="q-mr-xs" />
             {{ deepAgentStore.getStatusMessage }}
-            <q-btn v-if="deepAgentStore.isStreaming" dense outline @click="handleCancel" label="Stop" size="sm" class="q-ml-xs q-py-none" color="red"/>
+            <AnimatedDots v-if="deepAgentStore.isStreaming" :fixedWidth="'10px'" :speed="500" />
           </div>
         </div>
       </div>
@@ -16,85 +16,77 @@
         <AgentModeSelector />
       </div>
       <div class="col flex items-center justify-end">
-        <q-btn color="negative" flat no-caps @click="handleNewChat" :disable="deepAgentStore.isStreaming" size="md" icon="mdi-delete-outline" class="" :label="isMobile ? undefined : 'Clear'" dense :padding="isMobile ? 'xs md' : 'xs md'">
+        <q-btn dense v-if="deepAgentStore.isStreaming" no-caps icon="mdi-stop" flat @click="handleCancel" label="Stop" :padding="isMobile ? 'xs md' : 'xs md'" size="md" class="" color="negative"/>
+        <q-btn v-else color="negative" flat no-caps @click="handleNewChat" :disable="deepAgentStore.isStreaming" size="md" icon="mdi-delete-outline" class="" dense :padding="isMobile ? 'xs sm' : 'xs sm'">
           <q-tooltip :delay="500">
             Start a new Deep Agent conversation
           </q-tooltip>
         </q-btn>
-        <!--<div class="col-auto flex items-center"> not needed for Deep Agent - the New button supplies it
-          <q-btn flat color="negative" icon="mdi-delete-outline" size="md" :padding="isMobile ? 'xs md' : undefined">
-            <q-menu>
-              <q-list dense>
-                <q-item clickable @click="handleClearChat" v-close-popup>
-                  <q-item-section side>
-                    <q-icon name="mdi-close" />
-                  </q-item-section>
-                  <q-item-section>
-                    Clear current conversation
-                  </q-item-section>
-                </q-item>
-              </q-list>
-            </q-menu>
-          </q-btn>
-        </div>-->
       </div>
     </div>
 
     <!-- Chat messages area -->
-    <div ref="chatScrollArea" class="col scroll-area q-px-md">
+    <div ref="chatScrollArea" class="col scroll-area q-px-md q-mt-sm">
       <div class="chat-history-container" style="margin-bottom: 100px;">
         <div class="chat-messages">
           <!-- Loop through all messages -->
           <div
-            v-for="(message, index) in currentChat?.messages || []"
+            v-for="(message) in currentChat?.messages || []"
             :key="message.id"
             :class="[
               'message-wrapper',
               message.role === 'user' ? 'da-user-message' : 'da-agent-message',
               message.role === 'system' ? 'da-system-message' : '',
               'q-mb-md'
-            ]"
-          >
-          <div class="message-bubble">
-            <!-- Message header for assistant messages -->
-            <div v-if="message.role === 'assistant'" class="message-header q-mb-sm items-center text-grey-9">
-              <q-icon name="mdi-robot" size="xs" class="q-mr-xs" />
-              <span class="text-caption text-weight-medium">Deep Agent</span>
-            </div>
+            ]">
+            <div class="message-bubble">
+              <!-- Message header for assistant messages -->
+              <div v-if="message.role === 'assistant'" class="message-header q-mb-sm items-center text-grey-9">
+                <q-icon name="mdi-robot" size="xs" class="q-mr-xs" />
+                <span class="text-caption text-weight-medium">Deep Agent</span>
+              </div>
 
-            <!-- Message content -->
-            <div class="message-content text-editor no-p-margin-0 write-serif write-medium prompt-test-editor prompt-results tiptap" v-html="markdownToHtml(message.content)"></div>
+              <!-- Message content -->
+              <div class="message-content text-editor no-p-margin-0 write-serif write-medium prompt-test-editor prompt-results tiptap" v-html="markdownToHtml(message.content)"></div>
 
-            <!-- Tool calls section -->
-            <div
-              v-if="message.metadata?.tool_calls && message.metadata.tool_calls.filter(t => t.name).length > 0"
-              class="tool-calls-section q-mt-sm q-pa-sm"
-            >
-              <div class="text-caption text-weight-medium">
-                <q-icon name="mdi-tools" size="xs" color="primary" />
-                {{ message.metadata.tool_calls.filter(t => t.name).length }} tool call{{ message.metadata.tool_calls.filter(t => t.name).length !== 1 ? 's' : '' }}
-                ({{ message.metadata.tool_calls.filter(t => t.name).map(t => t.name).join(', ') }})
+              <!-- Tool calls section -->
+              <div
+                v-if="message.metadata?.tool_calls && message.metadata.tool_calls.filter(t => t.name).length > 0"
+                class="tool-calls-section q-mt-sm q-pa-sm"
+              >
+                <!-- List each tool call with args -->
+                <div
+                  v-for="(toolCall, idx) in message.metadata.tool_calls.filter(t => t.name)"
+                  :key="idx"
+                  class="tool-call-item text-caption q-ml-sm"
+                >
+                  <q-icon name="mdi-tools" size="14px" color="primary" class="q-mr-xs" />
+                  <span class="text-weight-medium">{{ getFriendlyToolName(toolCall.name) }}</span>
+                  <span v-if="getUserFriendlyToolCallArgs(toolCall)" class="text-grey-7 q-ml-sm">
+                    {{ getUserFriendlyToolCallArgs(toolCall) }}
+                  </span>
+                </div>
+              </div>
+
+              <!-- Metadata footer for assistant messages -->
+              <div
+                v-if="message.role === 'assistant' && message.metadata && Object.keys(message.metadata).length > 0"
+                class="message-footer text-caption text-grey-5 q-mt-xs justify-end"
+              >
+                <span v-if="message?.metadata?.usage?.total_tokens">
+                  {{ message.metadata.usage.total_tokens }} total tokens
+                </span>
               </div>
             </div>
-
-            <!-- Metadata footer for assistant messages -->
-            <div
-              v-if="message.role === 'assistant' && message.metadata && Object.keys(message.metadata).length > 0"
-              class="message-footer text-caption text-grey-5 q-mt-xs justify-end"
-            >
-              <span v-if="message?.metadata?.usage?.total_tokens">
-                {{ message.metadata.usage.total_tokens }} total tokens
-              </span>
-            </div>
           </div>
 
-          <!-- Streaming indicator below last user message -->
+
           <div
-            v-if="message.role === 'user' && currentChat && currentChat.messages && index === currentChat.messages.length - 1 && deepAgentStore.isStreaming"
-            class="streaming-indicator q-mt-xs"
-          >
-            <q-spinner-dots color="primary" size="md" />
-          </div>
+            v-if="currentChat && currentChat.messages && deepAgentStore.isStreaming"
+            class="streaming-indicator q-mt-xs full-width text-caption">
+
+            <q-spinner-dots v-if="deepAgentStore.isStreaming" color="primary" size="md" class="q-mr-sm" />
+
           </div>
 
         </div>
@@ -169,8 +161,10 @@
   import {useDeepAgentStore} from 'stores/deepagent-store';
   import {Notify} from 'quasar';
   import {markdownToHtml} from 'src/common/utils/textUtils';
+  import {getFriendlyToolName} from 'src/common/utils/toolNameUtils';
   import {writeText} from '@tauri-apps/plugin-clipboard-manager';
   import AgentModeSelector from 'components/Common/AgentModeSelector.vue';
+  import AnimatedDots from 'components/Common/AnimatedDots.vue';
 
   const promptStore = usePromptStore();
   const fileStore = useFileStore();
@@ -189,6 +183,76 @@
     const status = deepAgentStore.getStatusMessage;
     return status && (status.toLowerCase().includes('error') || status.toLowerCase().includes('failed'));
   });
+
+  /**
+   * Get user-friendly formatted arguments for a tool call
+   * @param {object} toolCall - Tool call object with args
+   * @returns {string|null} - Formatted args string or null
+   */
+  function getUserFriendlyToolCallArgs(toolCall) {
+    if (!toolCall.args) return null;
+
+    // Try to extract and format path (common for file operations)
+    const pathFields = ['path', 'file_path', 'filepath', 'file'];
+    for (const field of pathFields) {
+      if (toolCall.args[field]) {
+        const path = toolCall.args[field];
+        if (typeof path === 'string') {
+          // Sanitize path: remove leading slashes, backslashes, drive letters, and file extensions
+          const sanitized = path
+            .replace(/^[A-Za-z]:[\\/]/, '')  // Remove drive letters (C:\)
+            .replace(/^[\\/]+/, '')          // Remove leading slashes
+            .replace(/\\/g, '/')             // Convert backslashes to forward slashes
+            .replace(/\.[^/.]+$/, '');       // Remove file extension
+
+          return sanitized;
+        }
+      }
+    }
+
+    // Handle subagent calls - show type and trimmed description
+    if (toolCall.args.subagent_type) {
+      const subagentType = toolCall.args.subagent_type
+        .replace(/-/g, ' ')
+        .replace(/agent/gi, '')
+        .trim()
+        .split(' ')
+        .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+        .join(' ');
+
+      if (toolCall.args.description) {
+        let desc = toolCall.args.description;
+        // Remove markdown formatting and excessive whitespace
+        desc = desc.replace(/["*#`]/g, '').replace(/\n+/g, ' ').replace(/\s+/g, ' ').trim();
+
+        // Trim to reasonable length
+        const maxLength = 250;
+        if (desc.length > maxLength) {
+          desc = desc.substring(0, maxLength).trim() + '...';
+        }
+
+        return `${subagentType} - ${desc}`;
+      }
+
+      // Just show the subagent type if no description
+      return subagentType;
+    }
+
+    // If no path or subagent found, format all args as Parameter="Value" pairs
+    const argPairs = [];
+    for (const [key, value] of Object.entries(toolCall.args)) {
+      if (value !== null && value !== undefined) {
+        // Format value - truncate if too long
+        let displayValue = String(value);
+        if (displayValue.length > 50) {
+          displayValue = displayValue.substring(0, 47) + '...';
+        }
+        argPairs.push(`${key}="${displayValue}"`);
+      }
+    }
+
+    return argPairs.length > 0 ? argPairs.join(' ') : null;
+  }
 
   // Auto-scroll to bottom when new message is added (only for user messages)
   watch(() => currentChat.value?.messages?.length, (newLength, oldLength) => {
@@ -244,7 +308,6 @@
     const query = userInput.value.trim();
     userInput.value = '';
 
-    // TODO: Get actual project ID from fileStore or context
     const projectId = fileStore.projectId;
 
     try {
@@ -451,9 +514,8 @@ body.body--dark .help-text-area {
 
 .streaming-indicator {
   display: flex;
-  justify-content: flex-end;
+  justify-content: flex-start;
   align-items: center;
-  margin-right: 8px;
 }
 
 /* Code and pre tag styles */

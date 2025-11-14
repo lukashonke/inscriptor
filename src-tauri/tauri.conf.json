@@ -43,7 +43,7 @@
   },
   "productName": "Inscriptor",
   "mainBinaryName": "Inscriptor",
-  "version": "0.9.3",
+  "version": "1.0.0",
   "identifier": "cz.inscriptor",
   "plugins": {
     "updater": {

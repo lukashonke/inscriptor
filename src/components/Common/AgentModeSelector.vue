@@ -2,8 +2,8 @@
   <q-btn-toggle
     v-model="layoutStore.currentChatAgentMode"
     :options="[
-      { label: 'Agent Chat', value: 'simple' },
-      { label: '🧠 Deep Agent', value: 'deep-agent' }
+      { label: 'Agent', value: 'simple' },
+      { label: isMobile ? 'Deep Agent' : '🧠 Deep Agent', value: 'deep-agent' }
     ]"
     :toggle-color="layoutStore.currentChatAgentMode === 'deep-agent' ? 'purple' : 'primary'"
     unelevated
@@ -15,6 +15,9 @@
 
 <script setup>
 import { useLayoutStore } from 'stores/layout-store';
+import {useResponsive} from 'src/common/utils/screenUtils';
+
+const { isMobile } = useResponsive();
 
 const layoutStore = useLayoutStore();
 </script>

@@ -1,6 +1,6 @@
 <template>
   <div :class="isMobile ? '' : 'q-mx-md'">
-    <div class="flex justify-center q-mb-lg" v-if="maxResultsPage > 0">
+    <div class="row items-start q-mb-lg" :class="isMobile ? '' : 'q-mt-md'" v-if="maxResultsPage > 0" style="height: 30px;">
       <div class="col-auto flex items-center" v-if="maxResultsPage > 0">
         <q-pagination :max="maxResultsPage" v-model="page" :max-pages="3"  :boundary-links="false" direction-links   />
       </div>
@@ -8,7 +8,7 @@
       <div class="col">
       </div>
 
-      <div class="col-auto flex items-center">
+      <div class="col-auto flex items-start">
         <q-btn dense flat color="negative" icon="mdi-delete-outline" size="md">
           <q-menu>
             <q-list dense>

@@ -8,7 +8,7 @@
     <q-page-sticky position="bottom-right" :offset="[18, 18]">
       <q-fab
         v-model="fabOpen"
-        icon="mdi-plus"
+        icon="mdi-creation-outline"
         direction="up"
         color="accent"
         aria-label="Actions"

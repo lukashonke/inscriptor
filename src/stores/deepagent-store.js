@@ -33,7 +33,7 @@ export const useDeepAgentStore = defineStore('deepAgent', {
       if (currentChat && currentChat.isWorking) {
         return 'Thinking...';
       }
-      return 'Ready';
+      return '';
     }
   },
   actions: {
@@ -200,10 +200,16 @@ export const useDeepAgentStore = defineStore('deepAgent', {
 
             // Handle stats messages (credit costs)
             if (data.type === 'stats' && data.inputTokens !== undefined && data.outputTokens !== undefined) {
-              currentChat.streamMetadata.creditCost = {
-                inputTokens: data.inputTokens,
-                outputTokens: data.outputTokens
-              };
+              if (!currentChat.streamMetadata.creditCost) {
+                currentChat.streamMetadata.creditCost = {
+                  inputTokens: 0,
+                  outputTokens: 0
+                };
+              }
+
+              currentChat.streamMetadata.creditCost.inputTokens += data.inputTokens;
+              currentChat.streamMetadata.creditCost.outputTokens += data.outputTokens;
+
               console.log('[DeepAgent] Credit stats received:', {
                 inputTokens: data.inputTokens,
                 outputTokens: data.outputTokens,
@@ -268,32 +274,61 @@ export const useDeepAgentStore = defineStore('deepAgent', {
                   }
                 }
 
-                // Handle tool calls if present - merge by index instead of overriding
-                if (token.tool_calls && token.tool_calls.length > 0) {
+                // Handle tool call chunks - merge by index instead of overriding
+                if (token.tool_call_chunks && token.tool_call_chunks.length > 0) {
                   // Initialize tool_calls array if not exists
                   if (!streamingMessage.metadata.tool_calls) {
                     streamingMessage.metadata.tool_calls = [];
                   }
 
-                  // Merge each tool call by index
-                  for (const incomingTool of token.tool_calls) {
-                    const index = incomingTool.index ?? streamingMessage.metadata.tool_calls.length;
+                  // Merge each tool call chunk by index
+                  for (const incomingChunk of token.tool_call_chunks) {
+                    const index = incomingChunk.index ?? streamingMessage.metadata.tool_calls.length;
                     const existingTool = streamingMessage.metadata.tool_calls[index];
 
                     if (existingTool) {
-                      // Merge properties (prefer non-empty values from incoming)
-                      streamingMessage.metadata.tool_calls[index] = {
+                      // Merge properties
+                      const mergedTool = {
                         ...existingTool,
-                        ...incomingTool,
-                        name: incomingTool.name || existingTool.name,
-                        args: { ...existingTool.args, ...incomingTool.args },
-                        id: incomingTool.id || existingTool.id
+                        name: incomingChunk.name || existingTool.name,
+                        id: incomingChunk.id || existingTool.id
                       };
-                      console.log(`[DeepAgent] Merged tool call at index ${index}:`, streamingMessage.metadata.tool_calls[index]);
+
+                      // Handle args concatenation (args streamed as JSON string chunks)
+                      const argsChunk = incomingChunk.args;
+                      if (argsChunk && typeof argsChunk === 'string') {
+                        // Concatenate JSON string chunks
+                        const existingArgsStr = existingTool.argsString || '';
+                        mergedTool.argsString = existingArgsStr + argsChunk;
+
+                        // Try to parse completed JSON
+                        try {
+                          mergedTool.args = JSON.parse(mergedTool.argsString);
+                          console.log(`[DeepAgent] Successfully parsed args for tool ${mergedTool.name}:`, mergedTool.args);
+                        } catch (e) {
+                          // JSON not complete yet, keep accumulating
+                          mergedTool.args = null;
+                        }
+                      }
+
+                      streamingMessage.metadata.tool_calls[index] = mergedTool;
+                      console.log(`[DeepAgent] Merged tool call chunk at index ${index}:`, mergedTool);
                     } else {
-                      // New tool call
-                      streamingMessage.metadata.tool_calls[index] = incomingTool;
-                      console.log(`[DeepAgent] Added new tool call at index ${index}:`, incomingTool);
+                      // New tool call chunk
+                      const newTool = { ...incomingChunk };
+                      const argsChunk = incomingChunk.args;
+
+                      if (argsChunk && typeof argsChunk === 'string') {
+                        newTool.argsString = argsChunk;
+                        try {
+                          newTool.args = JSON.parse(argsChunk);
+                        } catch (e) {
+                          newTool.args = null;
+                        }
+                      }
+
+                      streamingMessage.metadata.tool_calls[index] = newTool;
+                      console.log(`[DeepAgent] Added new tool call chunk at index ${index}:`, newTool);
                     }
                   }
 
