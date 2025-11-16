@@ -32,7 +32,7 @@ export const useDeepAgentStore = defineStore('deepAgent', {
       }
       const currentChat = state.deepAgentChats[state.currentDeepAgentChat];
       if (currentChat && currentChat.isWorking) {
-        return 'Thinking...';
+        return 'Starting...';
       }
       return '';
     }
@@ -344,6 +344,11 @@ export const useDeepAgentStore = defineStore('deepAgent', {
             // Handle completion signal
             complete: (data) => {
               console.log('[DeepAgent] Stream complete signal:', data);
+              // Explicitly close SSE connection to prevent auto-reconnect on normal completion
+              if (this.sseSource) {
+                this.sseSource.close();
+                this.sseSource = null;
+              }
             },
 
             // Handle error events
@@ -362,6 +367,12 @@ export const useDeepAgentStore = defineStore('deepAgent', {
               currentChat.messages.push(errorMessage);
               this.currentStatusMessage = 'Error occurred';
               console.log('[DeepAgent] Added error message to chat:', errorMessage);
+
+              // Explicitly close SSE connection to prevent auto-reconnect on backend errors
+              if (this.sseSource) {
+                this.sseSource.close();
+                this.sseSource = null;
+              }
             }
           },
           // onComplete - called when stream ends normally
@@ -423,6 +434,13 @@ export const useDeepAgentStore = defineStore('deepAgent', {
           },
           // onError - called on connection errors
           onError: (error) => {
+            // Ignore "normal closure" errors (happens when we explicitly close the connection)
+            // These have status 0 or undefined with empty/SSE error message
+            if (!error.status || error.status === 0) {
+              console.log('[DeepAgent] Connection closed normally (status 0)');
+              return;
+            }
+
             console.error('[DeepAgent] Stream error:', {
               message: error.message,
               status: error.status,
@@ -456,7 +474,12 @@ export const useDeepAgentStore = defineStore('deepAgent', {
             this.sseSource = null;
           },
           // signal - abort signal for cancellation
-          signal: this.abortController.signal
+          signal: this.abortController.signal,
+          // Auto-reconnection support with Last-Event-ID
+          useLastEventId: true,
+          autoReconnect: true,
+          reconnectDelay: 3000,  // 3 seconds between reconnection attempts
+          maxRetries: 3           // Max 3 reconnection attempts
         });
       } catch (error) {
         console.error('[DeepAgent] Unexpected error during streaming:', error);

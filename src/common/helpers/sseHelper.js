@@ -66,6 +66,10 @@ export function streamSse(url, {
   Object.entries(eventHandlers).forEach(([eventType, handler]) => {
     source.addEventListener(eventType, (e) => {
       try {
+        // Skip empty data (common on connection close)
+        if (!e.data || e.data.trim() === '') {
+          return;
+        }
         // Try to parse JSON data
         const data = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
         handler(data, e.id);
@@ -87,6 +91,12 @@ export function streamSse(url, {
 
   // Handle errors
   source.addEventListener('error', (e) => {
+    // Skip logging for normal closures (responseCode 0 or undefined)
+    if (!e.responseCode || e.responseCode === 0) {
+      console.log('[SSE] Connection closed normally (responseCode 0)');
+      return;
+    }
+
     console.error('[SSE] Error:', {
       responseCode: e.responseCode,
       data: e.data,
