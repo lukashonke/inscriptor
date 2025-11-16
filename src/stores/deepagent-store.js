@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia';
-import { streamSseResponse } from 'src/common/helpers/sseStreamHelper';
+import { streamSse } from 'src/common/helpers/sseHelper';
 import { useLayoutStore } from 'stores/layout-store';
 import { usePromptStore } from 'stores/prompt-store';
 import { useFileStore } from 'stores/file-store';
@@ -12,6 +12,7 @@ export const useDeepAgentStore = defineStore('deepAgent', {
     deepAgentChats: [],
     currentDeepAgentChat: 0,
     abortController: null,
+    sseSource: null,
     currentStatusMessage: null,
   }),
   getters: {
@@ -31,7 +32,7 @@ export const useDeepAgentStore = defineStore('deepAgent', {
       }
       const currentChat = state.deepAgentChats[state.currentDeepAgentChat];
       if (currentChat && currentChat.isWorking) {
-        return 'Thinking...';
+        return 'Starting...';
       }
       return '';
     }
@@ -153,53 +154,32 @@ export const useDeepAgentStore = defineStore('deepAgent', {
         }
         console.log('[DeepAgent] Context info:', contextInfo);
 
-        await streamSseResponse(
-          'POST',
-          'deepagent/inscriptor_agent/stream',
-          {
+        // Build full URL for SSE endpoint
+        const fullUrl = `${api.defaults.baseURL}deepagent/inscriptor_agent/stream`;
+
+        // Start SSE streaming with event-specific handlers
+        this.sseSource = streamSse(fullUrl, {
+          method: 'POST',
+          body: {
             query: userQuery,
             project_id: projectId,
             thread_id: threadId,
             writing_style: writingStyle,
             context_info: contextInfo,
           },
-          null, // params
-          // dataCallback - called with parsed data from each SSE message
-          (data) => {
-            console.log('[DeepAgent] SSE Data received:', data);
-
-            // Check if data contains error
-            if (data.error) {
-              console.error('[DeepAgent] Error in stream data:', data.error);
-              currentChat.streamMetadata.completionReason = 'error';
-
-              // Add error message to chat so user can see it
-              const errorMessage = {
-                id: `msg-${Date.now()}-error`,
-                role: 'system',
-                content: `Error: ${data.error}`,
-                isStreaming: false,
-                timestamp: Date.now(),
-                metadata: {}
-              };
-              currentChat.messages.push(errorMessage);
-
-              // Update status indicator to show error
-              this.currentStatusMessage = 'Error occurred';
-
-              console.log('[DeepAgent] Added error message to chat:', errorMessage);
-              return;
-            }
-
-            // Handle status messages
-            if (data.type === 'status' && data.message) {
+          headers: {
+            'Authorization': idToken,
+            'languageId': api.defaults.headers.common.languageId || 'en'
+          },
+          eventHandlers: {
+            // Handle status events (Synchronizing, Agent runs, etc.)
+            status: (data) => {
               this.currentStatusMessage = data.message;
               console.log('[DeepAgent] Status update:', data.message);
-              return;
-            }
+            },
 
             // Handle stats messages (credit costs)
-            if (data.type === 'stats' && data.inputTokens !== undefined && data.outputTokens !== undefined) {
+            stats: (data) => {
               if (!currentChat.streamMetadata.creditCost) {
                 currentChat.streamMetadata.creditCost = {
                   inputTokens: 0,
@@ -215,14 +195,13 @@ export const useDeepAgentStore = defineStore('deepAgent', {
                 outputTokens: data.outputTokens,
                 total: data.inputTokens + data.outputTokens
               });
-              return;
-            }
+            },
 
-            // Handle LangChain streaming events
-            if (data.type === 'messages' && data.token) {
+            // Handle message tokens from LangChain streaming
+            messages: (data) => {
               const token = data.token;
 
-              if (token.type === 'AIMessageChunk') {
+              if (token && token.type === 'AIMessageChunk') {
                 // Find message by token.id (all chunks for same message have same id)
                 let streamingMessage = currentChat.messages.find(
                   msg => msg.id === token.id
@@ -342,32 +321,62 @@ export const useDeepAgentStore = defineStore('deepAgent', {
                                                       token.usage_metadata.input_tokens + token.usage_metadata.output_tokens;
                 }
               }
-            }
 
-            // Update global metadata if available
-            if (data.tokens) {
-              currentChat.streamMetadata.tokens = data.tokens;
-              console.log('[DeepAgent] Token count updated:', data.tokens);
-            }
-            if (data.finish_reason) {
-              currentChat.streamMetadata.completionReason = data.finish_reason;
-              console.log('[DeepAgent] Completion reason:', data.finish_reason);
-            }
+              // Update global metadata if available
+              if (data.tokens) {
+                currentChat.streamMetadata.tokens = data.tokens;
+                console.log('[DeepAgent] Token count updated:', data.tokens);
+              }
+              if (data.finish_reason) {
+                currentChat.streamMetadata.completionReason = data.finish_reason;
+                console.log('[DeepAgent] Completion reason:', data.finish_reason);
+              }
 
-            currentChat.lastActivity = Date.now();
+              currentChat.lastActivity = Date.now();
+            },
+
+            // Handle node state updates
+            updates: (data) => {
+              console.log('[DeepAgent] Node update received:', data);
+              currentChat.lastActivity = Date.now();
+            },
+
+            // Handle completion signal
+            complete: (data) => {
+              console.log('[DeepAgent] Stream complete signal:', data);
+              // Explicitly close SSE connection to prevent auto-reconnect on normal completion
+              if (this.sseSource) {
+                this.sseSource.close();
+                this.sseSource = null;
+              }
+            },
+
+            // Handle error events
+            error: (data) => {
+              console.error('[DeepAgent] Error event:', data);
+              currentChat.streamMetadata.completionReason = 'error';
+
+              const errorMessage = {
+                id: `msg-${Date.now()}-error`,
+                role: 'system',
+                content: `Error: ${data.error || 'Unknown error occurred'}`,
+                isStreaming: false,
+                timestamp: Date.now(),
+                metadata: {}
+              };
+              currentChat.messages.push(errorMessage);
+              this.currentStatusMessage = 'Error occurred';
+              console.log('[DeepAgent] Added error message to chat:', errorMessage);
+
+              // Explicitly close SSE connection to prevent auto-reconnect on backend errors
+              if (this.sseSource) {
+                this.sseSource.close();
+                this.sseSource = null;
+              }
+            }
           },
-          // eventCallback - called with {event, data, id} for each SSE message
-          (event) => {
-            /*console.log('[DeepAgent] SSE Event received:', {
-              eventType: event.event,
-              data: event.data,
-              id: event.id,
-            });*/
-
-            currentChat.lastActivity = Date.now();
-          },
-          // completeCallback - called when stream completes
-          () => {
+          // onComplete - called when stream ends normally
+          onComplete: () => {
             console.log('[DeepAgent] Stream completed successfully');
 
             // Mark any streaming message as complete
@@ -421,9 +430,17 @@ export const useDeepAgentStore = defineStore('deepAgent', {
             currentChat.lastActivity = Date.now();
             this.currentStatusMessage = null;
             this.abortController = null;
+            this.sseSource = null;
           },
-          // errorCallback - called on errors
-          (error) => {
+          // onError - called on connection errors
+          onError: (error) => {
+            // Ignore "normal closure" errors (happens when we explicitly close the connection)
+            // These have status 0 or undefined with empty/SSE error message
+            if (!error.status || error.status === 0) {
+              console.log('[DeepAgent] Connection closed normally (status 0)');
+              return;
+            }
+
             console.error('[DeepAgent] Stream error:', {
               message: error.message,
               status: error.status,
@@ -454,10 +471,16 @@ export const useDeepAgentStore = defineStore('deepAgent', {
             currentChat.streamMetadata.completionReason = 'error';
             currentChat.lastActivity = Date.now();
             this.abortController = null;
+            this.sseSource = null;
           },
           // signal - abort signal for cancellation
-          this.abortController.signal
-        );
+          signal: this.abortController.signal,
+          // Auto-reconnection support with Last-Event-ID
+          useLastEventId: true,
+          autoReconnect: true,
+          reconnectDelay: 3000,  // 3 seconds between reconnection attempts
+          maxRetries: 3           // Max 3 reconnection attempts
+        });
       } catch (error) {
         console.error('[DeepAgent] Unexpected error during streaming:', error);
         currentChat.isWorking = false;
@@ -475,6 +498,13 @@ export const useDeepAgentStore = defineStore('deepAgent', {
     cancelStream() {
       console.log('[DeepAgent] Cancelling stream');
 
+      // Close SSE connection if using sse.js
+      if (this.sseSource) {
+        this.sseSource.close();
+        this.sseSource = null;
+      }
+
+      // Abort fetch if using old method
       if (this.abortController) {
         this.abortController.abort();
         this.abortController = null;
